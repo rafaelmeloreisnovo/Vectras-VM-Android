@@ -161,7 +161,7 @@ object BootHookManager {
      * Load hooks from directory
      */
     fun loadHooksFromDirectory(context: Context, stage: BootStage) {
-        val hooksDir = File(context.filesDir, "hooks/${stage.name.toLowerCase()}")
+        val hooksDir = File(context.filesDir, "hooks/${stage.name.lowercase()}")
         if (!hooksDir.exists()) {
             return
         }
@@ -212,7 +212,7 @@ object BootHookManager {
      */
     fun initHookDirectories(context: Context) {
         BootStage.values().forEach { stage ->
-            val hooksDir = File(context.filesDir, "hooks/${stage.name.toLowerCase()}")
+            val hooksDir = File(context.filesDir, "hooks/${stage.name.lowercase()}")
             if (!hooksDir.exists()) {
                 hooksDir.mkdirs()
                 Log.d(TAG, "Created hooks directory: ${hooksDir.absolutePath}")
