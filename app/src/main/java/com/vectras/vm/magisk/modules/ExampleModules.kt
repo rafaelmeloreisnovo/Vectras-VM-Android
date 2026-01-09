@@ -18,7 +18,7 @@ class ExampleModule : VectraModule() {
     override val author: String = "Vectras Team"
     override val description: String = "Example module demonstrating the Magisk-inspired module system"
     override val priority: Int = 50
-    override val minVectrasVersion: String = "3.0.0"
+    override val minVectrasVersion: String = "3.5.0"
     
     private val TAG = "ExampleModule"
     

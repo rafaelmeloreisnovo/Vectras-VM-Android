@@ -49,14 +49,14 @@ object ModuleManager {
     /**
      * Register a module
      */
-    fun registerModule(module: VectraModule, context: Context): Boolean {
+    fun registerModule(module: VectraModule, context: Context, currentVersion: String = AppConfig.vectrasVersion): Boolean {
         if (modules.containsKey(module.id)) {
             Log.w(TAG, "Module ${module.id} already registered")
             return false
         }
         
         // Check compatibility
-        if (!module.isCompatible(AppConfig.vectrasVersion)) {
+        if (!module.isCompatible(currentVersion)) {
             Log.e(TAG, "Module ${module.id} is incompatible with current version")
             return false
         }

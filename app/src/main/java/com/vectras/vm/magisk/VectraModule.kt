@@ -31,8 +31,9 @@ abstract class VectraModule {
     
     /**
      * Minimum Vectras VM version required
+     * Default uses a conservative version to ensure broad compatibility
      */
-    open val minVectrasVersion: String = "3.0.0"
+    open val minVectrasVersion: String = "3.5.0"
     
     /**
      * Module state

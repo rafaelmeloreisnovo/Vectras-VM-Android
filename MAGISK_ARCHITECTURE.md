@@ -22,7 +22,7 @@ abstract class VectraModule {
     abstract val author: String
     abstract val description: String
     open val priority: Int = 50
-    open val minVectrasVersion: String = "3.0.0"
+    open val minVectrasVersion: String = "3.5.0"
     
     open fun onLoad(context: Context)
     open fun onPreBoot(context: Context, vmName: String)

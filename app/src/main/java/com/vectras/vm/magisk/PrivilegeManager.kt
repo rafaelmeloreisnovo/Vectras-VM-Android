@@ -30,9 +30,7 @@ object PrivilegeManager {
      * Check if root access is available
      */
     fun isRootAvailable(): Boolean {
-        if (rootAvailable != null) {
-            return rootAvailable!!
-        }
+        rootAvailable?.let { return it }
         
         // Check common su binary locations
         val suPaths = listOf(
