@@ -14,6 +14,7 @@ import android.util.Log;
 import androidx.core.app.NotificationCompat;
 
 import com.vectras.vterm.Terminal;
+import com.vectras.vm.magisk.MagiskArchitecture;
 
 public class MainService extends Service {
     public static String CHANNEL_ID = "Vectras VM Service";
@@ -47,8 +48,14 @@ public class MainService extends Service {
 
         if (env != null) {
             if (service != null) {
+                // Execute pre-boot hooks
+                MagiskArchitecture.INSTANCE.executeVMBoot(activityContext, MACHINE_NAME);
+                
                 Terminal vterm = new Terminal(activityContext);
                 vterm.executeShellCommand2(env, true, activityContext);
+                
+                // Execute post-boot hooks
+                MagiskArchitecture.INSTANCE.executeVMPostBoot(activityContext, MACHINE_NAME);
             }
         } else {
             Log.e(TAG, "env is null");
@@ -58,6 +65,9 @@ public class MainService extends Service {
     public static void stopService() {
         Thread t = new Thread(() -> {
             if (service != null) {
+                // Execute shutdown hooks
+                MagiskArchitecture.INSTANCE.executeVMShutdown(activityContext, MACHINE_NAME);
+                
                 service.stopForeground(true);
                 service.stopSelf();
                 VMManager.killallqemuprocesses(activityContext);

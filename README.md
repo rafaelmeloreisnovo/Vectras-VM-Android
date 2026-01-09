@@ -10,7 +10,9 @@
 # Vectras VM
 [![Ceasefire Now](https://badge.techforpalestine.org/default)](https://techforpalestine.org/learn-more)
 
-> **Note**: This project includes an experimental **Vectra Core MVP** - a deterministic event processing framework with integrity verification. See [VECTRA_CORE.md](VECTRA_CORE.md) for details.
+> **Note**: This project includes experimental features:
+> - **Vectra Core MVP** - A deterministic event processing framework with integrity verification. See [VECTRA_CORE.md](VECTRA_CORE.md) for details.
+> - **Magisk-Inspired Architecture** - A modular architecture system inspired by Magisk for VM extensions and customizations. See [MAGISK_ARCHITECTURE.md](MAGISK_ARCHITECTURE.md) for details.
 
 ![GitHub Repo stars](https://img.shields.io/github/stars/xoureldeen/Vectras-VM-Android)
 ![GitHub watchers](https://img.shields.io/github/watchers/xoureldeen/Vectras-VM-Android)

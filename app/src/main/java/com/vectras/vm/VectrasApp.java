@@ -17,6 +17,7 @@ import com.vectras.vm.utils.FileUtils;
 import com.vectras.vm.utils.PackageUtils;
 import com.vectras.vm.utils.UIUtils;
 import com.vectras.vm.vectra.VectraCore;
+import com.vectras.vm.magisk.MagiskArchitecture;
 
 import java.lang.ref.WeakReference;
 import java.util.Locale;
@@ -56,6 +57,7 @@ public class VectrasApp extends Application {
 //		}
 		setupAppConfig(getApplicationContext());
 		VectraCore.init(this);
+		MagiskArchitecture.INSTANCE.init(this);
 
         registerActivityLifecycleCallbacks(new ActivityLifecycleCallbacks() {
             @Override
@@ -81,6 +83,8 @@ public class VectrasApp extends Application {
 		super.onTerminate();
 		// Cleanup VectraCore resources
 		VectraCore.shutdown();
+		// Cleanup MagiskArchitecture resources
+		MagiskArchitecture.INSTANCE.shutdown(this);
 	}
 
 	private void setupTheme() {
