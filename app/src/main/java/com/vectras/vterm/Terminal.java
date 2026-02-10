@@ -24,6 +24,7 @@ import java.io.OutputStreamWriter;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
+import java.nio.charset.StandardCharsets;
 import java.util.Enumeration;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -140,9 +141,9 @@ public class Terminal {
             } finally {
                 new Handler(Looper.getMainLooper()).post(() -> {
                     progressDialog.dismiss(); // Dismiss ProgressDialog
-                    AppConfig.temporaryLastedTerminalOutput = output.toString();
+                    AppConfig.temporaryLastedTerminalOutput = output.get().toString();
                     if (showResultDialog) {
-                        String finalOutput = output.toString();
+                        String finalOutput = output.get().toString();
                         String finalErrors = errors.toString();
                         showDialog(finalOutput.isEmpty() ? finalErrors : finalOutput.replace("read interrupted", "Done!"), dialogActivity, userCommand);
                     }
@@ -216,10 +217,10 @@ public class Terminal {
             } finally {
                 // Switch to main thread after execution
                 new Handler(Looper.getMainLooper()).post(() -> {
-                    AppConfig.temporaryLastedTerminalOutput = output.toString();
+                    AppConfig.temporaryLastedTerminalOutput = output.get().toString();
                     // If showResultDialog is enabled, show the dialog with the result or errors
                     if (showResultDialog) {
-                        String finalOutput = output.toString();
+                        String finalOutput = output.get().toString();
                         String finalErrors = errors.toString();
                         // bcuz there is dumb users bruh
                         showDialog(finalOutput.isEmpty() ? finalErrors : finalOutput.replace("read interrupted", "Done!"), dialogActivity, userCommand);
@@ -416,7 +417,7 @@ public class Terminal {
                             drainer.cancel();
                             return;
                         }
-                        bytesSeen.addAndGet(line.getBytes().length);
+                        bytesSeen.addAndGet(line.getBytes(StandardCharsets.UTF_8).length);
                         if (!limiter.tryAcquire()) {
                             int dropped = droppedLogs.incrementAndGet();
                             if (dropped % 100 == 1) {
