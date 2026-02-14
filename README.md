@@ -46,6 +46,16 @@ find . -maxdepth 2 -type d | sort
 - [DOC_INDEX.md](DOC_INDEX.md)
 - [docs/README.md](docs/README.md)
 
+## Navegação rápida — governança e estado
+- Estado atual: [PROJECT_STATE.md](PROJECT_STATE.md) *(ativo)*
+- Histórico de mudanças: [CHANGELOG.md](CHANGELOG.md) *(ativo)*
+- Notas de release: [RELEASE_NOTES.md](RELEASE_NOTES.md) *(ativo)*
+- Licenças e terceiros: [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) *(ativo)*
+- Índice documental raiz: [DOC_INDEX.md](DOC_INDEX.md) *(ativo)*
+- Diretrizes do núcleo Vectra: [VECTRA_CORE.md](VECTRA_CORE.md) *(ativo)*
+- Otimizações avançadas: [ADVANCED_OPTIMIZATIONS.md](ADVANCED_OPTIMIZATIONS.md) *(ativo)*
+- Histórico arquivado: [archive/historical/](archive/historical/) *(histórico/arquivado)*
+
 ## Setup rápido de build
 - Copie `local.properties.example` para `local.properties` e ajuste `sdk.dir`.
 - Ajuste versões via `gradle.properties` (`COMPILE_API`, `TOOLS_VERSION`, `JAVA_LANGUAGE_VERSION`, `CMAKE_VERSION`, `NDK_VERSION`).
