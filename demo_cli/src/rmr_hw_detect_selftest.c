@@ -1,4 +1,5 @@
 #include "rmr_hw_detect.h"
+#include "rmr_asset_guard.h"
 #include "topological_guard.h"
 
 #include <stdio.h>
@@ -10,6 +11,29 @@ static int expect_true(int cond, const char *msg) {
     return 1;
   }
   return 0;
+}
+
+
+static int asset_guard_lowlevel_contract(void) {
+  int failed = 0;
+  RmR_AssetGuard guard;
+  const uint8_t bytes[] = {0x10u, 0x21u, 0x21u, 0x42u, 0x55u, 0x89u};
+
+  RmR_AssetGuard_Init(&guard, RMR_ASSET_RIGHT_READ_U32, 3u);
+  failed += expect_true(guard.required_rights == RMR_ASSET_RIGHT_READ_U32, "asset guard starts with read right");
+  failed += expect_true((RmR_AssetGuard_ProbeInlineAsm(&guard) & RMR_ASSET_CAP_GENERIC_U32) != 0u, "asset guard probes generic capability first");
+  failed += expect_true(RmR_AssetGuard_Enter(&guard, bytes, sizeof(bytes), RMR_ASSET_RIGHT_READ_U32) == RMR_ASSET_STATUS_OK_U32, "asset guard read pass");
+  failed += expect_true(guard.current.len_seen == (uint32_t)sizeof(bytes), "asset guard consumed bytes");
+  failed += expect_true(RmR_AssetGuard_Enter(&guard, bytes, sizeof(bytes), 0u) == (RMR_ASSET_STATUS_FAILSAFE_U32 | RMR_ASSET_STATUS_ROLLBACK_U32 | RMR_ASSET_STATUS_RIGHTS_U32), "asset guard missing rights rollback");
+  failed += expect_true(guard.current.len_seen == (uint32_t)sizeof(bytes), "asset guard rollback preserves checkpoint");
+  failed += expect_true(RmR_AssetGuard_Enter(&guard, bytes, sizeof(bytes), RMR_ASSET_RIGHT_READ_U32 | RMR_ASSET_RIGHT_ZERO_THRUST_U32) == (RMR_ASSET_STATUS_FAILSAFE_U32 | RMR_ASSET_STATUS_ROLLBACK_U32 | RMR_ASSET_STATUS_ZERO_THRUST_U32), "asset guard zerothrust denied");
+
+  RmR_AssetGuard_Init(&guard, RMR_ASSET_RIGHT_READ_U32, 2u);
+  failed += expect_true(RmR_AssetGuard_Enter(&guard, bytes, sizeof(bytes), RMR_ASSET_RIGHT_READ_U32) == RMR_ASSET_STATUS_OK_U32, "asset guard watchdog first pass");
+  failed += expect_true(RmR_AssetGuard_Enter(&guard, bytes, sizeof(bytes), RMR_ASSET_RIGHT_READ_U32) == (RMR_ASSET_STATUS_FAILSAFE_U32 | RMR_ASSET_STATUS_ROLLBACK_U32 | RMR_ASSET_STATUS_WATCHDOG_U32), "asset guard watchdog rollback");
+  failed += expect_true(guard.rollback_count == 1u, "asset guard rollback counted");
+
+  return failed;
 }
 
 int main(void) {
@@ -44,6 +68,8 @@ int main(void) {
   failed += expect_true(rmr_topo_guard_step(&guard, bytes, (uint32_t)sizeof(bytes)) == 2, "watchdog triggers rollback");
   failed += expect_true(guard.rollback_count == 1u, "rollback counter incremented");
   failed += expect_true(guard.failsafe_triggered == 1u, "failsafe flag raised");
+
+  failed += asset_guard_lowlevel_contract();
 
   if (failed != 0) {
     fprintf(stderr, "rmr_hw_detect_selftest FAILED (%d)\n", failed);

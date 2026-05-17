@@ -15,31 +15,38 @@ static int bitraf_roundtrip_test(void) {
   static const uint8_t payload[] = "vectra_rmr_roundtrip";
   uint64_t seed = 42u;
   uint64_t hash = bitraf_hash(payload, sizeof(payload), seed);
-  RmR_ExternalBitRafVerifyRequest req = {payload, sizeof(payload), hash, seed};
-  return RmR_External_RunBitRafVerify(&req);
+  int verify_ok = 0;
+  if (RmR_External_RunBitRafVerify(payload, sizeof(payload), hash, seed, &verify_ok) != 0) return 1;
+  return verify_ok ? 0 : 1;
 }
 
 static int zipraf_coherence_test(void) {
   static const uint8_t payload[] = {1u,2u,3u,4u,5u,6u};
-  RmR_ExternalZipRafRequest req = {payload, sizeof(payload), 11u, 3u, 0u};
+  RmR_ZiprafInput req;
   RmR_ZiprafOutput out;
+  req.seed = 11u;
+  req.trajectory_id = 3u;
+  req.invariant_mask = 0u;
+  req.payload_ptr = payload;
+  req.payload_len = sizeof(payload);
   return RmR_External_RunZipRaf(&req, &out);
 }
 
 static int policy_pipeline_replay_test(void) {
-  RmR_ExternalPolicyRequest req;
+  RmR_PipelineConfig config;
   RmR_AuditSummary sum;
-  memset(&req, 0, sizeof(req));
-  req.input_path = "bench/results/policy_in.bin";
-  req.output_path = "bench/results/policy_out_ext.bin";
-  req.audit_log_path = "bench/results/policy_log_ext.log";
-  req.config.chunk_size = 64u;
-  req.config.mutation_stride = 0u;
-  req.config.mutation_xor = 0u;
-  req.config.triad.cpu_ok = 1u;
-  req.config.triad.ram_ok = 1u;
-  req.config.triad.disk_ok = 1u;
-  return RmR_External_RunPolicyPipeline(&req, &sum);
+  memset(&config, 0, sizeof(config));
+  config.chunk_size = 64u;
+  config.mutation_stride = 0u;
+  config.mutation_xor = 0u;
+  config.triad.cpu_ok = 1u;
+  config.triad.ram_ok = 1u;
+  config.triad.disk_ok = 1u;
+  return RmR_External_RunPolicyPipeline("bench/results/policy_in.bin",
+                                        "bench/results/policy_out_ext.bin",
+                                        "bench/results/policy_log_ext.log",
+                                        &config,
+                                        &sum);
 }
 
 int main(void) {
