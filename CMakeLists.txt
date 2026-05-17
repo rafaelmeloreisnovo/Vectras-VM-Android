@@ -201,6 +201,7 @@ rmr_add_host_executable(rmr_unified_arena_selftest demo_cli/src/rmr_unified_aren
 rmr_add_host_executable(rmr_legacy_kernel_selftest demo_cli/src/rmr_legacy_kernel_selftest.c)
 rmr_add_host_executable(rmr_hw_detect_selftest demo_cli/src/rmr_hw_detect_selftest.c)
 rmr_add_host_executable(zipraf_core_selftest demo_cli/src/zipraf_core_selftest.c)
+rmr_add_host_executable(vectra_external_engine_selftest demo_cli/src/vectra_external_engine_selftest.c)
 rmr_add_host_executable(rmr_external_engine_selftest demo_cli/src/rmr_external_engine_selftest.c)
 rmr_add_host_executable(rmr_policy_benchmark demo_cli/src/rmr_policy_benchmark.c)
 

@@ -7,6 +7,7 @@ set(RMR_CORE_COMMON_SOURCES
   ${RMR_REPO_ROOT}/engine/rmr/src/rmr_cycles.c
   engine/rmr/src/rmr_external_engine.c
   ${RMR_REPO_ROOT}/engine/rmr/src/rmr_hw_detect.c
+  ${RMR_REPO_ROOT}/engine/rmr/src/rmr_asset_guard.c
   ${RMR_REPO_ROOT}/engine/rmr/src/rmr_bench.c
   ${RMR_REPO_ROOT}/engine/rmr/src/rmr_bench_suite.c
   ${RMR_REPO_ROOT}/engine/rmr/src/rmr_isorf.c

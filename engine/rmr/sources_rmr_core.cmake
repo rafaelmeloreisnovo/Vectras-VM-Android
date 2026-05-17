@@ -12,6 +12,7 @@ set(RMR_SOURCE_GROUP_CORE
   engine/rmr/src/rmr_cycles.c
   engine/rmr/src/rmr_external_engine.c
   engine/rmr/src/rmr_hw_detect.c
+  engine/rmr/src/rmr_asset_guard.c
   engine/rmr/src/rmr_isorf.c
   engine/rmr/src/rmr_apk_module.c
   engine/rmr/src/rmr_qemu_bridge.c
