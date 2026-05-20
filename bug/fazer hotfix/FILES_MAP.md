@@ -15,3 +15,5 @@
 | `readme.md` | Documento legado mantido por compatibilidade. | Histórico |
 | `VECTRAS_VM_ANDROID_BUG_REPORT.txt` | Relato técnico base para execução de hotfix. | Evidência bruta |
 | `VECTRAS_VM_ANDROID_CORRECTIONS.txt` | Correções previstas/aplicadas em ciclo curto. | Evidência bruta |
+
+| `HOTFIX_SERVICE_UPDATE_2026-05-20.md` | Plano técnico de hotfix + service update com retroalimentação coerente. | Canônico |
