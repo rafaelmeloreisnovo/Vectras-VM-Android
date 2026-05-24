@@ -25,6 +25,7 @@ Veja `FIXES_SUMMARY.md` para tabela completa.
 
 ## Documentos canônicos
 - `reports/CANONICAL_BUILD_STATUS.md` — **última validação conhecida** de build/release; não substitui execução CI do commit atual.
+- `reports/DOC_SYNC_2026-05-24.md` — sincronização documental determinística (inventário, consolidação e gaps desta rodada)
 - `FIXES_SUMMARY.md` — tabela completa 57 fixes
 - `docs/SETUP_SDK_NDK.md` — setup local
 - `tools/qemu_launch.yml` — QEMU configuration
@@ -51,3 +52,6 @@ Veja `FIXES_SUMMARY.md` para tabela completa.
 - Status canônico de build só é atualizado após CI real concluída.
 
 - `external_sources.manifest` mantém `androidx_RmR` e `qemu_rafaelia` com `pinned_commit_sha`, além de validação remota e contenção do SHA no branch no CI.
+
+
+Última sincronização documental registrada: **2026-05-24**.
