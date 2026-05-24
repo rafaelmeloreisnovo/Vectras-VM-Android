@@ -14,6 +14,7 @@ O **Vectras VM Android** é um sistema híbrido (Android + nativo) com foco em d
 ## 3) Recursos disponíveis (quick access)
 ### Governança e estado
 - Estado do projeto: `PROJECT_STATE.md`
+- Sincronização documental mais recente: `reports/DOC_SYNC_2026-05-24.md`
 - Histórico: `CHANGELOG.md`
 - Release notes: `RELEASE_NOTES.md`
 - Índice documental: `DOC_INDEX.md`
@@ -37,6 +38,9 @@ O **Vectras VM Android** é um sistema híbrido (Android + nativo) com foco em d
 
 ## 4) Trilha rápida de bootstrap
 ```bash
+# 0) Ler sincronização documental atual
+cat reports/DOC_SYNC_2026-05-24.md
+
 # 1) Configurar SDK local
 cp local.properties.example local.properties
 
