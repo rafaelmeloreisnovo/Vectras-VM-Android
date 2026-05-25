@@ -31,6 +31,8 @@ Esta revisão consolida a documentação em três camadas por diretório (propó
 - Créditos por inspiração (sem derivação): [`CREDITS_INSPIRATION.md`](CREDITS_INSPIRATION.md)
 - Política clean-room de assets: [`resources/compliance/ASSET_CLEANROOM_POLICY.md`](resources/compliance/ASSET_CLEANROOM_POLICY.md)
 - Registro de proveniência de assets: [`resources/compliance/ASSET_PROVENANCE_REGISTER.csv`](resources/compliance/ASSET_PROVENANCE_REGISTER.csv)
+- Guia low-level branchless/sem-heap: [`docs/active/LOWLEVEL_BRANCHLESS_SANS_HEAP_GUIDE.md`](docs/active/LOWLEVEL_BRANCHLESS_SANS_HEAP_GUIDE.md)
+- Verificador estático low-level: [`tools/compliance/check_lowlevel_constraints.py`](tools/compliance/check_lowlevel_constraints.py)
 - Referência do runtime: [`VECTRA_CORE.md`](VECTRA_CORE.md)
 - Guia macro de documentação: [`VECTRAS_MEGAPROMPT_DOCS.md`](VECTRAS_MEGAPROMPT_DOCS.md)
 - Auditoria de cobertura dos Markdown (2026-04-07): [`docs/active/DOCUMENTATION_COVERAGE_AUDIT_2026-04-07.md`](docs/active/DOCUMENTATION_COVERAGE_AUDIT_2026-04-07.md)
