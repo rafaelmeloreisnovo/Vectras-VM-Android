@@ -17,3 +17,9 @@ Este arquivo lista componentes de terceiros mencionados no repositório. As lice
 
 ## Aviso sobre ISOs e binários
 Arquivos ISO e binários incluídos no repositório devem ter licenças verificadas e documentadas caso sejam redistribuídos.
+## Política de rigor jurídico (clean-room)
+- Este repositório adota política de substituição obrigatória para qualquer componente sem licença confirmada.
+- Créditos de inspiração não autorizam reutilização de código, lógica, imagens, nomes ou algoritmos protegidos.
+- Componentes sem prova de origem/licença devem ser removidos da distribuição até regularização.
+- Consulte também: `AUTHORSHIP_CLEANROOM_PLAN.md`, `LICENSES_REGISTER.md` e `CREDITS_INSPIRATION.md`.
+
