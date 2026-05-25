@@ -1,0 +1,3 @@
+asset_path,asset_type,author,source_url,license_spdx,permission_proof,risk_class,status,notes,last_review_date
+resources/compliance/examples/authored_placeholder_01.txt,text,Project Team,internal,MIT,n/a,A,approved,authored placeholder for pipeline validation,2026-05-25
+resources/compliance/examples/authored_placeholder_02.txt,text,Project Team,internal,MIT,n/a,A,approved,authored placeholder for pipeline validation,2026-05-25
