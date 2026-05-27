@@ -165,33 +165,107 @@ Resumo linear solicitado:
 
 ---
 
-## 6) Contrato nativo real
+## 6) Contrato nativo real (melhorado com mitigação tática/profissional)
 
 - **NativeFastPath**:
   - carrega `libvectra_core_accel`; se falha, ativa fallback Java e mantém API funcional.
+  - **mitigação recomendada**: classificar fallback em níveis (`EXPECTED_DEVICE_LIMIT`, `JNI_MISSING`, `KERNEL_CONTRACT_MISMATCH`) para separar limitações de device vs bug real.
 - **`vectra_core_accel.c`**:
   - implementa JNI para cópia/checksum/arena/route/verify/audit + capacidades da unified kernel.
+  - **mitigação recomendada**: normalizar código de erro C/JNI (tabela única) e mapear para erro funcional no Java (`recoverable`, `degraded`, `fatal`).
 - **JNI symbols reais**:
   - `Java_com_vectras_vm_core_NativeFastPath_nativeInit`, `nativeReadHardwareContract`, `nativeFeatureMask`, `nativePointerBits`, `nativePageBytes`, `nativeCore*`, etc.
+  - **mitigação recomendada**: teste de contrato de símbolos no startup (smoke JNI) com fail-fast controlado e mensagem amigável antes do start VM.
 - **Fallback Java**:
   - `NativeFastPath` retorna implementações determinísticas em Java quando native indisponível/retorna zero.
+  - **mitigação recomendada**: manter equivalência determinística com suíte de comparação JNI vs Java (N=200, seed fixa) para evitar drift algorítmico.
 - **Telemetry**:
   - contadores `TELEMETRY_*` (copy/xor/crc/route/audit/native hits/fallback hits) com leitura raw estruturada.
+  - **mitigação recomendada**: incluir `vmId`, `arch`, `featureMask`, `pageBytes`, `pointerBits`, `fallbackReason`, `errorClass` em relatório runtime por sessão.
 - **Feature mask**:
   - contrato público `FEATURE_NEON/AES/CRC32/POPCNT/SSE42/AVX2/SIMD`.
+  - **mitigação recomendada**: strategy pattern por feature (ex.: CRC32 hw vs software), com guardas por bit e testes A/B de consistência.
 - **Page size / pointer bits**:
   - vêm de capability nativa (`nativePageBytes`, `nativePointerBits`), fallback 4096/32 em C quando kernel state indisponível.
+  - **mitigação recomendada**: validar compatibilidade mínima no boot (`pointerBits>=32`, `pageBytes` suportado) e registrar downgrade explícito no ledger.
+
+### Plano tático (2 ciclos) para o contrato nativo
+
+- **Ciclo 1 — Contenção de risco (rápido)**
+  1. Implementar classificação de erro/fallback e log estruturado obrigatório.
+  2. Adicionar smoke-test JNI no startup (sem bloquear app inteiro; bloqueia só fast-path quando necessário).
+  3. Exportar snapshot de telemetria em arquivo por sessão VM.
+
+- **Ciclo 2 — Robustez de produção**
+  1. Criar suíte de paridade JNI↔Java com seeds fixas + casos limítrofes.
+  2. Implantar SLO de confiabilidade do fast-path (ex.: taxa de fallback < X% por arch).
+  3. Automatizar alarme CI quando contrato de capability mudar sem atualização de testes/documentação.
 
 ---
 
-## 7) Bugs/gaps prioritários
+## 7) Bugs/gaps prioritários (com estratégia de correção e mitigação)
 
-1. **QEMU missing fallback ruim**: sem fail-fast quando binário inexistente executável.
-2. **String shell command risk**: `userCommand` como string única em shell dentro do proot amplia risco de escaping/injeção em concatenações futuras.
-3. **`/data` bind agressivo**: bind default amplo para todo guest.
-4. **`/dev/shm` usando root**: shm em `${rootfs}/root` (não tmpfs isolado).
-5. **Docs antigas desatualizadas**: divergência significativa com runtime atual.
-6. **Falta relatório runtime gerado pelo app**: há ledger/tracker parcial, mas falta relatório consolidado “code-real runtime session”.
+1. **QEMU missing fallback ruim**
+   - **falha atual**: sem fail-fast quando binário inexistente executável.
+   - **risco**: erro tardio no runtime, suporte operacional caro e UX ruim.
+   - **mitigação tática**:
+     - Gate em preflight: bloquear start se `QemuBinaryResolver` não encontrar executável válido.
+     - Retornar diagnóstico com `checkedPaths`, arch e ação sugerida.
+   - **boa prática**: validação de dependência crítica *antes* de side effects (foreground service/proot start).
+
+2. **String shell command risk**
+   - **falha atual**: `userCommand` único em shell dentro do proot.
+   - **risco**: escaping inconsistente e injeção acidental em concatenações futuras.
+   - **mitigação tática**:
+     - Introduzir pipeline `argv` estruturado para QEMU (sem composição textual quando possível).
+     - Canonicalizar/escapar apenas em camada única, com testes de comandos maliciosos.
+   - **boa prática**: princípio “structured command over shell string”.
+
+3. **`/data` bind agressivo**
+   - **falha atual**: `/data` habilitado por padrão.
+   - **risco**: exposição excessiva e possibilidade de escrita indevida no namespace host.
+   - **mitigação tática**:
+     - Trocar default para allowlist mínima (`/dev`,`/proc`,`/sys`,`/tmp`) e bind opcional de `/data` por feature flag explícita.
+     - Quando necessário, preferir bind read-only e paths específicos.
+   - **boa prática**: least privilege e defense-in-depth.
+
+4. **`/dev/shm` usando root**
+   - **falha atual**: `/dev/shm` apontando para `${rootfs}/root`.
+   - **risco**: semântica IPC/shm incorreta, lixo persistente e conflito com HOME.
+   - **mitigação tática**:
+     - Criar diretório dedicado (`${rootfs}/dev/shm`) com permissão `1777` na preparação do rootfs.
+     - Adicionar verificação de saúde do shm no preflight.
+   - **boa prática**: separar dados efêmeros IPC de diretórios de usuário.
+
+5. **Docs antigas desatualizadas**
+   - **falha atual**: documentação não reflete runtime real.
+   - **risco**: decisões erradas em operação/manutenção.
+   - **mitigação tática**:
+     - Estabelecer processo “code-real first”: gerar artefato de runtime em cada release.
+     - Tornar divergência doc↔código um check de PR.
+   - **boa prática**: documentação viva com owner definido.
+
+6. **Falta relatório runtime gerado pelo app**
+   - **falha atual**: ledger/tracker parciais sem visão consolidada por sessão.
+   - **risco**: baixa rastreabilidade de incidentes e MTTR alto.
+   - **mitigação tática**:
+     - Criar `runtime_session_report.json` por VM contendo: command hash, UI mode, QEMU binary path, binds, feature mask, fallback reason, tempos por fase, códigos de erro.
+     - Exportar relatório sob demanda no app para suporte técnico.
+   - **boa prática**: observabilidade orientada a sessão com campos estáveis.
+
+### Estratégia profissional de execução (priorização tática)
+
+- **Prioridade P0 (segurança/estabilidade imediata)**
+  1. Fail-fast de binário QEMU no preflight.
+  2. Hardening de bind `/data` e correção de `/dev/shm`.
+
+- **Prioridade P1 (confiabilidade operacional)**
+  1. Migrar para execução estruturada de comandos (`argv`) onde viável.
+  2. Implantar relatório consolidado de sessão runtime.
+
+- **Prioridade P2 (governança e prevenção de regressão)**
+  1. Testes automatizados de contrato (QEMU resolver + proot binds + JNI parity).
+  2. Checklist de release exigindo atualização de CODE_REAL quando fluxo mudar.
 
 ---
 
