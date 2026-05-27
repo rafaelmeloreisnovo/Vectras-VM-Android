@@ -64,7 +64,14 @@ public class StartVM {
         if (!isQuickRun) {
             lastMountState = "init";
             lastStartError = "";
-            params.add(QemuExecConfig.resolveBinary(activity, arch));
+            QemuBinaryResolver.Resolution strictResolution = QemuExecConfig.resolveBinaryStrict(activity, arch);
+            if (!strictResolution.found) {
+                lastStartError = "qemu_binary_missing";
+                lastRuntimeContract = RuntimeContract.fromStartVmPhase(arch, "UNKNOWN", "error:qemu_binary_missing");
+                Log.e("StartVM", "QEMU binary not found. checkedPaths=" + strictResolution.checkedPaths);
+                return "";
+            }
+            params.add(strictResolution.fullPath);
 
             params.add("-qmp");
             params.add("unix:" + Config.getLocalQMPSocketPath() + ",server,nowait");

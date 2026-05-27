@@ -36,6 +36,7 @@ import com.vectras.vm.core.RuntimeContract;
 import com.vectras.vm.core.VmIntrospection;
 import com.vectras.vm.qemu.VmLaunchLedger;
 import com.vectras.vm.qemu.VmLaunchMode;
+import com.vectras.vm.runtime.VectrasRuntimePreflight;
 import com.vectras.vm.settings.ExternalVNCSettingsActivity;
 import com.vectras.vm.setupwizard.SetupFeatureCore;
 import com.vectras.vm.utils.DeviceUtils;
@@ -330,6 +331,17 @@ public class MainStartVM {
         }
 
         VMManager.isQemuStopedWithError = false;
+        if (context instanceof Activity) {
+            VectrasRuntimePreflight.Result runtimePreflight = VectrasRuntimePreflight.run(context);
+            if (!runtimePreflight.ok) {
+                StartVM.lastStartError = "runtime_preflight_failed";
+                DialogUtils.oneDialog(context, "Runtime preflight failed",
+                        "QEMU binary not found. Runtime/rootfs is incomplete.", R.drawable.warning_48px);
+                VmFlowTracker.mark(context, finalvmID, VmFlowState.ERROR, "runtime_preflight_failed", "abort");
+                stopLaunchPoller();
+                return;
+            }
+        }
 
         String finalCommand = VMManager.addAudioDevSdl(String.format(runCommandFormat, env));
 

@@ -4,6 +4,7 @@ import android.content.Context;
 
 import com.termux.app.TermuxService;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -137,6 +138,15 @@ public class ProotCommandBuilder {
         return this;
     }
 
+    public ProotCommandBuilder setSafeBindsMode(boolean enabled) {
+        this.safeBindsMode = enabled;
+        if (enabled) {
+            this.bindDataEnabled = false;
+            this.bindStorageEnabled = false;
+        }
+        return this;
+    }
+
     public ProotCommandBuilder addExtraBind(String bindSpec) {
         if (bindSpec != null && !bindSpec.trim().isEmpty()) {
             extraBinds.add(bindSpec);
@@ -213,7 +223,7 @@ public class ProotCommandBuilder {
         binds.add(BIND_SDCARD);
         binds.add(BIND_STORAGE);
         binds.add(BIND_DATA);
-        binds.add(devShmBind(rootfsPath));
+        binds.add(devShmBind(filesDir));
         binds.add(tmpBind(filesDir));
         return binds;
     }
@@ -235,14 +245,14 @@ public class ProotCommandBuilder {
             if (bindSdcardEnabled) {
                 binds.add(BIND_SDCARD);
             }
-            if (bindStorageEnabled) {
+            if (bindStorageEnabled && !safeBindsMode) {
                 binds.add(BIND_STORAGE);
             }
-            if (bindDataEnabled) {
+            if (bindDataEnabled && !safeBindsMode) {
                 binds.add(BIND_DATA);
             }
             if (bindDevShmEnabled) {
-                binds.add(devShmBind(rootfsPath));
+                binds.add(devShmBind(filesDir));
             }
             if (bindTmpEnabled) {
                 binds.add(tmpBind(filesDir));
@@ -253,8 +263,15 @@ public class ProotCommandBuilder {
         return binds;
     }
 
-    private static String devShmBind(String rootfsPath) {
-        return rootfsPath + "/root:/dev/shm";
+    private static String devShmBind(String filesDir) {
+        File devShmDir = new File(filesDir + "/usr/tmp/dev-shm");
+        if (!devShmDir.exists()) {
+            devShmDir.mkdirs();
+        }
+        devShmDir.setReadable(true, false);
+        devShmDir.setWritable(true, true);
+        devShmDir.setExecutable(true, true);
+        return devShmDir.getAbsolutePath() + ":/dev/shm";
     }
 
     private static String tmpBind(String filesDir) {
@@ -286,3 +303,4 @@ public class ProotCommandBuilder {
         return null;
     }
 }
+    private boolean safeBindsMode = false;

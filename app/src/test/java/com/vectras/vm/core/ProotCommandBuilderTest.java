@@ -37,7 +37,7 @@ public class ProotCommandBuilderTest {
         assertHasPair(command, "-b", "/sdcard");
         assertHasPair(command, "-b", "/storage");
         assertHasPair(command, "-b", "/data");
-        assertHasPair(command, "-b", "/data/user/0/com.vectras.vm/files/distro/root:/dev/shm");
+        assertHasPair(command, "-b", "/data/user/0/com.vectras.vm/files/usr/tmp/dev-shm:/dev/shm");
         assertHasPair(command, "-b", "/data/user/0/com.vectras.vm/files/usr/tmp:/tmp");
 
         Assert.assertEquals("/bin/sh", command.get(command.size() - 2));
@@ -60,7 +60,7 @@ public class ProotCommandBuilderTest {
         assertHasPair(command, "-b", "/sys");
         assertHasPair(command, "-b", "/storage");
         assertHasPair(command, "-b", "/data");
-        assertHasPair(command, "-b", "/data/user/0/com.vectras.vm/files/distro/root:/dev/shm");
+        assertHasPair(command, "-b", "/data/user/0/com.vectras.vm/files/usr/tmp/dev-shm:/dev/shm");
         assertHasPair(command, "-b", "/data/user/0/com.vectras.vm/files/usr/tmp:/tmp");
     }
 
@@ -133,8 +133,8 @@ public class ProotCommandBuilderTest {
 
         List<String> command = builder.buildCommand();
 
-        assertHasPair(command, "-b", "/opt/custom-rootfs/root:/dev/shm");
-        assertMissingPair(command, "-b", "/data/user/0/com.vectras.vm/files/distro/root:/dev/shm");
+        assertHasPair(command, "-b", "/data/user/0/com.vectras.vm/files/usr/tmp/dev-shm:/dev/shm");
+        assertMissingPair(command, "-b", "/opt/custom-rootfs/root:/dev/shm");
     }
 
     @Test
@@ -177,6 +177,16 @@ public class ProotCommandBuilderTest {
 
         assertHasPair(command, "-b", "/data/user/0/com.vectras.vm/files/usr/tmp:/tmp");
         assertMissingPair(command, "-b", "   /usr/tmp:/tmp");
+    }
+
+    @Test
+    public void buildCommandSafeModeShouldNotIncludeDataBind() {
+        Context context = Mockito.mock(Context.class);
+        Mockito.when(context.getFilesDir()).thenReturn(new File("/data/user/0/com.vectras.vm/files"));
+        ProotCommandBuilder builder = new ProotCommandBuilder(context, "/rootfs", "/root")
+                .setSafeBindsMode(true);
+        List<String> command = builder.buildCommand();
+        assertMissingPair(command, "-b", "/data");
     }
 
     private static void assertHasPair(List<String> values, String key, String expectedValue) {
