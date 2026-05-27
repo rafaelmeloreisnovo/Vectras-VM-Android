@@ -33,15 +33,19 @@ cd "$WORKDIR"
   --disable-vnc-jpeg
 
 ninja -C build subprojects/libvhost-user/libvhost-user.a
-make -f hw/core/Makefile.integration all
-make -f hw/core/Makefile.integration test
+
+# Makefile.integration uses relative source names and include paths.
+# It must run with hw/core as the current working directory.
+make -C hw/core -f Makefile.integration all
+make -C hw/core -f Makefile.integration test
 
 cp -v build/subprojects/libvhost-user/libvhost-user.a "$ARTIFACT_DIR/" || true
 cp -v build/config.log "$ARTIFACT_DIR/" || true
 cp -v build/config-host.h "$ARTIFACT_DIR/" || true
+cp -v hw/core/rafaelia-integration-test "$ARTIFACT_DIR/" 2>/dev/null || true
 
 # If a full qemu-system binary is built by a later profile, copy it here.
-find build -type f -perm -111 -name 'qemu-system-*' -maxdepth 3 -exec cp -v {} "$ARTIFACT_DIR/" \; 2>/dev/null || true
+find build -maxdepth 3 -type f -perm -111 -name 'qemu-system-*' -exec cp -v {} "$ARTIFACT_DIR/" \; 2>/dev/null || true
 
 (
   cd "$ARTIFACT_DIR"
