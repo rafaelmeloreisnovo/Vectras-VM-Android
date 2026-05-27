@@ -3,8 +3,21 @@
 # ψ = intenção | Ω = Amor (coerência máxima)
 # ═══════════════════════════════════════════════════════════
 
-version: "1.0"
+version: "1.1"
 project: "Vectras-VM-Android / RAFAELIA"
+source_repository: "rafaelmeloreisnovo/qemu_rafaelia"
+asset_lock: "tools/qemu_rafaelia_assets.lock.yml"
+
+# Binaries/firmware/rootfs are runtime artifacts, not git-tracked assets.
+runtime_paths:
+  qemu_bin_dirs:
+    - "${filesDir}/distro/usr/local/bin"
+    - "${filesDir}/distro/usr/bin"
+    - "${filesDir}/usr/bin"
+    - "${filesDir}/bin"
+    - "${PATH}"
+  firmware_dir: "${filesDir}/firmware"
+  rootfs_dir: "${filesDir}/distro"
 
 # ── Global defaults ─────────────────────────────────────────
 defaults:
@@ -15,6 +28,8 @@ defaults:
   virtio_disk: true
   nographic: true
   serial: "mon:stdio"
+  qemu_binary_policy: "runtime-resolved"
+  firmware_policy: "external-sha256"
   common_virtio_devices: &common_virtio_devices
     - "-device virtio-balloon"
     - "-device virtio-rng-pci"
@@ -31,10 +46,14 @@ profiles:
     machine: "pc"
     cpu_kvm: host
     cpu_tcg: qemu64
+    qemu_binary_candidates:
+      - "qemu-system-x86_64-rafaelia"
+      - "qemu-system-x86_64-rafacodephi"
+      - "qemu-system-x86_64"
     firmware:
-      efi: "app/src/main/assets/roms/RELEASEX64_OVMF.fd"
-      efi_vars: "app/src/main/assets/roms/RELEASEX64_OVMF_VARS.fd"
-      bios_fallback: "app/src/main/assets/roms/bios-vectras.bin"
+      efi: "${filesDir}/firmware/RELEASEX64_OVMF.fd"
+      efi_vars: "${filesDir}/firmware/RELEASEX64_OVMF_VARS.fd"
+      bios_fallback: "${filesDir}/firmware/bios-vectras.bin"
     accel_priority: [kvm, tcg]
     extra_args: *common_virtio_devices
 
@@ -46,9 +65,13 @@ profiles:
       iommu: "none"
     cpu_kvm: host
     cpu_tcg: cortex-a72
+    qemu_binary_candidates:
+      - "qemu-system-aarch64-rafaelia"
+      - "qemu-system-aarch64-rafacodephi"
+      - "qemu-system-aarch64"
     firmware:
-      efi: "app/src/main/assets/roms/QEMU_EFI.img"
-      efi_vars: "app/src/main/assets/roms/QEMU_VARS.img"
+      efi: "${filesDir}/firmware/QEMU_EFI.img"
+      efi_vars: "${filesDir}/firmware/QEMU_VARS.img"
     accel_priority: [kvm, tcg]
     extra_args: *arm64_input_devices
 
@@ -58,6 +81,10 @@ profiles:
     memory_mb: 512
     cpus: 1
     cpu_tcg: cortex-a53
+    qemu_binary_candidates:
+      - "qemu-system-aarch64-rafaelia"
+      - "qemu-system-aarch64-rafacodephi"
+      - "qemu-system-aarch64"
     accel_priority: [tcg]
     nographic: true
 
@@ -66,9 +93,13 @@ profiles:
     machine: "pc"
     memory_mb: 512
     cpus: 1
+    qemu_binary_candidates:
+      - "qemu-system-i386-rafaelia"
+      - "qemu-system-i386-rafacodephi"
+      - "qemu-system-i386"
     accel_priority: [tcg]
     firmware:
-      bios_fallback: "app/src/main/assets/roms/bios-vectras.bin"
+      bios_fallback: "${filesDir}/firmware/bios-vectras.bin"
 
 # ── SDK/NDK build requirements ──────────────────────────────
 build_env:
@@ -85,7 +116,7 @@ build_env:
     internal_validation:
       - arm64-v8a
       - armeabi-v7a
-    
+
 # ── RMR engine compile flags ────────────────────────────────
 engine_flags:
   common:
@@ -110,3 +141,6 @@ telemetry:
     - halted_count
     - running_count
     - balloon_actual
+    - rafaelia_runtime_ticks
+    - rafaelia_entropy_last
+    - rafaelia_coherence_last
