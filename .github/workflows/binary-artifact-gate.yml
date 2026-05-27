@@ -1,0 +1,38 @@
+name: Binary Artifact Gate
+
+on:
+  pull_request:
+    paths:
+      - 'app/src/main/assets/**'
+      - 'app/src/main/jniLibs/**'
+      - '3dfx/**'
+      - 'Incluir/**'
+      - '.ci/**'
+      - '.github/workflows/binary-artifact-gate.yml'
+      - 'tools/ci/ban_repository_binaries.sh'
+      - 'tools/qemu_rafaelia_assets.lock.yml'
+      - 'tools/qemu_launch.yml'
+  push:
+    branches: [main, master, develop, 'release/**', 'clean/**']
+    paths:
+      - 'app/src/main/assets/**'
+      - 'app/src/main/jniLibs/**'
+      - '3dfx/**'
+      - 'Incluir/**'
+      - '.ci/**'
+      - '.github/workflows/binary-artifact-gate.yml'
+      - 'tools/ci/ban_repository_binaries.sh'
+      - 'tools/qemu_rafaelia_assets.lock.yml'
+      - 'tools/qemu_launch.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  ban-binaries:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Enforce binary artifact policy
+        run: bash tools/ci/ban_repository_binaries.sh

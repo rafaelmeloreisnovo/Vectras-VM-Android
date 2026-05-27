@@ -100,3 +100,22 @@ credentials.*
 
 # Local fork sync cache (downloaded via termux orchestrator)
 .third_party_forks/
+
+# RAFAELIA/QEMU binary-exodus: generated or external artifacts only.
+# Keep source, manifests, hashes and build recipes in git; keep blobs out.
+app/src/main/assets/roms/*.img
+app/src/main/assets/roms/*.fd
+app/src/main/assets/roms/*.bin
+app/src/main/assets/alpine19/*.tar
+app/src/main/assets/bootstrap/*.tar
+app/src/main/jniLibs/**/*.so
+3dfx/*.iso
+Incluir/*.zip
+Incluir/*.docx
+.ci/*.zip
+*.qcow2
+*.raw
+*.7z
+*.rar
+qemu_rafaelia_build/
+qemu_rafaelia_artifacts/
