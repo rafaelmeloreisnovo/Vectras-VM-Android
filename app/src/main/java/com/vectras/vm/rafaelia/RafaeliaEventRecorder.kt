@@ -31,18 +31,21 @@ object RafaeliaEventRecorder {
 
     @JvmStatic
     fun recordStart(context: Context, vmName: String) {
+        ensureOptionalCsvExports(context)
         record(context, "start", JSONObject().put("vm", vmName))
     }
 
     @JvmStatic
     fun recordStop(context: Context, vmName: String) {
         record(context, "stop", JSONObject().put("vm", vmName))
+        traceAllEngines(context, "stopped", JSONObject().put("phase", "vm_stop"))
         snapshot(context)
     }
 
     @JvmStatic
     fun recordCrash(context: Context, reason: String) {
         record(context, "crash", JSONObject().put("reason", reason))
+        traceAllEngines(context, "error", JSONObject().put("phase", "vm_crash"))
         snapshot(context)
     }
 
@@ -99,6 +102,21 @@ object RafaeliaEventRecorder {
         FileWriter(file, true).use { writer ->
             writer.append(payload.toString()).append("\n")
         }
+    }
+
+    private fun traceAllEngines(context: Context, event: String, payload: JSONObject) {
+        RafaeliaCsvTraceExporter.trace(context, "geolm", event, payload)
+        RafaeliaCsvTraceExporter.trace(context, "geoia", event, payload)
+        RafaeliaCsvTraceExporter.trace(context, "uniao", event, payload)
+        RafaeliaCsvTraceExporter.trace(context, "vectra_qemu", event, payload)
+    }
+
+    private fun ensureOptionalCsvExports(context: Context) {
+        val payload = JSONObject().put("phase", "init")
+        RafaeliaCsvTraceExporter.trace(context, "geolm", "preflight", payload)
+        RafaeliaCsvTraceExporter.trace(context, "geoia", "preflight", payload)
+        RafaeliaCsvTraceExporter.trace(context, "uniao", "preflight", payload)
+        RafaeliaCsvTraceExporter.trace(context, "vectra_qemu", "preflight", payload)
     }
 
     private fun timestamp(): String {
