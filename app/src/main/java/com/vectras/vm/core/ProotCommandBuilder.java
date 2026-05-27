@@ -50,135 +50,37 @@ public class ProotCommandBuilder {
     private boolean bindDataEnabled = true;
     private boolean bindDevShmEnabled = true;
     private boolean bindTmpEnabled = true;
+    private boolean safeBindsMode = false;
     private final List<String> extraBinds = new ArrayList<>();
 
-    public ProotCommandBuilder(Context context, String rootfsPath, String workDir) {
-        this.context = context;
-        this.rootfsPath = rootfsPath;
-        this.workDir = workDir;
-    }
+    public ProotCommandBuilder(Context context, String rootfsPath, String workDir) { this.context = context; this.rootfsPath = rootfsPath; this.workDir = workDir; }
+    public ProotCommandBuilder setFilesDirPath(String filesDirPath) { this.filesDirPath = filesDirPath; return this; }
+    public ProotCommandBuilder setHome(String home) { this.home = home; return this; }
+    public ProotCommandBuilder setUser(String user) { this.user = user; return this; }
+    public ProotCommandBuilder setTerm(String term) { this.term = term; return this; }
+    public ProotCommandBuilder setTmpDir(String tmpDir) { this.tmpDir = tmpDir; return this; }
+    public ProotCommandBuilder setShell(String shell) { this.shell = shell; return this; }
+    public ProotCommandBuilder setDisplay(String display) { this.display = display; return this; }
+    public ProotCommandBuilder setPulseServer(String pulseServer) { this.pulseServer = pulseServer; return this; }
+    public ProotCommandBuilder setXdgRuntimeDir(String xdgRuntimeDir) { this.xdgRuntimeDir = xdgRuntimeDir; return this; }
+    public ProotCommandBuilder setPath(String path) { this.path = path; return this; }
+    public ProotCommandBuilder setSdlVideoDriver(String sdlVideoDriver) { this.sdlVideoDriver = sdlVideoDriver; return this; }
+    public ProotCommandBuilder setBindSdcardEnabled(boolean bindSdcardEnabled) { this.bindSdcardEnabled = bindSdcardEnabled; return this; }
+    public ProotCommandBuilder setBindStorageEnabled(boolean bindStorageEnabled) { this.bindStorageEnabled = bindStorageEnabled; return this; }
+    public ProotCommandBuilder setBindDataEnabled(boolean bindDataEnabled) { this.bindDataEnabled = bindDataEnabled; return this; }
+    public ProotCommandBuilder setBindDevShmEnabled(boolean bindDevShmEnabled) { this.bindDevShmEnabled = bindDevShmEnabled; return this; }
+    public ProotCommandBuilder setBindTmpEnabled(boolean bindTmpEnabled) { this.bindTmpEnabled = bindTmpEnabled; return this; }
+    public ProotCommandBuilder setSafeBindsMode(boolean enabled) { this.safeBindsMode = enabled; if (enabled) { this.bindDataEnabled = false; this.bindStorageEnabled = false; } return this; }
+    public ProotCommandBuilder addExtraBind(String bindSpec) { if (bindSpec != null && !bindSpec.trim().isEmpty()) extraBinds.add(bindSpec); return this; }
 
-    public ProotCommandBuilder setFilesDirPath(String filesDirPath) {
-        this.filesDirPath = filesDirPath;
-        return this;
-    }
-
-    public ProotCommandBuilder setHome(String home) {
-        this.home = home;
-        return this;
-    }
-
-    public ProotCommandBuilder setUser(String user) {
-        this.user = user;
-        return this;
-    }
-
-    public ProotCommandBuilder setTerm(String term) {
-        this.term = term;
-        return this;
-    }
-
-    public ProotCommandBuilder setTmpDir(String tmpDir) {
-        this.tmpDir = tmpDir;
-        return this;
-    }
-
-    public ProotCommandBuilder setShell(String shell) {
-        this.shell = shell;
-        return this;
-    }
-
-    public ProotCommandBuilder setDisplay(String display) {
-        this.display = display;
-        return this;
-    }
-
-    public ProotCommandBuilder setPulseServer(String pulseServer) {
-        this.pulseServer = pulseServer;
-        return this;
-    }
-
-    public ProotCommandBuilder setXdgRuntimeDir(String xdgRuntimeDir) {
-        this.xdgRuntimeDir = xdgRuntimeDir;
-        return this;
-    }
-
-    public ProotCommandBuilder setPath(String path) {
-        this.path = path;
-        return this;
-    }
-
-    public ProotCommandBuilder setSdlVideoDriver(String sdlVideoDriver) {
-        this.sdlVideoDriver = sdlVideoDriver;
-        return this;
-    }
-
-    public ProotCommandBuilder setBindSdcardEnabled(boolean bindSdcardEnabled) {
-        this.bindSdcardEnabled = bindSdcardEnabled;
-        return this;
-    }
-
-    public ProotCommandBuilder setBindStorageEnabled(boolean bindStorageEnabled) {
-        this.bindStorageEnabled = bindStorageEnabled;
-        return this;
-    }
-
-    public ProotCommandBuilder setBindDataEnabled(boolean bindDataEnabled) {
-        this.bindDataEnabled = bindDataEnabled;
-        return this;
-    }
-
-    public ProotCommandBuilder setBindDevShmEnabled(boolean bindDevShmEnabled) {
-        this.bindDevShmEnabled = bindDevShmEnabled;
-        return this;
-    }
-
-    public ProotCommandBuilder setBindTmpEnabled(boolean bindTmpEnabled) {
-        this.bindTmpEnabled = bindTmpEnabled;
-        return this;
-    }
-
-    public ProotCommandBuilder setSafeBindsMode(boolean enabled) {
-        this.safeBindsMode = enabled;
-        if (enabled) {
-            this.bindDataEnabled = false;
-            this.bindStorageEnabled = false;
-        }
-        return this;
-    }
-
-    public ProotCommandBuilder addExtraBind(String bindSpec) {
-        if (bindSpec != null && !bindSpec.trim().isEmpty()) {
-            extraBinds.add(bindSpec);
-        }
-        return this;
-    }
-
-    public void applyEnvironment(Map<String, String> environment) {
-        Options options = new Options();
-        options.home = home;
-        options.user = user;
-        options.term = term;
-        options.tmpDir = tmpDir;
-        options.shell = shell;
-        options.display = display;
-        options.pulseServer = pulseServer;
-        options.xdgRuntimeDir = xdgRuntimeDir;
-        options.path = path;
-        options.sdlVideoDriver = sdlVideoDriver;
-        applyDefaultEnv(environment, options);
-    }
-
-    public void applyDefaultEnv(ProcessBuilder processBuilder, Options options) {
-        applyDefaultEnv(processBuilder.environment(), options);
-    }
+    public void applyEnvironment(Map<String, String> environment) { Options options = new Options(); options.home = home; options.user = user; options.term = term; options.tmpDir = tmpDir; options.shell = shell; options.display = display; options.pulseServer = pulseServer; options.xdgRuntimeDir = xdgRuntimeDir; options.path = path; options.sdlVideoDriver = sdlVideoDriver; applyDefaultEnv(environment, options); }
+    public void applyDefaultEnv(ProcessBuilder processBuilder, Options options) { applyDefaultEnv(processBuilder.environment(), options); }
 
     public void applyDefaultEnv(Map<String, String> environment, Options options) {
         String filesDir = resolveFilesDirPath();
         Options resolved = options != null ? options : new Options();
         String resolvedTmpDir = firstNotBlank(resolved.tmpDir, tmpDir, "/tmp");
         String resolvedXdgRuntimeDir = firstNotBlank(resolved.xdgRuntimeDir, xdgRuntimeDir, resolvedTmpDir);
-
         environment.put("PROOT_TMP_DIR", filesDir + "/usr/tmp");
         putIfNotEmpty(environment, "HOME", firstNotBlank(resolved.home, home, "/root"));
         putIfNotEmpty(environment, "USER", firstNotBlank(resolved.user, user, "root"));
@@ -195,112 +97,35 @@ public class ProotCommandBuilder {
     public List<String> buildCommand() {
         String filesDir = resolveFilesDirPath();
         List<String> binds = resolveFinalBinds(filesDir);
-
         List<String> command = new ArrayList<>();
-        command.add(TermuxService.PREFIX_PATH + "/bin/proot");
-        command.add("--kill-on-exit");
-        command.add("--link2symlink");
-        command.add("-0");
-        command.add("-r");
-        command.add(rootfsPath);
-        for (String bind : binds) {
-            command.add("-b");
-            command.add(bind);
-        }
-        command.add("-w");
-        command.add(workDir);
-        command.add(firstNotBlank(shell, "/bin/sh"));
-        command.add("--login");
-
+        command.add(TermuxService.PREFIX_PATH + "/bin/proot"); command.add("--kill-on-exit"); command.add("--link2symlink"); command.add("-0"); command.add("-r"); command.add(rootfsPath);
+        for (String bind : binds) { command.add("-b"); command.add(bind); }
+        command.add("-w"); command.add(workDir); command.add(firstNotBlank(shell, "/bin/sh")); command.add("--login");
         return command;
     }
 
     static List<String> buildDefaultBinds(String filesDir, String rootfsPath) {
-        List<String> binds = new ArrayList<>();
-        binds.add(BIND_DEV);
-        binds.add(BIND_PROC);
-        binds.add(BIND_SYS);
-        binds.add(BIND_SDCARD);
-        binds.add(BIND_STORAGE);
-        binds.add(BIND_DATA);
-        binds.add(devShmBind(filesDir));
-        binds.add(tmpBind(filesDir));
-        return binds;
+        List<String> binds = new ArrayList<>(); binds.add(BIND_DEV); binds.add(BIND_PROC); binds.add(BIND_SYS); binds.add(BIND_SDCARD); binds.add(BIND_STORAGE); binds.add(BIND_DATA); binds.add(devShmBind(filesDir)); binds.add(tmpBind(filesDir)); return binds;
     }
 
     private List<String> resolveFinalBinds(String filesDir) {
-        boolean allBaselineEnabled = bindSdcardEnabled
-                && bindStorageEnabled
-                && bindDataEnabled
-                && bindDevShmEnabled
-                && bindTmpEnabled;
-
+        boolean allBaselineEnabled = bindSdcardEnabled && bindStorageEnabled && bindDataEnabled && bindDevShmEnabled && bindTmpEnabled;
         List<String> binds = allBaselineEnabled ? buildDefaultBinds(filesDir, rootfsPath) : new ArrayList<>();
-
         if (!allBaselineEnabled) {
-            binds.add(BIND_DEV);
-            binds.add(BIND_PROC);
-            binds.add(BIND_SYS);
-
-            if (bindSdcardEnabled) {
-                binds.add(BIND_SDCARD);
-            }
-            if (bindStorageEnabled && !safeBindsMode) {
-                binds.add(BIND_STORAGE);
-            }
-            if (bindDataEnabled && !safeBindsMode) {
-                binds.add(BIND_DATA);
-            }
-            if (bindDevShmEnabled) {
-                binds.add(devShmBind(filesDir));
-            }
-            if (bindTmpEnabled) {
-                binds.add(tmpBind(filesDir));
-            }
+            binds.add(BIND_DEV); binds.add(BIND_PROC); binds.add(BIND_SYS);
+            if (bindSdcardEnabled) binds.add(BIND_SDCARD);
+            if (bindStorageEnabled && !safeBindsMode) binds.add(BIND_STORAGE);
+            if (bindDataEnabled && !safeBindsMode) binds.add(BIND_DATA);
+            if (bindDevShmEnabled) binds.add(devShmBind(filesDir));
+            if (bindTmpEnabled) binds.add(tmpBind(filesDir));
         }
-
         binds.addAll(extraBinds);
         return binds;
     }
 
-    private static String devShmBind(String filesDir) {
-        File devShmDir = new File(filesDir + "/usr/tmp/dev-shm");
-        if (!devShmDir.exists()) {
-            devShmDir.mkdirs();
-        }
-        devShmDir.setReadable(true, false);
-        devShmDir.setWritable(true, true);
-        devShmDir.setExecutable(true, true);
-        return devShmDir.getAbsolutePath() + ":/dev/shm";
-    }
-
-    private static String tmpBind(String filesDir) {
-        return filesDir + "/usr/tmp:/tmp";
-    }
-
-    private String resolveFilesDirPath() {
-        if (filesDirPath != null && !filesDirPath.trim().isEmpty()) {
-            return filesDirPath;
-        }
-        return context.getFilesDir().getAbsolutePath();
-    }
-
-    private static void putIfNotEmpty(Map<String, String> environment, String key, String value) {
-        if (value != null && !value.trim().isEmpty()) {
-            environment.put(key, value);
-        }
-    }
-
-    private static String firstNotBlank(String... values) {
-        if (values == null) {
-            return null;
-        }
-        for (String value : values) {
-            if (value != null && !value.trim().isEmpty()) {
-                return value;
-            }
-        }
-        return null;
-    }
+    private static String devShmBind(String filesDir) { File devShmDir = new File(filesDir + "/usr/tmp/dev-shm"); if (!devShmDir.exists()) devShmDir.mkdirs(); devShmDir.setReadable(true, false); devShmDir.setWritable(true, true); devShmDir.setExecutable(true, true); return devShmDir.getAbsolutePath() + ":/dev/shm"; }
+    private static String tmpBind(String filesDir) { return filesDir + "/usr/tmp:/tmp"; }
+    private String resolveFilesDirPath() { if (filesDirPath != null && !filesDirPath.trim().isEmpty()) return filesDirPath; return context.getFilesDir().getAbsolutePath(); }
+    private static void putIfNotEmpty(Map<String, String> environment, String key, String value) { if (value != null && !value.trim().isEmpty()) environment.put(key, value); }
+    private static String firstNotBlank(String... values) { if (values == null) return null; for (String value : values) if (value != null && !value.trim().isEmpty()) return value; return null; }
 }
-    private boolean safeBindsMode = false;
