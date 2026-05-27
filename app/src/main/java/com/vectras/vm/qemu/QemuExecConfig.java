@@ -13,17 +13,33 @@ import java.io.File;
 public final class QemuExecConfig {
     private static final String TAG = "QemuExecConfig";
     private static final String CONFIG_FILE_NAME = "qemu-exec.json";
+    public static final boolean ALLOW_QEMU_NAME_FALLBACK = false;
 
     private QemuExecConfig() {
     }
 
     public static String resolveBinary(Activity activity, String arch) {
+        QemuBinaryResolver.Resolution strict = resolveBinaryStrict(activity, arch);
+        if (strict.found) {
+            return strict.fullPath;
+        }
+        if (!ALLOW_QEMU_NAME_FALLBACK) {
+            return "";
+        }
         String fromConfig = resolveConfiguredBinary(activity, arch);
         if (fromConfig != null) {
             return fromConfig;
         }
         QemuBinaryResolver.Resolution resolution = QemuBinaryResolver.resolveForArch(activity, arch, TAG);
         return resolution.found ? fromConfigPath(resolution.fullPath) : QemuBinaryResolver.primaryBinaryForArch(arch);
+    }
+
+    public static QemuBinaryResolver.Resolution resolveBinaryStrict(Activity activity, String arch) {
+        String fromConfig = resolveConfiguredBinary(activity, arch);
+        if (fromConfig != null) {
+            return QemuBinaryResolver.Resolution.found(new File(fromConfig).getName(), fromConfig, java.util.Collections.singletonList(fromConfig));
+        }
+        return QemuBinaryResolver.resolveForArch(activity, arch, TAG);
     }
 
     private static String resolveConfiguredBinary(Activity activity, String arch) {
