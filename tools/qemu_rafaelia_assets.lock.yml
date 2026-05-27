@@ -1,0 +1,113 @@
+# qemu_rafaelia_assets.lock.yml
+# Source-of-truth for Vectra runtime artifacts produced from qemu_rafaelia.
+# Rule: git stores source/provenance/build recipe; build or release storage stores blobs.
+
+version: 1
+owner: rafaelmeloreisnovo
+source_repository: rafaelmeloreisnovo/qemu_rafaelia
+source_branch: master
+source_commit_observed: 46d994ba6a3b3a9b8a0590238666f19d800c1abc
+integration_branch: clean/qemu-rafaelia-binary-exodus
+policy:
+  qemu_binary_in_git: forbidden
+  firmware_binary_in_git: forbidden
+  rootfs_tar_in_git: forbidden
+  native_so_in_git: forbidden_unless_built_by_android_ndk
+  apk_in_git: forbidden
+  source_contract: required
+  sha256_for_external_artifacts: required
+
+runtime_layout:
+  qemu_binaries:
+    preferred_dirs:
+      - '${filesDir}/distro/usr/local/bin'
+      - '${filesDir}/distro/usr/bin'
+      - '${filesDir}/usr/bin'
+      - '${filesDir}/bin'
+      - '${PATH}'
+    names:
+      x86_64:
+        - qemu-system-x86_64-rafaelia
+        - qemu-system-x86_64-rafacodephi
+        - qemu-system-x86_64
+      aarch64:
+        - qemu-system-aarch64-rafaelia
+        - qemu-system-aarch64-rafacodephi
+        - qemu-system-aarch64
+      i386:
+        - qemu-system-i386-rafaelia
+        - qemu-system-i386-rafacodephi
+        - qemu-system-i386
+      ppc:
+        - qemu-system-ppc-rafaelia
+        - qemu-system-ppc-rafacodephi
+        - qemu-system-ppc
+  firmware:
+    runtime_dir: '${filesDir}/firmware'
+  rootfs:
+    runtime_dir: '${filesDir}/distro'
+
+build_contracts:
+  qemu_rafaelia_smoke:
+    repository: rafaelmeloreisnovo/qemu_rafaelia
+    commands:
+      - './configure --target-list=x86_64-softmmu --disable-werror --disable-docs --disable-gtk --disable-sdl --disable-curses --disable-vnc-jpeg'
+      - 'ninja -C build subprojects/libvhost-user/libvhost-user.a'
+    artifact_name: qemu-smoke-build-artifacts
+  qemu_rafaelia_integration:
+    repository: rafaelmeloreisnovo/qemu_rafaelia
+    commands:
+      - 'make -f hw/core/Makefile.integration all'
+      - 'make -f hw/core/Makefile.integration test'
+    required_modules:
+      - hw/core/rafaelia-runtime.c
+      - hw/core/rafaelia-qemu-shell.c
+      - hw/core/rafaelia-qemu-shell-standalone.c
+      - hw/core/rafaelia-route-table.c
+      - include/hw/core/rafaelia-kernel-abi.h
+      - system/process-monitor.c
+      - system/process-health.c
+
+external_artifacts:
+  # Fill sha256 and source_url when promoted to GitHub Release or artifact store.
+  - id: qemu-rafaelia-x86_64
+    kind: qemu-system-binary
+    runtime_path: '${filesDir}/distro/usr/bin/qemu-system-x86_64-rafaelia'
+    source_url: TODO
+    sha256: TODO
+    license: GPL-2.0-or-later/QEMU-compatible
+  - id: qemu-rafaelia-aarch64
+    kind: qemu-system-binary
+    runtime_path: '${filesDir}/distro/usr/bin/qemu-system-aarch64-rafaelia'
+    source_url: TODO
+    sha256: TODO
+    license: GPL-2.0-or-later/QEMU-compatible
+  - id: ovmf-x86_64-code
+    kind: firmware
+    runtime_path: '${filesDir}/firmware/RELEASEX64_OVMF.fd'
+    source_url: TODO
+    sha256: TODO
+    license: TODO
+  - id: ovmf-x86_64-vars-template
+    kind: firmware-vars-template
+    runtime_path: '${filesDir}/firmware/RELEASEX64_OVMF_VARS.fd'
+    source_url: TODO
+    sha256: TODO
+    license: TODO
+  - id: qemu-efi-aarch64-code
+    kind: firmware
+    runtime_path: '${filesDir}/firmware/QEMU_EFI.img'
+    source_url: TODO
+    sha256: TODO
+    license: TODO
+  - id: qemu-efi-aarch64-vars-template
+    kind: firmware-vars-template
+    runtime_path: '${filesDir}/firmware/QEMU_VARS.img'
+    source_url: TODO
+    sha256: TODO
+    license: TODO
+
+notes:
+  - Vectra should launch QEMU from runtime dirs using QemuBinaryResolver.
+  - Firmware/rootfs blobs must be installed at runtime from verified artifacts, not committed.
+  - VmLaunchLedger remains the Android-side proof trail for each launch.
