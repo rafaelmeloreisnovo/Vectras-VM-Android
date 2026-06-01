@@ -3,7 +3,6 @@ package com.vectras.vm.runtime;
 import android.app.Activity;
 import android.content.Context;
 
-import com.termux.app.TermuxService;
 import com.vectras.qemu.MainSettingsManager;
 import com.vectras.vm.qemu.QemuBinaryResolver;
 import com.vectras.vm.qemu.QemuExecConfig;
@@ -35,7 +34,7 @@ public final class VectrasRuntimePreflight {
 
     public static Result run(Context context) {
         String filesDir = context.getFilesDir().getAbsolutePath();
-        String prootPath = TermuxService.PREFIX_PATH + "/bin/proot";
+        String prootPath = filesDir + "/usr/bin/proot";
         String rootfsPath = filesDir + "/distro";
         String shellPath = rootfsPath + "/bin/sh";
         String tmpPath = filesDir + "/usr/tmp";

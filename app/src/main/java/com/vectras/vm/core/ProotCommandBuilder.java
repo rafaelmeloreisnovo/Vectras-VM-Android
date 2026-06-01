@@ -98,9 +98,20 @@ public class ProotCommandBuilder {
         String filesDir = resolveFilesDirPath();
         List<String> binds = resolveFinalBinds(filesDir);
         List<String> command = new ArrayList<>();
-        command.add(TermuxService.PREFIX_PATH + "/bin/proot"); command.add("--kill-on-exit"); command.add("--link2symlink"); command.add("-0"); command.add("-r"); command.add(rootfsPath);
-        for (String bind : binds) { command.add("-b"); command.add(bind); }
-        command.add("-w"); command.add(workDir); command.add(firstNotBlank(shell, "/bin/sh")); command.add("--login");
+        command.add(resolveProotBinaryPath(filesDir));
+        command.add("--kill-on-exit");
+        command.add("--link2symlink");
+        command.add("-0");
+        command.add("-r");
+        command.add(rootfsPath);
+        for (String bind : binds) {
+            command.add("-b");
+            command.add(bind);
+        }
+        command.add("-w");
+        command.add(workDir);
+        command.add(firstNotBlank(shell, "/bin/sh"));
+        command.add("--login");
         return command;
     }
 
@@ -123,9 +134,17 @@ public class ProotCommandBuilder {
         return binds;
     }
 
+    static String resolveProotBinaryPath(String filesDir) {
+        String resolvedFilesDir = firstNotBlank(filesDir);
+        if (resolvedFilesDir != null) {
+            return trimTrailingSlash(resolvedFilesDir) + "/usr/bin/proot";
+        }
+        return TermuxService.PREFIX_PATH + "/bin/proot";
+    }
     private static String devShmBind(String filesDir) { File devShmDir = new File(filesDir + "/usr/tmp/dev-shm"); if (!devShmDir.exists()) devShmDir.mkdirs(); devShmDir.setReadable(true, false); devShmDir.setWritable(true, true); devShmDir.setExecutable(true, true); return devShmDir.getAbsolutePath() + ":/dev/shm"; }
     private static String tmpBind(String filesDir) { return filesDir + "/usr/tmp:/tmp"; }
     private String resolveFilesDirPath() { if (filesDirPath != null && !filesDirPath.trim().isEmpty()) return filesDirPath; return context.getFilesDir().getAbsolutePath(); }
     private static void putIfNotEmpty(Map<String, String> environment, String key, String value) { if (value != null && !value.trim().isEmpty()) environment.put(key, value); }
     private static String firstNotBlank(String... values) { if (values == null) return null; for (String value : values) if (value != null && !value.trim().isEmpty()) return value; return null; }
+    private static String trimTrailingSlash(String value) { while (value.endsWith("/") && value.length() > 1) value = value.substring(0, value.length() - 1); return value; }
 }
