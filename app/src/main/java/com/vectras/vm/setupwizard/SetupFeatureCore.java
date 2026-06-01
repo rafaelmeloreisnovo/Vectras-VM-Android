@@ -71,7 +71,7 @@ public class SetupFeatureCore {
     }
 
     public static boolean isInstalledProot(Context context) {
-        return validateProotBootstrapState(context).ok;
+        return validateProotCoreState(context).ok;
     }
 
     public static boolean isInstalledDistro(Context context) {
@@ -102,7 +102,7 @@ public class SetupFeatureCore {
         }
     }
 
-    public static ProotBootstrapValidationResult validateProotBootstrapState(Context context) {
+    static ProotBootstrapValidationResult validateProotCoreState(Context context) {
         String filesDir = context.getFilesDir().getAbsolutePath();
         ArrayList<String> errors = new ArrayList<>();
 
@@ -112,6 +112,21 @@ public class SetupFeatureCore {
         } else if (!proot.canExecute()) {
             errors.add("proot-not-executable");
         }
+
+        File tmpDir = new File(filesDir + "/usr/tmp");
+        if (!tmpDir.isDirectory()) {
+            errors.add("missing-proot-tmp-dir");
+        } else if (!tmpDir.canWrite()) {
+            errors.add("proot-tmp-not-writable");
+        }
+
+        boolean ok = errors.isEmpty();
+        return new ProotBootstrapValidationResult(ok, errors, new File(filesDir + "/distro/bin/sh").getAbsolutePath());
+    }
+
+    public static ProotBootstrapValidationResult validateProotBootstrapState(Context context) {
+        String filesDir = context.getFilesDir().getAbsolutePath();
+        ArrayList<String> errors = new ArrayList<>(validateProotCoreState(context).errors);
 
         File busybox = new File(filesDir + "/distro/bin/busybox");
         if (!busybox.isFile()) {
@@ -125,13 +140,6 @@ public class SetupFeatureCore {
             errors.add("missing-rootfs-shell");
         } else if (!rootShell.canExecute()) {
             errors.add("rootfs-shell-not-executable");
-        }
-
-        File tmpDir = new File(filesDir + "/usr/tmp");
-        if (!tmpDir.isDirectory()) {
-            errors.add("missing-proot-tmp-dir");
-        } else if (!tmpDir.canWrite()) {
-            errors.add("proot-tmp-not-writable");
         }
 
         boolean ok = errors.isEmpty();
@@ -832,10 +840,21 @@ public class SetupFeatureCore {
                 + " extractTo=" + extractTargetPath
                 + " extractedFilePath=" + extractedTarPath);
 
+        BootstrapRollback rollback = BootstrapRollback.prepare(filesDirRealPath, extractTargetPath, fromAsset, randomFileName);
+        if (!rollback.ready) {
+            lastErrorLog = formatErrorCode(INTEGRITY_FAIL_PREFIX, rollback.detail);
+            Log.e(TAG, BOOTSTRAP_LOG_PREFIX + " ROLLBACK_PREP_FAIL " + lastErrorLog);
+            return false;
+        }
+
         File destDir = extractTargetPath.toFile();
         if (!destDir.exists()) {
             if (!destDir.mkdirs()) {
+                lastErrorLog = formatErrorCode(EXTRACTION_FAIL_PREFIX,
+                        "Unable to create extraction folder " + extractTargetPath);
                 Log.e(TAG, "extractSystemFiles: Unable to create folder " + extractTargetPath);
+                rollback.restore();
+                return false;
             }
         }
 
@@ -848,6 +867,7 @@ public class SetupFeatureCore {
                     + " asset=" + assetPath
                     + " output=" + extractedTarPath;
             Log.e(TAG, lastErrorLog);
+            rollback.restore();
             return false;
         }
 
@@ -859,6 +879,7 @@ public class SetupFeatureCore {
                         + " exists=" + extractedTarFile.exists()
                         + " isFile=" + extractedTarFile.isFile());
                 Log.e(TAG, lastErrorLog);
+                rollback.restore();
                 return false;
             }
         } else {
@@ -866,6 +887,7 @@ public class SetupFeatureCore {
                     ? "copy-asset-failed asset=" + assetPath + " output=" + extractedTarPath
                     : lastErrorLog;
             lastErrorLog = formatErrorCode(COPY_FAIL_PREFIX, detail);
+            rollback.restore();
             return false;
         }
 
@@ -904,6 +926,7 @@ public class SetupFeatureCore {
                 if (processValidationError != null) {
                     lastErrorLog = processValidationError;
                     Log.e(TAG, lastErrorLog);
+                    rollback.restore();
                     return false;
                 }
 
@@ -924,7 +947,9 @@ public class SetupFeatureCore {
                 if (fromAsset.contains("alpine") && !isInstalledDistro(context)) {
                     extractionPostCheckFailedItems.add("missing-distro-after-alpine-extract");
                 }
-                ProotBootstrapValidationResult validation = validateProotBootstrapState(context);
+                ProotBootstrapValidationResult validation = "bootstrap".equals(fromAsset)
+                        ? validateProotCoreState(context)
+                        : validateProotBootstrapState(context);
                 if (!validation.ok) {
                     extractionPostCheckFailedItems.addAll(validation.errors);
                 }
@@ -932,20 +957,114 @@ public class SetupFeatureCore {
                 if (!extractionPostCheckFailedItems.isEmpty()) {
                     lastErrorLog = formatPostCheckFailure(extractionPostCheckFailedItems);
                     Log.e(TAG, BOOTSTRAP_LOG_PREFIX + " PRECHECK_FAIL details=" + lastErrorLog);
+                    rollback.restore();
                     return false;
                 }
 
+                rollback.commit();
                 Log.i(TAG, BOOTSTRAP_LOG_PREFIX + " EXTRACT_OK asset=" + assetPath + " target=" + extractTargetPath);
                 return true;
             } catch (Exception e) {
                 lastErrorLog = formatErrorCode(EXTRACTION_FAIL_PREFIX, "PROCESS_EXECUTION_EXCEPTION " + e);
                 Log.e(TAG, "extractSystemFiles: ", e);
+                rollback.restore();
                 return false;
             }
         }
         lastErrorLog = formatErrorCode(EXTRACTION_FAIL_PREFIX,
                 "UNEXPECTED_EXTRACTION_STATE asset=" + assetPath + " output=" + extractedTarPath);
         return false;
+    }
+
+
+    static final class BootstrapRollback {
+        final boolean ready;
+        final String detail;
+        private final Path filesDir;
+        private final Path livePath;
+        private final Path backupPath;
+        private final boolean hadLivePath;
+
+        private BootstrapRollback(boolean ready, String detail, Path filesDir, Path livePath, Path backupPath, boolean hadLivePath) {
+            this.ready = ready;
+            this.detail = detail;
+            this.filesDir = filesDir;
+            this.livePath = livePath;
+            this.backupPath = backupPath;
+            this.hadLivePath = hadLivePath;
+        }
+
+        static BootstrapRollback prepare(Path filesDir, Path extractTarget, String fromAsset, String token) {
+            try {
+                Path live = rollbackLivePath(filesDir, extractTarget, fromAsset).normalize();
+                Path backup = filesDir.resolve(".bootstrap-rollback-" + sanitizeRollbackToken(token) + "-" + live.getFileName()).normalize();
+                if (!live.startsWith(filesDir) || !backup.startsWith(filesDir) || live.equals(filesDir)) {
+                    return new BootstrapRollback(false, "rollback path rejected live=" + live + " backup=" + backup, filesDir, live, backup, false);
+                }
+                deleteRecursively(backup.toFile());
+                boolean hadLive = live.toFile().exists();
+                if (hadLive && !live.toFile().renameTo(backup.toFile())) {
+                    return new BootstrapRollback(false, "unable to stage rollback backup live=" + live + " backup=" + backup, filesDir, live, backup, true);
+                }
+                return new BootstrapRollback(true, "ready", filesDir, live, backup, hadLive);
+            } catch (Exception e) {
+                return new BootstrapRollback(false, "rollback prepare exception=" + e, filesDir, extractTarget, null, false);
+            }
+        }
+
+        void commit() {
+            if (!ready) return;
+            try {
+                deleteRecursively(backupPath.toFile());
+                Log.i(TAG, BOOTSTRAP_LOG_PREFIX + " ROLLBACK_COMMIT live=" + livePath);
+            } catch (IOException e) {
+                Log.w(TAG, BOOTSTRAP_LOG_PREFIX + " ROLLBACK_COMMIT_CLEANUP_FAIL backup=" + backupPath, e);
+            }
+        }
+
+        void restore() {
+            if (!ready) return;
+            try {
+                if (livePath != null && livePath.startsWith(filesDir)) {
+                    deleteRecursively(livePath.toFile());
+                }
+                if (hadLivePath && backupPath != null && backupPath.toFile().exists()) {
+                    if (!backupPath.toFile().renameTo(livePath.toFile())) {
+                        throw new IOException("unable to move rollback backup into place backup=" + backupPath + " live=" + livePath);
+                    }
+                }
+                Log.i(TAG, BOOTSTRAP_LOG_PREFIX + " ROLLBACK_RESTORE live=" + livePath + " hadLive=" + hadLivePath);
+            } catch (IOException e) {
+                Log.e(TAG, BOOTSTRAP_LOG_PREFIX + " ROLLBACK_RESTORE_FAIL live=" + livePath + " backup=" + backupPath, e);
+            }
+        }
+
+        private static Path rollbackLivePath(Path filesDir, Path extractTarget, String fromAsset) {
+            if ("bootstrap".equals(fromAsset)) {
+                return filesDir.resolve("usr");
+            }
+            return extractTarget;
+        }
+
+        private static String sanitizeRollbackToken(String token) {
+            String value = token == null ? "unknown" : token.replaceAll("[^A-Za-z0-9_.-]", "_");
+            return value.isEmpty() ? "unknown" : value;
+        }
+    }
+
+    static void deleteRecursively(File fileOrDirectory) throws IOException {
+        if (fileOrDirectory == null || !fileOrDirectory.exists()) {
+            return;
+        }
+        File[] children = fileOrDirectory.listFiles();
+        if (children != null) {
+            for (File child : children) {
+                deleteRecursively(child);
+            }
+        }
+        if (!fileOrDirectory.delete() && fileOrDirectory.exists()) {
+            throw new IOException("Unable to delete " + fileOrDirectory);
+        }
     }
 
 

@@ -2,8 +2,6 @@ package com.vectras.vm.core;
 
 import android.content.Context;
 
-import com.termux.app.TermuxService;
-
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -24,7 +22,7 @@ public class ProotCommandBuilderTest {
 
         List<String> command = builder.buildCommand();
 
-        Assert.assertEquals(TermuxService.PREFIX_PATH + "/bin/proot", command.get(0));
+        Assert.assertEquals("/data/user/0/com.vectras.vm/files/usr/bin/proot", command.get(0));
         Assert.assertTrue(command.contains("--kill-on-exit"));
         Assert.assertTrue(command.contains("--link2symlink"));
         Assert.assertTrue(command.contains("-0"));
@@ -42,6 +40,13 @@ public class ProotCommandBuilderTest {
 
         Assert.assertEquals("/bin/sh", command.get(command.size() - 2));
         Assert.assertEquals("--login", command.get(command.size() - 1));
+    }
+
+    @Test
+    public void resolveProotBinaryPathShouldFallbackOnlyWhenFilesDirMissing() {
+        Assert.assertEquals("/custom/files/usr/bin/proot", ProotCommandBuilder.resolveProotBinaryPath("/custom/files"));
+        Assert.assertEquals("/custom/files/usr/bin/proot", ProotCommandBuilder.resolveProotBinaryPath("/custom/files/"));
+        Assert.assertTrue(ProotCommandBuilder.resolveProotBinaryPath("  ").endsWith("/usr/bin/proot"));
     }
 
     @Test
