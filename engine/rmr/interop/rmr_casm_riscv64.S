@@ -27,13 +27,23 @@ rmr_casm_xor_fold32_riscv64:
     li      t0, 0               /* accumulator */
     li      t1, 0               /* index */
 
-    /* 4-byte chunks */
+    /* 4-byte chunks: build little-endian lanes from bytes so generic
+       const uint8_t * callers never require word alignment on RV64. */
 .Lrv_word:
     addi    t2, t1, 4
     bgt     t2, a1, .Lrv_tail
     add     t3, a0, t1
-    lw      t3, 0(t3)
-    xor     t0, t0, t3
+    lbu     t4, 0(t3)
+    lbu     t5, 1(t3)
+    slli    t5, t5, 8
+    or      t4, t4, t5
+    lbu     t5, 2(t3)
+    slli    t5, t5, 16
+    or      t4, t4, t5
+    lbu     t5, 3(t3)
+    slli    t5, t5, 24
+    or      t4, t4, t5
+    xor     t0, t0, t4
     addi    t1, t1, 4
     j       .Lrv_word
 
