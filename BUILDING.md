@@ -138,19 +138,35 @@ python3 tools/verify_bootstrap_assets.py
 
 
 
-## Matriz local de artefatos (arm32+arm64, signed + unsigned)
-Use o helper canônico para gerar ambos os artefatos de release internos (unsigned e signed com keystore local de validação), incluindo manifesto e hashes:
+## Matriz local beta de artefatos (debugger + release, arm32+arm64, signed + unsigned)
+Use o helper canônico para gerar a entrega beta local completa em `armeabi-v7a` + `arm64-v8a`:
 
 ```bash
 ./tools/ci/build_artifact_matrix_local.sh
 ```
 
-Saída:
+O helper executa, em ordem:
+1. `clean`;
+2. build `debugger-beta` (`:app:assembleDebug`) com APK debug assinado pela chave debug padrão;
+3. build `release-beta` unsigned (`:app:assembleRelease :app:bundleRelease -Psigning_mode=unsigned`);
+4. build `release-beta` signed-internal com keystore local de validação (`-Psigning_mode=signed`);
+5. pré-teste de ABI em cada APK com `tools/ci/verify_apk_abi_set.sh`;
+6. relatório Gradle `:app:verifyDeliveredCompiledArtifacts -PartifactVariants=debug,release`;
+7. manifesto com tamanho individual, SHA-256, estado de assinatura e caminho de upload local.
+
+Saída/upload local:
+- `artifacts/local-matrix/app-debug-beta.apk`
 - `artifacts/local-matrix/app-release-unsigned.apk`
 - `artifacts/local-matrix/app-release-unsigned.aab`
 - `artifacts/local-matrix/app-release-signed-internal.apk`
 - `artifacts/local-matrix/app-release-signed-internal.aab`
 - `artifacts/local-matrix/manifest.json`
+- `artifacts/local-matrix/pretest-report.txt`
+
+Observações de assinatura:
+- APK debug sem assinatura não é uma entrega Android instalável normal; por isso a trilha `debugger-beta` é `debug-signed` pela configuração padrão do Gradle/AGP.
+- `release signed-internal` usa keystore beta local e não substitui a chave oficial de loja.
+- `release unsigned` é somente validação interna/CI e deve continuar fora da trilha oficial de publicação.
 
 ## RAFCoder Android/NDK
 

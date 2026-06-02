@@ -62,6 +62,9 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 public class MainStartVM {
     public static final String TAG = "HomeStartVM";
     public static AlertDialog progressDialog;
@@ -89,6 +92,26 @@ public class MainStartVM {
 
     private static boolean isNullOrEmpty(String value) {
         return value == null || value.trim().isEmpty();
+    }
+
+    private static JSONObject tracePhasePayload(String phase) {
+        JSONObject payload = new JSONObject();
+        try {
+            payload.put("phase", phase);
+        } catch (JSONException exception) {
+            Log.w(TAG, "Failed to build Rafaelia phase payload", exception);
+        }
+        return payload;
+    }
+
+    private static JSONObject traceCommandPhasePayload(String commandContract, String phase) {
+        JSONObject payload = tracePhasePayload(phase);
+        try {
+            payload.put("command_contract", commandContract);
+        } catch (JSONException exception) {
+            Log.w(TAG, "Failed to build Rafaelia command payload", exception);
+        }
+        return payload;
     }
 
     public static String createTransientLaunchVmId() {
@@ -187,7 +210,7 @@ public class MainStartVM {
         );
         if (!preflightResult.ok) {
             RafaeliaCsvTraceExporter.trace(context, "vectra_qemu", "error",
-                    new org.json.JSONObject().put("phase", "preflight"));
+                    tracePhasePayload("preflight"));
             VectrasStatus.logError("VM preflight failed: " + preflightResult.shortSummary());
             VmLaunchLedger.append(
                     context,
@@ -217,7 +240,7 @@ public class MainStartVM {
             return;
         }
         RafaeliaCsvTraceExporter.trace(context, "vectra_qemu", "preflight",
-                new org.json.JSONObject().put("phase", "ok"));
+                tracePhasePayload("ok"));
 
         File romDir = new File(Config.getCacheDir() + "/" + finalvmID);
         if (!romDir.exists()) {
@@ -353,7 +376,7 @@ public class MainStartVM {
             Log.i(TAG, finalCommand);
         }
         RafaeliaCsvTraceExporter.trace(context, "vectra_qemu", "qemu_binary_resolved",
-                new org.json.JSONObject().put("command_contract", finalCommand).put("phase", "resolved"));
+                traceCommandPhasePayload(finalCommand, "resolved"));
 
         VmLaunchLedger.append(
                 context,
@@ -393,7 +416,7 @@ public class MainStartVM {
             }
         }
         RafaeliaCsvTraceExporter.trace(context, "vectra_qemu", "proot_started",
-                new org.json.JSONObject().put("command_contract", finalCommand).put("phase", "main_service"));
+                traceCommandPhasePayload(finalCommand, "main_service"));
 
         RafaeliaBenchManager.scheduleBenchIfNeeded(context, vmName);
 
@@ -405,7 +428,7 @@ public class MainStartVM {
                 return;
             }
             RafaeliaCsvTraceExporter.trace(context, "vectra_qemu", "x11_ready",
-                    new org.json.JSONObject().put("phase", "termux_x11_installed"));
+                    tracePhasePayload("termux_x11_installed"));
         }
         LAUNCH_POLLER.start(context, finalvmID, headless);
 
@@ -595,10 +618,10 @@ public class MainStartVM {
                 if (isStopNow || VMManager.isQemuStopedWithError || FileUtils.isFileExists(Config.getLocalQMPSocketPath())) {
                     if (VMManager.isQemuStopedWithError) {
                         RafaeliaCsvTraceExporter.trace(appContext, "vectra_qemu", "error",
-                                new org.json.JSONObject().put("phase", "qemu_stopped_with_error"));
+                                tracePhasePayload("qemu_stopped_with_error"));
                     } else if (FileUtils.isFileExists(Config.getLocalQMPSocketPath())) {
                         RafaeliaCsvTraceExporter.trace(appContext, "vectra_qemu", "qmp_ready",
-                                new org.json.JSONObject().put("phase", "socket_ready"));
+                                tracePhasePayload("socket_ready"));
                     }
                     stop();
                     Context uiContext = contextRef.get();
@@ -611,14 +634,14 @@ public class MainStartVM {
                         if (headless) {
                             Log.i(TAG, "engine-only launch completed without frontend attach");
                             RafaeliaCsvTraceExporter.trace(launchContext, "vectra_qemu", "boot_ready",
-                                    new org.json.JSONObject().put("phase", "headless"));
+                                    tracePhasePayload("headless"));
                         } else if (MainSettingsManager.getVmUi(launchContext).equals("VNC")) {
                             applyVncPasswordOverQmpIfNeeded(launchContext);
                             String externalPassword = MainSettingsManager.getVncExternalPassword(launchContext);
                             boolean hasExternalPassword = externalPassword != null && !externalPassword.isEmpty();
                             if (MainSettingsManager.getVncExternal(launchContext) && hasExternalPassword) {
                                 RafaeliaCsvTraceExporter.trace(launchContext, "vectra_qemu", "vnc_ready",
-                                        new org.json.JSONObject().put("phase", "external_vnc"));
+                                        tracePhasePayload("external_vnc"));
                                 Config.currentVNCServervmID = vmId;
                                 DialogUtils.oneDialog(launchContext,
                                         launchContext.getString(R.string.vnc_server),
@@ -627,7 +650,7 @@ public class MainStartVM {
                                 );
                             } else {
                                 RafaeliaCsvTraceExporter.trace(launchContext, "vectra_qemu", "vnc_ready",
-                                        new org.json.JSONObject().put("phase", "embedded_vnc"));
+                                        tracePhasePayload("embedded_vnc"));
                                 MainVNCActivity.started = true;
                                 Intent intent = new Intent(launchContext, MainVNCActivity.class);
                                 if (!(launchContext instanceof Activity)) {
@@ -638,7 +661,7 @@ public class MainStartVM {
                         } else if (MainSettingsManager.getVmUi(launchContext).equals("X11") && !DisplaySystem.isUseBuiltInX11()) {
                             DisplaySystem.launch(launchContext);
                             RafaeliaCsvTraceExporter.trace(launchContext, "vectra_qemu", "x11_ready",
-                                    new org.json.JSONObject().put("phase", "x11_launch"));
+                                    tracePhasePayload("x11_launch"));
                         }
 
                         if (vmId != null && vmId.equals(reservedSpiceVmId)) {
@@ -646,7 +669,7 @@ public class MainStartVM {
                         }
                         VmFlowTracker.mark(launchContext, vmId, VmFlowState.RUNNING, "launch_ready", "running");
                         RafaeliaCsvTraceExporter.trace(launchContext, "vectra_qemu", "boot_ready",
-                                new org.json.JSONObject().put("phase", "running"));
+                                tracePhasePayload("running"));
                         Log.i(TAG, "Virtual machine running.");
                     }
 
