@@ -723,14 +723,16 @@ public class VMManager {
 
     //This can be removed because QMP currently uses sockets instead of open ports.
     public static int startRandomPort() {
-        final int min = 10_000;
-        final int max = 65_535;
+        return allocateAvailablePort(readReservedPortsFromVmDb());
+    }
+
+    static int allocateAvailablePort(Set<Integer> reservedPorts) {
         final int attempts = 128;
-        Set<Integer> reservedPorts = readReservedPortsFromVmDb();
+        Set<Integer> safeReservedPorts = reservedPorts == null ? new HashSet<>() : reservedPorts;
 
         for (int attempt = 0; attempt < attempts; attempt++) {
-            int candidate = SECURE_RANDOM.nextInt(max - min + 1) + min;
-            if (reservedPorts.contains(candidate)) {
+            int candidate = allocateEphemeralPortCandidate();
+            if (candidate <= 0 || safeReservedPorts.contains(candidate)) {
                 continue;
             }
             if (isPortAvailable(candidate)) {
@@ -738,7 +740,16 @@ public class VMManager {
             }
         }
 
-        return 8080;
+        throw new IllegalStateException("Unable to allocate available VM port after " + attempts + " attempts");
+    }
+
+    private static int allocateEphemeralPortCandidate() {
+        try (ServerSocket socket = new ServerSocket(0)) {
+            socket.setReuseAddress(true);
+            return socket.getLocalPort();
+        } catch (IOException ioException) {
+            return -1;
+        }
     }
 
     private static Set<Integer> readReservedPortsFromVmDb() {

@@ -27,6 +27,11 @@
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
+    <!--
+        X11/VNC mouse-helper overlay flow is Settings-gated, not runtime-requested:
+        PermissionUtils.openOverlayPermissionSettings() opens ACTION_MANAGE_OVERLAY_PERMISSION,
+        and PermissionUtils.canDrawOverlays() verifies the grant after returning from Settings.
+    -->
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
 
     <uses-feature

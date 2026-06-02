@@ -402,3 +402,10 @@ O script executa:
 
 ### Gate explícito para release interno unsigned
 Use obrigatoriamente `-PCI_INTERNAL_VALIDATION=true -Psigning_mode=unsigned`; para placeholder Firebase em validação interna, acrescente `-PALLOW_PLACEHOLDER_FIREBASE_FOR_RELEASE=true`.
+
+## Audit/reproducibility notes (2026-06-02)
+
+- Local Vectras build entrypoint: `./gradlew assembleDebug` for the Android debug APK and `./gradlew testDebugUnitTest` for JVM/Robolectric regression tests.
+- Runtime secrets policy: VNC passwords must not be embedded in QEMU argv or `/proc/<pid>/cmdline`; configure VNC credentials after QMP readiness with `set_password`.
+- Smoke evidence separation: a benchmark definition is not a measured benchmark, and CI smoke is not a real-device smoke. Store device proof in `reports/device_runtime_smoke.md` with APK hash, ABI, QMP stop result, and ledger excerpt.
+- CI must not mask failures: Gradle, JNI, ABI matrix, bootstrap BLAKE3, and release-contract tasks should run without `|| true` wrappers.
