@@ -119,3 +119,6 @@ Incluir/*.docx
 *.rar
 qemu_rafaelia_build/
 qemu_rafaelia_artifacts/
+
+# Local beta artifact matrix outputs (APKs/AABs/manifests/hashes/temporary beta keystores).
+artifacts/local-matrix/
