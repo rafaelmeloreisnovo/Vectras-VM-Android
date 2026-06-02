@@ -217,3 +217,15 @@ Mapa arquivo-a-arquivo em três linhas por item: papel, ligação e comando de i
 - Pipeline oficial Host: `.github/workflows/host-ci.yml`.
 - Orquestração e gate final: `.github/workflows/pipeline-orchestrator.yml` + `.github/workflows/quality-gates.yml`.
 - Matriz canônica documentada em `docs/ci/workflow-matrix.md`.
+
+## Organização documental 2026-06-02
+- `organization/README.md` — hub do saneamento documental iniciado em 2026-06-02.
+- `organization/DOC_ORGANIZATION_PLAN_2026-06-02.md` — plano de organização, promoção e rollback de dados/documentos.
+- `organization/LOOSE_FILES_AND_FRAGMENTS_INVENTORY_2026-06-02.md` — inventário de arquivos soltos e fragmentos até 7 níveis.
+- `organization/NECESSARY_CONDITIONS_AUDIT_2026-06-02.md` — auditoria de condições necessárias, placeholders, gaps e sinais de bug até 5 níveis.
+- `organization/INGRESS_ARTIFACTS_MANIFEST_2026-06-02.md` — manifesto SHA-256 para entradas pendentes e overlays.
+- `../reports/documentation_state_audit_2026-06-02.json` — saída JSON completa da auditoria executável.
+- `../reports/ingress_artifacts_sha256_2026-06-02.tsv` — hash TSV completo para rollback/failover de artefatos.
+- `../tools/docs/audit_documentation_state.py` — ferramenta read-only para regenerar a auditoria documental.
+- `organization/SOURCE_ARCHITECTURE_SYNC_2026-06-02.md` — mapa de sincronização entre código-fonte e documentação até 5 níveis.
+- `rafaelia_reference/RAFAELIA_T7_VARIABLES_FORMULAS.md` — referência consolidada de fórmulas e variáveis RAFAELIA/T7.
