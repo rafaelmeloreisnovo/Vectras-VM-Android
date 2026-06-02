@@ -1,0 +1,5572 @@
+{
+  "counts": {
+    "files_scanned": 1365,
+    "docs_scanned": 443,
+    "code_scanned": 590,
+    "ingress_files": 181,
+    "zip_files": 27,
+    "placeholder_hits": 365,
+    "bug_signal_hits": 233,
+    "navigation_gaps": 118
+  },
+  "severity_counts": {
+    "high": 208,
+    "medium": 598,
+    "low": 118
+  },
+  "category_counts": {
+    "entrada-pendente": 181,
+    "overlay-zip": 27,
+    "bug-failsafe-signal": 233,
+    "placeholder-ou-pendente": 365,
+    "sem-files-map": 33,
+    "sem-readme": 85
+  },
+  "artifact_hash_count": 183,
+  "findings": [
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "Incluir/.moveFiles para um su diretório.md",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "Incluir/01_Rafaelia_Execucao_Saneada.docx",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "Incluir/01_taxonomia_academica_malha_simbiotica.md",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "Incluir/02_Paper_Base_Completo.docx",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "Incluir/02_formalizacao_matematica_modelo_de_estados.md",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "Incluir/03_paper_base_programa_interdisciplinar.md",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "Incluir/09_Linha_de_Artigos.docx",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "Incluir/11_Artigo_2_Experimental.docx",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "Incluir/A incluir.md",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "Incluir/APPLY_FIXES.sh",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "Incluir/AUDIT_REPORT.json",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "Incluir/AUDIT_REPORT.md",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "Incluir/CODEX_PROMPT_VECTRAS_TERMUX_ARM32_CI.txt",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "Incluir/ChatGPT Image 22 de abr. de 2026, 08_01_26.png",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "Incluir/EXECUTION_REPORT.md",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "Incluir/FILE_ORGANIZATION.md",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "Incluir/FIX_01_local-1.properties",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "Incluir/FIX_02_google-services-1.json",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "Incluir/FIX_03_sources_rmr_core-1.cmake",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "Incluir/FIX_04_CMakeLists-1.txt",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "Incluir/FIX_05_app_src_main_cpp_CMakeLists-1.txt",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "Incluir/FIX_06_CMakePresets-1.json",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "Incluir/FIX_07_rmr_unified_jni_base-1.h",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "Incluir/INTEGRATION_STATUS.md",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "Incluir/Mais.md",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "Incluir/Possível núcleo.md",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "Incluir/RAF_C_ASM_ARM32_HotPath_N55_56Ciclos.zip",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "Incluir/RAF_C_ASM_ARM32_Pipeline_FrameCacheTelemetry_v5.zip",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "Incluir/RAF_C_ASM_ARM32_Pipeline_v6_TraceFaultTarget.zip",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "Incluir/RAF_C_ASM_ARM32_Pipeline_v7_ProtoCRCTrace.zip",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "Incluir/RAF_C_ASM_ARM32_Pipeline_v8_ProtoZeroCopyReport.zip",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "Incluir/RAF_C_ASM_Solido_ARM32_ARMv7.zip",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "Incluir/RAF_C_ASM_Solido_x86_64.zip",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "Incluir/Rafael estados.md",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "Incluir/Rafaelia_Execucao_Kit (1).zip",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "Incluir/Rafaelia_Execucao_Kit.zip",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "Incluir/Rafaelia_Execucao_Kit_Completo.zip",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "Incluir/Rafaelia_Execucao_Kit_V2_ABNT_Resultados_Artigos.zip",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "Incluir/Rafaeltesesmd.md",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "Incluir/Readme.md",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "Incluir/Texto colado.txt",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "Incluir/UNIFIED_INVARIANT_SPEC.md",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "Incluir/_VECTRAS_REPOSITORY_OVERVIEW.md",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "Incluir/arm32_nanogpt_c_asm_sem_dependencias.zip",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "Incluir/fit_coherence_C.png",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "Incluir/fit_timeseries_S.png",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "Incluir/glmm_em_zip.zip",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "Incluir/matrix_ops (1).py",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "Incluir/matrix_ops.py",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "Incluir/modelo_dinamico_pacote.zip",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "Incluir/pacote_1_2_3_malha_simbiotica.zip",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "Incluir/pacote_submissao_abnt_modelo_dinamico.zip",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "Incluir/pacote_submissao_abnt_modelo_dinamico_novo (1).zip",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "Incluir/pacote_submissao_abnt_modelo_dinamico_novo (2).zip",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "Incluir/pacote_submissao_abnt_modelo_dinamico_novo.zip",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "Incluir/rafaelia_anterioridade_pack.zip",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "Incluir/rafaelia_rigor_pipeline.py",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "Incluir/regime_map_alpha_lambda.png",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "Incluir/repo_audit_and_plan.py",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "Incluir/report.md",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "Incluir/sensitivity_mean_S.png",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "Incluir/sessao_completa_possibilidades_e_matematica.md",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "Incluir/sistema_minimo_invariantes (1).md",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "Incluir/sistema_minimo_invariantes (1).xlsx",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "Incluir/sistema_minimo_invariantes.md",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "Incluir/sistema_minimo_invariantes.xlsx",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "Incluir/submissao_modelo_dinamico_abnt (1).zip",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "Incluir/submissao_modelo_dinamico_abnt.zip",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "Incluir/t7_invariant_engine.py",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "Incluir/termux-app-rafacodephi-master.zip",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "Incluir/test_repo_audit_and_plan.py",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "Incluir/test_t7_invariant_engine.py",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "Incluir/tinygpt_c_asm_like_nanogpt_src.zip",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "Incluir/tres_md_malha_simbiotica.zip",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "Incluir/tue_apr_21_2026_comprehensive_documentation_for_vectras_vm_android.json",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "Incluir/tue_apr_21_2026_repository_analysis_and_bug_report_summary.md",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "Incluir/vectras_bbs.c",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "__DELTA__/CMAKE_ANDROID_SNIPPET.txt",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "__DELTA__/CMAKE_ROOT_SNIPPET.txt",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "__DELTA__/PATCH_NOTES.md",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "__DELTA__/rrrrr",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "_incoming/INTEGRATION_EVIDENCE.md",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "_incoming/README.md",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "_incoming/pending/Android_nomalloc.mk",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "_incoming/pending/Application.mk",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "_incoming/pending/RAFAELIA_MATH_FORMULAS.md",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "_incoming/pending/RafaeliaCore.java",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "_incoming/pending/baremetal_nomalloc.c",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "_incoming/pending/baremetal_nomalloc.h",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "_incoming/pending/bitraf64_prototype_Version4.py",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "_incoming/pending/bitstack.c",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "_incoming/pending/bitstack.h",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "_incoming/pending/build_all.sh",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "_incoming/pending/diagnose.sh",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "_incoming/pending/diagnose_termux.sh",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "_incoming/pending/hyperforms.json",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "_incoming/pending/r.S",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "_incoming/pending/raf_asm_b1.S",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "_incoming/pending/rafaelia_10x10.S",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "_incoming/pending/rafaelia_7d.S",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "_incoming/pending/rafaelia_7d_gyro.S",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "_incoming/pending/rafaelia_7d_shapes.S",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "_incoming/pending/rafaelia_8way.S",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "_incoming/pending/rafaelia_936_fast.S",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "_incoming/pending/rafaelia_999_logsin.S",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "_incoming/pending/rafaelia_abs.S",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "_incoming/pending/rafaelia_arena.h",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "_incoming/pending/rafaelia_avalanche.S",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "_incoming/pending/rafaelia_avalanche_v2.S",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "_incoming/pending/rafaelia_b1.S",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "_incoming/pending/rafaelia_b2.S",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "_incoming/pending/rafaelia_b3.S",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "_incoming/pending/rafaelia_b4.S",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "_incoming/pending/rafaelia_b5.S",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "_incoming/pending/rafaelia_b6.S",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "_incoming/pending/rafaelia_b7.S",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "_incoming/pending/rafaelia_b8.S",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "_incoming/pending/rafaelia_bench_phi.S",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "_incoming/pending/rafaelia_bitraf.c",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "_incoming/pending/rafaelia_central_link.S",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "_incoming/pending/rafaelia_chrono.S",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "_incoming/pending/rafaelia_concepts_refactor.c",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "_incoming/pending/rafaelia_core.c",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "_incoming/pending/rafaelia_decision.S",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "_incoming/pending/rafaelia_delta.S",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "_incoming/pending/rafaelia_equitas.S",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "_incoming/pending/rafaelia_final.S",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "_incoming/pending/rafaelia_final_bench.S",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "_incoming/pending/rafaelia_final_seal.S",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "_incoming/pending/rafaelia_fix.S",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "_incoming/pending/rafaelia_flash.S",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "_incoming/pending/rafaelia_flops.S",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "_incoming/pending/rafaelia_fractal.S",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "_incoming/pending/rafaelia_glue.c",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "_incoming/pending/rafaelia_gpu_mid.c",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "_incoming/pending/rafaelia_gpu_mid.h",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "_incoming/pending/rafaelia_hold.S",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "_incoming/pending/rafaelia_hw_sync.S",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "_incoming/pending/rafaelia_integrity.S",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "_incoming/pending/rafaelia_invasion.S",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "_incoming/pending/rafaelia_jni_direct.c",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "_incoming/pending/rafaelia_l2.S",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "_incoming/pending/rafaelia_life.S",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "_incoming/pending/rafaelia_master.sh",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "_incoming/pending/rafaelia_next.S",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "_incoming/pending/rafaelia_orchestrator.c",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "_incoming/pending/rafaelia_pilar.S",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "_incoming/pending/rafaelia_prime.S",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "_incoming/pending/rafaelia_prob.S",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "_incoming/pending/rafaelia_pure_asm.c",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "_incoming/pending/rafaelia_sigma_omega.c",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "_incoming/pending/rafaelia_sin_log.S",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "_incoming/pending/rafaelia_stabile.S",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "_incoming/pending/rafaelia_toro.S",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "_incoming/pending/rafaelia_torus.S",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "_incoming/pending/rafaelia_ttl",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "_incoming/pending/rafaelia_ttl.S",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "_incoming/pending/rafaelia_types.h",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "_incoming/pending/rafaelia_ultra.S",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "_incoming/pending/rafaelia_vacuo.S",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "_incoming/pending/rafaelia_vacuo_v2.S",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "_incoming/pending/rafaelia_vortex.S",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "_incoming/pending/rafaelia_vortex_live.S",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "_incoming/pending/rafaelia_vortex_v2.S",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "_incoming/pending/rmr_final.S",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "_incoming/pending/rmr_hidden.S",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "_incoming/pending/rmr_matrix.S",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "_incoming/pending/rmr_nihil.S",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "_incoming/pending/rmr_persist.S",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "_incoming/pending/rmr_spiral.S",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "_incoming/pending/rmr_test.c",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "_incoming/pending/termux_arm32_build.sh",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "_incoming/rafaelia_arm.c",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "_incoming/rafaelia_arm32.c",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "_incoming/rafaelia_bare.c",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "_incoming/rafaelia_clock.c",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "_incoming/rafaelia_clock_fix.c",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "_incoming/rafaelia_flow.c",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "_incoming/rafaelia_lowlevel.c",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "_incoming/rafaelia_ultra.c",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "entrada-pendente",
+      "path": "_incoming/termux.c",
+      "detail": "Arquivo em área de ingresso; requer hash, teste e decisão de promoção."
+    },
+    {
+      "severity": "high",
+      "category": "overlay-zip",
+      "path": ".ci/files (26).zip",
+      "detail": "Overlay ZIP precisa de SHA-256 e manifesto antes de extração ou remoção."
+    },
+    {
+      "severity": "high",
+      "category": "overlay-zip",
+      "path": ".ci/files (27).zip",
+      "detail": "Overlay ZIP precisa de SHA-256 e manifesto antes de extração ou remoção."
+    },
+    {
+      "severity": "high",
+      "category": "overlay-zip",
+      "path": "Incluir/RAF_C_ASM_ARM32_HotPath_N55_56Ciclos.zip",
+      "detail": "Overlay ZIP precisa de SHA-256 e manifesto antes de extração ou remoção."
+    },
+    {
+      "severity": "high",
+      "category": "overlay-zip",
+      "path": "Incluir/RAF_C_ASM_ARM32_Pipeline_FrameCacheTelemetry_v5.zip",
+      "detail": "Overlay ZIP precisa de SHA-256 e manifesto antes de extração ou remoção."
+    },
+    {
+      "severity": "high",
+      "category": "overlay-zip",
+      "path": "Incluir/RAF_C_ASM_ARM32_Pipeline_v6_TraceFaultTarget.zip",
+      "detail": "Overlay ZIP precisa de SHA-256 e manifesto antes de extração ou remoção."
+    },
+    {
+      "severity": "high",
+      "category": "overlay-zip",
+      "path": "Incluir/RAF_C_ASM_ARM32_Pipeline_v7_ProtoCRCTrace.zip",
+      "detail": "Overlay ZIP precisa de SHA-256 e manifesto antes de extração ou remoção."
+    },
+    {
+      "severity": "high",
+      "category": "overlay-zip",
+      "path": "Incluir/RAF_C_ASM_ARM32_Pipeline_v8_ProtoZeroCopyReport.zip",
+      "detail": "Overlay ZIP precisa de SHA-256 e manifesto antes de extração ou remoção."
+    },
+    {
+      "severity": "high",
+      "category": "overlay-zip",
+      "path": "Incluir/RAF_C_ASM_Solido_ARM32_ARMv7.zip",
+      "detail": "Overlay ZIP precisa de SHA-256 e manifesto antes de extração ou remoção."
+    },
+    {
+      "severity": "high",
+      "category": "overlay-zip",
+      "path": "Incluir/RAF_C_ASM_Solido_x86_64.zip",
+      "detail": "Overlay ZIP precisa de SHA-256 e manifesto antes de extração ou remoção."
+    },
+    {
+      "severity": "high",
+      "category": "overlay-zip",
+      "path": "Incluir/Rafaelia_Execucao_Kit (1).zip",
+      "detail": "Overlay ZIP precisa de SHA-256 e manifesto antes de extração ou remoção."
+    },
+    {
+      "severity": "high",
+      "category": "overlay-zip",
+      "path": "Incluir/Rafaelia_Execucao_Kit.zip",
+      "detail": "Overlay ZIP precisa de SHA-256 e manifesto antes de extração ou remoção."
+    },
+    {
+      "severity": "high",
+      "category": "overlay-zip",
+      "path": "Incluir/Rafaelia_Execucao_Kit_Completo.zip",
+      "detail": "Overlay ZIP precisa de SHA-256 e manifesto antes de extração ou remoção."
+    },
+    {
+      "severity": "high",
+      "category": "overlay-zip",
+      "path": "Incluir/Rafaelia_Execucao_Kit_V2_ABNT_Resultados_Artigos.zip",
+      "detail": "Overlay ZIP precisa de SHA-256 e manifesto antes de extração ou remoção."
+    },
+    {
+      "severity": "high",
+      "category": "overlay-zip",
+      "path": "Incluir/arm32_nanogpt_c_asm_sem_dependencias.zip",
+      "detail": "Overlay ZIP precisa de SHA-256 e manifesto antes de extração ou remoção."
+    },
+    {
+      "severity": "high",
+      "category": "overlay-zip",
+      "path": "Incluir/glmm_em_zip.zip",
+      "detail": "Overlay ZIP precisa de SHA-256 e manifesto antes de extração ou remoção."
+    },
+    {
+      "severity": "high",
+      "category": "overlay-zip",
+      "path": "Incluir/modelo_dinamico_pacote.zip",
+      "detail": "Overlay ZIP precisa de SHA-256 e manifesto antes de extração ou remoção."
+    },
+    {
+      "severity": "high",
+      "category": "overlay-zip",
+      "path": "Incluir/pacote_1_2_3_malha_simbiotica.zip",
+      "detail": "Overlay ZIP precisa de SHA-256 e manifesto antes de extração ou remoção."
+    },
+    {
+      "severity": "high",
+      "category": "overlay-zip",
+      "path": "Incluir/pacote_submissao_abnt_modelo_dinamico.zip",
+      "detail": "Overlay ZIP precisa de SHA-256 e manifesto antes de extração ou remoção."
+    },
+    {
+      "severity": "high",
+      "category": "overlay-zip",
+      "path": "Incluir/pacote_submissao_abnt_modelo_dinamico_novo (1).zip",
+      "detail": "Overlay ZIP precisa de SHA-256 e manifesto antes de extração ou remoção."
+    },
+    {
+      "severity": "high",
+      "category": "overlay-zip",
+      "path": "Incluir/pacote_submissao_abnt_modelo_dinamico_novo (2).zip",
+      "detail": "Overlay ZIP precisa de SHA-256 e manifesto antes de extração ou remoção."
+    },
+    {
+      "severity": "high",
+      "category": "overlay-zip",
+      "path": "Incluir/pacote_submissao_abnt_modelo_dinamico_novo.zip",
+      "detail": "Overlay ZIP precisa de SHA-256 e manifesto antes de extração ou remoção."
+    },
+    {
+      "severity": "high",
+      "category": "overlay-zip",
+      "path": "Incluir/rafaelia_anterioridade_pack.zip",
+      "detail": "Overlay ZIP precisa de SHA-256 e manifesto antes de extração ou remoção."
+    },
+    {
+      "severity": "high",
+      "category": "overlay-zip",
+      "path": "Incluir/submissao_modelo_dinamico_abnt (1).zip",
+      "detail": "Overlay ZIP precisa de SHA-256 e manifesto antes de extração ou remoção."
+    },
+    {
+      "severity": "high",
+      "category": "overlay-zip",
+      "path": "Incluir/submissao_modelo_dinamico_abnt.zip",
+      "detail": "Overlay ZIP precisa de SHA-256 e manifesto antes de extração ou remoção."
+    },
+    {
+      "severity": "high",
+      "category": "overlay-zip",
+      "path": "Incluir/termux-app-rafacodephi-master.zip",
+      "detail": "Overlay ZIP precisa de SHA-256 e manifesto antes de extração ou remoção."
+    },
+    {
+      "severity": "high",
+      "category": "overlay-zip",
+      "path": "Incluir/tinygpt_c_asm_like_nanogpt_src.zip",
+      "detail": "Overlay ZIP precisa de SHA-256 e manifesto antes de extração ou remoção."
+    },
+    {
+      "severity": "high",
+      "category": "overlay-zip",
+      "path": "Incluir/tres_md_malha_simbiotica.zip",
+      "detail": "Overlay ZIP precisa de SHA-256 e manifesto antes de extração ou remoção."
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": ".ci/RAFAELIA_ATLAS_DOMINIOS_ESPIRAL.md",
+      "detail": "Marcadores: bug"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": ".ci/rmr_core.h",
+      "detail": "Marcadores: bug"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": ".github/ISSUE_TEMPLATE/bug_report.md",
+      "detail": "Marcadores: bug"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "AGENTS.md",
+      "detail": "Marcadores: bug"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "BUILDING.md",
+      "detail": "Marcadores: bug"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "CODEX_EXECUTION_BRIEF.md",
+      "detail": "Marcadores: bug"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "CONTRIBUTING.md",
+      "detail": "Marcadores: bug"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "DOC_INDEX.md",
+      "detail": "Marcadores: bug, failsafe, failover, rollback"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "Erro.md",
+      "detail": "Marcadores: bug"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "FIXES_SUMMARY.md",
+      "detail": "Marcadores: bug"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "GAIAPHI/BUILD_STATUS.md",
+      "detail": "Marcadores: bug"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "Incluir/01_taxonomia_academica_malha_simbiotica.md",
+      "detail": "Marcadores: bug, mitigação"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "Incluir/APPLY_FIXES.sh",
+      "detail": "Marcadores: bug"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "Incluir/CODEX_PROMPT_VECTRAS_TERMUX_ARM32_CI.txt",
+      "detail": "Marcadores: bug"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "Incluir/FIX_05_app_src_main_cpp_CMakeLists-1.txt",
+      "detail": "Marcadores: bug"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "Incluir/INTEGRATION_STATUS.md",
+      "detail": "Marcadores: bug"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "Incluir/Texto colado.txt",
+      "detail": "Marcadores: bug"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "Incluir/_VECTRAS_REPOSITORY_OVERVIEW.md",
+      "detail": "Marcadores: bug"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "Incluir/matrix_ops (1).py",
+      "detail": "Marcadores: mitigation"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "Incluir/matrix_ops.py",
+      "detail": "Marcadores: mitigation"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "Incluir/sessao_completa_possibilidades_e_matematica.md",
+      "detail": "Marcadores: bug"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "Incluir/tue_apr_21_2026_repository_analysis_and_bug_report_summary.md",
+      "detail": "Marcadores: bug"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "PROVISIONING_REPORT_2026-04-03.md",
+      "detail": "Marcadores: bug"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "README.md",
+      "detail": "Marcadores: bug"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "RELEASE_NOTES.md",
+      "detail": "Marcadores: bug, failover, mitigação"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "Rafaelia/baremetal_nomalloc.c",
+      "detail": "Marcadores: bug"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "Rafaelia/build_all.sh",
+      "detail": "Marcadores: bug"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "Rafaelia/rafaelia_bitraf.c",
+      "detail": "Marcadores: rollback"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "Rafaelia/rafaelia_core.c",
+      "detail": "Marcadores: rollback"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "Rafaelia/rafaelia_glue.c",
+      "detail": "Marcadores: rollback"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "Rafaelia/rafaelia_jni_direct.c",
+      "detail": "Marcadores: rollback"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "Rafaelia/rafaelia_master.sh",
+      "detail": "Marcadores: bug, rollback"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "Rafaelia/rafaelia_orchestrator.c",
+      "detail": "Marcadores: rollback"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "Rafaelia/termux_arm32_build.sh",
+      "detail": "Marcadores: bug, rollback"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "SECURITY.md",
+      "detail": "Marcadores: bug, mitigation"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "VECTRAS_MEGAPROMPT_DOCS.md",
+      "detail": "Marcadores: bug, rollback"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "VECTRA_CORE.md",
+      "detail": "Marcadores: bug"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "VERSION_STABILITY.md",
+      "detail": "Marcadores: bug, rollback"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "_incoming/INTEGRATION_EVIDENCE.md",
+      "detail": "Marcadores: bug"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "_incoming/pending/baremetal_nomalloc.c",
+      "detail": "Marcadores: bug"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "_incoming/pending/build_all.sh",
+      "detail": "Marcadores: bug"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "_incoming/pending/rafaelia_bitraf.c",
+      "detail": "Marcadores: rollback"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "_incoming/pending/rafaelia_core.c",
+      "detail": "Marcadores: rollback"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "_incoming/pending/rafaelia_glue.c",
+      "detail": "Marcadores: rollback"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "_incoming/pending/rafaelia_jni_direct.c",
+      "detail": "Marcadores: rollback"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "_incoming/pending/rafaelia_master.sh",
+      "detail": "Marcadores: bug, rollback"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "_incoming/pending/rafaelia_orchestrator.c",
+      "detail": "Marcadores: rollback"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "_incoming/pending/termux_arm32_build.sh",
+      "detail": "Marcadores: bug, rollback"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "addthis/VECTRAS_BUGS.md",
+      "detail": "Marcadores: bug"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "addthis/VECTRAS_PROBLEMS.md",
+      "detail": "Marcadores: bug"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "addthis/VECTRAS_REALITY_DIFF.md",
+      "detail": "Marcadores: bug"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "addthis/VECTRAS_SOLUTIONS.md",
+      "detail": "Marcadores: bug"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "addthis/apply_fixes_phase1.sh",
+      "detail": "Marcadores: bug"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "addthis/rafaelia_audit-1.jsx.txt",
+      "detail": "Marcadores: bug"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "addthis/readme.md",
+      "detail": "Marcadores: bug"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "addthis/rmr_types.h",
+      "detail": "Marcadores: bug"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "addthis/vectras_audit_files.jsx.txt",
+      "detail": "Marcadores: bug"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "addthis/vectras_full_metrics.jsx.txt",
+      "detail": "Marcadores: bug"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "android/README.md",
+      "detail": "Marcadores: bug"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "android/app/build.gradle",
+      "detail": "Marcadores: bug"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "app/FIREBASE.md",
+      "detail": "Marcadores: bug"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "app/README.md",
+      "detail": "Marcadores: bug"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "app/build.gradle",
+      "detail": "Marcadores: bug"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "archive/root-history/1.md",
+      "detail": "Marcadores: bug"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "archive/root-history/ADVANCED_OPTIMIZATIONS.md",
+      "detail": "Marcadores: bug"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "archive/root-history/VECTRAS_ANALYSIS_COMPLETE.md",
+      "detail": "Marcadores: bug"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "archive/root-history/VECTRAS_DEEP_EVIDENCE.md",
+      "detail": "Marcadores: failover"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "bug/1_RAFAELIA_BITRAF64_KERNEL.md",
+      "detail": "Marcadores: bug"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "bug/ANALISE_70_METRICAS_DATACENTER.md",
+      "detail": "Marcadores: failover"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "bug/ANALISE_CODIGO_VECTRAS_v3.6.5.md",
+      "detail": "Marcadores: bug"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "bug/ANALISE_COMPLETA_8_NIVEIS_SEMANTICOS.md",
+      "detail": "Marcadores: bug, failover"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "bug/ANALISE_REAL_COMPILACAO_HARDWARE.md",
+      "detail": "Marcadores: bug, mitigação"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "bug/ANALISE_SO_COMPLETO_BIOS_FIRMWARE_BOOTLOADER.md",
+      "detail": "Marcadores: mitigation"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "bug/AUTOTUNE_ADAPTATIVO_REAL.md",
+      "detail": "Marcadores: bug"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "bug/BUGS_ENUMERATION.md",
+      "detail": "Marcadores: bug, rollback"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "bug/BUG_FIXES.md",
+      "detail": "Marcadores: bug, failover, rollback"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "bug/BUG_FIXES_AND_PATCHES_EXACT_CODE.md",
+      "detail": "Marcadores: bug"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "bug/DEPLOYMENT_GUIDE_COMPLETO.md",
+      "detail": "Marcadores: bug, rollback"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "bug/EXPERIENCIA_USUARIO_IMPACTO_TRABALHO.md",
+      "detail": "Marcadores: bug"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "bug/FILES_MAP.md",
+      "detail": "Marcadores: bug"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "bug/GUIA_TECNICO_IMPLEMENTACAO_PATCHES.md",
+      "detail": "Marcadores: bug"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "bug/RAFGITTOOLS_AUDIT_REPORT.md",
+      "detail": "Marcadores: bug"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "bug/RAFGITTOOLS_BUG_HUNTER_v6.md",
+      "detail": "Marcadores: bug"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "bug/README.md",
+      "detail": "Marcadores: bug"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "bug/SIGMA_SUMMARY.txt",
+      "detail": "Marcadores: bug, rollback, mitigation"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "bug/SOURCE_CODE_TRACEABILITY.md",
+      "detail": "Marcadores: bug"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "bug/STATUS_CORRECOES_VERIFICADAS.md",
+      "detail": "Marcadores: bug"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "bug/STATUS_IMPLEMENTACAO_COMPLETO.md",
+      "detail": "Marcadores: bug, failover"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "bug/VECTRAS_ANALISE_TECNICA_DETALHADA.md",
+      "detail": "Marcadores: bug, failover"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "bug/VECTRAS_CODIGO_ALEM_DOCUMENTACAO.md",
+      "detail": "Marcadores: failover"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "bug/VECTRAS_V7_BUG_HUNTER_55.md",
+      "detail": "Marcadores: bug"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "bug/VECTRAS_VM_ADDITIONAL_56_BUGS.txt",
+      "detail": "Marcadores: bug"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "bug/VECTRAS_VM_ANALYSIS_SUMMARY.txt",
+      "detail": "Marcadores: bug, failover"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "bug/VECTRAS_VM_ANDROID_BUG_REPORT.txt",
+      "detail": "Marcadores: bug, failover"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "bug/VECTRAS_VM_ANDROID_CORRECTIONS.txt",
+      "detail": "Marcadores: bug, failover"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "bug/VECTRAS_VM_BUG_HUNTER.md",
+      "detail": "Marcadores: bug"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "bug/VECTRAS_VM_COGNITIVE_STRATEGIC_TACTICAL_SOLUTIONS.txt",
+      "detail": "Marcadores: bug, mitigação"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "bug/VECTRAS_VM_COMPLETE_BENCHTABLE_TESTS.txt",
+      "detail": "Marcadores: bug, failover, mitigação"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "bug/VECTRAS_VM_DETAILED_INVENTORY_COMPLETE.txt",
+      "detail": "Marcadores: bug, failover, mitigation, mitigação"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "bug/VECTRAS_VM_EXPLICACAO_EXECUTIVA_CONSOLIDADA.txt",
+      "detail": "Marcadores: bug, mitigação"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "bug/VECTRAS_VM_LISTA_76_BUGS.txt",
+      "detail": "Marcadores: bug"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "bug/VECTRAS_VM_SYSTEMIC_FAILURE_ANALYSIS.txt",
+      "detail": "Marcadores: bug"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "bug/VERDADE_CRITICA_SEM_ABSTRACCAO.md",
+      "detail": "Marcadores: bug"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "bug/Vectras_BugReport.md",
+      "detail": "Marcadores: bug"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "bug/archive/FILES_MAP.md",
+      "detail": "Marcadores: bug"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "bug/archive/README.md",
+      "detail": "Marcadores: bug"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "bug/archive/evidencias/FILES_MAP.md",
+      "detail": "Marcadores: bug"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "bug/archive/evidencias/README.md",
+      "detail": "Marcadores: bug"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "bug/core/FILES_MAP.md",
+      "detail": "Marcadores: bug"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "bug/core/README.md",
+      "detail": "Marcadores: bug"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "bug/fazer hotfix/FILES_MAP.md",
+      "detail": "Marcadores: bug"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "bug/fazer hotfix/HOTFIX_SERVICE_UPDATE_2026-05-20.md",
+      "detail": "Marcadores: bug, mitigação"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "bug/fazer hotfix/README.md",
+      "detail": "Marcadores: bug"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "bug/fazer hotfix/VECTRAS_VM_ANDROID_BUG_REPORT.txt",
+      "detail": "Marcadores: bug, failover"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "bug/fazer hotfix/VECTRAS_VM_ANDROID_CORRECTIONS.txt",
+      "detail": "Marcadores: bug, failover"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "bug/feito/FILES_MAP.md",
+      "detail": "Marcadores: bug"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "bug/feito/README.md",
+      "detail": "Marcadores: bug"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "bug/issues/FILES_MAP.md",
+      "detail": "Marcadores: bug"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "bug/issues/README.md",
+      "detail": "Marcadores: bug"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "bug/prioridade/FILES_MAP.md",
+      "detail": "Marcadores: bug"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "bug/prioridade/README.md",
+      "detail": "Marcadores: bug"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "bug/prioridade/VECTRAS_VM_ADDITIONAL_56_BUGS.txt",
+      "detail": "Marcadores: bug"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "bug/prioridade/VECTRAS_VM_ANALYSIS_SUMMARY.txt",
+      "detail": "Marcadores: bug, failover"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "bug/prioridade/VECTRAS_VM_ANDROID_BUG_REPORT.txt",
+      "detail": "Marcadores: bug, failover"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "bug/prioridade/VECTRAS_VM_ANDROID_CORRECTIONS.txt",
+      "detail": "Marcadores: bug, failover"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "bug/prioridade/VECTRAS_VM_COGNITIVE_STRATEGIC_TACTICAL_SOLUTIONS.txt",
+      "detail": "Marcadores: bug, mitigação"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "bug/prioridade/VECTRAS_VM_COMPLETE_BENCHTABLE_TESTS.txt",
+      "detail": "Marcadores: bug, failover, mitigação"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "bug/prioridade/VECTRAS_VM_DETAILED_INVENTORY_COMPLETE.txt",
+      "detail": "Marcadores: bug, failover, mitigation, mitigação"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "bug/prioridade/VECTRAS_VM_SYSTEMIC_FAILURE_ANALYSIS.txt",
+      "detail": "Marcadores: bug"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "deep-research-report.md",
+      "detail": "Marcadores: bug"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "demo_cli/src/rmr_hw_detect_selftest.c",
+      "detail": "Marcadores: failsafe, rollback"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "demo_cli/src/rmr_vector_field_selftest.c",
+      "detail": "Marcadores: failsafe"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "docs/AI_BUILD_RELEASE_INDEX.md",
+      "detail": "Marcadores: bug"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "docs/API.md",
+      "detail": "Marcadores: failover"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "docs/ARCHITECTURE.md",
+      "detail": "Marcadores: bug, failover"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "docs/BETA_APK_ABI_BOOTSTRAP_REPORT.md",
+      "detail": "Marcadores: bug"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "docs/BETA_SHELL_LOADER_STATUS.md",
+      "detail": "Marcadores: bug"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "docs/BLUEPRINT_FLUXOS_VM.md",
+      "detail": "Marcadores: bug, failover"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "docs/BOOTSTRAP_PROOT_HOTFIX_DELIVERY.md",
+      "detail": "Marcadores: failsafe, failover, rollback, mitigation"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "docs/BUGFIX_REPORT.md",
+      "detail": "Marcadores: bug"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "docs/BUILD_ENV_ALIGNMENT.md",
+      "detail": "Marcadores: bug"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "docs/BUILD_REFACTOR_SCOPE.md",
+      "detail": "Marcadores: bug"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "docs/CODE_REAL_RUNTIME_VECTRAS.md",
+      "detail": "Marcadores: bug, mitigação"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "docs/CONTRIBUTING.md",
+      "detail": "Marcadores: bug"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "docs/DOCUMENTATION_SUMMARY.md",
+      "detail": "Marcadores: bug, failover, mitigation"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "docs/ESFERAS_METODOLOGICAS_RAFAELIA.md",
+      "detail": "Marcadores: bug"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "docs/FILES_MAP.md",
+      "detail": "Marcadores: bug, failover, rollback"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "docs/IMAGES_INDEX.md",
+      "detail": "Marcadores: bug, failsafe"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "docs/INDEX_CANONICAL.md",
+      "detail": "Marcadores: bug"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "docs/INTEGRACAO_RM_QEMU_ANDROIDX.md",
+      "detail": "Marcadores: bug"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "docs/METODOLOGIA_ORGANIZACAO_7_DIRECOES.md",
+      "detail": "Marcadores: bug"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "docs/OPERATIONS.md",
+      "detail": "Marcadores: bug, failover"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "docs/PREFACE.md",
+      "detail": "Marcadores: bug"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "docs/QUALITY_ISO8000_ISO9001_PLAN.md",
+      "detail": "Marcadores: bug"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "docs/RAFAELIA_T7_MULTILINGUAL_MAPPING.md",
+      "detail": "Marcadores: rollback"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "docs/RAFAELIA_TRACE_GBS3_UNIVERSAL_PANEL.md",
+      "detail": "Marcadores: rollback"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "docs/README.md",
+      "detail": "Marcadores: bug, rollback"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "docs/ROADMAP.md",
+      "detail": "Marcadores: bug"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "docs/SECURITY.md",
+      "detail": "Marcadores: bug, mitigação"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "docs/SETUP_SDK_NDK.md",
+      "detail": "Marcadores: bug"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "docs/SURGICAL_PATCHSET.md",
+      "detail": "Marcadores: bug"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "docs/TODO_INCOMING_PENDING.md",
+      "detail": "Marcadores: bug"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "docs/VECTRAS_BETA_READINESS_FINAL.md",
+      "detail": "Marcadores: mitigação"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "docs/VECTRAS_BOOT_TO_VM_FIX_PLAN.md",
+      "detail": "Marcadores: bug"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "docs/VM_SUPERVISION_NEXT_5_STEPS.md",
+      "detail": "Marcadores: bug, failover"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "docs/VNC_INPUT_BEHAVIOR_MATRIX.md",
+      "detail": "Marcadores: bug"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "docs/active/ALL_MARKDOWN_FILES_2026-04-07.md",
+      "detail": "Marcadores: bug"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "docs/active/DOCUMENTATION_COVERAGE_AUDIT_2026-04-07.md",
+      "detail": "Marcadores: bug"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "docs/active/VECTRAS_ORIGIN_DOCUMENTS_2026-05-05.md",
+      "detail": "Marcadores: bug"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "docs/active/VECTRAS_SOURCE_AUDIT_2026-05-05.md",
+      "detail": "Marcadores: bug"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "docs/active/VECTRAS_STARTUP_FIX_REPORT.md",
+      "detail": "Marcadores: bug"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "docs/archive/2026-04-06_status-superseded_BUILD_FAILURE_AUDIT.md",
+      "detail": "Marcadores: bug"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "docs/archive/2026-04-06_status-superseded_VM_SUPERVISION_AUDIT_EVIDENCE.md",
+      "detail": "Marcadores: failover"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "docs/assets/ascii/rafaelia-system-pipeline.ascii.md",
+      "detail": "Marcadores: failsafe"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "docs/build-release.md",
+      "detail": "Marcadores: bug"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "docs/ci/android-canonical-pipeline.md",
+      "detail": "Marcadores: bug"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "docs/ci/android-mode-matrix.md",
+      "detail": "Marcadores: bug"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "docs/ci/release-dual-track.md",
+      "detail": "Marcadores: bug"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "docs/ci/workflow-matrix.md",
+      "detail": "Marcadores: bug"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "docs/navigation/ENTERPRISE_COMPANIES.md",
+      "detail": "Marcadores: bug, rollback"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "docs/navigation/HIGH_LEVEL_INVESTORS.md",
+      "detail": "Marcadores: mitigação"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "docs/navigation/PERFORMANCE_OPERATIONS.md",
+      "detail": "Marcadores: rollback"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "docs/organization/DOC_ORGANIZATION_PLAN_2026-06-02.md",
+      "detail": "Marcadores: bug, failsafe, failover, rollback"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "docs/organization/LOOSE_FILES_AND_FRAGMENTS_INVENTORY_2026-06-02.md",
+      "detail": "Marcadores: bug, rollback"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "docs/organization/NECESSARY_DATA_DELIVERY_MATRIX_2026-06-02.md",
+      "detail": "Marcadores: bug, failsafe, failover, rollback, mitigação"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "docs/organization/README.md",
+      "detail": "Marcadores: bug, failsafe, failover, rollback"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "docs/organization/SOURCE_ARCHITECTURE_SYNC_2026-06-02.md",
+      "detail": "Marcadores: bug, failover, rollback"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "docs/rafaelia_reference/RAFAELIA_T7_VARIABLES_FORMULAS.md",
+      "detail": "Marcadores: bug, failover, rollback"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "engine/rmr/README.md",
+      "detail": "Marcadores: bug"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "engine/rmr/include/rmr_asset_guard.h",
+      "detail": "Marcadores: failsafe, rollback"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "engine/rmr/include/rmr_vector_field.h",
+      "detail": "Marcadores: failsafe, rollback"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "engine/rmr/include/topological_guard.h",
+      "detail": "Marcadores: failsafe, rollback"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "engine/rmr/src/rafaelia_bitraf_core.c",
+      "detail": "Marcadores: bug"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "engine/rmr/src/rmr_apk_module.c",
+      "detail": "Marcadores: bug"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "engine/rmr/src/rmr_asset_guard.c",
+      "detail": "Marcadores: failsafe, rollback"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "engine/rmr/src/rmr_policy_kernel.c",
+      "detail": "Marcadores: bug"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "engine/rmr/src/rmr_vector_field.c",
+      "detail": "Marcadores: failsafe, rollback"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "engine/rmr/src/topological_guard.c",
+      "detail": "Marcadores: failsafe, rollback"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "engine/vectra_policy_kernel/src/ffi.rs",
+      "detail": "Marcadores: bug"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "engine/vectra_policy_kernel/src/lib.rs",
+      "detail": "Marcadores: bug, rollback"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "engine/vectra_policy_kernel/tests/policy_kernel_tests.rs",
+      "detail": "Marcadores: rollback"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "evidence/2026-04-06_status-raw_bugs_vectras_completo.txt",
+      "detail": "Marcadores: bug, rollback"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "evidence/README.md",
+      "detail": "Marcadores: bug"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "reports/BUILD_VALIDATION_2026-04-03.md",
+      "detail": "Marcadores: bug"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "reports/CANONICAL_BUILD_STATUS.md",
+      "detail": "Marcadores: bug"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "reports/FULL_REPO_AUDIT_REPORT.md",
+      "detail": "Marcadores: bug"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "reports/NDK_DEPENDENCY_OVERHEAD_AUDIT.md",
+      "detail": "Marcadores: bug"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "reports/NON_MD_AUDIT_REPORT.md",
+      "detail": "Marcadores: bug"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "reports/Vectras-VM-Android_ARCH_REPORT.md",
+      "detail": "Marcadores: bug"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "reports/build-execution-2026-04-03.md",
+      "detail": "Marcadores: bug"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "reports/build-verification-2026-04-03-fix.md",
+      "detail": "Marcadores: bug"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "reports/build-verification-2026-04-03.md",
+      "detail": "Marcadores: bug"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "run_tests.sh",
+      "detail": "Marcadores: bug"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "scripts/collect_vectra_grade_benchmarks.sh",
+      "detail": "Marcadores: bug"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "scripts/device_runtime_smoke.sh",
+      "detail": "Marcadores: bug"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "shell-loader/build.gradle",
+      "detail": "Marcadores: bug"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "terminal-emulator/FILES_MAP.md",
+      "detail": "Marcadores: bug"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "tools/apk/README.md",
+      "detail": "Marcadores: bug"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "tools/apk/rmr_termux_release_orchestrator.sh",
+      "detail": "Marcadores: bug"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "tools/baremetal/verify_cmake_arm64_flags.sh",
+      "detail": "Marcadores: bug"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "tools/ci/ASM_COMPILER_GATE.md",
+      "detail": "Marcadores: rollback"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "tools/ci/build_apk_matrix.sh",
+      "detail": "Marcadores: bug"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "tools/ci/build_apk_wizard.sh",
+      "detail": "Marcadores: bug"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "tools/ci/build_artifact_matrix_local.sh",
+      "detail": "Marcadores: bug"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "tools/ci/build_verify_apks.sh",
+      "detail": "Marcadores: bug"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "tools/ci/run_asm_compiler_refactor_gate.sh",
+      "detail": "Marcadores: failsafe, rollback"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "tools/ci/validate_build_matrix.py",
+      "detail": "Marcadores: bug"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "tools/ci/validate_expected_android_artifacts.sh",
+      "detail": "Marcadores: bug"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "tools/ci/verify_artifact_contract.sh",
+      "detail": "Marcadores: bug"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "tools/compliance/check_lowlevel_constraints.py",
+      "detail": "Marcadores: bug"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "tools/docs/README.md",
+      "detail": "Marcadores: bug"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "tools/docs/audit_documentation_state.py",
+      "detail": "Marcadores: bug, failsafe, failover, rollback, mitigation, mitigacao, mitigação"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "tools/termux-arm64-orchestrator/bootstrap-termux-android15.sh",
+      "detail": "Marcadores: rollback"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": ".ci/RAFAELIA_ATLAS_DOMINIOS_ESPIRAL.md",
+      "detail": "Marcadores: todo, pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": ".ci/RAFAELIA_SESSAO_COMPLETA.md",
+      "detail": "Marcadores: todo, pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": ".github/ISSUE_TEMPLATE/bug_report.md",
+      "detail": "Marcadores: pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": ".github/ISSUE_TEMPLATE/custom.md",
+      "detail": "Marcadores: pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": ".github/ISSUE_TEMPLATE/feature_request.md",
+      "detail": "Marcadores: pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": ".github/workflows/formulasdoRafaelmr.md",
+      "detail": "Marcadores: todo"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "33.md",
+      "detail": "Marcadores: pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "3dfx/FILES_MAP.md",
+      "detail": "Marcadores: pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "3dfx/README.md",
+      "detail": "Marcadores: pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "AGENTS2.md",
+      "detail": "Marcadores: pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "AUTHORSHIP_CLEANROOM_PLAN.md",
+      "detail": "Marcadores: todo"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "BOOTSTRAP_LOWLEVEL_RAFAELIA.txt",
+      "detail": "Marcadores: todo, stub"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "BUILDING.md",
+      "detail": "Marcadores: placeholder, todo, pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "CHANGELOG.md",
+      "detail": "Marcadores: placeholder, todo, pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "CODEX_EXECUTION_BRIEF.md",
+      "detail": "Marcadores: stub, pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "CONTRIBUTING.md",
+      "detail": "Marcadores: placeholder"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "DOC_INDEX.md",
+      "detail": "Marcadores: placeholder, todo, pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "Erro.md",
+      "detail": "Marcadores: todo, pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "FIXES_SUMMARY.md",
+      "detail": "Marcadores: todo"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "GAIAPHI/divisoes/01_versao_curta.md",
+      "detail": "Marcadores: todo"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "GAIAPHI/divisoes/03_versao_expandida.md",
+      "detail": "Marcadores: todo"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "GAIAPHI/divisoes/04_mapa_operacional.md",
+      "detail": "Marcadores: todo"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "GAIAPHI/divisoes/curta/04.md",
+      "detail": "Marcadores: todo"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "GAIAPHI/divisoes/expandida/04.md",
+      "detail": "Marcadores: todo"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "GAIAPHI/mapa_operacional.md",
+      "detail": "Marcadores: todo"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "GAIAPHI/rafael_divisoes.md",
+      "detail": "Marcadores: todo"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "GAIAPHI/versao_curta.md",
+      "detail": "Marcadores: todo"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "GAIAPHI/versao_expandida.md",
+      "detail": "Marcadores: todo"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "Incluir/01_taxonomia_academica_malha_simbiotica.md",
+      "detail": "Marcadores: todo"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "Incluir/03_paper_base_programa_interdisciplinar.md",
+      "detail": "Marcadores: todo"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "Incluir/A incluir.md",
+      "detail": "Marcadores: todo, stub"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "Incluir/APPLY_FIXES.sh",
+      "detail": "Marcadores: placeholder, todo"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "Incluir/AUDIT_REPORT.md",
+      "detail": "Marcadores: stub, pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "Incluir/CODEX_PROMPT_VECTRAS_TERMUX_ARM32_CI.txt",
+      "detail": "Marcadores: todo"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "Incluir/Rafael estados.md",
+      "detail": "Marcadores: todo"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "Incluir/repo_audit_and_plan.py",
+      "detail": "Marcadores: pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "Incluir/sessao_completa_possibilidades_e_matematica.md",
+      "detail": "Marcadores: todo, stub"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "Incluir/test_repo_audit_and_plan.py",
+      "detail": "Marcadores: pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "Incluir/tue_apr_21_2026_repository_analysis_and_bug_report_summary.md",
+      "detail": "Marcadores: todo, fixme"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "PRIVACY.md",
+      "detail": "Marcadores: pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "PROVISIONING_REPORT_2026-04-03.md",
+      "detail": "Marcadores: pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "RAFAELMELOREIS/MIT/NAOCOMERCIAL/LICENSE_2.MD",
+      "detail": "Marcadores: todo"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "RAFAELMELOREIS/MIT/NAOCOMERCIAL/TENS.MD",
+      "detail": "Marcadores: todo"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "README.md",
+      "detail": "Marcadores: todo, pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "RELEASE_NOTES.md",
+      "detail": "Marcadores: pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "Rafaelia/README.md",
+      "detail": "Marcadores: xxx"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "Rafaelia/rafaelia_bitraf.c",
+      "detail": "Marcadores: todo"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "Rafaelia/rafaelia_glue.c",
+      "detail": "Marcadores: todo"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "Rafaelia/rafaelia_master.sh",
+      "detail": "Marcadores: todo"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "Rafaelia/rafaelia_orchestrator.c",
+      "detail": "Marcadores: todo"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "Rafaelia/rafaelia_sigma_omega.c",
+      "detail": "Marcadores: todo"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "THIRD_PARTY_NOTICES.md",
+      "detail": "Marcadores: pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "TROUBLESHOOTING.md",
+      "detail": "Marcadores: placeholder, stub, pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "VECTRAS_MEGAPROMPT_DOCS.md",
+      "detail": "Marcadores: todo, pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "VECTRA_CORE.md",
+      "detail": "Marcadores: pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "VERSION_STABILITY.md",
+      "detail": "Marcadores: todo, stub, pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "__DELTA__/PATCH_NOTES.md",
+      "detail": "Marcadores: pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "_incoming/INTEGRATION_EVIDENCE.md",
+      "detail": "Marcadores: todo, pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "_incoming/README.md",
+      "detail": "Marcadores: pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "_incoming/pending/rafaelia_bitraf.c",
+      "detail": "Marcadores: todo"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "_incoming/pending/rafaelia_glue.c",
+      "detail": "Marcadores: todo"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "_incoming/pending/rafaelia_master.sh",
+      "detail": "Marcadores: todo"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "_incoming/pending/rafaelia_orchestrator.c",
+      "detail": "Marcadores: todo"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "_incoming/pending/rafaelia_sigma_omega.c",
+      "detail": "Marcadores: todo"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "addthis/README.md",
+      "detail": "Marcadores: todo, pending, xxx"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "addthis/VECTRAS_BUGS.md",
+      "detail": "Marcadores: todo, pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "addthis/VECTRAS_PROBLEMS.md",
+      "detail": "Marcadores: stub, pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "addthis/VECTRAS_REALITY_DIFF.md",
+      "detail": "Marcadores: todo, pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "addthis/VECTRAS_SOLUTIONS.md",
+      "detail": "Marcadores: todo, pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "addthis/rafaelia_audit-1.jsx.txt",
+      "detail": "Marcadores: todo, mock"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "addthis/rafaelia_custody_stream.jsx (2).txt",
+      "detail": "Marcadores: todo"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "addthis/readme.md",
+      "detail": "Marcadores: pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "addthis/rmr_types.h",
+      "detail": "Marcadores: todo"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "addthis/vectras_audit_files.jsx.txt",
+      "detail": "Marcadores: todo"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "addthis/vectras_full_metrics.jsx.txt",
+      "detail": "Marcadores: todo"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "app/FILES_MAP.md",
+      "detail": "Marcadores: pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "app/FIREBASE.md",
+      "detail": "Marcadores: placeholder, pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "app/README.md",
+      "detail": "Marcadores: placeholder, todo, pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "app/build.gradle",
+      "detail": "Marcadores: placeholder"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "archive/FILES_MAP.md",
+      "detail": "Marcadores: pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "archive/README.md",
+      "detail": "Marcadores: pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "archive/experimental/seguranda/segurancaMilitarnasuditorias.md",
+      "detail": "Marcadores: pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "archive/root-history/1.md",
+      "detail": "Marcadores: placeholder, pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "archive/root-history/ADVANCED_OPTIMIZATIONS.md",
+      "detail": "Marcadores: pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "archive/root-history/BENCHMARK_REFACTORING_SUMMARY.md",
+      "detail": "Marcadores: pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "archive/root-history/IMPLEMENTATION_COMPLETE.md",
+      "detail": "Marcadores: pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "archive/root-history/IMPLEMENTATION_SUMMARY.md",
+      "detail": "Marcadores: pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "archive/root-history/VECTRAS_ANALYSIS_COMPLETE.md",
+      "detail": "Marcadores: todo, stub, mock, pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "archive/root-history/VECTRAS_DEEP_EVIDENCE.md",
+      "detail": "Marcadores: todo, pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "bench/FILES_MAP.md",
+      "detail": "Marcadores: pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "bench/README.md",
+      "detail": "Marcadores: pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "boot2exem.md",
+      "detail": "Marcadores: todo, pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "bootstrapexemplo.md",
+      "detail": "Marcadores: todo, stub"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "bug/1_RAFAELIA_BITRAF64_KERNEL.md",
+      "detail": "Marcadores: pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "bug/2_DETERMINISTIC_COHERENCE_MATRIX.md",
+      "detail": "Marcadores: pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "bug/3_ZIP_DETERMINISTIC_CONTAINER.md",
+      "detail": "Marcadores: placeholder, pending, xxx"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "bug/4_GEOMETRIC_PARITY_REDUNDANCY.md",
+      "detail": "Marcadores: placeholder, pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "bug/5_OMEGA_SME_COMPRESSION_CODEC.md",
+      "detail": "Marcadores: pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "bug/ANALISE_70_METRICAS_DATACENTER.md",
+      "detail": "Marcadores: pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "bug/ANALISE_CODIGO_VECTRAS_v3.6.5.md",
+      "detail": "Marcadores: todo, pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "bug/ANALISE_COMPLETA_8_NIVEIS_SEMANTICOS.md",
+      "detail": "Marcadores: todo, pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "bug/ANALISE_REAL_COMPILACAO_HARDWARE.md",
+      "detail": "Marcadores: todo, pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "bug/ANALISE_REAL_HARDWARE_COMPLETA.md",
+      "detail": "Marcadores: todo, pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "bug/ANALISE_SO_COMPLETO_BIOS_FIRMWARE_BOOTLOADER.md",
+      "detail": "Marcadores: todo, pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "bug/AUTOTUNE_ADAPTATIVO_REAL.md",
+      "detail": "Marcadores: todo, pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "bug/BUGS_ENUMERATION.md",
+      "detail": "Marcadores: pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "bug/BUG_FIXES.md",
+      "detail": "Marcadores: todo, mock, pending, xxx"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "bug/BUG_FIXES_AND_PATCHES_EXACT_CODE.md",
+      "detail": "Marcadores: todo, pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "bug/COMPARACAO_UPSTREAM_VS_OTIMIZADO.md",
+      "detail": "Marcadores: todo, pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "bug/DEPLOYMENT_GUIDE_COMPLETO.md",
+      "detail": "Marcadores: placeholder, todo, pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "bug/EXPERIENCIA_USUARIO_IMPACTO_TRABALHO.md",
+      "detail": "Marcadores: todo, pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "bug/FILES_MAP.md",
+      "detail": "Marcadores: placeholder, stub, pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "bug/GUIA_TECNICO_IMPLEMENTACAO_PATCHES.md",
+      "detail": "Marcadores: todo, mock, pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "bug/MATRIZ_T_ESPACO_ESTADOS_VERDADE.md",
+      "detail": "Marcadores: pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "bug/RAFGITTOOLS_AUDIT_REPORT.md",
+      "detail": "Marcadores: placeholder, todo, stub, pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "bug/RAFGITTOOLS_BUG_HUNTER_v6.md",
+      "detail": "Marcadores: placeholder, todo, stub, mock, pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "bug/README.md",
+      "detail": "Marcadores: pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "bug/SOURCE_CODE_TRACEABILITY.md",
+      "detail": "Marcadores: pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "bug/STATUS_CORRECOES_VERIFICADAS.md",
+      "detail": "Marcadores: pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "bug/STATUS_IMPLEMENTACAO_COMPLETO.md",
+      "detail": "Marcadores: stub, pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "bug/SUMARIO_EXECUTIVO.md",
+      "detail": "Marcadores: pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "bug/VECTRAS_ANALISE_TECNICA_DETALHADA.md",
+      "detail": "Marcadores: todo, stub, pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "bug/VECTRAS_CODIGO_ALEM_DOCUMENTACAO.md",
+      "detail": "Marcadores: mock, pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "bug/VECTRAS_V7_BUG_HUNTER_55.md",
+      "detail": "Marcadores: placeholder, todo, pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "bug/VECTRAS_VM_ADDITIONAL_56_BUGS.txt",
+      "detail": "Marcadores: todo, pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "bug/VECTRAS_VM_ANALYSIS_SUMMARY.txt",
+      "detail": "Marcadores: pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "bug/VECTRAS_VM_ANDROID_BUG_REPORT.txt",
+      "detail": "Marcadores: xxx"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "bug/VECTRAS_VM_ANDROID_CORRECTIONS.txt",
+      "detail": "Marcadores: todo, pending, xxx"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "bug/VECTRAS_VM_BUG_HUNTER.md",
+      "detail": "Marcadores: placeholder, todo, stub, pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "bug/VECTRAS_VM_COGNITIVE_STRATEGIC_TACTICAL_SOLUTIONS.txt",
+      "detail": "Marcadores: todo, xxx"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "bug/VECTRAS_VM_COMPLETE_BENCHTABLE_TESTS.txt",
+      "detail": "Marcadores: todo"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "bug/VECTRAS_VM_DETAILED_INVENTORY_COMPLETE.txt",
+      "detail": "Marcadores: todo, pending, xxx"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "bug/VECTRAS_VM_EXPLICACAO_EXECUTIVA_CONSOLIDADA.txt",
+      "detail": "Marcadores: todo"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "bug/VECTRAS_VM_LISTA_76_BUGS.txt",
+      "detail": "Marcadores: todo"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "bug/VERDADE_CRITICA_SEM_ABSTRACCAO.md",
+      "detail": "Marcadores: pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "bug/Vectras_BugReport.md",
+      "detail": "Marcadores: pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "bug/archive/FILES_MAP.md",
+      "detail": "Marcadores: pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "bug/archive/README.md",
+      "detail": "Marcadores: pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "bug/archive/evidencias/FILES_MAP.md",
+      "detail": "Marcadores: pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "bug/archive/evidencias/README.md",
+      "detail": "Marcadores: pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "bug/core/1.md",
+      "detail": "Marcadores: pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "bug/core/FILES_MAP.md",
+      "detail": "Marcadores: placeholder, stub, pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "bug/core/NUCLEUS_README.md",
+      "detail": "Marcadores: todo, stub, pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "bug/core/README.md",
+      "detail": "Marcadores: pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "bug/fazer hotfix/FILES_MAP.md",
+      "detail": "Marcadores: pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "bug/fazer hotfix/HOTFIX_SERVICE_UPDATE_2026-05-20.md",
+      "detail": "Marcadores: placeholder"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "bug/fazer hotfix/README.md",
+      "detail": "Marcadores: pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "bug/fazer hotfix/VECTRAS_VM_ANDROID_BUG_REPORT.txt",
+      "detail": "Marcadores: xxx"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "bug/fazer hotfix/VECTRAS_VM_ANDROID_CORRECTIONS.txt",
+      "detail": "Marcadores: todo, pending, xxx"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "bug/feito/FILES_MAP.md",
+      "detail": "Marcadores: pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "bug/feito/README.md",
+      "detail": "Marcadores: pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "bug/issues/FILES_MAP.md",
+      "detail": "Marcadores: pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "bug/issues/ISSUE_FILEUTILS_BACKEND_MODE_AND_ISO_READONLY.md",
+      "detail": "Marcadores: todo, pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "bug/issues/ISSUE_MAINVNCACTIVITY_DISPATCHKEYEVENT_IME_COMPOSITION.md",
+      "detail": "Marcadores: pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "bug/issues/ISSUE_TERMINALROW_COMBINING_LIMIT_AND_UNASSIGNED_WIDTH.md",
+      "detail": "Marcadores: pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "bug/issues/README.md",
+      "detail": "Marcadores: pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "bug/prioridade/FILES_MAP.md",
+      "detail": "Marcadores: pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "bug/prioridade/README.md",
+      "detail": "Marcadores: pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "bug/prioridade/VECTRAS_VM_ADDITIONAL_56_BUGS.txt",
+      "detail": "Marcadores: todo, pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "bug/prioridade/VECTRAS_VM_ANALYSIS_SUMMARY.txt",
+      "detail": "Marcadores: pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "bug/prioridade/VECTRAS_VM_ANDROID_BUG_REPORT.txt",
+      "detail": "Marcadores: xxx"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "bug/prioridade/VECTRAS_VM_ANDROID_CORRECTIONS.txt",
+      "detail": "Marcadores: todo, pending, xxx"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "bug/prioridade/VECTRAS_VM_COGNITIVE_STRATEGIC_TACTICAL_SOLUTIONS.txt",
+      "detail": "Marcadores: todo, xxx"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "bug/prioridade/VECTRAS_VM_COMPLETE_BENCHTABLE_TESTS.txt",
+      "detail": "Marcadores: todo"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "bug/prioridade/VECTRAS_VM_DETAILED_INVENTORY_COMPLETE.txt",
+      "detail": "Marcadores: todo, pending, xxx"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "deep-research-report.md",
+      "detail": "Marcadores: todo"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "demo_cli/FILES_MAP.md",
+      "detail": "Marcadores: pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "demo_cli/README.md",
+      "detail": "Marcadores: pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "docs/ABSTRACT.md",
+      "detail": "Marcadores: pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "docs/API.md",
+      "detail": "Marcadores: pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "docs/ARCHITECTURE.md",
+      "detail": "Marcadores: pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "docs/AUDIT_CLAIMS_POLICY.md",
+      "detail": "Marcadores: todo"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "docs/BENCHMARKS.md",
+      "detail": "Marcadores: pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "docs/BENCHMARK_MANAGER.md",
+      "detail": "Marcadores: pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "docs/BETA_EXTERNAL_REFERENCE_MAP.md",
+      "detail": "Marcadores: placeholder"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "docs/BIBLIOGRAPHY.md",
+      "detail": "Marcadores: pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "docs/BLUEPRINT_FLUXOS_VM.md",
+      "detail": "Marcadores: todo, pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "docs/BUGFIX_REPORT.md",
+      "detail": "Marcadores: todo, pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "docs/BUILD_ENV_ALIGNMENT.md",
+      "detail": "Marcadores: todo, stub, pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "docs/BUILD_REFACTOR_SCOPE.md",
+      "detail": "Marcadores: todo, pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "docs/CODE_GEOMETRY_REALITY_2026-04-03.md",
+      "detail": "Marcadores: pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "docs/CODE_REAL_RUNTIME_VECTRAS.md",
+      "detail": "Marcadores: placeholder, todo, pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "docs/CONTRIBUTING.md",
+      "detail": "Marcadores: placeholder, pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "docs/DETERMINISTIC_VM_MUTATION_LAYER.md",
+      "detail": "Marcadores: pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "docs/DOCUMENTATION_STANDARDS.md",
+      "detail": "Marcadores: todo, pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "docs/DOCUMENTATION_SUMMARY.md",
+      "detail": "Marcadores: todo, pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "docs/ESFERAS_METODOLOGICAS_RAFAELIA.md",
+      "detail": "Marcadores: todo, stub, pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "docs/FILES_MAP.md",
+      "detail": "Marcadores: placeholder, todo, pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "docs/FULLSTACK_SOURCE_MAP.md",
+      "detail": "Marcadores: pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "docs/GLOSSARY.md",
+      "detail": "Marcadores: todo, pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "docs/IMAGES_INDEX.md",
+      "detail": "Marcadores: pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "docs/INDEX_CANONICAL.md",
+      "detail": "Marcadores: todo"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "docs/INTEGRACAO_RM_QEMU_ANDROIDX.md",
+      "detail": "Marcadores: todo, pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "docs/IP_MAP.md",
+      "detail": "Marcadores: todo, pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "docs/LEGAL_AND_LICENSES.md",
+      "detail": "Marcadores: pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "docs/LOWBASIC_ABI_BOOTSTRAP_HOTFIX.md",
+      "detail": "Marcadores: todo"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "docs/METODOLOGIA_ORGANIZACAO_7_DIRECOES.md",
+      "detail": "Marcadores: todo"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "docs/OPERATIONS.md",
+      "detail": "Marcadores: pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "docs/PERFORMANCE_INTEGRITY.md",
+      "detail": "Marcadores: pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "docs/PREFACE.md",
+      "detail": "Marcadores: todo, pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "docs/QUALITY_ISO8000_ISO9001_PLAN.md",
+      "detail": "Marcadores: pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "docs/RAFAELIA_COHESION_ENTERPRISE_STACK.md",
+      "detail": "Marcadores: todo, pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "docs/RAFAELIA_PERF_OPS.md",
+      "detail": "Marcadores: pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "docs/RAFAELIA_TRACE_GBS3_UNIVERSAL_PANEL.md",
+      "detail": "Marcadores: todo"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "docs/RAFCODE_PHI_COMPILER_HEADER.md",
+      "detail": "Marcadores: pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "docs/README.md",
+      "detail": "Marcadores: placeholder"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "docs/REPO_XRAY.md",
+      "detail": "Marcadores: pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "docs/RESUMO.md",
+      "detail": "Marcadores: todo, pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "docs/ROADMAP.md",
+      "detail": "Marcadores: placeholder, todo, pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "docs/ROOT_FILES_CATALOG.md",
+      "detail": "Marcadores: todo, pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "docs/ROOT_FILE_CHAIN.md",
+      "detail": "Marcadores: todo, pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "docs/SALMO_DE_CODIGO_EU_SOU.md",
+      "detail": "Marcadores: todo, pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "docs/SECURITY.md",
+      "detail": "Marcadores: pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "docs/SETUP_SDK_NDK.md",
+      "detail": "Marcadores: pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "docs/SOURCE_TRACEABILITY_MATRIX.md",
+      "detail": "Marcadores: todo, pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "docs/SURGICAL_PATCHSET.md",
+      "detail": "Marcadores: todo, pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "docs/THREE_LAYER_ANALYSIS.md",
+      "detail": "Marcadores: pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "docs/TODO_INCOMING_PENDING.md",
+      "detail": "Marcadores: todo, pending, tbd"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "docs/VECTRAS_BETA_READINESS_FINAL.md",
+      "detail": "Marcadores: placeholder"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "docs/VM_SUPERVISION_NEXT_5_STEPS.md",
+      "detail": "Marcadores: todo, pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "docs/VNC_INPUT_BEHAVIOR_MATRIX.md",
+      "detail": "Marcadores: todo, pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "docs/WHITEPAPER.md",
+      "detail": "Marcadores: pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "docs/active/ALL_MARKDOWN_FILES_2026-04-07.md",
+      "detail": "Marcadores: todo, pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "docs/active/COERENCIA_AMOR_PROVA_SYSTEM_REVIEW_2026-05-01.md",
+      "detail": "Marcadores: todo"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "docs/active/DOCUMENTATION_COVERAGE_AUDIT_2026-04-07.md",
+      "detail": "Marcadores: todo, pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "docs/active/UNIFIED_CODE_DOCUMENTATION_ALIGNMENT_2026-04-12.md",
+      "detail": "Marcadores: todo"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "docs/active/VECTRAS_ORIGIN_DOCUMENTS_2026-05-05.md",
+      "detail": "Marcadores: todo"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "docs/active/VECTRAS_SOURCE_AUDIT_2026-05-05.md",
+      "detail": "Marcadores: todo, stub"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "docs/active/VECTRAS_STARTUP_FIX_REPORT.md",
+      "detail": "Marcadores: placeholder"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "docs/active/VECTRAS_STARTUP_INCONSISTENCIES.md",
+      "detail": "Marcadores: placeholder, pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "docs/active/VECTRAS_STARTUP_PATH_AUDIT.md",
+      "detail": "Marcadores: placeholder, pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "docs/architecture/VM_EXECUTION_FLOW.md",
+      "detail": "Marcadores: pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "docs/archive/2026-04-06_status-superseded_BUILD_FAILURE_AUDIT.md",
+      "detail": "Marcadores: placeholder, todo, pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "docs/archive/2026-04-06_status-superseded_VM_SUPERVISION_AUDIT_EVIDENCE.md",
+      "detail": "Marcadores: pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "docs/archive/README.md",
+      "detail": "Marcadores: pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "docs/assets/CHAT_PROMPT_PROVENANCE.md",
+      "detail": "Marcadores: pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "docs/assets/MANIFEST.md",
+      "detail": "Marcadores: todo, pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "docs/assets/README.md",
+      "detail": "Marcadores: pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "docs/assets/ascii/additional-image-01.ascii.md",
+      "detail": "Marcadores: pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "docs/assets/ascii/rafaelia-coherence-layers.ascii.md",
+      "detail": "Marcadores: pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "docs/assets/ascii/rafaelia-core-eye-toroid.ascii.md",
+      "detail": "Marcadores: pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "docs/assets/ascii/rafaelia-fractal-architecture.ascii.md",
+      "detail": "Marcadores: pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "docs/assets/ascii/rafaelia-mathematical.ascii.md",
+      "detail": "Marcadores: pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "docs/assets/ascii/rafaelia-system-pipeline.ascii.md",
+      "detail": "Marcadores: pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "docs/assets/ascii/rafaelia-toroid-recursive-container.ascii.md",
+      "detail": "Marcadores: pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "docs/assets/ascii/rafaelia-vazio-verbo-axis.ascii.md",
+      "detail": "Marcadores: pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "docs/assets/ascii/vectra-mystical-ui-concept.ascii.md",
+      "detail": "Marcadores: pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "docs/assets/ascii/ziprafa-integrity-architecture.ascii.md",
+      "detail": "Marcadores: pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "docs/bitomega_postdoc/00_THESIS_OVERVIEW.md",
+      "detail": "Marcadores: pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "docs/bitomega_postdoc/01_FORMALISM_BITOMEGA.md",
+      "detail": "Marcadores: pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "docs/bitomega_postdoc/02_TRANSITION_GRAPH.md",
+      "detail": "Marcadores: pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "docs/bitomega_postdoc/03_IMPLEMENTATION_MAP.md",
+      "detail": "Marcadores: pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "docs/bitomega_postdoc/04_EXPERIMENTS.md",
+      "detail": "Marcadores: pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "docs/bitomega_postdoc/05_RESULTS_TABLES.md",
+      "detail": "Marcadores: pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "docs/bitomega_postdoc/06_LIMITATIONS_NEXT.md",
+      "detail": "Marcadores: pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "docs/bitomega_postdoc/README.md",
+      "detail": "Marcadores: pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "docs/ci/android-job-permissions-matrix.md",
+      "detail": "Marcadores: todo"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "docs/native-hardening-backlog.md",
+      "detail": "Marcadores: stub, pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "docs/navigation/BENCHMARK_COMPARISONS.md",
+      "detail": "Marcadores: todo, pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "docs/navigation/BIGTECH_REVOLUTION_ANNOUNCE.md",
+      "detail": "Marcadores: todo, pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "docs/navigation/ENTERPRISE_COMPANIES.md",
+      "detail": "Marcadores: pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "docs/navigation/HIGH_LEVEL_INVESTORS.md",
+      "detail": "Marcadores: pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "docs/navigation/INDEX.md",
+      "detail": "Marcadores: todo, pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "docs/navigation/PERFORMANCE_OPERATIONS.md",
+      "detail": "Marcadores: pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "docs/navigation/RUNTIME_ENGINE_SYSTEMS.md",
+      "detail": "Marcadores: pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "docs/navigation/SCIENTISTS_RESEARCH.md",
+      "detail": "Marcadores: todo, pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "docs/navigation/TECHNOLOGY_INNOVATION_AUTHORSHIP.md",
+      "detail": "Marcadores: pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "docs/navigation/TRACEABILITY_GOVERNANCE.md",
+      "detail": "Marcadores: pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "docs/navigation/UNIVERSITIES_ACADEMIC.md",
+      "detail": "Marcadores: todo, pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "docs/organization/DOC_ORGANIZATION_PLAN_2026-06-02.md",
+      "detail": "Marcadores: placeholder, stub"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "docs/organization/LOOSE_FILES_AND_FRAGMENTS_INVENTORY_2026-06-02.md",
+      "detail": "Marcadores: pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "docs/organization/NECESSARY_DATA_DELIVERY_MATRIX_2026-06-02.md",
+      "detail": "Marcadores: stub, pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "docs/organization/README.md",
+      "detail": "Marcadores: placeholder"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "docs/organization/SOURCE_ARCHITECTURE_SYNC_2026-06-02.md",
+      "detail": "Marcadores: todo, stub"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "docs/rafaelia_reference/RAFAELIA_AUTHOR_NOTE.md",
+      "detail": "Marcadores: todo"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "docs/runtime-catch-review-checklist.md",
+      "detail": "Marcadores: pending, xxx"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "engine/FILES_MAP.md",
+      "detail": "Marcadores: pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "engine/README.md",
+      "detail": "Marcadores: todo, pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "engine/rmr/README.md",
+      "detail": "Marcadores: todo, pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "engine/rmr/include/rmr_baremetal_compat.h",
+      "detail": "Marcadores: stub"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "engine/rmr/src/rmr_host_compat.c",
+      "detail": "Marcadores: stub"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "engine/vectra_policy_kernel/README.md",
+      "detail": "Marcadores: pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "evidence/2026-04-06_status-raw_bugs_vectras_completo.txt",
+      "detail": "Marcadores: todo"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "evidence/README.md",
+      "detail": "Marcadores: pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "fastlane/FILES_MAP.md",
+      "detail": "Marcadores: pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "fastlane/README.md",
+      "detail": "Marcadores: pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "for.md",
+      "detail": "Marcadores: todo, pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "gaiaphi/boot2exem.md",
+      "detail": "Marcadores: todo"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "gaiaphi/bootstrapexemplo.md",
+      "detail": "Marcadores: todo, stub"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "gradle/FILES_MAP.md",
+      "detail": "Marcadores: pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "gradle/README.md",
+      "detail": "Marcadores: pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "rafael.md",
+      "detail": "Marcadores: todo, stub, pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "raiz de cinco por doze.md",
+      "detail": "Marcadores: todo"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "reports/ANALISE_COMPLETA_VECTRAS.md",
+      "detail": "Marcadores: todo, pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "reports/BUILD_VALIDATION_2026-04-03.md",
+      "detail": "Marcadores: pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "reports/CANONICAL_BUILD_STATUS.md",
+      "detail": "Marcadores: pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "reports/COMPARISON_REPORT.md",
+      "detail": "Marcadores: pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "reports/EXTERNAL_FORKS_BUILD_INPUTS.md",
+      "detail": "Marcadores: stub, pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "reports/FILES_MAP.md",
+      "detail": "Marcadores: pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "reports/FULL_REPO_AUDIT_REPORT.md",
+      "detail": "Marcadores: todo"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "reports/MD_INDEX_Vectras-VM-Android.md",
+      "detail": "Marcadores: pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "reports/NDK_DEPENDENCY_OVERHEAD_AUDIT.md",
+      "detail": "Marcadores: mock, pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "reports/NON_MD_AUDIT_REPORT.md",
+      "detail": "Marcadores: todo"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "reports/POST_FIX_VALIDATION.md",
+      "detail": "Marcadores: pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "reports/README.md",
+      "detail": "Marcadores: pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "reports/Vectras-VM-Android_ARCH_REPORT.md",
+      "detail": "Marcadores: stub, pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "reports/build-execution-2026-04-03.md",
+      "detail": "Marcadores: pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "reports/build-verification-2026-04-03-fix.md",
+      "detail": "Marcadores: pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "reports/build-verification-2026-04-03.md",
+      "detail": "Marcadores: pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "reports/device_runtime_smoke.md",
+      "detail": "Marcadores: pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "reports/external-dependency-hotspots.md",
+      "detail": "Marcadores: pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "reports/metrics/README.md",
+      "detail": "Marcadores: pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "reports/vectra_grade_benchmarks.md",
+      "detail": "Marcadores: pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "resources/FILES_MAP.md",
+      "detail": "Marcadores: pending, xxx"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "resources/README.md",
+      "detail": "Marcadores: pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "resources/compliance/ASSET_CLEANROOM_POLICY.md",
+      "detail": "Marcadores: todo"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "resources/compliance/examples/authored_placeholder_01.txt",
+      "detail": "Marcadores: placeholder"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "resources/compliance/examples/authored_placeholder_02.txt",
+      "detail": "Marcadores: placeholder"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "rmr/RAFAELIA_SEMENTES.txt",
+      "detail": "Marcadores: todo"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "rmr_lowlevel.h",
+      "detail": "Marcadores: stub"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "rmr_policy_kernel.h",
+      "detail": "Marcadores: stub"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "rmr_unified_kernel.h",
+      "detail": "Marcadores: stub"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "runtime/FILES_MAP.md",
+      "detail": "Marcadores: pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "runtime/README.md",
+      "detail": "Marcadores: pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "runtime/showcase/README.md",
+      "detail": "Marcadores: pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "scripts/collect_vectra_grade_benchmarks.sh",
+      "detail": "Marcadores: pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "scripts/device_runtime_smoke.sh",
+      "detail": "Marcadores: pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "scripts/rmr_equivalence_check.sh",
+      "detail": "Marcadores: pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "settings.gradle",
+      "detail": "Marcadores: stub"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "shell-loader/FILES_MAP.md",
+      "detail": "Marcadores: stub, pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "shell-loader/README.md",
+      "detail": "Marcadores: stub, pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "shell-loader/build.gradle",
+      "detail": "Marcadores: stub"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "shell-loader/stub/build.gradle",
+      "detail": "Marcadores: stub"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "terminal-emulator/FILES_MAP.md",
+      "detail": "Marcadores: pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "terminal-emulator/README.md",
+      "detail": "Marcadores: pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "terminal-view/FILES_MAP.md",
+      "detail": "Marcadores: pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "terminal-view/README.md",
+      "detail": "Marcadores: pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "tools/FILES_MAP.md",
+      "detail": "Marcadores: todo, pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "tools/README.md",
+      "detail": "Marcadores: pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "tools/apk/README.md",
+      "detail": "Marcadores: pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "tools/audit_full_repo.py",
+      "detail": "Marcadores: todo"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "tools/audit_non_md_inventory.py",
+      "detail": "Marcadores: todo"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "tools/baremetal/rafcode_phi/README.md",
+      "detail": "Marcadores: pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "tools/ci/build_arm32_arm64_release_bundle.sh",
+      "detail": "Marcadores: placeholder"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "tools/ci/build_verify_apks.sh",
+      "detail": "Marcadores: placeholder"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "tools/ci/local_build_arm32_arm64.sh",
+      "detail": "Marcadores: placeholder"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "tools/ci/materialize_firebase_config.sh",
+      "detail": "Marcadores: placeholder"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "tools/ci/prepare_release_signing.sh",
+      "detail": "Marcadores: placeholder, xxx"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "tools/docs/README.md",
+      "detail": "Marcadores: placeholder"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "tools/docs/audit_documentation_state.py",
+      "detail": "Marcadores: placeholder, todo, fixme, stub, mock, pending, tbd, xxx"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "tools/fordo.md",
+      "detail": "Marcadores: todo, stub"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "tools/gradle_with_jdk21.sh",
+      "detail": "Marcadores: xxx"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "tools/perf/README.md",
+      "detail": "Marcadores: todo"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "tools/state_geometry_lab/README.md",
+      "detail": "Marcadores: todo"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "tools/state_geometry_lab/docs/METHODS.md",
+      "detail": "Marcadores: todo"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "tools/state_geometry_lab/py/state_geometry_lab.py",
+      "detail": "Marcadores: todo"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "tools/state_geometry_lab/raw_c/item_033.c",
+      "detail": "Marcadores: todo"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "tools/state_geometry_lab/raw_c/raw_multicli.c",
+      "detail": "Marcadores: todo"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "tools/termux-arm64-orchestrator/README.md",
+      "detail": "Marcadores: pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "tools/termux-arm64-orchestrator/TOOLCHAIN_CORE.md",
+      "detail": "Marcadores: pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "tools/termux-arm64-orchestrator/TOOLCHAIN_LICENSES.md",
+      "detail": "Marcadores: pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "tools/termux-arm64-orchestrator/bootstrap-termux-android15.sh",
+      "detail": "Marcadores: xxx"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "tools/verify_repo_file_dependencies.py",
+      "detail": "Marcadores: stub"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "web/FILES_MAP.md",
+      "detail": "Marcadores: pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "web/README.md",
+      "detail": "Marcadores: pending"
+    },
+    {
+      "severity": "low",
+      "category": "sem-files-map",
+      "path": "archive/experimental",
+      "detail": "Diretório de domínio sem FILES_MAP.md local."
+    },
+    {
+      "severity": "low",
+      "category": "sem-files-map",
+      "path": "archive/root-history",
+      "detail": "Diretório de domínio sem FILES_MAP.md local."
+    },
+    {
+      "severity": "low",
+      "category": "sem-files-map",
+      "path": "docs/abi",
+      "detail": "Diretório de domínio sem FILES_MAP.md local."
+    },
+    {
+      "severity": "low",
+      "category": "sem-files-map",
+      "path": "docs/active",
+      "detail": "Diretório de domínio sem FILES_MAP.md local."
+    },
+    {
+      "severity": "low",
+      "category": "sem-files-map",
+      "path": "docs/architecture",
+      "detail": "Diretório de domínio sem FILES_MAP.md local."
+    },
+    {
+      "severity": "low",
+      "category": "sem-files-map",
+      "path": "docs/archive",
+      "detail": "Diretório de domínio sem FILES_MAP.md local."
+    },
+    {
+      "severity": "low",
+      "category": "sem-files-map",
+      "path": "docs/assets",
+      "detail": "Diretório de domínio sem FILES_MAP.md local."
+    },
+    {
+      "severity": "low",
+      "category": "sem-files-map",
+      "path": "docs/bitomega_postdoc",
+      "detail": "Diretório de domínio sem FILES_MAP.md local."
+    },
+    {
+      "severity": "low",
+      "category": "sem-files-map",
+      "path": "docs/ci",
+      "detail": "Diretório de domínio sem FILES_MAP.md local."
+    },
+    {
+      "severity": "low",
+      "category": "sem-files-map",
+      "path": "docs/navigation",
+      "detail": "Diretório de domínio sem FILES_MAP.md local."
+    },
+    {
+      "severity": "low",
+      "category": "sem-files-map",
+      "path": "docs/organization",
+      "detail": "Diretório de domínio sem FILES_MAP.md local."
+    },
+    {
+      "severity": "low",
+      "category": "sem-files-map",
+      "path": "docs/qemu",
+      "detail": "Diretório de domínio sem FILES_MAP.md local."
+    },
+    {
+      "severity": "low",
+      "category": "sem-files-map",
+      "path": "docs/rafaelia_reference",
+      "detail": "Diretório de domínio sem FILES_MAP.md local."
+    },
+    {
+      "severity": "low",
+      "category": "sem-files-map",
+      "path": "engine/rmr",
+      "detail": "Diretório de domínio sem FILES_MAP.md local."
+    },
+    {
+      "severity": "low",
+      "category": "sem-files-map",
+      "path": "engine/vectra_policy_kernel",
+      "detail": "Diretório de domínio sem FILES_MAP.md local."
+    },
+    {
+      "severity": "low",
+      "category": "sem-files-map",
+      "path": "reports/baremetal",
+      "detail": "Diretório de domínio sem FILES_MAP.md local."
+    },
+    {
+      "severity": "low",
+      "category": "sem-files-map",
+      "path": "reports/metrics",
+      "detail": "Diretório de domínio sem FILES_MAP.md local."
+    },
+    {
+      "severity": "low",
+      "category": "sem-files-map",
+      "path": "resources/android",
+      "detail": "Diretório de domínio sem FILES_MAP.md local."
+    },
+    {
+      "severity": "low",
+      "category": "sem-files-map",
+      "path": "resources/compliance",
+      "detail": "Diretório de domínio sem FILES_MAP.md local."
+    },
+    {
+      "severity": "low",
+      "category": "sem-files-map",
+      "path": "resources/lang",
+      "detail": "Diretório de domínio sem FILES_MAP.md local."
+    },
+    {
+      "severity": "low",
+      "category": "sem-files-map",
+      "path": "resources/web",
+      "detail": "Diretório de domínio sem FILES_MAP.md local."
+    },
+    {
+      "severity": "low",
+      "category": "sem-files-map",
+      "path": "runtime/showcase",
+      "detail": "Diretório de domínio sem FILES_MAP.md local."
+    },
+    {
+      "severity": "low",
+      "category": "sem-files-map",
+      "path": "tools/apk",
+      "detail": "Diretório de domínio sem FILES_MAP.md local."
+    },
+    {
+      "severity": "low",
+      "category": "sem-files-map",
+      "path": "tools/baremetal",
+      "detail": "Diretório de domínio sem FILES_MAP.md local."
+    },
+    {
+      "severity": "low",
+      "category": "sem-files-map",
+      "path": "tools/ci",
+      "detail": "Diretório de domínio sem FILES_MAP.md local."
+    },
+    {
+      "severity": "low",
+      "category": "sem-files-map",
+      "path": "tools/compliance",
+      "detail": "Diretório de domínio sem FILES_MAP.md local."
+    },
+    {
+      "severity": "low",
+      "category": "sem-files-map",
+      "path": "tools/docs",
+      "detail": "Diretório de domínio sem FILES_MAP.md local."
+    },
+    {
+      "severity": "low",
+      "category": "sem-files-map",
+      "path": "tools/perf",
+      "detail": "Diretório de domínio sem FILES_MAP.md local."
+    },
+    {
+      "severity": "low",
+      "category": "sem-files-map",
+      "path": "tools/qemu",
+      "detail": "Diretório de domínio sem FILES_MAP.md local."
+    },
+    {
+      "severity": "low",
+      "category": "sem-files-map",
+      "path": "tools/security",
+      "detail": "Diretório de domínio sem FILES_MAP.md local."
+    },
+    {
+      "severity": "low",
+      "category": "sem-files-map",
+      "path": "tools/state_geometry_lab",
+      "detail": "Diretório de domínio sem FILES_MAP.md local."
+    },
+    {
+      "severity": "low",
+      "category": "sem-files-map",
+      "path": "tools/termux-arm64-orchestrator",
+      "detail": "Diretório de domínio sem FILES_MAP.md local."
+    },
+    {
+      "severity": "low",
+      "category": "sem-files-map",
+      "path": "tools/tests",
+      "detail": "Diretório de domínio sem FILES_MAP.md local."
+    },
+    {
+      "severity": "low",
+      "category": "sem-readme",
+      "path": ".ci",
+      "detail": "Diretório com conteúdo sem README.md local."
+    },
+    {
+      "severity": "low",
+      "category": "sem-readme",
+      "path": "GAIAPHI/divisoes/curta",
+      "detail": "Diretório com conteúdo sem README.md local."
+    },
+    {
+      "severity": "low",
+      "category": "sem-readme",
+      "path": "GAIAPHI/divisoes/expandida",
+      "detail": "Diretório com conteúdo sem README.md local."
+    },
+    {
+      "severity": "low",
+      "category": "sem-readme",
+      "path": "GAIAPHI/divisoes/media",
+      "detail": "Diretório com conteúdo sem README.md local."
+    },
+    {
+      "severity": "low",
+      "category": "sem-readme",
+      "path": "Incluir",
+      "detail": "Diretório com conteúdo sem README.md local."
+    },
+    {
+      "severity": "low",
+      "category": "sem-readme",
+      "path": "RAFAELMELOREIS/MIT/NAOCOMERCIAL",
+      "detail": "Diretório com conteúdo sem README.md local."
+    },
+    {
+      "severity": "low",
+      "category": "sem-readme",
+      "path": "Rafaelia/Game",
+      "detail": "Diretório com conteúdo sem README.md local."
+    },
+    {
+      "severity": "low",
+      "category": "sem-readme",
+      "path": "__DELTA__",
+      "detail": "Diretório com conteúdo sem README.md local."
+    },
+    {
+      "severity": "low",
+      "category": "sem-readme",
+      "path": "_incoming/pending",
+      "detail": "Diretório com conteúdo sem README.md local."
+    },
+    {
+      "severity": "low",
+      "category": "sem-readme",
+      "path": "android/app",
+      "detail": "Diretório com conteúdo sem README.md local."
+    },
+    {
+      "severity": "low",
+      "category": "sem-readme",
+      "path": "android/app/src/main",
+      "detail": "Diretório com conteúdo sem README.md local."
+    },
+    {
+      "severity": "low",
+      "category": "sem-readme",
+      "path": "android/app/src/release",
+      "detail": "Diretório com conteúdo sem README.md local."
+    },
+    {
+      "severity": "low",
+      "category": "sem-readme",
+      "path": "archive/experimental",
+      "detail": "Diretório com conteúdo sem README.md local."
+    },
+    {
+      "severity": "low",
+      "category": "sem-readme",
+      "path": "archive/experimental/seguranda",
+      "detail": "Diretório com conteúdo sem README.md local."
+    },
+    {
+      "severity": "low",
+      "category": "sem-readme",
+      "path": "archive/root-history",
+      "detail": "Diretório com conteúdo sem README.md local."
+    },
+    {
+      "severity": "low",
+      "category": "sem-readme",
+      "path": "bench/baseline",
+      "detail": "Diretório com conteúdo sem README.md local."
+    },
+    {
+      "severity": "low",
+      "category": "sem-readme",
+      "path": "bench/results",
+      "detail": "Diretório com conteúdo sem README.md local."
+    },
+    {
+      "severity": "low",
+      "category": "sem-readme",
+      "path": "bench/scripts",
+      "detail": "Diretório com conteúdo sem README.md local."
+    },
+    {
+      "severity": "low",
+      "category": "sem-readme",
+      "path": "bench/src",
+      "detail": "Diretório com conteúdo sem README.md local."
+    },
+    {
+      "severity": "low",
+      "category": "sem-readme",
+      "path": "core",
+      "detail": "Diretório com conteúdo sem README.md local."
+    },
+    {
+      "severity": "low",
+      "category": "sem-readme",
+      "path": "demo_cli/src",
+      "detail": "Diretório com conteúdo sem README.md local."
+    },
+    {
+      "severity": "low",
+      "category": "sem-readme",
+      "path": "docs/abi",
+      "detail": "Diretório com conteúdo sem README.md local."
+    },
+    {
+      "severity": "low",
+      "category": "sem-readme",
+      "path": "docs/architecture",
+      "detail": "Diretório com conteúdo sem README.md local."
+    },
+    {
+      "severity": "low",
+      "category": "sem-readme",
+      "path": "docs/assets/ascii",
+      "detail": "Diretório com conteúdo sem README.md local."
+    },
+    {
+      "severity": "low",
+      "category": "sem-readme",
+      "path": "docs/ci",
+      "detail": "Diretório com conteúdo sem README.md local."
+    },
+    {
+      "severity": "low",
+      "category": "sem-readme",
+      "path": "docs/navigation",
+      "detail": "Diretório com conteúdo sem README.md local."
+    },
+    {
+      "severity": "low",
+      "category": "sem-readme",
+      "path": "docs/qemu",
+      "detail": "Diretório com conteúdo sem README.md local."
+    },
+    {
+      "severity": "low",
+      "category": "sem-readme",
+      "path": "engine/platform/android",
+      "detail": "Diretório com conteúdo sem README.md local."
+    },
+    {
+      "severity": "low",
+      "category": "sem-readme",
+      "path": "engine/platform/linux",
+      "detail": "Diretório com conteúdo sem README.md local."
+    },
+    {
+      "severity": "low",
+      "category": "sem-readme",
+      "path": "engine/rmr/cmake",
+      "detail": "Diretório com conteúdo sem README.md local."
+    },
+    {
+      "severity": "low",
+      "category": "sem-readme",
+      "path": "engine/rmr/include",
+      "detail": "Diretório com conteúdo sem README.md local."
+    },
+    {
+      "severity": "low",
+      "category": "sem-readme",
+      "path": "engine/rmr/interop",
+      "detail": "Diretório com conteúdo sem README.md local."
+    },
+    {
+      "severity": "low",
+      "category": "sem-readme",
+      "path": "engine/rmr/src",
+      "detail": "Diretório com conteúdo sem README.md local."
+    },
+    {
+      "severity": "low",
+      "category": "sem-readme",
+      "path": "engine/vectra_policy_kernel/src",
+      "detail": "Diretório com conteúdo sem README.md local."
+    },
+    {
+      "severity": "low",
+      "category": "sem-readme",
+      "path": "engine/vectra_policy_kernel/src/ops",
+      "detail": "Diretório com conteúdo sem README.md local."
+    },
+    {
+      "severity": "low",
+      "category": "sem-readme",
+      "path": "engine/vectra_policy_kernel/tests",
+      "detail": "Diretório com conteúdo sem README.md local."
+    },
+    {
+      "severity": "low",
+      "category": "sem-readme",
+      "path": "fastlane/metadata/android/en-US",
+      "detail": "Diretório com conteúdo sem README.md local."
+    },
+    {
+      "severity": "low",
+      "category": "sem-readme",
+      "path": "formula_ci/tests",
+      "detail": "Diretório com conteúdo sem README.md local."
+    },
+    {
+      "severity": "low",
+      "category": "sem-readme",
+      "path": "formula_ci/tests/__pycache__",
+      "detail": "Diretório com conteúdo sem README.md local."
+    },
+    {
+      "severity": "low",
+      "category": "sem-readme",
+      "path": "gaiaphi",
+      "detail": "Diretório com conteúdo sem README.md local."
+    },
+    {
+      "severity": "low",
+      "category": "sem-readme",
+      "path": "gradle/wrapper",
+      "detail": "Diretório com conteúdo sem README.md local."
+    },
+    {
+      "severity": "low",
+      "category": "sem-readme",
+      "path": "reports/baremetal",
+      "detail": "Diretório com conteúdo sem README.md local."
+    },
+    {
+      "severity": "low",
+      "category": "sem-readme",
+      "path": "resources/android",
+      "detail": "Diretório com conteúdo sem README.md local."
+    },
+    {
+      "severity": "low",
+      "category": "sem-readme",
+      "path": "resources/android/res/mipmap-anydpi-v26",
+      "detail": "Diretório com conteúdo sem README.md local."
+    },
+    {
+      "severity": "low",
+      "category": "sem-readme",
+      "path": "resources/android/res/mipmap-hdpi",
+      "detail": "Diretório com conteúdo sem README.md local."
+    },
+    {
+      "severity": "low",
+      "category": "sem-readme",
+      "path": "resources/android/res/mipmap-mdpi",
+      "detail": "Diretório com conteúdo sem README.md local."
+    },
+    {
+      "severity": "low",
+      "category": "sem-readme",
+      "path": "resources/android/res/mipmap-xhdpi",
+      "detail": "Diretório com conteúdo sem README.md local."
+    },
+    {
+      "severity": "low",
+      "category": "sem-readme",
+      "path": "resources/android/res/mipmap-xxhdpi",
+      "detail": "Diretório com conteúdo sem README.md local."
+    },
+    {
+      "severity": "low",
+      "category": "sem-readme",
+      "path": "resources/android/res/mipmap-xxxhdpi",
+      "detail": "Diretório com conteúdo sem README.md local."
+    },
+    {
+      "severity": "low",
+      "category": "sem-readme",
+      "path": "resources/compliance",
+      "detail": "Diretório com conteúdo sem README.md local."
+    },
+    {
+      "severity": "low",
+      "category": "sem-readme",
+      "path": "resources/compliance/examples",
+      "detail": "Diretório com conteúdo sem README.md local."
+    },
+    {
+      "severity": "low",
+      "category": "sem-readme",
+      "path": "resources/lang",
+      "detail": "Diretório com conteúdo sem README.md local."
+    },
+    {
+      "severity": "low",
+      "category": "sem-readme",
+      "path": "resources/web",
+      "detail": "Diretório com conteúdo sem README.md local."
+    },
+    {
+      "severity": "low",
+      "category": "sem-readme",
+      "path": "rmr",
+      "detail": "Diretório com conteúdo sem README.md local."
+    },
+    {
+      "severity": "low",
+      "category": "sem-readme",
+      "path": "rmr/rrr",
+      "detail": "Diretório com conteúdo sem README.md local."
+    },
+    {
+      "severity": "low",
+      "category": "sem-readme",
+      "path": "scripts",
+      "detail": "Diretório com conteúdo sem README.md local."
+    },
+    {
+      "severity": "low",
+      "category": "sem-readme",
+      "path": "scripts/native",
+      "detail": "Diretório com conteúdo sem README.md local."
+    },
+    {
+      "severity": "low",
+      "category": "sem-readme",
+      "path": "security",
+      "detail": "Diretório com conteúdo sem README.md local."
+    },
+    {
+      "severity": "low",
+      "category": "sem-readme",
+      "path": "tools/baremetal",
+      "detail": "Diretório com conteúdo sem README.md local."
+    },
+    {
+      "severity": "low",
+      "category": "sem-readme",
+      "path": "tools/baremetal/rafcode_phi/asm",
+      "detail": "Diretório com conteúdo sem README.md local."
+    },
+    {
+      "severity": "low",
+      "category": "sem-readme",
+      "path": "tools/baremetal/rafcode_phi/c",
+      "detail": "Diretório com conteúdo sem README.md local."
+    },
+    {
+      "severity": "low",
+      "category": "sem-readme",
+      "path": "tools/baremetal/rafcode_phi/include",
+      "detail": "Diretório com conteúdo sem README.md local."
+    },
+    {
+      "severity": "low",
+      "category": "sem-readme",
+      "path": "tools/ci",
+      "detail": "Diretório com conteúdo sem README.md local."
+    },
+    {
+      "severity": "low",
+      "category": "sem-readme",
+      "path": "tools/compliance",
+      "detail": "Diretório com conteúdo sem README.md local."
+    },
+    {
+      "severity": "low",
+      "category": "sem-readme",
+      "path": "tools/qemu",
+      "detail": "Diretório com conteúdo sem README.md local."
+    },
+    {
+      "severity": "low",
+      "category": "sem-readme",
+      "path": "tools/security",
+      "detail": "Diretório com conteúdo sem README.md local."
+    },
+    {
+      "severity": "low",
+      "category": "sem-readme",
+      "path": "tools/state_geometry_lab/asm",
+      "detail": "Diretório com conteúdo sem README.md local."
+    },
+    {
+      "severity": "low",
+      "category": "sem-readme",
+      "path": "tools/state_geometry_lab/c",
+      "detail": "Diretório com conteúdo sem README.md local."
+    },
+    {
+      "severity": "low",
+      "category": "sem-readme",
+      "path": "tools/state_geometry_lab/docs",
+      "detail": "Diretório com conteúdo sem README.md local."
+    },
+    {
+      "severity": "low",
+      "category": "sem-readme",
+      "path": "tools/state_geometry_lab/modules",
+      "detail": "Diretório com conteúdo sem README.md local."
+    },
+    {
+      "severity": "low",
+      "category": "sem-readme",
+      "path": "tools/state_geometry_lab/modules/c",
+      "detail": "Diretório com conteúdo sem README.md local."
+    },
+    {
+      "severity": "low",
+      "category": "sem-readme",
+      "path": "tools/state_geometry_lab/modules/py",
+      "detail": "Diretório com conteúdo sem README.md local."
+    },
+    {
+      "severity": "low",
+      "category": "sem-readme",
+      "path": "tools/state_geometry_lab/modules/rs",
+      "detail": "Diretório com conteúdo sem README.md local."
+    },
+    {
+      "severity": "low",
+      "category": "sem-readme",
+      "path": "tools/state_geometry_lab/modules/sh",
+      "detail": "Diretório com conteúdo sem README.md local."
+    },
+    {
+      "severity": "low",
+      "category": "sem-readme",
+      "path": "tools/state_geometry_lab/py",
+      "detail": "Diretório com conteúdo sem README.md local."
+    },
+    {
+      "severity": "low",
+      "category": "sem-readme",
+      "path": "tools/state_geometry_lab/raw_c",
+      "detail": "Diretório com conteúdo sem README.md local."
+    },
+    {
+      "severity": "low",
+      "category": "sem-readme",
+      "path": "tools/state_geometry_lab/rs",
+      "detail": "Diretório com conteúdo sem README.md local."
+    },
+    {
+      "severity": "low",
+      "category": "sem-readme",
+      "path": "tools/state_geometry_lab/rs/src",
+      "detail": "Diretório com conteúdo sem README.md local."
+    },
+    {
+      "severity": "low",
+      "category": "sem-readme",
+      "path": "tools/state_geometry_lab/sh",
+      "detail": "Diretório com conteúdo sem README.md local."
+    },
+    {
+      "severity": "low",
+      "category": "sem-readme",
+      "path": "tools/termux-arm64-orchestrator/c",
+      "detail": "Diretório com conteúdo sem README.md local."
+    },
+    {
+      "severity": "low",
+      "category": "sem-readme",
+      "path": "tools/termux-arm64-orchestrator/fork-manifests",
+      "detail": "Diretório com conteúdo sem README.md local."
+    },
+    {
+      "severity": "low",
+      "category": "sem-readme",
+      "path": "tools/termux-arm64-orchestrator/toolchain-core",
+      "detail": "Diretório com conteúdo sem README.md local."
+    },
+    {
+      "severity": "low",
+      "category": "sem-readme",
+      "path": "tools/termux-arm64-orchestrator/toolchain-manifests",
+      "detail": "Diretório com conteúdo sem README.md local."
+    },
+    {
+      "severity": "low",
+      "category": "sem-readme",
+      "path": "tools/tests",
+      "detail": "Diretório com conteúdo sem README.md local."
+    },
+    {
+      "severity": "low",
+      "category": "sem-readme",
+      "path": "web/data",
+      "detail": "Diretório com conteúdo sem README.md local."
+    }
+  ]
+}
