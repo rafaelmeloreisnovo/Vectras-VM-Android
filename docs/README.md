@@ -52,6 +52,8 @@ Use o protocolo abaixo em revisões profundas:
 
 Documento de apoio para esse protocolo: [`active/AI_SESSION_SYSTEM_MODEL_2026-04-17.md`](active/AI_SESSION_SYSTEM_MODEL_2026-04-17.md).
 
+Complemento para verdade operacional, token vazio e metáforas como parábolas didáticas: [`active/AI_SESSION_TRUTH_AND_EMPTY_TOKEN_PROTOCOL_2026-06-02.md`](active/AI_SESSION_TRUTH_AND_EMPTY_TOKEN_PROTOCOL_2026-06-02.md).
+
 ## Validação mínima recomendada
 ```bash
 ./tools/check_docs_reference_commit.sh

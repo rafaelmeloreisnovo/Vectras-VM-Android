@@ -1,24 +1,24 @@
 {
   "counts": {
-    "files_scanned": 1365,
-    "docs_scanned": 443,
+    "files_scanned": 1366,
+    "docs_scanned": 444,
     "code_scanned": 590,
     "ingress_files": 181,
     "zip_files": 27,
-    "placeholder_hits": 365,
-    "bug_signal_hits": 233,
+    "placeholder_hits": 366,
+    "bug_signal_hits": 234,
     "navigation_gaps": 118
   },
   "severity_counts": {
     "high": 208,
-    "medium": 598,
+    "medium": 600,
     "low": 118
   },
   "category_counts": {
     "entrada-pendente": 181,
     "overlay-zip": 27,
-    "bug-failsafe-signal": 233,
-    "placeholder-ou-pendente": 365,
+    "bug-failsafe-signal": 234,
+    "placeholder-ou-pendente": 366,
     "sem-files-map": 33,
     "sem-readme": 85
   },
@@ -2271,6 +2271,12 @@
     {
       "severity": "medium",
       "category": "bug-failsafe-signal",
+      "path": "docs/active/AI_SESSION_TRUTH_AND_EMPTY_TOKEN_PROTOCOL_2026-06-02.md",
+      "detail": "Marcadores: bug, failsafe, failover, rollback"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
       "path": "docs/active/ALL_MARKDOWN_FILES_2026-04-07.md",
       "detail": "Marcadores: bug"
     },
@@ -4001,6 +4007,12 @@
       "category": "placeholder-ou-pendente",
       "path": "docs/WHITEPAPER.md",
       "detail": "Marcadores: pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "docs/active/AI_SESSION_TRUTH_AND_EMPTY_TOKEN_PROTOCOL_2026-06-02.md",
+      "detail": "Marcadores: todo"
     },
     {
       "severity": "medium",

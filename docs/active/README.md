@@ -33,3 +33,6 @@ Consulte [`docs/INDEX_CANONICAL.md`](../INDEX_CANONICAL.md) para a classificaç�
 - Pipeline oficial Host: `.github/workflows/host-ci.yml`.
 - Orquestração e gate final: `.github/workflows/pipeline-orchestrator.yml` + `.github/workflows/quality-gates.yml`.
 - Matriz canônica documentada em `docs/ci/workflow-matrix.md`.
+
+## Documentos ativos
+- `AI_SESSION_TRUTH_AND_EMPTY_TOKEN_PROTOCOL_2026-06-02.md` — protocolo para separar fato, hipótese, metáfora/parábola, lacuna, risco e ação em sessões de IA, com uso explícito de token vazio quando não há evidência suficiente.
