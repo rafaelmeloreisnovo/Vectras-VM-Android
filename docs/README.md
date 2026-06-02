@@ -16,6 +16,14 @@ Camada canônica de documentação técnica do repositório, organizada para eng
 4. Índice por audiência/domínio: [`navigation/INDEX.md`](navigation/INDEX.md)
 5. Documento especializado por tema: arquivos em `docs/`, `docs/active/`, `docs/ci/` e `docs/navigation/`
 
+
+## Organização documental e dados (2026-06-02)
+
+- [`organization/DOC_ORGANIZATION_PLAN_2026-06-02.md`](organization/DOC_ORGANIZATION_PLAN_2026-06-02.md): plano em dois ciclos para organizar documentos, dados, fragmentos e entradas pendentes com rollback.
+- [`organization/LOOSE_FILES_AND_FRAGMENTS_INVENTORY_2026-06-02.md`](organization/LOOSE_FILES_AND_FRAGMENTS_INVENTORY_2026-06-02.md): inventário de arquivos soltos/fragmentos até 7 níveis.
+- [`organization/SOURCE_ARCHITECTURE_SYNC_2026-06-02.md`](organization/SOURCE_ARCHITECTURE_SYNC_2026-06-02.md): mapa código-fonte ↔ documentação baseado na árvore real até 5 níveis.
+- [`rafaelia_reference/RAFAELIA_T7_VARIABLES_FORMULAS.md`](rafaelia_reference/RAFAELIA_T7_VARIABLES_FORMULAS.md): dicionário RAFAELIA/T7 de fórmulas, variáveis e invariantes para promoção futura a código/testes.
+
 ## Fonte de verdade por domínio
 | Domínio | Documento principal | Documentos de suporte |
 |---|---|---|
