@@ -18,6 +18,7 @@
 - [`docs/organization/INGRESS_ARTIFACTS_MANIFEST_2026-06-02.md`](docs/organization/INGRESS_ARTIFACTS_MANIFEST_2026-06-02.md): manifesto SHA-256 de entradas pendentes e overlays para rollback/failover.
 - [`docs/organization/SOURCE_ARCHITECTURE_SYNC_2026-06-02.md`](docs/organization/SOURCE_ARCHITECTURE_SYNC_2026-06-02.md): sincronização entre arquitetura de código atual e documentação até 5 níveis.
 - [`docs/rafaelia_reference/RAFAELIA_T7_VARIABLES_FORMULAS.md`](docs/rafaelia_reference/RAFAELIA_T7_VARIABLES_FORMULAS.md): vocabulário consolidado de fórmulas, variáveis e invariantes RAFAELIA/T7.
+- [`docs/active/AI_SESSION_TRUTH_AND_EMPTY_TOKEN_PROTOCOL_2026-06-02.md`](docs/active/AI_SESSION_TRUTH_AND_EMPTY_TOKEN_PROTOCOL_2026-06-02.md): protocolo de verdade operacional, token vazio e metáforas/parábolas para sessões de IA.
 
 ## Documentos de raiz
 | Documento | Finalidade | Público-alvo | Classificação | Localização atual | Inbound link |
