@@ -32,6 +32,7 @@ set(RMR_SOURCE_GROUP_CORE
   engine/rmr/src/rmr_lowlevel_portable.c
   engine/rmr/src/rmr_lowlevel_mix.c
   engine/rmr/src/rmr_lowlevel_reduce.c
+  engine/rmr/src/rmr_vector_field.c
 )
 
 set(RMR_SOURCE_GROUP_OPTIONAL_POLICY

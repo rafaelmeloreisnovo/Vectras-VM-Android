@@ -186,6 +186,7 @@ rmr_add_host_executable(policy_kernel_demo demo_cli/src/policy_kernel_demo.c)
 rmr_add_host_executable(policy_kernel_selftest demo_cli/src/policy_kernel_selftest.c)
 rmr_add_host_executable(math_fabric_selftest demo_cli/src/math_fabric_selftest.c)
 rmr_add_host_executable(rmr_torus_flow_selftest demo_cli/src/rmr_torus_flow_selftest.c)
+rmr_add_host_executable(rmr_vector_field_selftest demo_cli/src/rmr_vector_field_selftest.c)
 rmr_add_host_executable(determinism_signature_selftest demo_cli/src/determinism_signature_selftest.c)
 rmr_add_host_executable(apk_module_demo demo_cli/src/apk_module_demo.c)
 rmr_add_host_executable(rmr_qemu_bridge_demo demo_cli/src/rmr_qemu_bridge_demo.c)
@@ -214,6 +215,7 @@ set(RMR_RUN_SELFTEST_COMMANDS
   bitraf_selftest
   math_fabric_selftest
   rmr_torus_flow_selftest
+  rmr_vector_field_selftest
   determinism_signature_selftest
   policy_kernel_selftest
   rmr_qemu_bridge_selftest
@@ -231,6 +233,7 @@ set(RMR_RUN_SELFTEST_DEPENDS
   bitraf_selftest
   math_fabric_selftest
   rmr_torus_flow_selftest
+  rmr_vector_field_selftest
   determinism_signature_selftest
   policy_kernel_selftest
   rmr_qemu_bridge_selftest
