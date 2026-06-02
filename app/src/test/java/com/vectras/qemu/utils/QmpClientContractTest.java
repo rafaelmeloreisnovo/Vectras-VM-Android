@@ -40,6 +40,17 @@ public class QmpClientContractTest {
         Assert.assertEquals(snapshotName, parsed.getJSONObject("arguments").getString("name"));
     }
     @Test
+    public void setVncPassword_buildsQmpSetPasswordCommandWithEscapedSecret() throws Exception {
+        String password = "My\"Secret\\Pass";
+        String payload = QmpClient.setVncPassword(password);
+
+        JSONObject parsed = new JSONObject(payload);
+        Assert.assertEquals("set_password", parsed.getString("execute"));
+        Assert.assertEquals("vnc", parsed.getJSONObject("arguments").getString("protocol"));
+        Assert.assertEquals(password, parsed.getJSONObject("arguments").getString("password"));
+    }
+
+    @Test
     public void sanitizeRequestForLogs_masksSensitiveFieldsRecursivelyAndCaseInsensitive() throws Exception {
         String request = "{"
                 + "\"execute\":\"set-password\","
