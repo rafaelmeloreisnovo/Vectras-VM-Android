@@ -21,6 +21,8 @@ Camada canônica de documentação técnica do repositório, organizada para eng
 
 - [`organization/DOC_ORGANIZATION_PLAN_2026-06-02.md`](organization/DOC_ORGANIZATION_PLAN_2026-06-02.md): plano em dois ciclos para organizar documentos, dados, fragmentos e entradas pendentes com rollback.
 - [`organization/LOOSE_FILES_AND_FRAGMENTS_INVENTORY_2026-06-02.md`](organization/LOOSE_FILES_AND_FRAGMENTS_INVENTORY_2026-06-02.md): inventário de arquivos soltos/fragmentos até 7 níveis.
+- [`organization/NECESSARY_CONDITIONS_AUDIT_2026-06-02.md`](organization/NECESSARY_CONDITIONS_AUDIT_2026-06-02.md): auditoria profissional de placeholders, bugs sinalizados, gaps de navegação e condições necessárias até 5 níveis.
+- [`organization/INGRESS_ARTIFACTS_MANIFEST_2026-06-02.md`](organization/INGRESS_ARTIFACTS_MANIFEST_2026-06-02.md): manifesto SHA-256 de entradas pendentes e overlays para promoção com rollback.
 - [`organization/SOURCE_ARCHITECTURE_SYNC_2026-06-02.md`](organization/SOURCE_ARCHITECTURE_SYNC_2026-06-02.md): mapa código-fonte ↔ documentação baseado na árvore real até 5 níveis.
 - [`rafaelia_reference/RAFAELIA_T7_VARIABLES_FORMULAS.md`](rafaelia_reference/RAFAELIA_T7_VARIABLES_FORMULAS.md): dicionário RAFAELIA/T7 de fórmulas, variáveis e invariantes para promoção futura a código/testes.
 
