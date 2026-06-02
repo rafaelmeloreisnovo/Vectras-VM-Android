@@ -223,6 +223,7 @@ Mapa arquivo-a-arquivo em três linhas por item: papel, ligação e comando de i
 - `organization/DOC_ORGANIZATION_PLAN_2026-06-02.md` — plano de organização, promoção e rollback de dados/documentos.
 - `organization/LOOSE_FILES_AND_FRAGMENTS_INVENTORY_2026-06-02.md` — inventário de arquivos soltos e fragmentos até 7 níveis.
 - `organization/NECESSARY_CONDITIONS_AUDIT_2026-06-02.md` — auditoria de condições necessárias, placeholders, gaps e sinais de bug até 5 níveis.
+- `organization/NECESSARY_DATA_DELIVERY_MATRIX_2026-06-02.md` — matriz enterprise de dados necessários, promoção, testes e rollback por camada.
 - `organization/INGRESS_ARTIFACTS_MANIFEST_2026-06-02.md` — manifesto SHA-256 para entradas pendentes e overlays.
 - `../reports/documentation_state_audit_2026-06-02.json` — saída JSON completa da auditoria executável.
 - `../reports/ingress_artifacts_sha256_2026-06-02.tsv` — hash TSV completo para rollback/failover de artefatos.

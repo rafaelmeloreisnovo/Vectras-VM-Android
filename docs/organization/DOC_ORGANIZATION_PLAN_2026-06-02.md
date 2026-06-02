@@ -6,6 +6,7 @@
 - Criada auditoria executável de condições necessárias, placeholders, gaps e sinais de bug até 5 níveis.
 - Criado manifesto SHA-256 para entradas pendentes e overlays, permitindo rollback/failover por hash.
 - Criado um mapa de sincronização entre código-fonte atual e documentação até 5 níveis de diretórios.
+- Criada matriz enterprise de dados necessários por camada fullstack, com critérios de teste, promoção e rollback.
 - Consolidado o vocabulário RAFAELIA/T7 de fórmulas, variáveis e invariantes em documento de referência.
 - Atualizados os índices para que a documentação nova seja encontrável sem mover fontes nem apagar artefatos existentes.
 
@@ -22,7 +23,8 @@ A árvore contém documentos canônicos, relatórios históricos, overlays ZIP, 
 | 3 | Separar vocabulário conceitual | Fórmulas/variáveis em referência única | Remover documento novo |
 | 4 | Auditar placeholders/gaps/bugs sinalizados | Relatório Markdown + JSON em `reports/` | Remover relatórios novos |
 | 5 | Gerar manifesto SHA-256 de entradas | TSV em `reports/` + resumo em `docs/organization/` | Regerar manifesto ou reverter arquivo |
-| 6 | Atualizar índices | Links novos em `docs/README.md` e `DOC_INDEX.md` | Reverter linhas adicionadas |
+| 6 | Definir matriz fullstack de dados faltantes | Matriz versionada com teste/rollback por tipo de mudança | Reverter documento novo |
+| 7 | Atualizar índices | Links novos em `docs/README.md` e `DOC_INDEX.md` | Reverter linhas adicionadas |
 
 ## Ciclo 2 — promoção com evidência
 

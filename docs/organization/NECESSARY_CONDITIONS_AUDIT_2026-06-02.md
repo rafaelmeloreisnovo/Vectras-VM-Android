@@ -1,18 +1,19 @@
 # Auditoria de condições necessárias, placeholders e materiais pendentes — 2026-06-02
 
-Varredura determinística local, somente leitura, limitada a 5 níveis de profundidade.
+Varredura determinística local, source-read-only, limitada a 5 níveis de profundidade.
+Arquivos de saída gerados pela própria auditoria são excluídos da contagem para evitar auto-ruído.
 
 ## Contadores
 
 | Métrica | Valor |
 |---|---:|
-| `bug_signal_hits` | 234 |
+| `bug_signal_hits` | 233 |
 | `code_scanned` | 590 |
-| `docs_scanned` | 444 |
-| `files_scanned` | 1368 |
+| `docs_scanned` | 443 |
+| `files_scanned` | 1365 |
 | `ingress_files` | 181 |
 | `navigation_gaps` | 118 |
-| `placeholder_hits` | 366 |
+| `placeholder_hits` | 365 |
 | `zip_files` | 27 |
 
 ## Condições necessárias de aceite
@@ -20,10 +21,27 @@ Varredura determinística local, somente leitura, limitada a 5 níveis de profun
 | Condição | Estado | Evidência/ação |
 |---|---|---|
 | Varredura até 5 níveis | PASS | Profundidade fixa no script e relatório. |
-| Não remover funcionalidades | PASS | Auditoria read-only; organização por manifesto antes de mover. |
+| Não remover funcionalidades | PASS | Auditoria source-read-only; organização por manifesto antes de mover. |
 | Placeholders e pendências visíveis | PASS | Achados listados por severidade e categoria. |
 | Failsafe/failover/rollback | PARCIAL | Documentado como critério de promoção; build/teste Android ainda dependem de SDK. |
 | Hot path sem heap/GC | PASS nesta etapa | Nenhum `.S` ou hot path nativo foi alterado. |
+
+## Distribuição dos achados
+
+| Severidade | Total |
+|---|---:|
+| `high` | 208 |
+| `medium` | 598 |
+| `low` | 118 |
+
+| Categoria | Total |
+|---|---:|
+| `bug-failsafe-signal` | 233 |
+| `entrada-pendente` | 181 |
+| `overlay-zip` | 27 |
+| `placeholder-ou-pendente` | 365 |
+| `sem-files-map` | 33 |
+| `sem-readme` | 85 |
 
 ## Achados priorizados
 
@@ -149,7 +167,7 @@ Varredura determinística local, somente leitura, limitada a 5 níveis de profun
 | high | entrada-pendente | `_incoming/pending/rafaelia_bench_phi.S` | Arquivo em área de ingresso; requer hash, teste e decisão de promoção. |
 | high | entrada-pendente | `_incoming/pending/rafaelia_bitraf.c` | Arquivo em área de ingresso; requer hash, teste e decisão de promoção. |
 | high | entrada-pendente | `_incoming/pending/rafaelia_central_link.S` | Arquivo em área de ingresso; requer hash, teste e decisão de promoção. |
-| info | truncado | `...` | 806 achados adicionais disponíveis no JSON. |
+| info | truncado | `...` | 804 achados adicionais disponíveis no JSON. |
 
 ## Mitigação recomendada
 

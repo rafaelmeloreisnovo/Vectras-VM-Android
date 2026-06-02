@@ -14,6 +14,7 @@
 - [`docs/organization/DOC_ORGANIZATION_PLAN_2026-06-02.md`](docs/organization/DOC_ORGANIZATION_PLAN_2026-06-02.md): plano de saneamento em ciclos, com failsafe/failover/rollback.
 - [`docs/organization/LOOSE_FILES_AND_FRAGMENTS_INVENTORY_2026-06-02.md`](docs/organization/LOOSE_FILES_AND_FRAGMENTS_INVENTORY_2026-06-02.md): inventário de arquivos soltos, fragmentos e entradas pendentes até 7 níveis.
 - [`docs/organization/NECESSARY_CONDITIONS_AUDIT_2026-06-02.md`](docs/organization/NECESSARY_CONDITIONS_AUDIT_2026-06-02.md): auditoria executável de placeholders, gaps, bugs sinalizados e condições necessárias até 5 níveis.
+- [`docs/organization/NECESSARY_DATA_DELIVERY_MATRIX_2026-06-02.md`](docs/organization/NECESSARY_DATA_DELIVERY_MATRIX_2026-06-02.md): matriz enterprise de dados faltantes, correções, promoção e testes por camada fullstack.
 - [`docs/organization/INGRESS_ARTIFACTS_MANIFEST_2026-06-02.md`](docs/organization/INGRESS_ARTIFACTS_MANIFEST_2026-06-02.md): manifesto SHA-256 de entradas pendentes e overlays para rollback/failover.
 - [`docs/organization/SOURCE_ARCHITECTURE_SYNC_2026-06-02.md`](docs/organization/SOURCE_ARCHITECTURE_SYNC_2026-06-02.md): sincronização entre arquitetura de código atual e documentação até 5 níveis.
 - [`docs/rafaelia_reference/RAFAELIA_T7_VARIABLES_FORMULAS.md`](docs/rafaelia_reference/RAFAELIA_T7_VARIABLES_FORMULAS.md): vocabulário consolidado de fórmulas, variáveis e invariantes RAFAELIA/T7.

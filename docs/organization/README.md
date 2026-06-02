@@ -8,6 +8,7 @@ Este diretório reúne o saneamento documental iniciado em 2026-06-02 para organ
 - `LOOSE_FILES_AND_FRAGMENTS_INVENTORY_2026-06-02.md` — inventário local até 7 níveis para arquivos soltos, nomes fragmentados e entradas pendentes.
 - `SOURCE_ARCHITECTURE_SYNC_2026-06-02.md` — mapa da arquitetura real até 5 níveis para alinhar documentos aos fontes atuais.
 - `NECESSARY_CONDITIONS_AUDIT_2026-06-02.md` — auditoria executável de placeholders, gaps, materiais faltantes e sinais de bug.
+- `NECESSARY_DATA_DELIVERY_MATRIX_2026-06-02.md` — matriz fullstack/enterprise de dados necessários, correção, promoção, testes e rollback.
 - `INGRESS_ARTIFACTS_MANIFEST_2026-06-02.md` — manifesto SHA-256 para promoção, rollback e failover de entradas pendentes.
 
 ## Regras de uso

@@ -1,13 +1,15 @@
 #!/usr/bin/env python3
 """Deterministic repository documentation audit up to a bounded depth.
 
-The script is intentionally read-only. It scans for documentation drift signals,
-placeholder markers, bug/todo markers, pending ingress folders, and directory
-navigation gaps. It writes stable Markdown plus JSON reports for review.
+The script is intentionally source-read-only: it does not edit runtime code, hot
+paths, assembly, ingress artifacts, or project documentation outside its configured
+audit outputs. It scans for documentation drift signals, placeholder markers,
+bug/todo markers, pending ingress folders, and directory navigation gaps.
 """
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import os
 from dataclasses import asdict, dataclass
@@ -20,6 +22,12 @@ CODE_EXTS = {".c", ".h", ".cpp", ".hpp", ".java", ".kt", ".rs", ".py", ".sh", ".
 PLACEHOLDER_PATTERNS = ("placeholder", "todo", "fixme", "stub", "mock", "pending", "tbd", "xxx")
 BUG_PATTERNS = ("bug", "failsafe", "failover", "rollback", "mitigation", "mitigacao", "mitigação")
 INGRESS_DIRS = {"Incluir", "_incoming", "__DELTA__"}
+GENERATED_OUTPUTS = {
+    "docs/organization/NECESSARY_CONDITIONS_AUDIT_2026-06-02.md",
+    "docs/organization/INGRESS_ARTIFACTS_MANIFEST_2026-06-02.md",
+    "reports/documentation_state_audit_2026-06-02.json",
+    "reports/ingress_artifacts_sha256_2026-06-02.tsv",
+}
 
 
 @dataclass(frozen=True)
@@ -28,6 +36,13 @@ class Finding:
     category: str
     path: str
     detail: str
+
+
+@dataclass(frozen=True)
+class ArtifactHash:
+    path: str
+    bytes: int
+    sha256: str
 
 
 def inside_depth(path: Path, max_depth: int) -> bool:
@@ -44,6 +59,8 @@ def iter_paths(root: Path, max_depth: int) -> Iterable[Path]:
             continue
         for name in sorted(files):
             rel = (current / name).relative_to(root)
+            if str(rel) in GENERATED_OUTPUTS:
+                continue
             if inside_depth(rel, max_depth):
                 yield rel
 
@@ -53,6 +70,24 @@ def text_sample(path: Path, limit: int = 32768) -> str:
         return path.read_text(encoding="utf-8", errors="ignore")[:limit]
     except OSError:
         return ""
+
+
+def sha256_file(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as handle:
+        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def collect_artifact_hashes(root: Path, max_depth: int) -> list[ArtifactHash]:
+    artifacts: dict[str, ArtifactHash] = {}
+    for rel in iter_paths(root, max_depth):
+        first = rel.parts[0] if rel.parts else ""
+        if first in INGRESS_DIRS or rel.suffix.lower() == ".zip":
+            full = root / rel
+            artifacts[str(rel)] = ArtifactHash(str(rel), full.stat().st_size, sha256_file(full))
+    return [artifacts[key] for key in sorted(artifacts)]
 
 
 def audit(root: Path, max_depth: int) -> tuple[list[Finding], dict[str, int]]:
@@ -124,12 +159,79 @@ def audit(root: Path, max_depth: int) -> tuple[list[Finding], dict[str, int]]:
     return findings, counts
 
 
-def write_reports(findings: list[Finding], counts: dict[str, int], out_md: Path, out_json: Path, max_items: int) -> None:
-    out_json.write_text(json.dumps({"counts": counts, "findings": [asdict(f) for f in findings]}, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+def write_reports(
+    findings: list[Finding],
+    counts: dict[str, int],
+    artifacts: list[ArtifactHash],
+    out_md: Path,
+    out_json: Path,
+    out_sha_tsv: Path,
+    out_sha_md: Path,
+    max_items: int,
+) -> None:
+    severity_counts: dict[str, int] = {}
+    category_counts: dict[str, int] = {}
+    for finding in findings:
+        severity_counts[finding.severity] = severity_counts.get(finding.severity, 0) + 1
+        category_counts[finding.category] = category_counts.get(finding.category, 0) + 1
+    out_json.write_text(
+        json.dumps(
+            {
+                "counts": counts,
+                "severity_counts": severity_counts,
+                "category_counts": category_counts,
+                "artifact_hash_count": len(artifacts),
+                "findings": [asdict(f) for f in findings],
+            },
+            indent=2,
+            ensure_ascii=False,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    out_sha_tsv.write_text(
+        "path\tbytes\tsha256\n" + "".join(f"{item.path}\t{item.bytes}\t{item.sha256}\n" for item in artifacts),
+        encoding="utf-8",
+    )
+    manifest_lines = [
+        "# Manifesto SHA-256 de entradas pendentes e overlays — 2026-06-02\n",
+        "\n",
+        "Manifesto gerado para reduzir risco antes de qualquer promoção, extração, movimentação ou remoção de artefatos.\n",
+        "\n",
+        "## Escopo\n",
+        "\n",
+        "- Inclui todos os arquivos sob `Incluir/`, `_incoming/` e `__DELTA__/` dentro da profundidade auditada.\n",
+        "- Inclui overlays `*.zip` adicionais encontrados até 5 níveis fora desses diretórios.\n",
+        "- O TSV completo fica em `reports/ingress_artifacts_sha256_2026-06-02.tsv`.\n",
+        "\n",
+        "## Resumo\n",
+        "\n",
+        f"- Total de artefatos com hash: **{len(artifacts)}**.\n",
+        "- Regra: se o hash mudar antes da promoção, reexecutar auditoria e invalidar decisão anterior.\n",
+        "\n",
+        "## Amostra inicial\n",
+        "\n",
+        "| Caminho | Bytes | SHA-256 |\n",
+        "|---|---:|---|\n",
+    ]
+    for item in artifacts[:40]:
+        manifest_lines.append(f"| `{item.path}` | {item.bytes} | `{item.sha256}` |\n")
+    if len(artifacts) > 40:
+        manifest_lines.append(f"| `...` | ... | {len(artifacts) - 40} entradas adicionais no TSV completo. |\n")
+    manifest_lines.extend([
+        "\n",
+        "## Uso em rollback/failover\n",
+        "\n",
+        "1. Antes de promover um arquivo, comparar o hash atual com o TSV.\n",
+        "2. Se a promoção falhar em build/teste, usar o caminho e hash para restaurar o artefato original.\n",
+        "3. Não extrair ZIP em árvore ativa sem manifesto de arquivos internos e teste correspondente.\n",
+    ])
+    out_sha_md.write_text("".join(manifest_lines), encoding="utf-8")
     lines = [
         "# Auditoria de condições necessárias, placeholders e materiais pendentes — 2026-06-02\n",
         "\n",
-        "Varredura determinística local, somente leitura, limitada a 5 níveis de profundidade.\n",
+        "Varredura determinística local, source-read-only, limitada a 5 níveis de profundidade.\n",
+        "Arquivos de saída gerados pela própria auditoria são excluídos da contagem para evitar auto-ruído.\n",
         "\n",
         "## Contadores\n",
         "\n",
@@ -145,10 +247,26 @@ def write_reports(findings: list[Finding], counts: dict[str, int], out_md: Path,
         "| Condição | Estado | Evidência/ação |\n",
         "|---|---|---|\n",
         "| Varredura até 5 níveis | PASS | Profundidade fixa no script e relatório. |\n",
-        "| Não remover funcionalidades | PASS | Auditoria read-only; organização por manifesto antes de mover. |\n",
+        "| Não remover funcionalidades | PASS | Auditoria source-read-only; organização por manifesto antes de mover. |\n",
         "| Placeholders e pendências visíveis | PASS | Achados listados por severidade e categoria. |\n",
         "| Failsafe/failover/rollback | PARCIAL | Documentado como critério de promoção; build/teste Android ainda dependem de SDK. |\n",
         "| Hot path sem heap/GC | PASS nesta etapa | Nenhum `.S` ou hot path nativo foi alterado. |\n",
+        "\n",
+        "## Distribuição dos achados\n",
+        "\n",
+        "| Severidade | Total |\n",
+        "|---|---:|\n",
+    ])
+    for severity in ("high", "medium", "low"):
+        lines.append(f"| `{severity}` | {severity_counts.get(severity, 0)} |\n")
+    lines.extend([
+        "\n",
+        "| Categoria | Total |\n",
+        "|---|---:|\n",
+    ])
+    for category in sorted(category_counts):
+        lines.append(f"| `{category}` | {category_counts[category]} |\n")
+    lines.extend([
         "\n",
         "## Achados priorizados\n",
         "\n",
@@ -178,13 +296,25 @@ def main() -> int:
     parser.add_argument("--max-depth", type=int, default=5)
     parser.add_argument("--out-md", default="docs/organization/NECESSARY_CONDITIONS_AUDIT_2026-06-02.md")
     parser.add_argument("--out-json", default="reports/documentation_state_audit_2026-06-02.json")
+    parser.add_argument("--out-sha-tsv", default="reports/ingress_artifacts_sha256_2026-06-02.tsv")
+    parser.add_argument("--out-sha-md", default="docs/organization/INGRESS_ARTIFACTS_MANIFEST_2026-06-02.md")
     parser.add_argument("--max-items", type=int, default=120)
     args = parser.parse_args()
 
     root = Path(args.root).resolve()
     findings, counts = audit(root, args.max_depth)
-    write_reports(findings, counts, root / args.out_md, root / args.out_json, args.max_items)
-    print(json.dumps(counts, sort_keys=True))
+    artifacts = collect_artifact_hashes(root, args.max_depth)
+    write_reports(
+        findings,
+        counts,
+        artifacts,
+        root / args.out_md,
+        root / args.out_json,
+        root / args.out_sha_tsv,
+        root / args.out_sha_md,
+        args.max_items,
+    )
+    print(json.dumps({**counts, "artifact_hash_count": len(artifacts)}, sort_keys=True))
     return 0
 
 

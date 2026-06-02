@@ -4,7 +4,7 @@ Manifesto gerado para reduzir risco antes de qualquer promoção, extração, mo
 
 ## Escopo
 
-- Inclui todos os arquivos sob `Incluir/`, `_incoming/` e `__DELTA__/`.
+- Inclui todos os arquivos sob `Incluir/`, `_incoming/` e `__DELTA__/` dentro da profundidade auditada.
 - Inclui overlays `*.zip` adicionais encontrados até 5 níveis fora desses diretórios.
 - O TSV completo fica em `reports/ingress_artifacts_sha256_2026-06-02.tsv`.
 
@@ -17,6 +17,8 @@ Manifesto gerado para reduzir risco antes de qualquer promoção, extração, mo
 
 | Caminho | Bytes | SHA-256 |
 |---|---:|---|
+| `.ci/files (26).zip` | 18908 | `ab5b0c2df6122989a69f036a029d54a20baa493000e5d40b660b1b8a7c8336ce` |
+| `.ci/files (27).zip` | 25061 | `5838f48a226e205981a838234d9c9d31007409a169494554248012ce04160afc` |
 | `Incluir/.moveFiles para um su diretório.md` | 1 | `01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b` |
 | `Incluir/01_Rafaelia_Execucao_Saneada.docx` | 41885 | `d4b7a82972e88d7b17964a234c88c10d79890d4337cdd83eed1454198b25a8b0` |
 | `Incluir/01_taxonomia_academica_malha_simbiotica.md` | 15381 | `dec8c3b8dd038181fcba05f578050a13b60695042b8442fae2a3310aba9cad21` |
@@ -55,8 +57,6 @@ Manifesto gerado para reduzir risco antes de qualquer promoção, extração, mo
 | `Incluir/Rafaelia_Execucao_Kit.zip` | 42667 | `5a91138a822dc5d608f4ee635758d18a6d809fb95724a109fab68b3f864e59dd` |
 | `Incluir/Rafaelia_Execucao_Kit_Completo.zip` | 142367 | `eb5fb60c3e93b404c9ab09d2f0ebe4c4bdbe7ba140eb05029aa5a3dc92012413` |
 | `Incluir/Rafaelia_Execucao_Kit_V2_ABNT_Resultados_Artigos.zip` | 1622102 | `7e602fb93bb4b09c83ddacd8ba134d5e41a9640f160e6e2c31f6bb34e9785bd1` |
-| `Incluir/Rafaeltesesmd.md` | 8929 | `ca5f7002251c81ed5f5ea8eff73aceea8b7f4c0af423307921fb90f9d4b7e93b` |
-| `Incluir/Readme.md` | 1791 | `455bdb337591a52cafdc143eecec1e29c8f977862c46ecb67b0fd392b14f7586` |
 | `...` | ... | 143 entradas adicionais no TSV completo. |
 
 ## Uso em rollback/failover
