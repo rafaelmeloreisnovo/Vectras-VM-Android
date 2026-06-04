@@ -7,6 +7,7 @@ RMR_SOURCE_GROUP_CORE := \
 	engine/rmr/src/rmr_cycles.c \
 	engine/rmr/src/rmr_external_engine.c \
 	engine/rmr/src/rmr_hw_detect.c \
+	engine/rmr/src/rmr_asset_guard.c \
 	engine/rmr/src/rmr_isorf.c \
 	engine/rmr/src/rmr_apk_module.c \
 	engine/rmr/src/rmr_qemu_bridge.c \
@@ -22,10 +23,10 @@ RMR_SOURCE_GROUP_CORE := \
 	engine/rmr/src/rmr_host_compat.c \
 	engine/rmr/src/rmr_zipraf_core.c \
 	engine/rmr/src/topological_guard.c \
-	engine/rmr/src/rmr_external_engine.c \
 	engine/rmr/src/rmr_lowlevel_portable.c \
 	engine/rmr/src/rmr_lowlevel_mix.c \
-	engine/rmr/src/rmr_lowlevel_reduce.c
+	engine/rmr/src/rmr_lowlevel_reduce.c \
+	engine/rmr/src/rmr_vector_field.c
 
 RMR_SOURCE_GROUP_OPTIONAL_POLICY := \
 	engine/rmr/src/rmr_policy_kernel.c
