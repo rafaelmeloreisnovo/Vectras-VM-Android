@@ -1,10 +1,11 @@
 <!-- DOC_ORG_SCAN: 2026-04-07 | source-scan: pending-manual-by-domain -->
+<!-- HOTFIX: 2026-06-05 — preenchimento de placeholders, secão de ciclos e compilador -->
 
 # Vectra Core MVP
 
 ## Atualização
 
-- **Data da revisão**: 2026-04-07
+- **Data da revisão**: 2026-04-07 (HOTFIX 2026-06-05)
 - **Escopo auditado**: `engine/rmr`, `app/src/main/cpp`, `demo_cli/src`
 - **Tipo de revisão**: documental estática
 
@@ -41,7 +42,7 @@ Vectra Core is a minimal "information-theoretic" runtime framework for Android t
 - Funções de mapeamento determinístico implementadas em `engine/rmr/src/rmr_unified_kernel.c`:
   - `RmR_Toroidal_Map(...)`
   - `RmR_Toroidal_MapThetaLcm(...)`
-- A estabilidade de rota é coberta por checks de replay em `demo_cli/src/rmr_qemu_bridge_selftest.c` (rotas legado/unificado com comparação de `route id/tag` e coordenadas toroidais em múltiplas reinicializações).
+- A estabilidade de rota é coberta por checks de replay em `demo_cli/src/rmr_qemu_bridge_selftest.c`.
 
 ### Ponte Android e runtime de alto nível
 - Entrypoint nativo Android para aceleração: `app/src/main/cpp/vectra_core_accel.c`
@@ -69,9 +70,12 @@ Vectra Core is a minimal "information-theoretic" runtime framework for Android t
 - Validar presença dos símbolos canônicos em `engine/rmr/include/rmr_unified_kernel.h`.
 - Validar referência cruzada com `README.md` e `FILES_MAP.md` dos diretórios citados.
 - Quando houver rename/move de arquivo ou API, atualizar esta seção no mesmo commit da mudança.
+
 ## Navegação documental relacionada
 
 - Matriz de alinhamento de diretórios críticos: [`docs/active/DIRECTORY_ALIGNMENT_MATRIX.md`](docs/active/DIRECTORY_ALIGNMENT_MATRIX.md)
+- Guia low-level branchless sem heap: [`docs/active/LOWLEVEL_BRANCHLESS_SANS_HEAP_GUIDE.md`](docs/active/LOWLEVEL_BRANCHLESS_SANS_HEAP_GUIDE.md)
+- Técnicas de compilador não-acadêmicas: [`docs/active/VECTRA_COMPILER_PRECOMPILER_NONACADEMIC_2026-06-05.md`](docs/active/VECTRA_COMPILER_PRECOMPILER_NONACADEMIC_2026-06-05.md)
 
 ## Key Concepts
 
@@ -246,7 +250,7 @@ val digest = VectraCore.omegaFinalize()
 ## Architecture Components
 
 | Component | Purpose |
-|-----------|---------|
+|-----------|-------|
 | **VectraState** | 1024-bit flag array + stage counters |
 | **VectraBlock** | 4×4 block with parity8 + CRC32C |
 | **VectraMemPool** | Fixed-size buffer pool (no GC churn) |
@@ -266,14 +270,22 @@ val digest = VectraCore.omegaFinalize()
 - **Threads**: 2 daemon threads (cycle + timer)
 - **GC Impact**: Minimal (uses mempool for frequent allocations)
 
-## Future Enhancements (Not in MVP)
+## Future Enhancements (Roadmap Pós-MVP)
 
-- Network event source integration
-- Log compression and rotation
-- Error correction (not just detection)
-- Multi-device state synchronization
-- Configurable cycle frequency
-- Export/import log format
+### Planejado (próxima iteração)
+- **Network event source integration**: ingresso de eventos via socket (UDP/Unix domain) para correlação com eventos de rede Android (`ConnectivityManager` → `VectraEvent`). Permite correlacionar eventos de rede com ciclos RAFAELIA em tempo real.
+- **Log compression and rotation**: compressão LZ4 de segmentos do append-only log ao atingir 2 MB; rotação mantendo os últimos 5 segmentos (máximo 10 MB total). Compatibilidade retroativa com format v1 via header magic check.
+- **Configurable cycle frequency**: expor `VectraCycle.setHz(n)` com range 1–100 Hz; default 10 Hz; persistência via SharedPreferences. Freqüências acima de 50 Hz requerem validação de CPU budget.
+
+### Em investigação
+- **Error correction (ECC)**: upgrade de detecção para correção de erro single-bit usando o syndrome 2D do BITRAF. Requer mudança de formato de bloco (backward-incompatível com log format v1 — necessário bumpar para v2, `BLOCK_MAGIC="VECTRA02"`).
+- **Multi-device state synchronization**: exportar estado toroidal (`RmR_ToroidalAddr7D`) via canal QMP para sincronização entre instâncias Vectras. Protocolo de quorum não definido; requer definição de quantos dispositivos constituem consenso Triad.
+- **Export/import log format**: conversor `vectra_core.log` → JSON Lines para integração com ferramentas de análise externas (jq, grafana, etc.).
+
+### Observações
+- Todas as melhorias devem manter `VECTRA_CORE_ENABLED=false` como caminho de zero-overhead.
+- ECC requer discussão de migração de log antes de implementação.
+- Multi-device sync depende de definição do protocolo de transporte antes de qualquer implementação.
 
 ## Checklist de Validação Documental (inspeção estática)
 
@@ -293,9 +305,43 @@ val digest = VectraCore.omegaFinalize()
 
 - [ ] **Conferir links e referências em README/FILES_MAP**
   ```bash
-  rg -n "VECTRA_CORE\\.md|VectraCore|vectra" README.md app/README.md app/FILES_MAP.md docs/README.md docs/FILES_MAP.md
+  rg -n "VECTRA_CORE\.md|VectraCore|vectra" README.md app/README.md app/FILES_MAP.md docs/README.md docs/FILES_MAP.md
   rg -n "https?://" README.md app/README.md docs/README.md
   ```
+
+## Filosofia de Execução: Ciclos, Não Relógios
+
+O Vectra Core não mede throughput em operações/segundo nem em clock cycles.
+A unidade fundamental é o **ciclo de estado** — uma passagem completa pelo
+pipeline ψ→χ→ρ→Δ→Σ→Ω que constitui uma decisão auditável de sistema.
+
+Um ciclo pode consumir 1 ou 10.000 instruções de CPU — o que importa é que
+ao final de cada ciclo o sistema conhece seu estado exato e o resultado está
+no log append-only. MISS (ciclo sem evento) não é silêncio — é um estado
+explícito registrado com valor de entropia não-zero.
+
+Esta abordagem difere fundamentalmente dos modelos de clock da literatura
+acadêmica: a **transição de estado** é o átomo de execução, não a instrução.
+
+Documentação completa desta filosofia e das técnicas de compilador associadas:
+[`docs/active/VECTRA_COMPILER_PRECOMPILER_NONACADEMIC_2026-06-05.md`](docs/active/VECTRA_COMPILER_PRECOMPILER_NONACADEMIC_2026-06-05.md)
+
+## Compilador e Pré-compilador: Guards e Flags
+
+O engine usa um sistema de guards de pré-compilador (`RMR_JNI_BUILD` vs
+`RMR_BAREMETAL`) e flags de compilador que **ativam instruções ISA**, não
+apenas otimizam. Entre os pontos documentados:
+
+- `-march=armv8-a+crc` habilita `crc32cd` (CRC32C hardware, 20× vs SW)
+- `-ffreestanding` foi **removida** do Android build (HOTFIX fix #3) — não
+  compatível com Bionic libc; substituída por `-DRMR_JNI_BUILD=1`
+- Magic constant `0x56414343` ("VACC") alinhada em 3 locais C + Java
+  (HOTFIX fix #1a-1c) — desalinhamento causava `NATIVE_AVAILABLE=false` silencioso
+- `VECTRA_HAS_CASM_MARKER`: guard para pontos de inserção de assembly
+  gerenciado pelo compilador
+
+Veja detalhes completos em:
+[`docs/active/VECTRA_COMPILER_PRECOMPILER_NONACADEMIC_2026-06-05.md`](docs/active/VECTRA_COMPILER_PRECOMPILER_NONACADEMIC_2026-06-05.md)
 
 ## Signature/Version
 
