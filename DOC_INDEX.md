@@ -1,4 +1,5 @@
 <!-- DOC_ORG_SCAN: 2026-04-07 | source-scan: pending-manual-by-domain -->
+<!-- HOTFIX: 2026-06-05 — adicionados dois novos docs de compilador e low-level -->
 
 # Índice de Documentação do Repositório
 
@@ -15,6 +16,8 @@
 - [`docs/rafaelia_reference/RAFAELIA_SEED_BLOCK_CATALOG_2026-06-05.md`](docs/rafaelia_reference/RAFAELIA_SEED_BLOCK_CATALOG_2026-06-05.md): catálogo das sementes E20/E13/S11 com invariantes, falsificação, expansão fullstack e riscos.
 - [`docs/active/RAFAELIA_ENTERPRISE_COMPLETION_PLAYBOOK_2026-06-05.md`](docs/active/RAFAELIA_ENTERPRISE_COMPLETION_PLAYBOOK_2026-06-05.md): playbook de uso real enterprise com mais de 20 modos de trabalho, critérios de aceite, failover e rollback.
 - [`docs/rafaelia_reference/rafaelia_enterprise_completion_manifest_2026-06-05.json`](docs/rafaelia_reference/rafaelia_enterprise_completion_manifest_2026-06-05.json): manifesto executável validado por `tools/docs/validate_rafaelia_completion_manifest.py`.
+- [`docs/active/LOWLEVEL_BRANCHLESS_SANS_HEAP_GUIDE.md`](docs/active/LOWLEVEL_BRANCHLESS_SANS_HEAP_GUIDE.md): guia completo expandido (de stub) para execução low-level sem heap, branchless, sem GC — padrões ARM64/NEON, arena, Q16.16, JNI zero-copy.
+- [`docs/active/VECTRA_COMPILER_PRECOMPILER_NONACADEMIC_2026-06-05.md`](docs/active/VECTRA_COMPILER_PRECOMPILER_NONACADEMIC_2026-06-05.md): técnicas de compilador/pré-compilador do Vectras Engine que excedem a cobertura da literatura acadêmica padrão: guards `RMR_JNI_BUILD`/`RMR_BAREMETAL`, flags ISA, BITRAF, ciclos vs clocks, toroidal 7D.
 
 ## Organização documental e dados — 2026-06-02
 - [`docs/organization/DOC_ORGANIZATION_PLAN_2026-06-02.md`](docs/organization/DOC_ORGANIZATION_PLAN_2026-06-02.md): plano de saneamento em ciclos, com failsafe/failover/rollback.
@@ -35,12 +38,13 @@
 | `CHANGELOG.md` | Histórico contínuo de mudanças por versão. | Desenvolvimento, QA, release managers. | **Ativo** | Raiz | [`README.md`](README.md#governança-e-estado---navegação-rápida) |
 | `RELEASE_NOTES.md` | Notas executivas da release mais recente (registro temporal). | Produto, operação, stakeholders externos. | **Histórico** | Raiz | [`README.md`](README.md#governança-e-estado---navegação-rápida) |
 | `THIRD_PARTY_NOTICES.md` | Registro legal/licenças de terceiros. | Compliance, jurídico, segurança. | **Ativo** | Raiz | [`README.md`](README.md#governança-e-estado---navegação-rápida) |
-| `VECTRA_CORE.md` | Referência conceitual do runtime Vectra Core MVP. | Engenharia de runtime e arquitetura. | **Ativo** | Raiz | [`README.md`](README.md#governança-e-estado---navegação-rápida) |
+| `VECTRA_CORE.md` | Referência conceitual do runtime Vectra Core MVP (atualizado 2026-06-05: ciclos, compilador, roadmap). | Engenharia de runtime e arquitetura. | **Ativo** | Raiz | [`README.md`](README.md#governança-e-estado---navegação-rápida) |
 | `VECTRAS_MEGAPROMPT_DOCS.md` | Guia estratégico de documentação técnica ampla do projeto. | Documentação técnica, enablement e coordenação. | **Ativo** | Raiz | [`README.md`](README.md#governança-e-estado---navegação-rápida) |
 | `BUILDING.md` | Guia operacional de pré-requisitos e comandos de build (CLI/Gradle/ABI). | Engenharia, integração contínua, mantenedores de build. | **Ativo** | Raiz | [`README.md`](README.md#governança-e-estado---navegação-rápida) |
 | `TROUBLESHOOTING.md` | Runbook de diagnóstico para falhas de setup/build/bootstrap. | Engenharia, QA, suporte técnico. | **Ativo** | Raiz | [`README.md`](README.md#governança-e-estado---navegação-rápida) |
-| `FIXES_SUMMARY.md` | Sumário operacional das correções aplicadas e impactos técnicos. | Engenharia, auditoria técnica, manutenção corretiva. | **Ativo** | Raiz | [`README.md`](README.md#governança-e-estado---navegação-rápida) |
+| `FIXES_SUMMARY.md` | Sumário operacional das correções aplicadas e impactos técnicos (57 pontos). | Engenharia, auditoria técnica, manutenção corretiva. | **Ativo** | Raiz | [`README.md`](README.md#governança-e-estado---navegação-rápida) |
 | `VERSION_STABILITY.md` | Manifesto e checklist de estabilidade por versão/metodologia. | Arquitetura, release managers, governança técnica. | **Ativo** | Raiz | [`README.md`](README.md#governança-e-estado---navegação-rápida) |
+| `COMPILATION_FIXES.md` | Correções estruturais de build/JNI/ABI aplicadas. | Engenharia de build, CI. | **Ativo** | Raiz | [`DOC_INDEX.md`](DOC_INDEX.md) |
 | `archive/root-history/1.md` | Registro pontual de ajuste de compatibilidade/chaves. | Auditoria histórica. | **Arquivado** | `archive/root-history/` | [`README.md`](README.md#histórico-arquivado-raiz) |
 | `archive/root-history/ADVANCED_OPTIMIZATIONS.md` | Catálogo histórico de módulos avançados de otimização. | Engenharia/performance (consulta histórica). | **Arquivado** | `archive/root-history/` | [`README.md`](README.md#histórico-arquivado-raiz) |
 | `archive/root-history/BENCHMARK_REFACTORING_SUMMARY.md` | Sumário histórico da etapa de refatoração de benchmark. | Performance, engenharia de validação. | **Arquivado** | `archive/root-history/` | [`README.md`](README.md#histórico-arquivado-raiz) |
@@ -78,6 +82,8 @@ Cada diretório tem:
 - Performance: `docs/PERFORMANCE_INTEGRITY.md`, `docs/BENCHMARKS.md`
 - Conformidade: `docs/LEGAL_AND_LICENSES.md`, `docs/IP_MAP.md`, `THIRD_PARTY_NOTICES.md`
 - Build/release para IA: `docs/AI_BUILD_RELEASE_INDEX.md`
+- **Low-level sem heap (expandido)**: [`docs/active/LOWLEVEL_BRANCHLESS_SANS_HEAP_GUIDE.md`](docs/active/LOWLEVEL_BRANCHLESS_SANS_HEAP_GUIDE.md)
+- **Compilador/pré-compilador não-acadêmico**: [`docs/active/VECTRA_COMPILER_PRECOMPILER_NONACADEMIC_2026-06-05.md`](docs/active/VECTRA_COMPILER_PRECOMPILER_NONACADEMIC_2026-06-05.md)
 
 
 ## Governança operacional (CI e segurança)
