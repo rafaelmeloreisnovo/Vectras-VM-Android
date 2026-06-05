@@ -22,6 +22,8 @@
 - `reports/CANONICAL_BUILD_STATUS.md`
 
 ## 2) Ativo (estado operacional vigente)
+- `docs/active/AI_SESSION_FACT_MAP_2026-06-05.md`
+- `docs/rafaelia_reference/RAFAELIA_SEED_BLOCK_CATALOG_2026-06-05.md`
 - `docs/active/README.md`
 - `docs/active/AI_SESSION_SYSTEM_MODEL_2026-04-17.md`
 - `docs/active/UNIFIED_CODE_DOCUMENTATION_ALIGNMENT_2026-04-12.md`

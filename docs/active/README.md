@@ -35,4 +35,5 @@ Consulte [`docs/INDEX_CANONICAL.md`](../INDEX_CANONICAL.md) para a classificaç�
 - Matriz canônica documentada em `docs/ci/workflow-matrix.md`.
 
 ## Documentos ativos
+- `AI_SESSION_FACT_MAP_2026-06-05.md` — mapa factual desta sessão: o que muda antes/depois do contexto, sessão comum versus sessão semântica ampliada, token vazio, 7 direções qualitativas/quantitativas e reversas.
 - `AI_SESSION_TRUTH_AND_EMPTY_TOKEN_PROTOCOL_2026-06-02.md` — protocolo para separar fato, hipótese, metáfora/parábola, lacuna, risco e ação em sessões de IA, com uso explícito de token vazio quando não há evidência suficiente.
