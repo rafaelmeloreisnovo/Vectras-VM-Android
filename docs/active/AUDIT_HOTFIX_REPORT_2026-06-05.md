@@ -137,4 +137,47 @@ Java NativeFastPath.NATIVE_OK_MAGIC = 0x56414343
 
 ---
 
-*Gerado em 2026-06-05 | Branch: `claude/vectra-docs-update-UMztI` | PR: #993*
+## 7. Análise de Continuação — Sessão 2 (2026-06-05)
+
+Esta seção registra os resultados da varredura adicional realizada na continuação da sessão.
+
+### 7.1 Varredura de Variáveis Não Inicializadas — Falso Positivos Confirmados
+
+Varredura estática adicional identificou 38 variáveis declaradas sem inicialização explícita
+em vários arquivos do engine. **Todas confirmadas como seguras** após análise manual:
+
+| Arquivo | Variáveis | Padrão | Veredito |
+|---------|-----------|--------|---------|
+| `bitomega.c:91-94` | `coh`, `ent`, `noi`, `ld` | Atribuídas nas linhas seguintes antes do `switch` | ✅ Seguro |
+| `rmr_external_engine.c:32` | `verify_ok` | Atribuída imediatamente na linha seguinte | ✅ Seguro |
+| `rmr_apk_module.c:49` | `shift` | Inicializada na cláusula `for (shift = 28; ...)` | ✅ Seguro |
+| `rmr_policy_kernel.c:346-347` | `io_batch_size`, `commit_quantum` | Atribuídas incondicionalmente nas linhas 358 e 363 | ✅ Seguro |
+| `rmr_policy_kernel.c:206,225,231` | `uint64_t x`, `uint32_t x` | `rmr_mem_copy(&x, ...)` imediato antes do uso | ✅ Seguro |
+| `rmr_unified_kernel.c:844-862` | 14 variáveis de score/sig/toroidal | Atribuídas incondicionalmente após guards de NULL | ✅ Seguro |
+| `rmr_host_compat.c:132-167` | Contadores `size_t i`, `size_t nlen` | `for (i = 0u; ...)` ou atribuição imediata | ✅ Seguro |
+| `rmr_zipraf_core.c:13-35` | `a,b,c`, `cycle,err,coherence` | Atribuídas imediatamente após guard de NULL | ✅ Seguro |
+
+**Conclusão**: O único bug real de variável não inicializada no engine era o de `rmr_zipraf_core.c`
+(linhas 80-82), já corrigido no commit `202bcf4e`. Todos os demais são estilo C89 legítimo.
+
+### 7.2 Verificação Adicional de Implementações
+
+| Componente | Verificado | Resultado |
+|---|---|---|
+| `rmr_lowlevel_reduce.c` | `rmr_lowlevel_reduce_xor` + `rmr_lowlevel_checksum32` | ✅ Implementados |
+| `rafcode_phi_abi.h` | `RAFPHI_ARCH_RISCV64 = 3` + `RAFPHI_BIN_VERSION` | ✅ Presentes |
+| `rmr_baremetal_compat.c` | Definições de `rmr_arena[]` e `rmr_arena_ptr` | ✅ Presentes |
+| `demo_cli/src/` | 22 arquivos de selftest/demo | ✅ Todos reais (não stubs) |
+| `rafcode_phi_vecbit.c` | Módulo de verificação de vizinhança de bits | ✅ Presente |
+
+### 7.3 PR #993 Merged
+
+PR #993 (`docs: Vectra — expansão de stubs, HOTFIXes e técnicas de compilador não-acadêmicas`)
+foi revisado e mergeado pelo mantenedor `rafaelmeloreisnovo` em 2026-06-05T10:38:51Z.
+Conteúdo: docs expandidos (2 commits, +733 -37 linhas, 4 arquivos).
+
+O commit de HOTFIX C (`202bcf4e`) foi pushado APÓS o merge do PR #993 e aguarda PR separado.
+
+---
+
+*Gerado em 2026-06-05 | Branch: `claude/vectra-docs-update-UMztI` | PR #993: merged ✅ | HOTFIX C: aguardando PR*

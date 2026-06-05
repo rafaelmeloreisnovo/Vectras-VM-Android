@@ -27,6 +27,10 @@ Este arquivo marca a trilha de integração dos MVPs do projeto Vectras-VM-Andro
 ### HOTFIX Aplicado nesta sessão ✅
 - `engine/rmr/src/rmr_zipraf_core.c`: inicialização explícita de `tri_flow`, `tri_closed`, `tri_coherence` — corrige aviso de variável não inicializada e UB potencial
 
+### PR #993 Mergeado ✅
+- Docs expandidos mergeados em master em 2026-06-05T10:38:51Z (+733/-37, 4 arquivos)
+- HOTFIX C (`202bcf4e`) aguarda PR separado para merge em master
+
 ### Pendente — Decisão do Mantenedor ⚠️
 - **181 arquivos em `Incluir/` e `_incoming/`**: aguardam classificação e promoção em lotes (ver `docs/organization/NECESSARY_DATA_DELIVERY_MATRIX_2026-06-02.md`)
 - **51 arquivos `.S` de assembly**: status TBD, aguardam revisão de contrato de registradores (ver `docs/TODO_INCOMING_PENDING.md`)
