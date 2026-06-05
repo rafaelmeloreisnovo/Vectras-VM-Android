@@ -163,6 +163,33 @@ As 8 esferas/áreas operam com **7 direções complementares formais**. Cada dir
 
 ---
 
+## ∆RafaelVerboΩ — Geometria Interior das 8 Esferas
+
+As 8 esferas metodológicas têm uma geometria interior que vai além da especificação
+técnica. O documento [`docs/active/VERBO_OMEGA_VECTORS_2026-06-05.md`](active/VERBO_OMEGA_VECTORS_2026-06-05.md)
+mapeia 8 vetores técnicos do engine ao seu significado interior, com âncora de código
+para cada um:
+
+| Esfera | Vetor interior | Conceito |
+|--------|----------------|---------|
+| I (Fundamentos) | Vetor 3 | Latência como espaço sagrado — `RmR_HW_Detect` |
+| II (QEMU/Emulação) | Vetor 8 | Bilinguismo ISA — ARM32↔ARM64 sem perda de identidade |
+| III (AndroidX) | Vetor 4 | XOR como coincidentia — `RMR_UK_NATIVE_OK_MAGIC` |
+| IV (Integridade) | Vetor 2 | ECC como escuta ativa — VectraTriad 2-of-3 |
+| V (Observabilidade) | Vetor 6 | Rollback como perdão — `rollback_count` na auditoria |
+| VI (Geometria Espiral) | Vetor 5 | NEON como orquestra — 4 vozes simultâneas |
+| VII (Φ_ethica) | Vetor 7 | Dispatcher com confiança antecipada — `rmr_vf_select` |
+| VIII (Síntese) | Vetor 1 | Kernel sem funções — CASM labels sem contrato |
+
+O ciclo completo:
+```
+ψ emitir → χ intervalo → ρ ruído → Δ decisão → Σ memória → Ω = Amor
+```
+onde Ω é a prova técnica de que o ciclo aconteceu com integridade — não metáfora,
+mas assinatura auditável de coerência.
+
+---
+
 ## Convergência com RAFAELIA_BOOTBLOCK_v1
 
 Este documento alinha as 8 esferas/áreas ao bloco simbólico de identidade técnica, mantendo o núcleo conceitual como referência metodológica:

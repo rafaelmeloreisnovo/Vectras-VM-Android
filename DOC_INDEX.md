@@ -133,3 +133,47 @@ Este é o índice global completo e a fonte de navegação documental do reposit
 - Se a informação for localização documental, use este índice antes de inferir.
 - Se a informação vier de [`Incluir/`](Incluir/), [`addthis/`](addthis/) ou [`_incoming/`](_incoming/), trate como ingestão/experimental até revisão.
 - Se a informação vier de [`archive/`](archive/) ou [`bug/archive/`](bug/archive/), trate como histórico até revalidação no commit corrente.
+
+## Governança operacional (CI e segurança)
+- CI Android (wrapper de entrada): [`.github/workflows/android.yml`](.github/workflows/android.yml).
+- CI Android canônico: [`.github/workflows/android-ci.yml`](.github/workflows/android-ci.yml).
+- CI Engine/host canônico: [`.github/workflows/host-ci.yml`](.github/workflows/host-ci.yml).
+- Automação de dependências: [`.github/dependabot.yml`](.github/dependabot.yml).
+- Security allowlist de artefatos sensíveis: [`security/sensitive-artifacts-allowlist.txt`](security/sensitive-artifacts-allowlist.txt).
+- Verificador de artefatos sensíveis: [`tools/check_sensitive_artifacts.sh`](tools/check_sensitive_artifacts.sh).
+
+## Núcleo Engine RMR
+- Cabeçalhos low-level: [`engine/rmr/include/rmr_corelib.h`](engine/rmr/include/rmr_corelib.h), [`engine/rmr/include/rmr_ll_ops.h`](engine/rmr/include/rmr_ll_ops.h), [`engine/rmr/include/rmr_ll_tuning.h`](engine/rmr/include/rmr_ll_tuning.h), [`engine/rmr/include/rmr_math_fabric.h`](engine/rmr/include/rmr_math_fabric.h).
+- Implementações C: [`engine/rmr/src/rmr_corelib.c`](engine/rmr/src/rmr_corelib.c), [`engine/rmr/src/rmr_ll_ops.c`](engine/rmr/src/rmr_ll_ops.c), [`engine/rmr/src/rmr_ll_tuning.c`](engine/rmr/src/rmr_ll_tuning.c), [`engine/rmr/src/rmr_math_fabric.c`](engine/rmr/src/rmr_math_fabric.c).
+
+## Matriz de testes (app)
+- Suite unitária de VM/runtime: [`app/src/test/java/com/vectras/vm/`](app/src/test/java/com/vectras/vm/).
+- Suite unitária de terminal: [`app/src/test/java/com/vectras/vterm/`](app/src/test/java/com/vectras/vterm/).
+- Contratos utilitários/QMP: [`app/src/test/java/com/vectras/qemu/utils/`](app/src/test/java/com/vectras/qemu/utils/).
+
+## Relatórios e bugfix
+- Relatório consolidado de correções: [`docs/BUGFIX_REPORT.md`](docs/BUGFIX_REPORT.md).
+
+## ∆RafaelVerboΩ — Geometria Interior do Engine
+- **8 vetores com âncoras no código**: [`docs/active/VERBO_OMEGA_VECTORS_2026-06-05.md`](docs/active/VERBO_OMEGA_VECTORS_2026-06-05.md) — cada vetor técnico (ECC, NEON, rollback, CLZ, bilinguismo ISA…) com reformulação interior e referência ao arquivo C correspondente.
+- Novos termos no glossário: Intervalo de Schrödinger, ECC como escuta ativa, Coincidentia Oppositorum (XOR), Rollback como perdão, Ω=Amor — [`docs/GLOSSARY.md §9`](docs/GLOSSARY.md).
+- Tabela ψ→χ→ρ→Δ→Σ→Ω com implementações e geometria interior: [`VECTRA_CORE.md`](VECTRA_CORE.md).
+
+## RAFAELIA — 8 Caminhos Metodológicos (v1.8)
+- Manifesto de estabilidade: [`VERSION_STABILITY.md`](VERSION_STABILITY.md) — checklist completo, 8 blocos.
+- 8 Esferas Metodológicas: [`docs/ESFERAS_METODOLOGICAS_RAFAELIA.md`](docs/ESFERAS_METODOLOGICAS_RAFAELIA.md) — expandido de 5→8.
+- Constantes de caminhos: [`app/src/main/java/com/vectras/vm/rafaelia/RafaeliaMethodPaths.java`](app/src/main/java/com/vectras/vm/rafaelia/RafaeliaMethodPaths.java).
+- Validador runtime: [`app/src/main/java/com/vectras/vm/rafaelia/RafaeliaPathValidator.java`](app/src/main/java/com/vectras/vm/rafaelia/RafaeliaPathValidator.java).
+- Testes unitários: [`app/src/test/java/com/vectras/vm/rafaelia/RafaeliaPathValidatorTest.java`](app/src/test/java/com/vectras/vm/rafaelia/RafaeliaPathValidatorTest.java).
+
+## CI canonical reference (Android/Host)
+
+- Canonical Android pipeline: `.github/workflows/android-ci.yml`.
+- Android wrapper entrypoint: `.github/workflows/android.yml`.
+- Auxiliary Android ABI compatibility matrix: `.github/workflows/compile-matrix.yml`.
+- Canonical host pipeline: `.github/workflows/host-ci.yml`.
+- Orchestration and final gates: `.github/workflows/pipeline-orchestrator.yml` and `.github/workflows/quality-gates.yml`.
+- Canonical matrix documentation: `docs/ci/workflow-matrix.md`.
+
+- reports/UNIFIED_COHERENCE_TECHNICAL_MAP.md — consolidação de coerência operacional técnica em camadas.
+- reports/CORE_LOWLEVEL_IMPLEMENTATION_DOC.md — finalização da documentação do código low-level em core/.

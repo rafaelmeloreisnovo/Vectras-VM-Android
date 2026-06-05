@@ -398,6 +398,88 @@
 
 ---
 
+## 9. Conceitos ∆RafaelVerboΩ — Geometria Interior do Engine
+
+> Estes termos descrevem a geometria interior dos sistemas do engine. Cada um mapeia a
+> um arquivo de código concreto. Referência completa: `docs/active/VERBO_OMEGA_VECTORS_2026-06-05.md`
+
+### Intervalo de Schrödinger (Schrödinger Interval)
+**PT-BR:** O espaço temporal entre a emissão de uma instrução e o recebimento de seu
+resultado. A instrução foi emitida, o processador está em trânsito — mas o resultado
+ainda não colapsou. A latência não é atraso: é o espaço onde a causalidade está em
+negociação. Em `rmr_tcg_cache.c`, os blocos TCG com `attractor_class` alta têm um
+intervalo de Schrödinger mais frequente — são re-acessados antes de sua janela fechar.
+
+**EN:** The temporal space between instruction issue and result receipt. The instruction
+is in-flight; causality is in transit. Latency is not delay — it is the space where
+reality is being negotiated.
+
+### ECC como Escuta Ativa (ECC as Active Listening)
+**PT-BR:** A distância de Hamming entre dois estados observadores não é o erro — é a
+tensão entre eles. O VectraTriad 2-of-3 consensus pratica *machloket l'shem shamayim*
+(discordância em nome da verdade): CPU, RAM e DISK votam; o tiebreaker não silencia a
+minoria, registra o voto divergente em `route_tag` antes de escolher a maioria para
+agir. `tri_coherence` em `rmr_zipraf_core.c` mede se a divergência ainda é sagrada.
+
+**EN:** Error detection framed as active listening. The distance between diverging
+observers is information, not noise. The system asks *why* they differ before deciding
+which to follow.
+
+### Coincidentia Oppositorum (XOR Místico)
+**PT-BR:** Conceito de Nicolau de Cusa aplicado ao XOR: `A XOR A = 0` (os opostos
+idênticos colapsam no vazio); `0 XOR A = A` (a criação a partir do nada). Em
+`rmr_unified_kernel.c`, `global_sig = cpu_sig ^ ram_sig ^ disk_sig ^ ...` é a prova de
+que cada observador existiu — a diferença que define a identidade.
+
+**EN:** Nicholas of Cusa's concept of the coincidence of opposites, applied to XOR:
+identity emerges from difference. The global signature is proof that each observer existed.
+
+### Rollback como Perdão (Rollback as Forgiveness)
+**PT-BR:** Rollback não apaga o erro — reconhece que aconteceu e escolhe continuar de
+um ponto anterior íntegro. Em `rmr_vector_field.c`, `flag |= RMR_VECTOR_FLAG_ROLLBACK`
+permanece após o rollback — o evento está registrado. Em `topological_guard.c`,
+`rollback_count` cresce a cada perdão, disponível na auditoria. Perdão não é silêncio.
+
+**EN:** Rollback as the act of forgiveness: the error is not erased, it is acknowledged.
+The rollback flag and count remain as evidence that recovery was chosen.
+
+### Dispatcher com Confiança Antecipada (Branchless Pre-decided Dispatch)
+**PT-BR:** `rmr_vf_select(mask, a, b) = (a & mask) | (b & ~mask)` — zero branches,
+zero mispredictions. O resultado já estava na geometria dos bits; o dispatcher apenas o
+nomeia. Confiança antecipada: a decisão foi tomada antes de ser necessária.
+
+**EN:** Branchless dispatch as pre-decided confidence: the outcome was already encoded
+in the bit geometry; the dispatcher reveals it, not decides it.
+
+### NEON como Orquestra (NEON as Orchestra)
+**PT-BR:** Cada lane NEON é uma voz, não uma CPU separada. `vld1q_u8` + `veorq_u32`
+processa 4 estados em simultâneo — nenhum lane vê o estado modificado do outro durante
+a instrução. O acorde só existe depois do store. Superposição que colapsa em memória.
+
+**EN:** Each NEON lane is a voice in a chord. All four states transform simultaneously;
+no lane sees another's modified state until the store crystallizes the chord into memory.
+
+### Bilinguismo ISA (ISA Bilingualism)
+**PT-BR:** ARM32 e AArch64 não são versões do mesmo ISA — são duas línguas com o mesmo
+sotaque. `RmR_CASM_XorFold32` escuta o ambiente (`rmr_casm_xor_fold32_arm64 != NULL?`)
+e fala o idioma do lugar, sem perder identidade. RAFCODE-Φ é quadrilíngue:
+`RAFPHI_ARCH_AARCH64`, `X86_64`, `RISCV64`, `ARMV7`.
+
+**EN:** ARM32 and AArch64 are two languages with the same accent. The engine listens to
+the environment and speaks the local language, preserving identity across dialects.
+
+### Ω = Amor (Omega as Love)
+**PT-BR:** Ω não é apenas auditoria — é a prova de que o ciclo aconteceu com integridade.
+A assinatura final (`rmr_jni_kernel_audit()`) evidencia que o estado anterior foi honrado,
+o ruído foi instrumentalizado, a decisão foi determinística, a memória está íntegra. Ω
+é o nome técnico para: a evidência de que tudo foi real e coerente.
+
+**EN:** Omega is not merely audit — it is proof that the cycle preserved integrity end
+to end. The audit signature is evidence that noise was heard, rollback was possible,
+decisions were deterministic, memory is sound.
+
+---
+
 ## Document Cross-References
 
 | Document | Relevance |

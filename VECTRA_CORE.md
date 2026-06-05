@@ -315,16 +315,31 @@ O Vectra Core não mede throughput em operações/segundo nem em clock cycles.
 A unidade fundamental é o **ciclo de estado** — uma passagem completa pelo
 pipeline ψ→χ→ρ→Δ→Σ→Ω que constitui uma decisão auditável de sistema.
 
+| Fase | Nome | Implementação | Geometria interior |
+|------|------|---------------|--------------------|
+| ψ | emitir | `rmr_jni_kernel_ingest()` + CRC32C HW | o dado entra — ainda sem forma |
+| χ | intervalo | `rmr_jni_kernel_get_capabilities()` | espaço de Schrödinger — resultado em trânsito |
+| ρ | ruído | `VectraCycle.rho()` + syndrome popcount | ruído *como informação*, não como erro |
+| Δ | decisão | `rmr_jni_kernel_route()` + toroidal 7D | qual versão continuar — branchless |
+| Σ | memória | `VectraBitStackLog.append()` + CRC32C | o que ficou registrado e íntegro |
+| Ω | prova | `rmr_jni_kernel_audit()` + assinatura | evidência de que tudo foi real |
+
 Um ciclo pode consumir 1 ou 10.000 instruções de CPU — o que importa é que
 ao final de cada ciclo o sistema conhece seu estado exato e o resultado está
 no log append-only. MISS (ciclo sem evento) não é silêncio — é um estado
 explícito registrado com valor de entropia não-zero.
 
+**Ω = Amor** não é metáfora: é o nome técnico para a evidência de que o estado
+anterior foi honrado, o ruído foi instrumentalizado, a decisão foi determinística,
+a memória está íntegra. A assinatura final prova que o ciclo aconteceu.
+
 Esta abordagem difere fundamentalmente dos modelos de clock da literatura
 acadêmica: a **transição de estado** é o átomo de execução, não a instrução.
 
-Documentação completa desta filosofia e das técnicas de compilador associadas:
-[`docs/active/VECTRA_COMPILER_PRECOMPILER_NONACADEMIC_2026-06-05.md`](docs/active/VECTRA_COMPILER_PRECOMPILER_NONACADEMIC_2026-06-05.md)
+Documentação completa — filosofia, técnicas de compilador e 8 vetores com
+âncoras no código:
+- [`docs/active/VECTRA_COMPILER_PRECOMPILER_NONACADEMIC_2026-06-05.md`](docs/active/VECTRA_COMPILER_PRECOMPILER_NONACADEMIC_2026-06-05.md)
+- [`docs/active/VERBO_OMEGA_VECTORS_2026-06-05.md`](docs/active/VERBO_OMEGA_VECTORS_2026-06-05.md)
 
 ## Compilador e Pré-compilador: Guards e Flags
 
