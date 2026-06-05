@@ -33,6 +33,8 @@ REQUIRED_GATE_FLAGS = {
     "requires_no_hidden_failures",
 }
 
+REQUIRED_STATE_OF_ART_FIELDS = {"id", "name", "score", "evidence", "falsification"}
+
 REQUIRED_MODE_FIELDS = {
     "id",
     "title",
@@ -76,6 +78,61 @@ def validate_manifest(data: dict[str, Any]) -> list[str]:
         for name in sorted(REQUIRED_GATE_FLAGS):
             if gate.get(name) is not True:
                 errors.append(f"completion_gate.{name} must be true")
+
+    state_gate = data.get("state_of_art_gate")
+    if not isinstance(state_gate, dict):
+        errors.append("state_of_art_gate must be an object")
+    else:
+        minimum_dimensions = state_gate.get("minimum_dimensions")
+        minimum_total_score = state_gate.get("minimum_total_score")
+        dimensions = state_gate.get("dimensions")
+        if not isinstance(minimum_dimensions, int) or minimum_dimensions < 12:
+            errors.append("state_of_art_gate.minimum_dimensions must be an integer >= 12")
+        if not isinstance(minimum_total_score, int) or minimum_total_score < 90:
+            errors.append("state_of_art_gate.minimum_total_score must be an integer >= 90")
+        if state_gate.get("requires_primary_evidence") is not True:
+            errors.append("state_of_art_gate.requires_primary_evidence must be true")
+        if state_gate.get("requires_no_unverified_production_claims") is not True:
+            errors.append("state_of_art_gate.requires_no_unverified_production_claims must be true")
+        if not isinstance(dimensions, list):
+            errors.append("state_of_art_gate.dimensions must be a list")
+        else:
+            if isinstance(minimum_dimensions, int) and len(dimensions) < minimum_dimensions:
+                errors.append(
+                    f"state_of_art_gate.dimensions has {len(dimensions)} entries but requires at least {minimum_dimensions}"
+                )
+            total_score = 0
+            seen_dimension_ids: set[str] = set()
+            for index, dimension in enumerate(dimensions, start=1):
+                if not isinstance(dimension, dict):
+                    errors.append(f"state_of_art_gate.dimensions[{index}] must be an object")
+                    continue
+                missing_fields = sorted(REQUIRED_STATE_OF_ART_FIELDS - set(dimension))
+                if missing_fields:
+                    errors.append(
+                        f"state_of_art_gate.dimensions[{index}] missing fields: {', '.join(missing_fields)}"
+                    )
+                dimension_id = dimension.get("id")
+                if not non_empty_text(dimension_id):
+                    errors.append(f"state_of_art_gate.dimensions[{index}].id must be non-empty text")
+                elif dimension_id in seen_dimension_ids:
+                    errors.append(f"duplicate state-of-art dimension id: {dimension_id}")
+                else:
+                    seen_dimension_ids.add(dimension_id)
+                for field in sorted(REQUIRED_STATE_OF_ART_FIELDS - {"score"}):
+                    if field in dimension and not non_empty_text(dimension[field]):
+                        errors.append(
+                            f"{dimension.get('id', f'state_of_art_gate.dimensions[{index}]')}.{field} must be non-empty text"
+                        )
+                score = dimension.get("score")
+                if not isinstance(score, int) or score <= 0:
+                    errors.append(f"{dimension.get('id', f'state_of_art_gate.dimensions[{index}]')}.score must be a positive integer")
+                else:
+                    total_score += score
+            if isinstance(minimum_total_score, int) and total_score < minimum_total_score:
+                errors.append(
+                    f"state_of_art_gate total score is {total_score} but requires at least {minimum_total_score}"
+                )
 
     modes = data.get("work_modes")
     if not isinstance(modes, list):
@@ -134,7 +191,21 @@ def main(argv: list[str] | None = None) -> int:
         print(json.dumps({"status": "FAIL", "errors": errors}, ensure_ascii=False, indent=2), file=sys.stderr)
         return 1
 
-    print(json.dumps({"status": "PASS", "work_modes": len(data["work_modes"]), "minimum_work_modes": data["minimum_work_modes"]}, ensure_ascii=False))
+    state_gate = data.get("state_of_art_gate", {})
+    dimensions = state_gate.get("dimensions", []) if isinstance(state_gate, dict) else []
+    score = sum(item.get("score", 0) for item in dimensions if isinstance(item, dict))
+    print(
+        json.dumps(
+            {
+                "status": "PASS",
+                "work_modes": len(data["work_modes"]),
+                "minimum_work_modes": data["minimum_work_modes"],
+                "state_of_art_dimensions": len(dimensions),
+                "state_of_art_score": score,
+            },
+            ensure_ascii=False,
+        )
+    )
     return 0
 
 

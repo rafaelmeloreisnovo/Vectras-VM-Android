@@ -91,10 +91,16 @@ Um módulo só pode ser chamado de funcional quando cumprir todos os itens:
 - Uso de memória no hot path é fixo.
 - Nenhum claim técnico depende apenas de metáfora.
 
-## 6) Manifesto executável
+## 6) Gate state-of-art
 
-O arquivo `docs/rafaelia_reference/rafaelia_enterprise_completion_manifest_2026-06-05.json` torna este playbook verificável. O validador `tools/docs/validate_rafaelia_completion_manifest.py` confirma que há pelo menos 20 modos de trabalho, invariantes essenciais e campos de validação/rollback por modo.
+Para tratar “state-of-art” como engenharia e não como slogan, o manifesto agora exige uma rubrica mensurável com pelo menos 12 dimensões e pontuação total mínima de 90. As dimensões cobrem reprodutibilidade, segurança determinística, hot path sem heap, Q16.16, branchless auditável, prova GCD, custódia digital, privacidade local, portabilidade ARM, observabilidade, baixa fricção operacional e integridade semântica.
 
-## 7) Estado desta entrega
+Uma entrega só pode avançar quando cada dimensão tiver evidência e falsificação. Isso impede que o sistema seja chamado de avançado apenas por linguagem forte; o avanço precisa ser verificável por comando, contrato e rollback.
+
+## 7) Manifesto executável
+
+O arquivo `docs/rafaelia_reference/rafaelia_enterprise_completion_manifest_2026-06-05.json` torna este playbook verificável. O validador `tools/docs/validate_rafaelia_completion_manifest.py` confirma que há pelo menos 20 modos de trabalho, invariantes essenciais, campos de validação/rollback por modo e gate state-of-art com pontuação mínima.
+
+## 8) Estado desta entrega
 
 Esta etapa ainda não implementa kernel, scheduler, filesystem, rede, IA completa ou assembly. Ela adiciona uma ponte auditável entre o material conceitual e a execução real: manifesto validável, playbook de uso real, critérios de promoção e práticas operacionais.

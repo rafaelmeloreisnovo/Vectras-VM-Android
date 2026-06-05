@@ -35,6 +35,20 @@ class RafaeliaCompletionManifestTests(unittest.TestCase):
         errors = validate_manifest(data)
         self.assertTrue(any("rollback" in error for error in errors))
 
+
+    def test_rejects_missing_state_of_art_dimension(self) -> None:
+        data = self.load_manifest()
+        data["state_of_art_gate"]["dimensions"] = data["state_of_art_gate"]["dimensions"][:11]
+        errors = validate_manifest(data)
+        self.assertTrue(any("state_of_art_gate.dimensions" in error for error in errors))
+
+    def test_rejects_low_state_of_art_score(self) -> None:
+        data = self.load_manifest()
+        for dimension in data["state_of_art_gate"]["dimensions"]:
+            dimension["score"] = 1
+        errors = validate_manifest(data)
+        self.assertTrue(any("total score" in error for error in errors))
+
     def test_cli_passes_valid_manifest_file(self) -> None:
         data = self.load_manifest()
         with tempfile.TemporaryDirectory() as tmpdir:
