@@ -10,6 +10,12 @@
 - [`docs/ROOT_FILE_CHAIN.md`](docs/ROOT_FILE_CHAIN.md): reflexão arquivo-a-arquivo da raiz.
 - [`docs/AI_BUILD_RELEASE_INDEX.md`](docs/AI_BUILD_RELEASE_INDEX.md): índice operacional IA para build/release/ABI/signing.
 
+## Organização documental e dados — 2026-06-05
+- [`docs/active/AI_SESSION_FACT_MAP_2026-06-05.md`](docs/active/AI_SESSION_FACT_MAP_2026-06-05.md): mapa factual da sessão, diferenças entre sessão comum e contexto semântico ampliado, token vazio e direções de análise.
+- [`docs/rafaelia_reference/RAFAELIA_SEED_BLOCK_CATALOG_2026-06-05.md`](docs/rafaelia_reference/RAFAELIA_SEED_BLOCK_CATALOG_2026-06-05.md): catálogo das sementes E20/E13/S11 com invariantes, falsificação, expansão fullstack e riscos.
+- [`docs/active/RAFAELIA_ENTERPRISE_COMPLETION_PLAYBOOK_2026-06-05.md`](docs/active/RAFAELIA_ENTERPRISE_COMPLETION_PLAYBOOK_2026-06-05.md): playbook de uso real enterprise com mais de 20 modos de trabalho, critérios de aceite, failover e rollback.
+- [`docs/rafaelia_reference/rafaelia_enterprise_completion_manifest_2026-06-05.json`](docs/rafaelia_reference/rafaelia_enterprise_completion_manifest_2026-06-05.json): manifesto executável validado por `tools/docs/validate_rafaelia_completion_manifest.py`.
+
 ## Organização documental e dados — 2026-06-02
 - [`docs/organization/DOC_ORGANIZATION_PLAN_2026-06-02.md`](docs/organization/DOC_ORGANIZATION_PLAN_2026-06-02.md): plano de saneamento em ciclos, com failsafe/failover/rollback.
 - [`docs/organization/LOOSE_FILES_AND_FRAGMENTS_INVENTORY_2026-06-02.md`](docs/organization/LOOSE_FILES_AND_FRAGMENTS_INVENTORY_2026-06-02.md): inventário de arquivos soltos, fragmentos e entradas pendentes até 7 níveis.

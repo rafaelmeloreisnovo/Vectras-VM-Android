@@ -1,24 +1,24 @@
 {
   "counts": {
-    "files_scanned": 1366,
-    "docs_scanned": 444,
-    "code_scanned": 590,
+    "files_scanned": 1376,
+    "docs_scanned": 451,
+    "code_scanned": 592,
     "ingress_files": 181,
     "zip_files": 27,
-    "placeholder_hits": 366,
-    "bug_signal_hits": 234,
+    "placeholder_hits": 368,
+    "bug_signal_hits": 243,
     "navigation_gaps": 118
   },
   "severity_counts": {
     "high": 208,
-    "medium": 600,
+    "medium": 611,
     "low": 118
   },
   "category_counts": {
     "entrada-pendente": 181,
     "overlay-zip": 27,
-    "bug-failsafe-signal": 234,
-    "placeholder-ou-pendente": 366,
+    "bug-failsafe-signal": 243,
+    "placeholder-ou-pendente": 368,
     "sem-files-map": 33,
     "sem-readme": 85
   },
@@ -2212,7 +2212,7 @@
       "severity": "medium",
       "category": "bug-failsafe-signal",
       "path": "docs/README.md",
-      "detail": "Marcadores: bug, rollback"
+      "detail": "Marcadores: bug, failover, rollback"
     },
     {
       "severity": "medium",
@@ -2271,6 +2271,12 @@
     {
       "severity": "medium",
       "category": "bug-failsafe-signal",
+      "path": "docs/active/AI_SESSION_FACT_MAP_2026-06-05.md",
+      "detail": "Marcadores: bug, failover, rollback, mitigação"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
       "path": "docs/active/AI_SESSION_TRUTH_AND_EMPTY_TOKEN_PROTOCOL_2026-06-02.md",
       "detail": "Marcadores: bug, failsafe, failover, rollback"
     },
@@ -2285,6 +2291,18 @@
       "category": "bug-failsafe-signal",
       "path": "docs/active/DOCUMENTATION_COVERAGE_AUDIT_2026-04-07.md",
       "detail": "Marcadores: bug"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "docs/active/RAFAELIA_ENTERPRISE_COMPLETION_PLAYBOOK_2026-06-05.md",
+      "detail": "Marcadores: failsafe, failover, rollback, mitigação"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "docs/active/README.md",
+      "detail": "Marcadores: failover, rollback, mitigação"
     },
     {
       "severity": "medium",
@@ -2403,8 +2421,20 @@
     {
       "severity": "medium",
       "category": "bug-failsafe-signal",
+      "path": "docs/rafaelia_reference/RAFAELIA_SEED_BLOCK_CATALOG_2026-06-05.md",
+      "detail": "Marcadores: bug, failover, rollback"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
       "path": "docs/rafaelia_reference/RAFAELIA_T7_VARIABLES_FORMULAS.md",
       "detail": "Marcadores: bug, failover, rollback"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "docs/rafaelia_reference/README.md",
+      "detail": "Marcadores: failover, rollback"
     },
     {
       "severity": "medium",
@@ -2553,6 +2583,18 @@
     {
       "severity": "medium",
       "category": "bug-failsafe-signal",
+      "path": "reports/device_runtime_smoke.md",
+      "detail": "Marcadores: bug, failover"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "reports/vectra_integration_report.md",
+      "detail": "Marcadores: bug"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
       "path": "run_tests.sh",
       "detail": "Marcadores: bug"
     },
@@ -2673,7 +2715,19 @@
     {
       "severity": "medium",
       "category": "bug-failsafe-signal",
+      "path": "tools/docs/validate_rafaelia_completion_manifest.py",
+      "detail": "Marcadores: failover, rollback"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
       "path": "tools/termux-arm64-orchestrator/bootstrap-termux-android15.sh",
+      "detail": "Marcadores: rollback"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "tools/tests/test_validate_rafaelia_completion_manifest.py",
       "detail": "Marcadores: rollback"
     },
     {
@@ -2921,6 +2975,12 @@
       "category": "placeholder-ou-pendente",
       "path": "PROVISIONING_REPORT_2026-04-03.md",
       "detail": "Marcadores: pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "R223a.md",
+      "detail": "Marcadores: todo"
     },
     {
       "severity": "medium",
@@ -4035,6 +4095,12 @@
     {
       "severity": "medium",
       "category": "placeholder-ou-pendente",
+      "path": "docs/active/RAFAELIA_ENTERPRISE_COMPLETION_PLAYBOOK_2026-06-05.md",
+      "detail": "Marcadores: todo"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
       "path": "docs/active/UNIFIED_CODE_DOCUMENTATION_ALIGNMENT_2026-04-12.md",
       "detail": "Marcadores: todo"
     },
@@ -4539,12 +4605,6 @@
     {
       "severity": "medium",
       "category": "placeholder-ou-pendente",
-      "path": "reports/device_runtime_smoke.md",
-      "detail": "Marcadores: pending"
-    },
-    {
-      "severity": "medium",
-      "category": "placeholder-ou-pendente",
       "path": "reports/external-dependency-hotspots.md",
       "detail": "Marcadores: pending"
     },
@@ -4558,6 +4618,12 @@
       "severity": "medium",
       "category": "placeholder-ou-pendente",
       "path": "reports/vectra_grade_benchmarks.md",
+      "detail": "Marcadores: pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "reports/vectra_integration_report.md",
       "detail": "Marcadores: pending"
     },
     {
