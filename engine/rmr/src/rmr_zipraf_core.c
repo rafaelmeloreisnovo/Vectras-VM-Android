@@ -74,9 +74,12 @@ int RmR_Zipraf_Execute(const RmR_ZiprafInput *in, RmR_ZiprafOutput *out) {
   uint64_t signed_mix_a;
   uint64_t signed_mix_b;
   int64_t tri_state[3];
-  int64_t tri_flow[6];
-  int64_t tri_closed[3];
-  uint32_t tri_coherence;
+  /* HOTFIX 2026-06-05: initialize to 0 — used outside the if-block that sets
+   * them; uninitialized-variable warning and potential UB if TriFlow3x6 or
+   * TriCloseBase10 fails (e.g. NULL guard). Safe neutral values are zeros. */
+  int64_t tri_flow[6]   = {0, 0, 0, 0, 0, 0};
+  int64_t tri_closed[3] = {0, 0, 0};
+  uint32_t tri_coherence = 0u;
 
   if (!out) return -1;
 
