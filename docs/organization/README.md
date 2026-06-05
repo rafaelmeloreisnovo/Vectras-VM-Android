@@ -6,6 +6,7 @@ Este diretório reúne o saneamento documental iniciado em 2026-06-02 para organ
 
 - `../active/AI_SESSION_FACT_MAP_2026-06-05.md` — organização semântica da sessão atual, distinguindo fato, hipótese, metáfora/parábola, token vazio, validação e rollback.
 - `../rafaelia_reference/RAFAELIA_SEED_BLOCK_CATALOG_2026-06-05.md` — catálogo navegável das sementes E20/E13/S11 para promoção futura sem misturar conceito e claim de produção.
+- `../active/RAFAELIA_ENTERPRISE_COMPLETION_PLAYBOOK_2026-06-05.md` — camada de uso real enterprise com práticas, validação, failover e rollback por camada.
 - `DOC_ORGANIZATION_PLAN_2026-06-02.md` — plano de dois ciclos com critérios PASS, rollback, failsafe e failover.
 - `LOOSE_FILES_AND_FRAGMENTS_INVENTORY_2026-06-02.md` — inventário local até 7 níveis para arquivos soltos, nomes fragmentados e entradas pendentes.
 - `SOURCE_ARCHITECTURE_SYNC_2026-06-02.md` — mapa da arquitetura real até 5 níveis para alinhar documentos aos fontes atuais.

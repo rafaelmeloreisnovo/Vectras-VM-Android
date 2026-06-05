@@ -130,6 +130,8 @@ O bloco S11 falha se exigir heap para operar, se gerar estados não reprodutíve
 3. Fórmulas e variáveis T7: `docs/rafaelia_reference/RAFAELIA_T7_VARIABLES_FORMULAS.md`.
 4. Organização de arquivos soltos: `docs/organization/README.md`.
 5. Índices canônicos: `DOC_INDEX.md`, `docs/README.md`, `docs/INDEX_CANONICAL.md`.
+6. Uso real enterprise: `docs/active/RAFAELIA_ENTERPRISE_COMPLETION_PLAYBOOK_2026-06-05.md`.
+7. Manifesto validável: `docs/rafaelia_reference/rafaelia_enterprise_completion_manifest_2026-06-05.json`.
 
 ## 8) Riscos mantidos abertos
 

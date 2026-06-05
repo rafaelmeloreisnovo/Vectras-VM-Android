@@ -1,24 +1,24 @@
 {
   "counts": {
-    "files_scanned": 1372,
-    "docs_scanned": 450,
-    "code_scanned": 590,
+    "files_scanned": 1376,
+    "docs_scanned": 451,
+    "code_scanned": 592,
     "ingress_files": 181,
     "zip_files": 27,
-    "placeholder_hits": 367,
-    "bug_signal_hits": 238,
+    "placeholder_hits": 368,
+    "bug_signal_hits": 243,
     "navigation_gaps": 118
   },
   "severity_counts": {
     "high": 208,
-    "medium": 605,
+    "medium": 611,
     "low": 118
   },
   "category_counts": {
     "entrada-pendente": 181,
     "overlay-zip": 27,
-    "bug-failsafe-signal": 238,
-    "placeholder-ou-pendente": 367,
+    "bug-failsafe-signal": 243,
+    "placeholder-ou-pendente": 368,
     "sem-files-map": 33,
     "sem-readme": 85
   },
@@ -2295,6 +2295,18 @@
     {
       "severity": "medium",
       "category": "bug-failsafe-signal",
+      "path": "docs/active/RAFAELIA_ENTERPRISE_COMPLETION_PLAYBOOK_2026-06-05.md",
+      "detail": "Marcadores: failsafe, failover, rollback, mitigação"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "docs/active/README.md",
+      "detail": "Marcadores: failover, rollback, mitigação"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
       "path": "docs/active/VECTRAS_ORIGIN_DOCUMENTS_2026-05-05.md",
       "detail": "Marcadores: bug"
     },
@@ -2417,6 +2429,12 @@
       "category": "bug-failsafe-signal",
       "path": "docs/rafaelia_reference/RAFAELIA_T7_VARIABLES_FORMULAS.md",
       "detail": "Marcadores: bug, failover, rollback"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "docs/rafaelia_reference/README.md",
+      "detail": "Marcadores: failover, rollback"
     },
     {
       "severity": "medium",
@@ -2697,7 +2715,19 @@
     {
       "severity": "medium",
       "category": "bug-failsafe-signal",
+      "path": "tools/docs/validate_rafaelia_completion_manifest.py",
+      "detail": "Marcadores: failover, rollback"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
       "path": "tools/termux-arm64-orchestrator/bootstrap-termux-android15.sh",
+      "detail": "Marcadores: rollback"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "tools/tests/test_validate_rafaelia_completion_manifest.py",
       "detail": "Marcadores: rollback"
     },
     {
@@ -4061,6 +4091,12 @@
       "category": "placeholder-ou-pendente",
       "path": "docs/active/DOCUMENTATION_COVERAGE_AUDIT_2026-04-07.md",
       "detail": "Marcadores: todo, pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "docs/active/RAFAELIA_ENTERPRISE_COMPLETION_PLAYBOOK_2026-06-05.md",
+      "detail": "Marcadores: todo"
     },
     {
       "severity": "medium",

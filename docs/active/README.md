@@ -36,4 +36,5 @@ Consulte [`docs/INDEX_CANONICAL.md`](../INDEX_CANONICAL.md) para a classificaç�
 
 ## Documentos ativos
 - `AI_SESSION_FACT_MAP_2026-06-05.md` — mapa factual desta sessão: o que muda antes/depois do contexto, sessão comum versus sessão semântica ampliada, token vazio, 7 direções qualitativas/quantitativas e reversas.
+- `RAFAELIA_ENTERPRISE_COMPLETION_PLAYBOOK_2026-06-05.md` — playbook de uso real/fullstack: mais de 20 modos de trabalho, dois ciclos de promoção, critérios de aceite, failover, rollback e mitigação.
 - `AI_SESSION_TRUTH_AND_EMPTY_TOKEN_PROTOCOL_2026-06-02.md` — protocolo para separar fato, hipótese, metáfora/parábola, lacuna, risco e ação em sessões de IA, com uso explícito de token vazio quando não há evidência suficiente.
