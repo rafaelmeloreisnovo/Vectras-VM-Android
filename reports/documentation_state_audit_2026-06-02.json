@@ -1,24 +1,24 @@
 {
   "counts": {
-    "files_scanned": 1366,
-    "docs_scanned": 444,
+    "files_scanned": 1372,
+    "docs_scanned": 450,
     "code_scanned": 590,
     "ingress_files": 181,
     "zip_files": 27,
-    "placeholder_hits": 366,
-    "bug_signal_hits": 234,
+    "placeholder_hits": 367,
+    "bug_signal_hits": 238,
     "navigation_gaps": 118
   },
   "severity_counts": {
     "high": 208,
-    "medium": 600,
+    "medium": 605,
     "low": 118
   },
   "category_counts": {
     "entrada-pendente": 181,
     "overlay-zip": 27,
-    "bug-failsafe-signal": 234,
-    "placeholder-ou-pendente": 366,
+    "bug-failsafe-signal": 238,
+    "placeholder-ou-pendente": 367,
     "sem-files-map": 33,
     "sem-readme": 85
   },
@@ -2212,7 +2212,7 @@
       "severity": "medium",
       "category": "bug-failsafe-signal",
       "path": "docs/README.md",
-      "detail": "Marcadores: bug, rollback"
+      "detail": "Marcadores: bug, failover, rollback"
     },
     {
       "severity": "medium",
@@ -2267,6 +2267,12 @@
       "category": "bug-failsafe-signal",
       "path": "docs/VNC_INPUT_BEHAVIOR_MATRIX.md",
       "detail": "Marcadores: bug"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "docs/active/AI_SESSION_FACT_MAP_2026-06-05.md",
+      "detail": "Marcadores: bug, failover, rollback, mitigação"
     },
     {
       "severity": "medium",
@@ -2398,6 +2404,12 @@
       "severity": "medium",
       "category": "bug-failsafe-signal",
       "path": "docs/organization/SOURCE_ARCHITECTURE_SYNC_2026-06-02.md",
+      "detail": "Marcadores: bug, failover, rollback"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "docs/rafaelia_reference/RAFAELIA_SEED_BLOCK_CATALOG_2026-06-05.md",
       "detail": "Marcadores: bug, failover, rollback"
     },
     {
@@ -2548,6 +2560,18 @@
       "severity": "medium",
       "category": "bug-failsafe-signal",
       "path": "reports/build-verification-2026-04-03.md",
+      "detail": "Marcadores: bug"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "reports/device_runtime_smoke.md",
+      "detail": "Marcadores: bug, failover"
+    },
+    {
+      "severity": "medium",
+      "category": "bug-failsafe-signal",
+      "path": "reports/vectra_integration_report.md",
       "detail": "Marcadores: bug"
     },
     {
@@ -2921,6 +2945,12 @@
       "category": "placeholder-ou-pendente",
       "path": "PROVISIONING_REPORT_2026-04-03.md",
       "detail": "Marcadores: pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "R223a.md",
+      "detail": "Marcadores: todo"
     },
     {
       "severity": "medium",
@@ -4539,12 +4569,6 @@
     {
       "severity": "medium",
       "category": "placeholder-ou-pendente",
-      "path": "reports/device_runtime_smoke.md",
-      "detail": "Marcadores: pending"
-    },
-    {
-      "severity": "medium",
-      "category": "placeholder-ou-pendente",
       "path": "reports/external-dependency-hotspots.md",
       "detail": "Marcadores: pending"
     },
@@ -4558,6 +4582,12 @@
       "severity": "medium",
       "category": "placeholder-ou-pendente",
       "path": "reports/vectra_grade_benchmarks.md",
+      "detail": "Marcadores: pending"
+    },
+    {
+      "severity": "medium",
+      "category": "placeholder-ou-pendente",
+      "path": "reports/vectra_integration_report.md",
       "detail": "Marcadores: pending"
     },
     {

@@ -17,6 +17,11 @@ Camada canônica de documentação técnica do repositório, organizada para eng
 5. Documento especializado por tema: arquivos em `docs/`, `docs/active/`, `docs/ci/` e `docs/navigation/`
 
 
+## Organização documental e dados (2026-06-05)
+
+- [`active/AI_SESSION_FACT_MAP_2026-06-05.md`](active/AI_SESSION_FACT_MAP_2026-06-05.md): resposta documental ao contexto desta sessão, explicando o fato, token vazio, antes/depois, sessão comum versus sessão ampliada e 7 direções de análise.
+- [`rafaelia_reference/RAFAELIA_SEED_BLOCK_CATALOG_2026-06-05.md`](rafaelia_reference/RAFAELIA_SEED_BLOCK_CATALOG_2026-06-05.md): catálogo enterprise/fullstack das sementes E20/E13/S11, invariantes, promoção segura, falsificação, failover e rollback.
+
 ## Organização documental e dados (2026-06-02)
 
 - [`organization/DOC_ORGANIZATION_PLAN_2026-06-02.md`](organization/DOC_ORGANIZATION_PLAN_2026-06-02.md): plano em dois ciclos para organizar documentos, dados, fragmentos e entradas pendentes com rollback.

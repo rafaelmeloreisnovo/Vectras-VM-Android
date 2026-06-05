@@ -7,13 +7,13 @@ Arquivos de saída gerados pela própria auditoria são excluídos da contagem p
 
 | Métrica | Valor |
 |---|---:|
-| `bug_signal_hits` | 234 |
+| `bug_signal_hits` | 238 |
 | `code_scanned` | 590 |
-| `docs_scanned` | 444 |
-| `files_scanned` | 1366 |
+| `docs_scanned` | 450 |
+| `files_scanned` | 1372 |
 | `ingress_files` | 181 |
 | `navigation_gaps` | 118 |
-| `placeholder_hits` | 366 |
+| `placeholder_hits` | 367 |
 | `zip_files` | 27 |
 
 ## Condições necessárias de aceite
@@ -31,15 +31,15 @@ Arquivos de saída gerados pela própria auditoria são excluídos da contagem p
 | Severidade | Total |
 |---|---:|
 | `high` | 208 |
-| `medium` | 600 |
+| `medium` | 605 |
 | `low` | 118 |
 
 | Categoria | Total |
 |---|---:|
-| `bug-failsafe-signal` | 234 |
+| `bug-failsafe-signal` | 238 |
 | `entrada-pendente` | 181 |
 | `overlay-zip` | 27 |
-| `placeholder-ou-pendente` | 366 |
+| `placeholder-ou-pendente` | 367 |
 | `sem-files-map` | 33 |
 | `sem-readme` | 85 |
 
@@ -167,7 +167,7 @@ Arquivos de saída gerados pela própria auditoria são excluídos da contagem p
 | high | entrada-pendente | `_incoming/pending/rafaelia_bench_phi.S` | Arquivo em área de ingresso; requer hash, teste e decisão de promoção. |
 | high | entrada-pendente | `_incoming/pending/rafaelia_bitraf.c` | Arquivo em área de ingresso; requer hash, teste e decisão de promoção. |
 | high | entrada-pendente | `_incoming/pending/rafaelia_central_link.S` | Arquivo em área de ingresso; requer hash, teste e decisão de promoção. |
-| info | truncado | `...` | 806 achados adicionais disponíveis no JSON. |
+| info | truncado | `...` | 811 achados adicionais disponíveis no JSON. |
 
 ## Mitigação recomendada
 
