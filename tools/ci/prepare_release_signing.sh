@@ -5,17 +5,14 @@ usage() {
   cat <<'USAGE'
 Usage: prepare_release_signing.sh --mode <signed|unsigned|auto>
 
-Required secrets for signed mode:
-  ANDROID_KEYSTORE_BASE64
-  ANDROID_KEYSTORE_PASSWORD
-  ANDROID_KEY_ALIAS
-  ANDROID_KEY_PASSWORD
+Required secrets for signed mode (canonical namespace):
+  VECTRAS_RELEASE_KEYSTORE_BASE64
+  VECTRAS_RELEASE_STORE_PASSWORD
+  VECTRAS_RELEASE_KEY_ALIAS
+  VECTRAS_RELEASE_KEY_PASSWORD
 
-Canonical signing secrets:
-  ANDROID_KEYSTORE_BASE64
-  ANDROID_KEYSTORE_PASSWORD
-  ANDROID_KEY_ALIAS
-  ANDROID_KEY_PASSWORD
+Legacy ANDROID_* signing secret names are intentionally not accepted here.
+Use the VECTRAS_RELEASE_* namespace for official release lanes.
 
 Outputs (when GITHUB_ENV exists):
   VECTRAS_CI_RELEASE_FLAGS
@@ -58,10 +55,10 @@ fi
 missing_android_signing_secrets() {
   local missing=()
 
-  [[ -n "${ANDROID_KEYSTORE_BASE64:-}" ]] || missing+=("ANDROID_KEYSTORE_BASE64")
-  [[ -n "${ANDROID_KEYSTORE_PASSWORD:-}" ]] || missing+=("ANDROID_KEYSTORE_PASSWORD")
-  [[ -n "${ANDROID_KEY_ALIAS:-}" ]] || missing+=("ANDROID_KEY_ALIAS")
-  [[ -n "${ANDROID_KEY_PASSWORD:-}" ]] || missing+=("ANDROID_KEY_PASSWORD")
+  [[ -n "${VECTRAS_RELEASE_KEYSTORE_BASE64:-}" ]] || missing+=("VECTRAS_RELEASE_KEYSTORE_BASE64")
+  [[ -n "${VECTRAS_RELEASE_STORE_PASSWORD:-}" ]] || missing+=("VECTRAS_RELEASE_STORE_PASSWORD")
+  [[ -n "${VECTRAS_RELEASE_KEY_ALIAS:-}" ]] || missing+=("VECTRAS_RELEASE_KEY_ALIAS")
+  [[ -n "${VECTRAS_RELEASE_KEY_PASSWORD:-}" ]] || missing+=("VECTRAS_RELEASE_KEY_PASSWORD")
 
   if ((${#missing[@]} > 0)); then
     printf '%s\n' "${missing[@]}"
@@ -84,19 +81,19 @@ resolve_keystore() {
   fi
 
   umask 077
-  printf '%s' "${ANDROID_KEYSTORE_BASE64}" | base64 --decode > "$out_path"
+  printf '%s' "${VECTRAS_RELEASE_KEYSTORE_BASE64}" | base64 --decode > "$out_path"
 
   if [[ ! -s "$out_path" ]]; then
-    echo "::error::ANDROID_KEYSTORE_BASE64 provided but decoded keystore is empty" >&2
+    echo "::error::VECTRAS_RELEASE_KEYSTORE_BASE64 provided but decoded keystore is empty" >&2
     exit 1
   fi
 
   chmod 600 "$out_path"
 
   export VECTRAS_RELEASE_STORE_FILE="$out_path"
-  export VECTRAS_RELEASE_STORE_PASSWORD="$ANDROID_KEYSTORE_PASSWORD"
-  export VECTRAS_RELEASE_KEY_ALIAS="$ANDROID_KEY_ALIAS"
-  export VECTRAS_RELEASE_KEY_PASSWORD="$ANDROID_KEY_PASSWORD"
+  export VECTRAS_RELEASE_STORE_PASSWORD="$VECTRAS_RELEASE_STORE_PASSWORD"
+  export VECTRAS_RELEASE_KEY_ALIAS="$VECTRAS_RELEASE_KEY_ALIAS"
+  export VECTRAS_RELEASE_KEY_PASSWORD="$VECTRAS_RELEASE_KEY_PASSWORD"
 }
 
 signed_ready="false"
@@ -135,7 +132,7 @@ case "$MODE" in
 esac
 
 if [[ -z "$RELEASE_FLAGS" ]]; then
-  SIGNING_ARGS="-Pandroid.injected.signing.store.file=${VECTRAS_RELEASE_STORE_FILE} -Pandroid.injected.signing.store.password=${ANDROID_KEYSTORE_PASSWORD} -Pandroid.injected.signing.key.alias=${ANDROID_KEY_ALIAS} -Pandroid.injected.signing.key.password=${ANDROID_KEY_PASSWORD}"
+  SIGNING_ARGS="-Pandroid.injected.signing.store.file=${VECTRAS_RELEASE_STORE_FILE} -Pandroid.injected.signing.store.password=${VECTRAS_RELEASE_STORE_PASSWORD} -Pandroid.injected.signing.key.alias=${VECTRAS_RELEASE_KEY_ALIAS} -Pandroid.injected.signing.key.password=${VECTRAS_RELEASE_KEY_PASSWORD}"
 fi
 
 if [[ -n "${GITHUB_ENV:-}" ]]; then

@@ -37,10 +37,10 @@
 ## Matriz de gates (auditoria de processo)
 | Gate | Objetivo | Execução/critério | Evidência gerada |
 |---|---|---|---|
-| Build Android (debug + release) | Garantir integridade de compilação dos módulos Android antes de distribuição | Workflow canônico `Pipeline Orchestrator` em `.github/workflows/pipeline-orchestrator.yml`, encadeando os workflows canônicos reutilizáveis `host-ci.yml` (host) e `android-ci.yml` (Android) via `workflow_call`, mantendo `android.yml` apenas como wrapper de entrada. O estágio Android mantém `assembleDebug`/`assembleRelease` com parâmetros controlados pelo orquestrador. | APKs publicados como artefatos `android-debug-apk` e `android-release-apk` no Actions. |
+| Build Android (debug + release) | Garantir integridade de compilação dos módulos Android antes de distribuição | Workflow canônico Android `android-ci.yml` via `workflow_call`; para publicação oficial, a entrada obrigatória é `release-dual-track.yml`, que executa lanes unsigned interna e signed oficial antes do gate final. | Artefatos `android-artifacts-*`, manifests de staging e APK/AAB publicados pelo Actions. |
 | Dependências de arquivos de repositório | Bloquear divergências entre documentação, mapeamentos e cadeia de arquivos essenciais | Etapa explícita `./tools/gradle_with_jdk21.sh verifyRepoFileDependencies` executada antes das etapas de build. | Log da etapa `Verify repository file dependencies` no job de CI. |
 | Documentação crítica (links locais markdown) | Detectar referências quebradas em `README.md` e `docs/**/*.md` | Etapa opcional `Validate local markdown links` em Python (com `continue-on-error`) verifica caminhos locais não-HTTP. | Relatório no log da etapa, com lista de links inválidos quando detectados. |
-| Artefatos de distribuição | Assegurar rastreabilidade de binários gerados na pipeline | Upload automatizado dos APKs de debug/release via `actions/upload-artifact@v5` com execução forçada das JavaScript Actions em Node.js 24 (`FORCE_JAVASCRIPT_ACTIONS_TO_NODE24=true`). | Artefatos versionados por run no GitHub Actions + upload Telegram condicionado a segredo. |
+| Artefatos de distribuição | Assegurar rastreabilidade de binários gerados na pipeline | `android-ci.yml` materializa artefatos com `tools/ci/materialize_android_ci_artifacts.sh`; somente `release-dual-track.yml` pode baixar a lane assinada oficial e criar GitHub Release. `sign-release.yml` é legado e bloqueado para publicação oficial. | Artefatos versionados por run no GitHub Actions, manifests `artifact-manifest.*` e release assets oficiais somente após gate signed verde. |
 
 
 
@@ -97,14 +97,18 @@ para inspeção de gargalo e reconsolidação no troubleshooting.
 
 
 ## Política de acionamento de workflows
-- Apenas `.github/workflows/pipeline-orchestrator.yml` deve responder a eventos de branch e pull request.
+- Branches e pull requests continuam sob orquestração/validação normal; publicação oficial não deve ocorrer nessas entradas.
+- O fluxo oficial de release é `.github/workflows/release-dual-track.yml`, acionado por tag `v*.*.*` ou `workflow_dispatch` controlado com `release_tag` quando publicar, sempre delegando a build para `.github/workflows/android-ci.yml`.
 - Workflows filhos devem operar em modo reutilizável (`on: workflow_call`) e podem manter `workflow_dispatch` somente para debug manual controlado.
 - Chamadas entre workflows devem usar `uses: ./.github/workflows/<arquivo>.yml` para preservar rastreabilidade e governança do pipeline.
+- `.github/workflows/sign-release.yml` é legado/compatibilidade: pode gerar artefato manual com `allow_compat_artifact=true`, mas não possui permissão nem etapa de publicação oficial.
 
 ## Referência canônica de CI Android/Host
 
-- Pipeline oficial Android: `.github/workflows/android-ci.yml` (acionado por wrappers/orquestração).
+- Publicador oficial de release: `.github/workflows/release-dual-track.yml` delegando para `.github/workflows/android-ci.yml`.
+- Pipeline oficial Android: `.github/workflows/android-ci.yml` (acionado por wrappers/orquestração/release-dual-track).
 - Entrada Android: `.github/workflows/android.yml` (wrapper de eventos + delegação).
+- Compatibilidade legada sem publicação oficial: `.github/workflows/sign-release.yml`.
 - Compatibilidade ABI Android: `.github/workflows/compile-matrix.yml` (trilha auxiliar).
 - Pipeline oficial Host: `.github/workflows/host-ci.yml`.
 - Orquestração e gate final: `.github/workflows/pipeline-orchestrator.yml` + `.github/workflows/quality-gates.yml`.

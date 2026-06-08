@@ -36,6 +36,14 @@ Esta classificação é documental e não move arquivos. Migração física só 
 4. Use [`BUILDING.md`](BUILDING.md) para executar build local, CI ou release sem enfraquecer assinatura oficial.
 5. Use [`docs/navigation/INDEX.md`](docs/navigation/INDEX.md) quando a próxima leitura depender do público: engenharia, IA, pesquisa, operação, produto, compliance ou auditoria.
 
+
+## Release oficial e publicação de artefatos
+
+- **Único publicador oficial:** [`.github/workflows/release-dual-track.yml`](.github/workflows/release-dual-track.yml), acionado por tag `v*.*.*` ou despacho manual com `release_tag`, delegando a compilação, assinatura, verificação ABI e upload intermediário para [`.github/workflows/android-ci.yml`](.github/workflows/android-ci.yml).
+- **Cadeia obrigatória:** `tools/ci/prepare_android_env.sh` → `tools/ci/prepare_release_signing.sh` → Gradle `:app:assembleRelease`/`:app:verifyDeliveredCompiledArtifacts` → `tools/ci/materialize_android_ci_artifacts.sh` → publicação do GitHub Release apenas após a lane assinada oficial ficar verde.
+- **Segredos oficiais:** somente `VECTRAS_RELEASE_KEYSTORE_BASE64`, `VECTRAS_RELEASE_STORE_PASSWORD`, `VECTRAS_RELEASE_KEY_ALIAS` e `VECTRAS_RELEASE_KEY_PASSWORD`.
+- **Legado bloqueado:** [`.github/workflows/sign-release.yml`](.github/workflows/sign-release.yml) é compatibilidade manual, não responde a tags e não pode criar release oficial.
+
 ## Princípios de excelência operacional
 
 - Código, workflow e documentação devem apontar para a mesma fonte de verdade.
