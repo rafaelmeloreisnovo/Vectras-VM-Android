@@ -1,9 +1,21 @@
 <!-- DOC_ORG_SCAN: 2026-04-07 | source-scan: pending-manual-by-domain -->
 
+> **Classificação:** `NARRATIVE`
+> **Natureza:** navegação institucional sobre tecnologia, inovação e autoria técnica.
+> **Obrigação de evidência:** qualquer claim de benchmark, desempenho, aceleração, eficiência ou comparação deve citar [`../../bench/`](../../bench/), [`../../reports/metrics/`](../../reports/metrics/), [`../../tools/perf/`](../../tools/perf/) ou CI em [`.github/workflows/`](../../.github/workflows/).
+> **Abstenção técnica:** autoria e arquitetura podem ser mapeadas por código/documentação; performance só pode ser afirmada com artefato medido.
+
 # Tecnologia, Inovação e Autoria Técnica (Navegação Guiada)
 
 ## Propósito
 Este documento consolida pilares de inovação e explicita a autoria técnica por subsistema, com rastreabilidade verificável entre código, documentação e estado do projeto.
+
+
+## Escopo semântico e evidência
+- **Autoria técnica:** pode ser mapeada por subsistema, código e trilha documental.
+- **Inovação:** deve ser descrita como combinação verificável de arquitetura, governança, ferramentas e método; não como superioridade não medida.
+- **Performance:** qualquer menção a benchmark determinístico, execução real, eficiência ou comparação exige vínculo com [`../../bench/`](../../bench/), [`../../reports/metrics/`](../../reports/metrics/), [`../../tools/perf/`](../../tools/perf/) ou CI em [`.github/workflows/`](../../.github/workflows/).
+- **Homem + inteligência artificial:** humanos recebem contexto e caminhos de auditoria; agentes de IA devem preservar a diferença entre fato de autoria, hipótese experimental, narrativa institucional e resultado validado.
 
 ## Pilares de inovação
 1. **Benchmark determinístico**

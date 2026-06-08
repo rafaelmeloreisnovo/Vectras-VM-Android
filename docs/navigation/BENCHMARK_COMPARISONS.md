@@ -1,5 +1,10 @@
 <!-- DOC_ORG_SCAN: 2026-04-07 | source-scan: pending-manual-by-domain -->
 
+> **Classificação:** `VALIDATED`
+> **Natureza:** método de comparação apoiado por código de benchmark, ferramentas de performance e pastas de resultados; números específicos continuam dependentes de artefato bruto anexado.
+> **Obrigação de evidência:** toda claim de performance deve apontar para [`../../bench/`](../../bench/), [`../../reports/metrics/`](../../reports/metrics/), [`../../tools/perf/`](../../tools/perf/) ou artefato de CI em [`.github/workflows/`](../../.github/workflows/).
+> **Abstenção técnica:** este documento valida o protocolo e a rastreabilidade; não valida um resultado numérico quando o relatório bruto não estiver citado.
+
 # Vectras VM — Benchmark Comparisons (Code-Grounded)
 
 ## Resumo
@@ -12,6 +17,17 @@ Documento de comparação de benchmark orientado por evidência reproduzível. D
   - Requisitos mínimos de publicação de resultados.
 - Não coberto:
   - Tabelas fixas por dispositivo sem relatório bruto anexado.
+
+
+## Estado validado do método e limite dos resultados
+A classificação `VALIDATED` aplica-se ao **método documentado**, à existência de fontes de benchmark e às ferramentas de validação. Ela não transforma placeholders, templates ou exemplos em resultados medidos. Cada tabela publicada deve citar pelo menos um destes vínculos:
+
+- Fonte de suíte ou baseline: [`../../bench/`](../../bench/).
+- Métricas versionadas: [`../../reports/metrics/`](../../reports/metrics/).
+- Ferramentas de comparação/validação: [`../../tools/perf/`](../../tools/perf/).
+- Execução automatizada ou artefato: [`.github/workflows/`](../../.github/workflows/).
+
+Critério de abstenção: se não houver arquivo bruto, comando e contexto de execução, preencher a coluna `Válido` como `false` e manter a linha como exemplo metodológico.
 
 ## Base no código
 - `app/src/main/java/com/vectras/vm/benchmark/VectraBenchmark.java`
