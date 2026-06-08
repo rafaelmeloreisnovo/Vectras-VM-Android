@@ -93,16 +93,12 @@ Comandos canônicos (raiz):
 ### Assinatura em CI (contrato canônico)
 - O fluxo oficial de publicação é `.github/workflows/release-dual-track.yml` + `.github/workflows/android-ci.yml`.
 - `android-ci.yml` usa `tools/ci/prepare_android_env.sh`, `tools/ci/prepare_release_signing.sh`, `tools/ci/materialize_android_ci_artifacts.sh` e o gate Gradle `:app:verifyDeliveredCompiledArtifacts` como cadeia única de build, assinatura, verificação e staging de artefatos.
-- O namespace oficial de signing é exclusivamente `VECTRAS_RELEASE_*`:
-  - `VECTRAS_RELEASE_STORE_FILE`: caminho para keystore já materializada;
-  - `VECTRAS_RELEASE_STORE_PASSWORD`: senha da keystore;
-  - `VECTRAS_RELEASE_KEY_ALIAS`: alias da chave;
-  - `VECTRAS_RELEASE_KEY_PASSWORD`: senha da chave;
-  - `VECTRAS_RELEASE_KEYSTORE_B64` (opcional): keystore em base64, usada quando o CI precisa decodificar a keystore em arquivo temporário.
-- `tools/ci/prepare_release_signing.sh` é a fronteira única de materialização/ponte: ele aceita `VECTRAS_RELEASE_STORE_FILE` ou decodifica `VECTRAS_RELEASE_KEYSTORE_B64`; nomes `ANDROID_*` só existem ali como ponte explícita de compatibilidade interna/legada e devem emitir aviso.
-- `signing_mode=auto`: com valores `VECTRAS_RELEASE_*` válidos executa release assinado; sem valores executa release interno unsigned apenas quando a lane permite validação interna.
-- `signing_mode=signed` sem o contrato `VECTRAS_RELEASE_*` falha explicitamente; não há fallback silencioso para release oficial.
-- `.github/workflows/sign-release.yml` permanece apenas como compatibilidade manual bloqueada para publicação oficial; ele delega para `android-ci.yml`, herda/mapeia apenas o contrato `VECTRAS_RELEASE_*` e não cria GitHub Release.
+- Segredos oficiais usam exclusivamente o namespace `VECTRAS_RELEASE_*`: `VECTRAS_RELEASE_KEYSTORE_BASE64`, `VECTRAS_RELEASE_STORE_PASSWORD`, `VECTRAS_RELEASE_KEY_ALIAS` e `VECTRAS_RELEASE_KEY_PASSWORD`.
+- `signing_mode=auto`: com segredos `VECTRAS_RELEASE_*` válidos executa release assinado; sem segredos executa release interno unsigned apenas quando a lane permite validação interna.
+- `signing_mode=signed` sem segredos `VECTRAS_RELEASE_*` falha explicitamente; não há fallback silencioso nem ponte `ANDROID_*` para release oficial.
+- `.github/workflows/sign-release.yml` permanece apenas como compatibilidade manual bloqueada para publicação oficial; ele delega para `android-ci.yml` e não cria GitHub Release.
+- Ledger esperado de evidência: `docs/RELEASE_EVIDENCE_LEDGER.md`. Ao finalizar uma lane que gere APK/AAB, registre data UTC, commit, workflow/lane, ABI profile, signing mode, caminho do APK/AAB, SHA-256, relatório ABI, status de upload e bloqueios.
+- Vocabulário sem mistura: `release-unsigned-internal`, `debug-signed` e `signed-internal` são **validação interna**; `release-signed-official` com `signing_mode=signed` e segredos `VECTRAS_RELEASE_*` é **distribuição oficial**.
 
 
 ### Lane -> abi_profile -> uso permitido
