@@ -96,6 +96,19 @@ Esses campos fecham o vínculo entre o diagrama toroidal e a telemetria real (`w
 para inspeção de gargalo e reconsolidação no troubleshooting.
 
 
+
+## Contrato operacional de signing
+
+O namespace oficial de assinatura de release é `VECTRAS_RELEASE_*` e deve permanecer igual entre documentação, workflows, scripts e Gradle:
+
+- `VECTRAS_RELEASE_STORE_FILE`: caminho para a keystore materializada;
+- `VECTRAS_RELEASE_STORE_PASSWORD`: senha da keystore;
+- `VECTRAS_RELEASE_KEY_ALIAS`: alias da chave;
+- `VECTRAS_RELEASE_KEY_PASSWORD`: senha da chave;
+- `VECTRAS_RELEASE_KEYSTORE_B64` (opcional): transporte base64 da keystore para CI antes da decodificação temporária.
+
+`ANDROID_*` não é namespace oficial de signing. A única exceção permitida é a ponte de compatibilidade interna documentada em `tools/ci/prepare_release_signing.sh`, que converte nomes legados para `VECTRAS_RELEASE_*` com aviso auditável. Workflows novos ou alterados não devem introduzir `RELEASE_*`, `ANDROID_*` ou outro prefixo de signing sem atualizar este contrato operacional, `BUILDING.md`, `CONTRIBUTING.md`, `SECURITY.md` e o script canônico.
+
 ## Política de acionamento de workflows
 - Branches e pull requests continuam sob orquestração/validação normal; publicação oficial não deve ocorrer nessas entradas.
 - O fluxo oficial de release é `.github/workflows/release-dual-track.yml`, acionado por tag `v*.*.*` ou `workflow_dispatch` controlado com `release_tag` quando publicar, sempre delegando a build para `.github/workflows/android-ci.yml`.

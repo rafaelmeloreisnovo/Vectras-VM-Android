@@ -127,6 +127,11 @@ fix: validate QEMU command argv before execution
 security: block shell control operators in VM launch path
 ```
 
+
+### Signing namespace review rule
+
+New or modified workflows, Gradle release paths and CI scripts must not introduce a new signing namespace. The central contract is `VECTRAS_RELEASE_STORE_FILE`, `VECTRAS_RELEASE_STORE_PASSWORD`, `VECTRAS_RELEASE_KEY_ALIAS`, `VECTRAS_RELEASE_KEY_PASSWORD` and optional `VECTRAS_RELEASE_KEYSTORE_B64`. Any intentional change to signing names must update `BUILDING.md`, `docs/OPERATIONS.md`, `SECURITY.md` and `tools/ci/prepare_release_signing.sh` in the same change. `ANDROID_*` may appear only inside the documented internal compatibility bridge in `tools/ci/prepare_release_signing.sh`.
+
 ## Pull Request Checklist
 
 Before submitting:
@@ -144,6 +149,7 @@ Before submitting:
 For release or perf-release paths:
 
 - [ ] Release signing uses CI secrets or secure secret storage.
+- [ ] Signing variables use the central `VECTRAS_RELEASE_*` contract; no new namespace was introduced without updating the contract docs and `prepare_release_signing.sh`.
 - [ ] Unsigned release is explicitly marked internal only.
 - [ ] Firebase or similar production config is real and not placeholder.
 - [ ] Native ABI contract gate passes.
