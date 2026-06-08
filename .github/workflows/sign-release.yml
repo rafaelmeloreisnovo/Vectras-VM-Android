@@ -36,6 +36,9 @@ jobs:
           cat <<'MSG'
           sign-release.yml is legacy/compatibility only.
           Official signed release publication is blocked here by policy.
+          Signing secrets in this compatibility path are inherited by android-ci.yml
+          only through the canonical VECTRAS_RELEASE_* contract; RELEASE_* and
+          ANDROID_* signing namespaces are not configured in this workflow.
           Use .github/workflows/release-dual-track.yml, which delegates build/signing
           to .github/workflows/android-ci.yml and is the only workflow allowed to
           publish official release artifacts.

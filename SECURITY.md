@@ -61,6 +61,9 @@ Do not include real personal data, private disk images, production signing keys,
 
 - Do not commit keystores, passwords, signing secrets, Firebase private configuration, tokens or API keys.
 - Release signing must use CI secrets or another secure secret store.
+- Release signing variables must use the central `VECTRAS_RELEASE_*` contract: `VECTRAS_RELEASE_STORE_FILE`, `VECTRAS_RELEASE_STORE_PASSWORD`, `VECTRAS_RELEASE_KEY_ALIAS`, `VECTRAS_RELEASE_KEY_PASSWORD` and optional `VECTRAS_RELEASE_KEYSTORE_B64`.
+- New workflows must not introduce a new signing namespace without updating `BUILDING.md`, `docs/OPERATIONS.md`, `CONTRIBUTING.md`, this policy and `tools/ci/prepare_release_signing.sh` in the same review.
+- `ANDROID_*` signing names are allowed only as the documented internal compatibility bridge inside `tools/ci/prepare_release_signing.sh`; they must not be used as official release secrets.
 - Debug builds must not depend on production signing material.
 - Rotate any secret immediately if it is accidentally committed or exposed.
 

@@ -43,13 +43,15 @@ CI_RELEASE=false
 EXTRA_FLAGS=()
 if [[ "$SIGNING_MODE" == "signed" ]]; then
   CI_RELEASE=true
-  ./tools/ci/prepare_release_signing.sh --mode signed
-  EXTRA_FLAGS+=(
-    "-Pandroid.injected.signing.store.file=${VECTRAS_RELEASE_STORE_FILE}"
-    "-Pandroid.injected.signing.store.password=${ANDROID_KEYSTORE_PASSWORD}"
-    "-Pandroid.injected.signing.key.alias=${ANDROID_KEY_ALIAS}"
-    "-Pandroid.injected.signing.key.password=${ANDROID_KEY_PASSWORD}"
-  )
+  signing_output="$(mktemp "${TMPDIR:-/tmp}/vectras-local-signing-output.XXXXXX")"
+  GITHUB_OUTPUT="$signing_output" ./tools/ci/prepare_release_signing.sh --mode signed
+  signing_args="$(awk -F= '$1=="signing_args" {sub(/^signing_args=/, ""); print; exit}' "$signing_output")"
+  if [[ -z "$signing_args" ]]; then
+    echo "Falha ao resolver argumentos de assinatura VECTRAS_RELEASE_* para build local signed." >&2
+    exit 1
+  fi
+  read -r -a signing_args_array <<< "$signing_args"
+  EXTRA_FLAGS+=("${signing_args_array[@]}")
 else
   EXTRA_FLAGS+=("-PALLOW_UNSIGNED_RELEASE=true" "-PALLOW_PLACEHOLDER_FIREBASE_FOR_RELEASE=true" "-PCI_INTERNAL_VALIDATION=true")
 fi

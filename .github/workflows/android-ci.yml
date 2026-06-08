@@ -322,7 +322,7 @@ jobs:
         if: ${{ contains(needs.resolve.outputs.artifact_variants, 'release') }}
         shell: bash
         env:
-          VECTRAS_RELEASE_KEYSTORE_BASE64: ${{ secrets.VECTRAS_RELEASE_KEYSTORE_BASE64 }}
+          VECTRAS_RELEASE_KEYSTORE_B64: ${{ secrets.VECTRAS_RELEASE_KEYSTORE_B64 }}
           VECTRAS_RELEASE_STORE_PASSWORD: ${{ secrets.VECTRAS_RELEASE_STORE_PASSWORD }}
           VECTRAS_RELEASE_KEY_ALIAS: ${{ secrets.VECTRAS_RELEASE_KEY_ALIAS }}
           VECTRAS_RELEASE_KEY_PASSWORD: ${{ secrets.VECTRAS_RELEASE_KEY_PASSWORD }}
