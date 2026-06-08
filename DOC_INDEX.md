@@ -2,6 +2,15 @@
 
 # Índice global de documentação — Vectras VM Android
 
+## Metadados canônicos
+
+- Versão do documento: 2.1.
+- Última revisão: 2026-06-08.
+- Escopo: índice global, taxonomia documental, status dos documentos, donos lógicos e vínculos com código/workflow.
+- Status: canônico vigente.
+- Commit de referência: `HEAD`.
+- Fonte de verdade relacionada: [`docs/DOCUMENTATION_STANDARDS.md`](docs/DOCUMENTATION_STANDARDS.md), [`README.md`](README.md), [`docs/README.md`](docs/README.md) e [`docs/navigation/INDEX.md`](docs/navigation/INDEX.md).
+
 Este é o índice global completo e a fonte de navegação documental do repositório. Ele organiza os documentos por papel, status, dono lógico e vínculo com código/workflow para reduzir drift entre humanos, IA, CI, build Android/NDK e release.
 
 ## Taxonomia única de entrada
@@ -40,10 +49,11 @@ Este é o índice global completo e a fonte de navegação documental do reposit
 | [`DOC_INDEX.md`](DOC_INDEX.md) | Índice global completo. | Canônico vigente | Governança documental / technical writing | 2026-06-08 | Referencia app, engine, CI, docs, estado e workflows. |
 | [`docs/README.md`](docs/README.md) | Hub técnico. | Canônico vigente | Arquitetura / engenharia Android-NDK | 2026-06-08 | Vínculo com [`docs/architecture/VM_EXECUTION_FLOW.md`](docs/architecture/VM_EXECUTION_FLOW.md), [`docs/AI_BUILD_RELEASE_INDEX.md`](docs/AI_BUILD_RELEASE_INDEX.md) e [`docs/ci/workflow-matrix.md`](docs/ci/workflow-matrix.md). |
 | [`docs/navigation/INDEX.md`](docs/navigation/INDEX.md) | Navegação por audiência. | Canônico vigente | Enablement / documentação técnica | 2026-06-08 | Direciona leitura para arquitetura, operação, benchmark, pesquisa, auditoria e governança. |
-| [`PROJECT_STATE.md`](PROJECT_STATE.md) | Estado real validado. | Canônico vigente; estado declarado `BETA_BLOCKED` | Release management / CI owners | 2026-05-24 registrada; taxonomia vinculada em 2026-06-08 | Vínculo com [`reports/CANONICAL_BUILD_STATUS.md`](reports/CANONICAL_BUILD_STATUS.md), workflows Android/Host e políticas ABI. |
-| [`BUILDING.md`](BUILDING.md) | Execução local/CI/release. | Canônico vigente | Build/release engineering | 2026-06-08 por vínculo documental | Vínculo com [`tools/gradle_with_jdk21.sh`](tools/gradle_with_jdk21.sh), [`tools/ci/`](tools/ci/), [`app/build.gradle`](app/build.gradle) e [`.github/workflows/android-ci.yml`](.github/workflows/android-ci.yml). |
+| [`docs/DOCUMENTATION_STANDARDS.md`](docs/DOCUMENTATION_STANDARDS.md) | Padrão de metadados, escrita, navegação e rastreabilidade documental. | Canônico de governança | Governança documental / technical writing | 2026-06-08 | Define bloco `Metadados canônicos`, regras de revisão para workflow/build/release e vínculo com índices canônicos. |
+| [`PROJECT_STATE.md`](PROJECT_STATE.md) | Estado real validado. | Canônico vigente; estado declarado `BETA_BLOCKED` | Release management / CI owners | 2026-06-08; validação operacional continua limitada às evidências internas declaradas | Vínculo com [`reports/CANONICAL_BUILD_STATUS.md`](reports/CANONICAL_BUILD_STATUS.md), [`BUILDING.md`](BUILDING.md), [`.github/workflows/android-ci.yml`](.github/workflows/android-ci.yml), [`.github/workflows/host-ci.yml`](.github/workflows/host-ci.yml) e políticas ABI. |
+| [`BUILDING.md`](BUILDING.md) | Execução local/CI/release. | Canônico vigente | Build/release engineering | 2026-06-08 | Vínculo com [`tools/gradle_with_jdk21.sh`](tools/gradle_with_jdk21.sh), [`tools/ci/`](tools/ci/), [`app/build.gradle`](app/build.gradle), [`.github/workflows/android-ci.yml`](.github/workflows/android-ci.yml) e [`.github/workflows/release-dual-track.yml`](.github/workflows/release-dual-track.yml). |
 | [`docs/AI_BUILD_RELEASE_INDEX.md`](docs/AI_BUILD_RELEASE_INDEX.md) | Índice operacional para IA em build/release/ABI/signing. | Canônico técnico | Build/release engineering + IA operacional | 2026-06-08 por vínculo documental | Complementa [`BUILDING.md`](BUILDING.md) e workflows Android. |
-| [`docs/ci/workflow-matrix.md`](docs/ci/workflow-matrix.md) | Matriz canônica de workflows. | Canônico técnico | CI owners | 2026-06-08 por vínculo documental | Vínculo direto com [`.github/workflows/`](.github/workflows/). |
+| [`docs/ci/workflow-matrix.md`](docs/ci/workflow-matrix.md) | Matriz canônica de workflows. | Canônico técnico | CI owners | 2026-06-08 | Vínculo direto com [`.github/workflows/`](.github/workflows/), [`BUILDING.md`](BUILDING.md) e políticas de signing/artefatos. |
 | [`docs/architecture/VM_EXECUTION_FLOW.md`](docs/architecture/VM_EXECUTION_FLOW.md) | Fluxo de execução da VM. | Canônico técnico | Arquitetura/runtime | 2026-06-08 por vínculo documental | Vínculo com [`app/`](app/) e [`engine/`](engine/). |
 | [`docs/THREAT_MODEL.md`](docs/THREAT_MODEL.md) | Modelo de ameaças. | Canônico técnico | Segurança / compliance | 2026-06-08 por vínculo documental | Vínculo com release, signing, CI e privacidade. |
 | [`SECURITY.md`](SECURITY.md) | Política de segurança. | Canônico vigente | Segurança | 2026-06-08 por vínculo documental | Vínculo com triagem de vulnerabilidades e artefatos sensíveis. |

@@ -2,6 +2,15 @@
 
 # Vectras VM Android
 
+## Metadados canônicos
+
+- Versão do documento: 2.1.
+- Última revisão: 2026-06-08.
+- Escopo: entrada institucional, taxonomia operacional, links de primeiro contato e rota curta para build/release/documentação.
+- Status: canônico vigente.
+- Commit de referência: `HEAD`.
+- Fonte de verdade relacionada: [`DOC_INDEX.md`](DOC_INDEX.md), [`PROJECT_STATE.md`](PROJECT_STATE.md), [`BUILDING.md`](BUILDING.md) e [`docs/README.md`](docs/README.md).
+
 > Entrada institucional e operacional curta para humanos e agentes de IA. Este repositório reúne a aplicação Android, o engine nativo, automações de CI/release e documentação técnica do Vectras VM Android, com foco em rastreabilidade, build reprodutível, segurança de release e coerência entre código, workflow e documentação.
 
 ## Como navegar sem ambiguidade
@@ -35,7 +44,6 @@ Esta classificação é documental e não move arquivos. Migração física só 
 3. Use o hub técnico em [`docs/README.md`](docs/README.md) para aprofundar arquitetura, CI, NDK/JNI e governança.
 4. Use [`BUILDING.md`](BUILDING.md) para executar build local, CI ou release sem enfraquecer assinatura oficial.
 5. Use [`docs/navigation/INDEX.md`](docs/navigation/INDEX.md) quando a próxima leitura depender do público: engenharia, IA, pesquisa, operação, produto, compliance ou auditoria.
-
 
 ## Release oficial e publicação de artefatos
 

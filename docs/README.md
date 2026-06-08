@@ -2,6 +2,15 @@
 
 # Hub técnico — Vectras VM Android
 
+## Metadados canônicos
+
+- Versão do documento: 2.1.
+- Última revisão: 2026-06-08.
+- Escopo: hub técnico de arquitetura, build/release, CI, segurança, documentação, operação e pesquisa.
+- Status: canônico vigente.
+- Commit de referência: `HEAD`.
+- Fonte de verdade relacionada: [`../DOC_INDEX.md`](../DOC_INDEX.md), [`navigation/INDEX.md`](navigation/INDEX.md), [`DOCUMENTATION_STANDARDS.md`](DOCUMENTATION_STANDARDS.md) e [`ci/workflow-matrix.md`](ci/workflow-matrix.md).
+
 Este diretório é o hub técnico canônico. Ele aprofunda a entrada curta do [`../README.md`](../README.md), complementa o índice global [`../DOC_INDEX.md`](../DOC_INDEX.md) e aponta para execução local/CI/release em [`../BUILDING.md`](../BUILDING.md).
 
 ## Responsabilidade deste hub

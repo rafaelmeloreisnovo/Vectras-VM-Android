@@ -1,6 +1,16 @@
-<!-- DOC_ORG_SCAN: 2026-04-07 | source-scan: complete -->
+<!-- DOC_METADATA_SYNC: 2026-06-08 | role: project-state -->
 
 # PROJECT_STATE
+
+## Metadados canônicos
+
+- Versão do documento: 2.1.
+- Última revisão: 2026-06-08.
+- Escopo: estado operacional validado, bloqueios, riscos, limitações e critérios para não inferir build/release sem evidência atual.
+- Status: canônico vigente; estado técnico declarado continua condicionado às validações registradas no próprio documento.
+- Commit de referência: `HEAD`.
+- Fonte de verdade relacionada: [`reports/CANONICAL_BUILD_STATUS.md`](reports/CANONICAL_BUILD_STATUS.md), [`BUILDING.md`](BUILDING.md), [`DOC_INDEX.md`](DOC_INDEX.md), [`.github/workflows/android-ci.yml`](.github/workflows/android-ci.yml) e [`.github/workflows/host-ci.yml`](.github/workflows/host-ci.yml).
+
 
 Estado atual do projeto: `BETA_BLOCKED`.
 
@@ -42,7 +52,6 @@ Veja `FIXES_SUMMARY.md` para tabela completa.
 - Canonical host pipeline: `.github/workflows/host-ci.yml`.
 - Orchestration and final gates: `.github/workflows/pipeline-orchestrator.yml` and `.github/workflows/quality-gates.yml`.
 - Canonical matrix documentation: `docs/ci/workflow-matrix.md`.
-
 
 ## Coerência operacional de release
 - Branch padrão operacional inclui `master` no orquestrador, mantendo `main`, `develop` e `feature/**`.

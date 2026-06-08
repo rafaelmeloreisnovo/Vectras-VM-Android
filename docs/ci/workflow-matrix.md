@@ -1,6 +1,15 @@
-<!-- DOC_ORG_SCAN: 2026-04-30 | source-scan: workflow-classification-refresh -->
+<!-- DOC_METADATA_SYNC: 2026-06-08 | role: ci-workflow-matrix -->
 
 # CI workflow matrix (canonical + classification)
+
+## Metadados canônicos
+
+- Versão do documento: 2.1.
+- Última revisão: 2026-06-08.
+- Escopo: matriz canônica de workflows, entradas de CI, gates, release, signing, ABIs e publicação de artefatos.
+- Status: canônico técnico vigente.
+- Commit de referência: `HEAD`.
+- Fonte de verdade relacionada: [`../../BUILDING.md`](../../BUILDING.md), [`../AI_BUILD_RELEASE_INDEX.md`](../AI_BUILD_RELEASE_INDEX.md), [`.github/workflows/android-ci.yml`](../../.github/workflows/android-ci.yml) e [`.github/workflows/release-dual-track.yml`](../../.github/workflows/release-dual-track.yml).
 
 ## Classificação oficial
 
