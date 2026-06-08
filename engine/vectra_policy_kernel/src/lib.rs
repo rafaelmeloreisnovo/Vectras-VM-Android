@@ -599,7 +599,7 @@ impl PolicyKernel {
                 sequence,
                 offset,
                 len: read_len,
-                crc32c: crc32c(&chunk),
+                crc32c: verified_crc32c(&chunk, sequence),
                 optional_hash: fnv1a64(&chunk),
                 entropy_milli: entropy_milli(&chunk),
                 flags,
@@ -697,7 +697,7 @@ fn stream_chunks<R: Read>(
             sequence,
             offset,
             len: read_len,
-            crc32c: crc32c(&chunk),
+            crc32c: verified_crc32c(&chunk, sequence),
             optional_hash: fnv1a64(&chunk),
             entropy_milli: entropy_milli(&chunk),
             flags,
@@ -766,6 +766,12 @@ fn route_label(target: RouteTarget) -> &'static str {
         RouteTarget::Disk => "DISK",
         RouteTarget::Fallback => "FALLBACK",
     }
+}
+
+fn verified_crc32c(data: &[u8], sequence: u64) -> u32 {
+    UnifiedKernelHandle::new(sequence as u32, 0)
+        .and_then(|mut kernel| kernel.verify_crc32c(data))
+        .unwrap_or_else(|| crc32c(data))
 }
 
 pub fn crc32c(data: &[u8]) -> u32 {
