@@ -1,48 +1,63 @@
-<!-- DOC_ORG_SCAN: 2026-04-07 | source-scan: pending-manual-by-domain -->
+<!-- DOC_TAXONOMY_SYNC: 2026-06-08 | role: audience-navigation -->
 
-# Vectras VM - Navigation Index
+# Navegação por audiência — Vectras VM Android
 
-## Resumo
-Navegação por audiência para documentos técnicos e operacionais alinhados ao código implementado.
+Este índice direciona pessoas e agentes de IA para o documento certo conforme intenção, responsabilidade e nível de evidência necessário. Ele complementa a entrada curta [`../../README.md`](../../README.md), o índice global [`../../DOC_INDEX.md`](../../DOC_INDEX.md), o hub técnico [`../README.md`](../README.md), o estado real [`../../PROJECT_STATE.md`](../../PROJECT_STATE.md) e o guia de execução [`../../BUILDING.md`](../../BUILDING.md).
 
-## Trilha de navegação em 5 níveis
-1. Institucional: [`../../README.md`](../../README.md)
-2. Índice global: [`../../DOC_INDEX.md`](../../DOC_INDEX.md)
-3. Hub técnico: [`../README.md`](../README.md)
-4. Índice de navegação por público: [`INDEX.md`](INDEX.md)
-5. Documento-alvo (execução): `HIGH_LEVEL_INVESTORS.md`, `SCIENTISTS_RESEARCH.md`, `UNIVERSITIES_ACADEMIC.md`, `ENTERPRISE_COMPANIES.md`, `BENCHMARK_COMPARISONS.md`, `PERFORMANCE_OPERATIONS.md`.
+## Trilha universal de 5 passos
 
-## Audiências
-- **Big Tech / Board** → `BIGTECH_REVOLUTION_ANNOUNCE.md` (narrativa em 5 níveis)
-- **Investors & VCs** → `HIGH_LEVEL_INVESTORS.md` (diligência técnica)
-- **Scientists & Researchers** → `SCIENTISTS_RESEARCH.md` (protocolo reprodutível)
-- **Universities** → `UNIVERSITIES_ACADEMIC.md` (uso didático)
-- **Enterprises** → `ENTERPRISE_COMPANIES.md` (adoção operacional)
-- **Benchmarking** → `BENCHMARK_COMPARISONS.md` (método de comparação)
-- **Operations** → `PERFORMANCE_OPERATIONS.md` (runbook)
-- **Inovação & autoria técnica** → `TECHNOLOGY_INNOVATION_AUTHORSHIP.md` (pilares + autoria por subsistema)
+1. **Entrada institucional**: [`../../README.md`](../../README.md).
+2. **Estado real validado**: [`../../PROJECT_STATE.md`](../../PROJECT_STATE.md).
+3. **Índice global completo**: [`../../DOC_INDEX.md`](../../DOC_INDEX.md).
+4. **Hub técnico**: [`../README.md`](../README.md).
+5. **Execução local/CI/release**: [`../../BUILDING.md`](../../BUILDING.md).
 
-## Núcleo técnico
-- `../ARCHITECTURE.md`
-- `../BENCHMARK_MANAGER.md`
-- `../PERFORMANCE_INTEGRITY.md`
-- `../SOURCE_TRACEABILITY_MATRIX.md`
-- `TECHNOLOGY_INNOVATION_AUTHORSHIP.md`
-- `../../PROJECT_STATE.md`
-- `../../archive/root-history/IMPLEMENTATION_SUMMARY.md`
-- `../../archive/root-history/IMPLEMENTATION_COMPLETE.md`
+## Taxonomia de diretórios para qualquer audiência
+
+| Classe | Diretórios | Como interpretar |
+|---|---|---|
+| **Canônico** | [`../../app/`](../../app/), [`../../engine/`](../../engine/), [`../../tools/ci/`](../../tools/ci/), [`../../.github/workflows/`](../../.github/workflows/), [`../`](../) | Base atual de decisão técnica, build, CI, release e documentação. |
+| **Legado compatível** | [`../../android/`](../../android/) | Referência/compatibilidade; não é entrypoint oficial. |
+| **Experimental/ingestão** | [`../../Incluir/`](../../Incluir/), [`../../addthis/`](../../addthis/), [`../../_incoming/`](../../_incoming/) | Material em triagem; exige validação antes de uso normativo. |
+| **Histórico** | [`../../archive/`](../../archive/), [`../../bug/archive/`](../../bug/archive/) | Memória e evidência antiga; não substitui estado atual. |
+
+## Audiências e caminhos recomendados
+
+| Audiência | Primeira leitura | Segunda leitura | Critério de confiança |
+|---|---|---|---|
+| **Engenharia Android/NDK/JNI** | [`../README.md`](../README.md) | [`../../BUILDING.md`](../../BUILDING.md), [`../architecture/VM_EXECUTION_FLOW.md`](../architecture/VM_EXECUTION_FLOW.md) | Código em [`../../app/`](../../app/) + [`../../engine/`](../../engine/) e workflow verde. |
+| **Build, release e CI** | [`../../BUILDING.md`](../../BUILDING.md) | [`../AI_BUILD_RELEASE_INDEX.md`](../AI_BUILD_RELEASE_INDEX.md), [`../ci/workflow-matrix.md`](../ci/workflow-matrix.md) | Artefatos, assinatura e ABI validados por [`.github/workflows/`](../../.github/workflows/). |
+| **Operações/performance** | [`PERFORMANCE_OPERATIONS.md`](PERFORMANCE_OPERATIONS.md) | [`../active/LOWLEVEL_BRANCHLESS_SANS_HEAP_GUIDE.md`](../active/LOWLEVEL_BRANCHLESS_SANS_HEAP_GUIDE.md) | Benchmark/relatório real, não promessa narrativa. |
+| **Empresas/adoção operacional** | [`ENTERPRISE_COMPANIES.md`](ENTERPRISE_COMPANIES.md) | [`TRACEABILITY_GOVERNANCE.md`](TRACEABILITY_GOVERNANCE.md), [`../../SECURITY.md`](../../SECURITY.md) | Governança, segurança, compliance e release reproduzível. |
+| **Pesquisa/cientistas** | [`SCIENTISTS_RESEARCH.md`](SCIENTISTS_RESEARCH.md) | [`BENCHMARK_COMPARISONS.md`](BENCHMARK_COMPARISONS.md), [`../architecture/VM_EXECUTION_FLOW.md`](../architecture/VM_EXECUTION_FLOW.md) | Método reprodutível, falsificação e dados versionados. |
+| **Universidades/formação** | [`UNIVERSITIES_ACADEMIC.md`](UNIVERSITIES_ACADEMIC.md) | [`RUNTIME_ENGINE_SYSTEMS.md`](RUNTIME_ENGINE_SYSTEMS.md) | Separação clara entre teoria, implementação e experimento. |
+| **Investidores/board/produto** | [`HIGH_LEVEL_INVESTORS.md`](HIGH_LEVEL_INVESTORS.md) | [`BIGTECH_REVOLUTION_ANNOUNCE.md`](BIGTECH_REVOLUTION_ANNOUNCE.md), [`../../PROJECT_STATE.md`](../../PROJECT_STATE.md) | Estado real validado antes de narrativa estratégica. |
+| **Compliance/licenças/autoria** | [`TRACEABILITY_GOVERNANCE.md`](TRACEABILITY_GOVERNANCE.md) | [`../../THIRD_PARTY_NOTICES.md`](../../THIRD_PARTY_NOTICES.md), [`../../LICENSES_REGISTER.md`](../../LICENSES_REGISTER.md), [`../../AUTHORSHIP_CLEANROOM_PLAN.md`](../../AUTHORSHIP_CLEANROOM_PLAN.md) | Proveniência, licença, autoria e rollback. |
+| **Agentes de IA** | [`../../DOC_INDEX.md`](../../DOC_INDEX.md) | [`../README.md`](../README.md), [`../../PROJECT_STATE.md`](../../PROJECT_STATE.md) | Citar arquivos canônicos, marcar inferência e evitar promoção silenciosa de material experimental. |
+
+## Documentos desta navegação
+
+- [`BIGTECH_REVOLUTION_ANNOUNCE.md`](BIGTECH_REVOLUTION_ANNOUNCE.md) — narrativa estratégica para anúncio e alto nível.
+- [`HIGH_LEVEL_INVESTORS.md`](HIGH_LEVEL_INVESTORS.md) — diligência técnica para investidores e VCs.
+- [`SCIENTISTS_RESEARCH.md`](SCIENTISTS_RESEARCH.md) — protocolo reprodutível para pesquisa.
+- [`UNIVERSITIES_ACADEMIC.md`](UNIVERSITIES_ACADEMIC.md) — uso didático e formação.
+- [`ENTERPRISE_COMPANIES.md`](ENTERPRISE_COMPANIES.md) — adoção operacional empresarial.
+- [`BENCHMARK_COMPARISONS.md`](BENCHMARK_COMPARISONS.md) — método de comparação e benchmark.
+- [`PERFORMANCE_OPERATIONS.md`](PERFORMANCE_OPERATIONS.md) — runbook de operação/performance.
+- [`RUNTIME_ENGINE_SYSTEMS.md`](RUNTIME_ENGINE_SYSTEMS.md) — ponte runtime/engine/sistemas.
+- [`TRACEABILITY_GOVERNANCE.md`](TRACEABILITY_GOVERNANCE.md) — governança, rastreabilidade e compliance.
+- [`TECHNOLOGY_INNOVATION_AUTHORSHIP.md`](TECHNOLOGY_INNOVATION_AUTHORSHIP.md) — inovação, autoria e subsistemas.
+
+## Rapport técnico: inclusão informacional sem perder rigor
+
+- **Humano**: comece pela intenção, valide o estado real e avance por links internos.
+- **IA**: minimize inferências, cite a fonte, preserve distinção entre canônico/legado/experimental/histórico.
+- **Operação**: uma trilha só é confiável quando conecta documento, código, workflow, comando e resultado.
+- **Governança**: coerência vale mais que fluidez; material latente ou esquecido deve ser incluído como hipótese até ser validado.
 
 ## Metadados
-- Versão do documento: 1.3
-- Última atualização: 2026-03-06
-- Commit de referência: `HEAD`
-- Domínio de código coberto: Índice de navegação documental e ponte para domínios app, engine, tools, web e runtime.
 
-## Referência canônica de CI Android/Host
-
-- Pipeline oficial Android: `.github/workflows/android-ci.yml` (acionado por wrappers/orquestração).
-- Entrada Android: `.github/workflows/android.yml` (wrapper de eventos + delegação).
-- Compatibilidade ABI Android: `.github/workflows/compile-matrix.yml` (trilha auxiliar).
-- Pipeline oficial Host: `.github/workflows/host-ci.yml`.
-- Orquestração e gate final: `.github/workflows/pipeline-orchestrator.yml` + `.github/workflows/quality-gates.yml`.
-- Matriz canônica documentada em `docs/ci/workflow-matrix.md`.
+- Versão do documento: 2.0.
+- Última revisão: 2026-06-08.
+- Papel: navegação por audiência.
+- Commit de referência: `HEAD`.

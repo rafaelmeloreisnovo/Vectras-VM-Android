@@ -1,126 +1,125 @@
-<!-- DOC_ORG_SCAN: 2026-04-07 | source-scan: pending-manual-by-domain -->
-<!-- HOTFIX: 2026-06-05 — adicionados dois novos docs de compilador e low-level -->
+<!-- DOC_TAXONOMY_SYNC: 2026-06-08 | role: global-complete-index -->
 
-# Índice de Documentação do Repositório
+# Índice global de documentação — Vectras VM Android
 
-## Entradas principais
+Este é o índice global completo e a fonte de navegação documental do repositório. Ele organiza os documentos por papel, status, dono lógico e vínculo com código/workflow para reduzir drift entre humanos, IA, CI, build Android/NDK e release.
 
-- [`README.md`](README.md): visão institucional + navegação por camadas.
-- [`docs/README.md`](docs/README.md): curadoria técnica.
-- [`docs/THREE_LAYER_ANALYSIS.md`](docs/THREE_LAYER_ANALYSIS.md): análise estrutural em 3 camadas.
-- [`docs/ROOT_FILE_CHAIN.md`](docs/ROOT_FILE_CHAIN.md): reflexão arquivo-a-arquivo da raiz.
-- [`docs/AI_BUILD_RELEASE_INDEX.md`](docs/AI_BUILD_RELEASE_INDEX.md): índice operacional IA para build/release/ABI/signing.
+## Taxonomia única de entrada
 
-## Organização documental e dados — 2026-06-05
-- [`docs/active/AI_SESSION_FACT_MAP_2026-06-05.md`](docs/active/AI_SESSION_FACT_MAP_2026-06-05.md): mapa factual da sessão, diferenças entre sessão comum e contexto semântico ampliado, token vazio e direções de análise.
-- [`docs/rafaelia_reference/RAFAELIA_SEED_BLOCK_CATALOG_2026-06-05.md`](docs/rafaelia_reference/RAFAELIA_SEED_BLOCK_CATALOG_2026-06-05.md): catálogo das sementes E20/E13/S11 com invariantes, falsificação, expansão fullstack e riscos.
-- [`docs/active/RAFAELIA_ENTERPRISE_COMPLETION_PLAYBOOK_2026-06-05.md`](docs/active/RAFAELIA_ENTERPRISE_COMPLETION_PLAYBOOK_2026-06-05.md): playbook de uso real enterprise com mais de 20 modos de trabalho, critérios de aceite, failover e rollback.
-- [`docs/rafaelia_reference/rafaelia_enterprise_completion_manifest_2026-06-05.json`](docs/rafaelia_reference/rafaelia_enterprise_completion_manifest_2026-06-05.json): manifesto executável validado por `tools/docs/validate_rafaelia_completion_manifest.py`.
-- [`docs/active/LOWLEVEL_BRANCHLESS_SANS_HEAP_GUIDE.md`](docs/active/LOWLEVEL_BRANCHLESS_SANS_HEAP_GUIDE.md): guia completo expandido (de stub) para execução low-level sem heap, branchless, sem GC — padrões ARM64/NEON, arena, Q16.16, JNI zero-copy.
-- [`docs/active/VECTRA_COMPILER_PRECOMPILER_NONACADEMIC_2026-06-05.md`](docs/active/VECTRA_COMPILER_PRECOMPILER_NONACADEMIC_2026-06-05.md): técnicas de compilador/pré-compilador do Vectras Engine que excedem a cobertura da literatura acadêmica padrão: guards `RMR_JNI_BUILD`/`RMR_BAREMETAL`, flags ISA, BITRAF, ciclos vs clocks, toroidal 7D.
+| Documento | Papel único | Escopo |
+|---|---|---|
+| [`README.md`](README.md) | Entrada institucional e operacional curta. | Visão rápida, classificação de diretórios e sequência inicial. |
+| [`DOC_INDEX.md`](DOC_INDEX.md) | Índice global completo. | Catálogo documental, status, dono lógico e vínculos executáveis. |
+| [`docs/README.md`](docs/README.md) | Hub técnico. | Arquitetura, CI, build/release, low-level, segurança e governança. |
+| [`docs/navigation/INDEX.md`](docs/navigation/INDEX.md) | Navegação por audiência. | Trilhas por público humano/IA, engenharia, pesquisa, operação, produto e compliance. |
+| [`PROJECT_STATE.md`](PROJECT_STATE.md) | Estado real validado. | Estado corrente, bloqueios, limitações e última sincronização. |
+| [`BUILDING.md`](BUILDING.md) | Execução local/CI/release. | Comandos canônicos de build, signing, ABI, artefatos e validações. |
 
-## Organização documental e dados — 2026-06-02
-- [`docs/organization/DOC_ORGANIZATION_PLAN_2026-06-02.md`](docs/organization/DOC_ORGANIZATION_PLAN_2026-06-02.md): plano de saneamento em ciclos, com failsafe/failover/rollback.
-- [`docs/organization/LOOSE_FILES_AND_FRAGMENTS_INVENTORY_2026-06-02.md`](docs/organization/LOOSE_FILES_AND_FRAGMENTS_INVENTORY_2026-06-02.md): inventário de arquivos soltos, fragmentos e entradas pendentes até 7 níveis.
-- [`docs/organization/NECESSARY_CONDITIONS_AUDIT_2026-06-02.md`](docs/organization/NECESSARY_CONDITIONS_AUDIT_2026-06-02.md): auditoria executável de placeholders, gaps, bugs sinalizados e condições necessárias até 5 níveis.
-- [`docs/organization/NECESSARY_DATA_DELIVERY_MATRIX_2026-06-02.md`](docs/organization/NECESSARY_DATA_DELIVERY_MATRIX_2026-06-02.md): matriz enterprise de dados faltantes, correções, promoção e testes por camada fullstack.
-- [`docs/organization/INGRESS_ARTIFACTS_MANIFEST_2026-06-02.md`](docs/organization/INGRESS_ARTIFACTS_MANIFEST_2026-06-02.md): manifesto SHA-256 de entradas pendentes e overlays para rollback/failover.
-- [`docs/organization/SOURCE_ARCHITECTURE_SYNC_2026-06-02.md`](docs/organization/SOURCE_ARCHITECTURE_SYNC_2026-06-02.md): sincronização entre arquitetura de código atual e documentação até 5 níveis.
-- [`docs/rafaelia_reference/RAFAELIA_T7_VARIABLES_FORMULAS.md`](docs/rafaelia_reference/RAFAELIA_T7_VARIABLES_FORMULAS.md): vocabulário consolidado de fórmulas, variáveis e invariantes RAFAELIA/T7.
-- [`docs/active/AI_SESSION_TRUTH_AND_EMPTY_TOKEN_PROTOCOL_2026-06-02.md`](docs/active/AI_SESSION_TRUTH_AND_EMPTY_TOKEN_PROTOCOL_2026-06-02.md): protocolo de verdade operacional, token vazio e metáforas/parábolas para sessões de IA.
+## Classificação oficial dos diretórios
 
-## Documentos de raiz
-| Documento | Finalidade | Público-alvo | Classificação | Localização atual | Inbound link |
+| Classe | Diretórios | Uso permitido | Regra de promoção/migração |
+|---|---|---|---|
+| **Canônico** | [`app/`](app/), [`engine/`](engine/), [`tools/ci/`](tools/ci/), [`.github/workflows/`](.github/workflows/), [`docs/`](docs/) | Fonte vigente para app, engine, automação, CI/release e documentação ativa. | Alterações exigem validação por build/teste/documentação aplicáveis. |
+| **Legado compatível** | [`android/`](android/) | Compatibilidade, referência e comparação histórica controlada. | Não promover a entrypoint oficial sem plano de convergência e rollback. |
+| **Experimental/ingestão** | [`Incluir/`](Incluir/), [`addthis/`](addthis/), [`_incoming/`](_incoming/) | Triagem, ingestão, pesquisa e material ainda não canonizado. | Promover somente após revisão de licença, autoria, segurança, build e links. |
+| **Histórico** | [`archive/`](archive/), [`bug/archive/`](bug/archive/) | Registro de decisões, correções antigas e evidências arquivadas. | Restaurar conteúdo apenas com justificativa, teste e rollback explícitos. |
+
+## Política de migração documental e física
+
+1. Primeiro criar a camada de classificação, links e status.
+2. Depois abrir plano de migração física com escopo, owners, riscos e rollback.
+3. Não mover arquivos inicialmente para não quebrar links, scripts, workflows, histórico ou evidências.
+4. Qualquer promoção de experimental para canônico deve declarar origem, licença, vínculo com código, validação e critério de reversão.
+5. Qualquer uso de histórico como base atual deve citar a evidência e revalidar no commit corrente.
+
+## Status documental
+
+| Caminho | Papel | Status | Dono lógico | Última revisão | Vínculo com código/workflow |
 |---|---|---|---|---|---|
-| `README.md` | Porta de entrada do repositório e mapa de navegação geral. | Novos contribuidores, engenharia, auditoria técnica. | **Ativo** | Raiz | [`DOC_INDEX.md`](DOC_INDEX.md) |
-| `DOC_INDEX.md` | Índice canônico da documentação e governança documental. | Engenharia, technical writers, manutenção de docs. | **Ativo** | Raiz | [`README.md`](README.md) |
-| `PROJECT_STATE.md` | Estado corrente do ciclo de vida (stable/experimental/refactoring). | Liderança técnica, release managers, PM. | **Ativo** | Raiz | [`README.md`](README.md#governança-e-estado---navegação-rápida) |
-| `CHANGELOG.md` | Histórico contínuo de mudanças por versão. | Desenvolvimento, QA, release managers. | **Ativo** | Raiz | [`README.md`](README.md#governança-e-estado---navegação-rápida) |
-| `RELEASE_NOTES.md` | Notas executivas da release mais recente (registro temporal). | Produto, operação, stakeholders externos. | **Histórico** | Raiz | [`README.md`](README.md#governança-e-estado---navegação-rápida) |
-| `THIRD_PARTY_NOTICES.md` | Registro legal/licenças de terceiros. | Compliance, jurídico, segurança. | **Ativo** | Raiz | [`README.md`](README.md#governança-e-estado---navegação-rápida) |
-| `VECTRA_CORE.md` | Referência conceitual do runtime Vectra Core MVP (atualizado 2026-06-05: ciclos, compilador, roadmap). | Engenharia de runtime e arquitetura. | **Ativo** | Raiz | [`README.md`](README.md#governança-e-estado---navegação-rápida) |
-| `VECTRAS_MEGAPROMPT_DOCS.md` | Guia estratégico de documentação técnica ampla do projeto. | Documentação técnica, enablement e coordenação. | **Ativo** | Raiz | [`README.md`](README.md#governança-e-estado---navegação-rápida) |
-| `BUILDING.md` | Guia operacional de pré-requisitos e comandos de build (CLI/Gradle/ABI). | Engenharia, integração contínua, mantenedores de build. | **Ativo** | Raiz | [`README.md`](README.md#governança-e-estado---navegação-rápida) |
-| `TROUBLESHOOTING.md` | Runbook de diagnóstico para falhas de setup/build/bootstrap. | Engenharia, QA, suporte técnico. | **Ativo** | Raiz | [`README.md`](README.md#governança-e-estado---navegação-rápida) |
-| `FIXES_SUMMARY.md` | Sumário operacional das correções aplicadas e impactos técnicos (57 pontos). | Engenharia, auditoria técnica, manutenção corretiva. | **Ativo** | Raiz | [`README.md`](README.md#governança-e-estado---navegação-rápida) |
-| `VERSION_STABILITY.md` | Manifesto e checklist de estabilidade por versão/metodologia. | Arquitetura, release managers, governança técnica. | **Ativo** | Raiz | [`README.md`](README.md#governança-e-estado---navegação-rápida) |
-| `COMPILATION_FIXES.md` | Correções estruturais de build/JNI/ABI aplicadas. | Engenharia de build, CI. | **Ativo** | Raiz | [`DOC_INDEX.md`](DOC_INDEX.md) |
-| `archive/root-history/1.md` | Registro pontual de ajuste de compatibilidade/chaves. | Auditoria histórica. | **Arquivado** | `archive/root-history/` | [`README.md`](README.md#histórico-arquivado-raiz) |
-| `archive/root-history/ADVANCED_OPTIMIZATIONS.md` | Catálogo histórico de módulos avançados de otimização. | Engenharia/performance (consulta histórica). | **Arquivado** | `archive/root-history/` | [`README.md`](README.md#histórico-arquivado-raiz) |
-| `archive/root-history/BENCHMARK_REFACTORING_SUMMARY.md` | Sumário histórico da etapa de refatoração de benchmark. | Performance, engenharia de validação. | **Arquivado** | `archive/root-history/` | [`README.md`](README.md#histórico-arquivado-raiz) |
-| `archive/root-history/IMPLEMENTATION_COMPLETE.md` | Registro histórico de implementação consolidada. | Auditoria técnica e rastreabilidade histórica. | **Arquivado** | `archive/root-history/` | [`README.md`](README.md#histórico-arquivado-raiz) |
-| `archive/root-history/IMPLEMENTATION_SUMMARY.md` | Resumo histórico de implementação por evidências. | Auditoria técnica e documentação histórica. | **Arquivado** | `archive/root-history/` | [`README.md`](README.md#histórico-arquivado-raiz) |
-| `archive/root-history/VECTRAS_ANALYSIS_COMPLETE.md` | Relato histórico de análise consolidada. | Pesquisa histórica e auditoria. | **Arquivado** | `archive/root-history/` | [`README.md`](README.md#histórico-arquivado-raiz) |
-| `archive/root-history/VECTRAS_DEEP_EVIDENCE.md` | Evidências históricas detalhadas de revisão/validação. | Auditoria e governança histórica. | **Arquivado** | `archive/root-history/` | [`README.md`](README.md#histórico-arquivado-raiz) |
+| [`README.md`](README.md) | Entrada institucional e operacional curta. | Canônico vigente | Governança documental / release engineering | 2026-06-08 | Ponte para [`PROJECT_STATE.md`](PROJECT_STATE.md), [`DOC_INDEX.md`](DOC_INDEX.md), [`BUILDING.md`](BUILDING.md) e diretórios canônicos. |
+| [`DOC_INDEX.md`](DOC_INDEX.md) | Índice global completo. | Canônico vigente | Governança documental / technical writing | 2026-06-08 | Referencia app, engine, CI, docs, estado e workflows. |
+| [`docs/README.md`](docs/README.md) | Hub técnico. | Canônico vigente | Arquitetura / engenharia Android-NDK | 2026-06-08 | Vínculo com [`docs/architecture/VM_EXECUTION_FLOW.md`](docs/architecture/VM_EXECUTION_FLOW.md), [`docs/AI_BUILD_RELEASE_INDEX.md`](docs/AI_BUILD_RELEASE_INDEX.md) e [`docs/ci/workflow-matrix.md`](docs/ci/workflow-matrix.md). |
+| [`docs/navigation/INDEX.md`](docs/navigation/INDEX.md) | Navegação por audiência. | Canônico vigente | Enablement / documentação técnica | 2026-06-08 | Direciona leitura para arquitetura, operação, benchmark, pesquisa, auditoria e governança. |
+| [`PROJECT_STATE.md`](PROJECT_STATE.md) | Estado real validado. | Canônico vigente; estado declarado `BETA_BLOCKED` | Release management / CI owners | 2026-05-24 registrada; taxonomia vinculada em 2026-06-08 | Vínculo com [`reports/CANONICAL_BUILD_STATUS.md`](reports/CANONICAL_BUILD_STATUS.md), workflows Android/Host e políticas ABI. |
+| [`BUILDING.md`](BUILDING.md) | Execução local/CI/release. | Canônico vigente | Build/release engineering | 2026-06-08 por vínculo documental | Vínculo com [`tools/gradle_with_jdk21.sh`](tools/gradle_with_jdk21.sh), [`tools/ci/`](tools/ci/), [`app/build.gradle`](app/build.gradle) e [`.github/workflows/android-ci.yml`](.github/workflows/android-ci.yml). |
+| [`docs/AI_BUILD_RELEASE_INDEX.md`](docs/AI_BUILD_RELEASE_INDEX.md) | Índice operacional para IA em build/release/ABI/signing. | Canônico técnico | Build/release engineering + IA operacional | 2026-06-08 por vínculo documental | Complementa [`BUILDING.md`](BUILDING.md) e workflows Android. |
+| [`docs/ci/workflow-matrix.md`](docs/ci/workflow-matrix.md) | Matriz canônica de workflows. | Canônico técnico | CI owners | 2026-06-08 por vínculo documental | Vínculo direto com [`.github/workflows/`](.github/workflows/). |
+| [`docs/architecture/VM_EXECUTION_FLOW.md`](docs/architecture/VM_EXECUTION_FLOW.md) | Fluxo de execução da VM. | Canônico técnico | Arquitetura/runtime | 2026-06-08 por vínculo documental | Vínculo com [`app/`](app/) e [`engine/`](engine/). |
+| [`docs/THREAT_MODEL.md`](docs/THREAT_MODEL.md) | Modelo de ameaças. | Canônico técnico | Segurança / compliance | 2026-06-08 por vínculo documental | Vínculo com release, signing, CI e privacidade. |
+| [`SECURITY.md`](SECURITY.md) | Política de segurança. | Canônico vigente | Segurança | 2026-06-08 por vínculo documental | Vínculo com triagem de vulnerabilidades e artefatos sensíveis. |
+| [`CONTRIBUTING.md`](CONTRIBUTING.md) | Guia de contribuição. | Canônico vigente | Maintainers | 2026-06-08 por vínculo documental | Vínculo com fluxo Git, validação local e revisão. |
+| [`CHANGELOG.md`](CHANGELOG.md) | Histórico de mudanças. | Registro ativo | Release management | 2026-06-08 por vínculo documental | Vínculo com releases e PRs. |
+| [`RELEASE_NOTES.md`](RELEASE_NOTES.md) | Notas de release. | Registro temporal | Release management / produto | 2026-06-08 por vínculo documental | Vínculo com artefatos publicados e changelog. |
+| [`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md) | Avisos de terceiros/licenças. | Canônico compliance | Jurídico/compliance | 2026-06-08 por vínculo documental | Vínculo com código importado, forks e assets. |
+| [`LICENSES_REGISTER.md`](LICENSES_REGISTER.md) | Registro formal de licenças. | Canônico compliance | Jurídico/compliance | 2026-06-08 por vínculo documental | Vínculo com dependências, forks e distribuição. |
+| [`AUTHORSHIP_CLEANROOM_PLAN.md`](AUTHORSHIP_CLEANROOM_PLAN.md) | Plano clean-room de autoria. | Canônico compliance | Compliance / arquitetura | 2026-06-08 por vínculo documental | Vínculo com ingestão, legado e remoção de risco. |
+| [`resources/compliance/ASSET_CLEANROOM_POLICY.md`](resources/compliance/ASSET_CLEANROOM_POLICY.md) | Política clean-room de assets. | Canônico compliance | Compliance / design assets | 2026-06-08 por vínculo documental | Vínculo com [`resources/`](resources/) e proveniência de assets. |
+| [`resources/compliance/ASSET_PROVENANCE_REGISTER.csv`](resources/compliance/ASSET_PROVENANCE_REGISTER.csv) | Registro de proveniência de assets. | Canônico compliance | Compliance / assets | 2026-06-08 por vínculo documental | Vínculo com assets versionados. |
+| [`VECTRA_CORE.md`](VECTRA_CORE.md) | Referência conceitual do runtime/core. | Canônico técnico | Runtime/engine | 2026-06-08 por vínculo documental | Vínculo com [`engine/`](engine/) e contratos low-level. |
+| [`docs/active/LOWLEVEL_BRANCHLESS_SANS_HEAP_GUIDE.md`](docs/active/LOWLEVEL_BRANCHLESS_SANS_HEAP_GUIDE.md) | Guia low-level branchless/sem heap. | Canônico técnico especializado | Engine/native performance | 2026-06-08 por vínculo documental | Vínculo com [`engine/`](engine/) e validações low-level. |
+| [`tools/compliance/check_lowlevel_constraints.py`](tools/compliance/check_lowlevel_constraints.py) | Verificador estático low-level. | Canônico operacional | Engine/native performance | 2026-06-08 por vínculo documental | Executável para checagem de restrições low-level. |
+| [`docs/active/DIRECTORY_ALIGNMENT_MATRIX.md`](docs/active/DIRECTORY_ALIGNMENT_MATRIX.md) | Matriz de alinhamento de diretórios críticos. | Apoio canônico | Governança documental / arquitetura | 2026-06-08 por vínculo documental | Complementa esta classificação de diretórios. |
+| [`docs/organization/DOC_ORGANIZATION_PLAN_2026-06-02.md`](docs/organization/DOC_ORGANIZATION_PLAN_2026-06-02.md) | Plano de saneamento documental. | Plano ativo de organização | Governança documental | 2026-06-02 | Base para migração planejada, failsafe/failover/rollback. |
+| [`docs/organization/INGRESS_ARTIFACTS_MANIFEST_2026-06-02.md`](docs/organization/INGRESS_ARTIFACTS_MANIFEST_2026-06-02.md) | Manifesto de ingressos/overlays. | Apoio de ingestão | Governança documental / compliance | 2026-06-02 | Vínculo com experimental/ingestão e rollback. |
+| [`TROUBLESHOOTING.md`](TROUBLESHOOTING.md) | Diagnóstico operacional. | Canônico operacional | Operações / build engineering | 2026-06-08 por vínculo documental | Vínculo com falhas de build, CI, SDK/NDK e execução. |
+| [`FIXES_SUMMARY.md`](FIXES_SUMMARY.md) | Sumário de correções. | Registro ativo | Maintainers / release | 2026-06-08 por vínculo documental | Vínculo com estado e histórico de correções. |
+| [`VERSION_STABILITY.md`](VERSION_STABILITY.md) | Manifesto/checklist de estabilidade. | Governança ativa | Release management / QA | 2026-06-08 por vínculo documental | Vínculo com gates e critérios de release. |
+| [`app/README.md`](app/README.md) | Mapa local do app Android. | Canônico por diretório | Android app owners | 2026-06-08 por vínculo documental | Vínculo com [`app/build.gradle`](app/build.gradle) e código Android/JNI. |
+| [`engine/README.md`](engine/README.md) | Mapa local do engine. | Canônico por diretório | Engine/native owners | 2026-06-08 por vínculo documental | Vínculo com C/C++/ASM/RMR. |
+| [`tools/README.md`](tools/README.md) | Mapa local de ferramentas. | Canônico por diretório | Build/release/tooling owners | 2026-06-08 por vínculo documental | Vínculo com scripts de validação, CI e compliance. |
+| [`android/README.md`](android/README.md) | Mapa de legado compatível. | Legado compatível | Maintainers de compatibilidade | 2026-06-08 por vínculo documental | Não é entrypoint oficial; comparar com raiz antes de usar. |
+| [`_incoming/README.md`](_incoming/README.md) | Área de ingestão pendente. | Experimental/ingestão | Triagem documental/compliance | 2026-06-08 por vínculo documental | Promover somente com revisão e rollback. |
+| [`addthis/README.md`](addthis/README.md) | Área experimental/ingestão. | Experimental/ingestão | Triagem documental/compliance | 2026-06-08 por vínculo documental | Promover somente com revisão e rollback. |
+| [`archive/README.md`](archive/README.md) | Entrada do histórico arquivado. | Histórico | Governança documental | 2026-06-08 por vínculo documental | Evidência antiga; não substitui estado atual. |
+| [`bug/archive/README.md`](bug/archive/README.md) | Arquivo histórico de bugs. | Histórico | QA / manutenção | 2026-06-08 por vínculo documental | Consultar apenas como evidência histórica. |
 
-## Regra de manutenção do índice
-- Todo novo arquivo Markdown na raiz (`./*.md`) deve ser incluído na tabela **Documentos de raiz** no mesmo commit/PR em que for criado ou movido.
-- Antes de concluir mudanças na raiz, validar consistência com [`docs/ROOT_FILES_CATALOG.md`](docs/ROOT_FILES_CATALOG.md) e [`docs/ROOT_FILE_CHAIN.md`](docs/ROOT_FILE_CHAIN.md).
-- Para revisão/refatoração documental, seguir o fluxo em [`docs/README.md#fluxo-de-revisão-documental-refatorado`](docs/README.md#fluxo-de-revisão-documental-refatorado).
+## Índice técnico por domínio
 
-## Diretórios com documentação completa
-Cada diretório tem:
-1) `README.md` (camadas 1 e 2)
-2) `FILES_MAP.md` (camada 3)
+### Build, CI, release e artefatos
+- Guia de execução: [`BUILDING.md`](BUILDING.md).
+- Índice IA build/release: [`docs/AI_BUILD_RELEASE_INDEX.md`](docs/AI_BUILD_RELEASE_INDEX.md).
+- Matriz de workflows: [`docs/ci/workflow-matrix.md`](docs/ci/workflow-matrix.md).
+- Workflows: [`.github/workflows/android.yml`](.github/workflows/android.yml), [`.github/workflows/android-ci.yml`](.github/workflows/android-ci.yml), [`.github/workflows/host-ci.yml`](.github/workflows/host-ci.yml), [`.github/workflows/pipeline-orchestrator.yml`](.github/workflows/pipeline-orchestrator.yml), [`.github/workflows/quality-gates.yml`](.github/workflows/quality-gates.yml), [`.github/workflows/compile-matrix.yml`](.github/workflows/compile-matrix.yml).
+- Ferramentas CI: [`tools/ci/`](tools/ci/).
 
-- `app/`, `engine/`, `terminal-emulator/`, `terminal-view/`, `shell-loader/`, `bench/`, `bug/`, `demo_cli/`, `tools/`, `docs/`, `reports/`, `resources/`, `runtime/`, `web/`, `archive/`, `fastlane/`, `gradle/`, `3dfx/`.
+### Android, JNI, NDK e engine
+- App Android: [`app/`](app/) e [`app/README.md`](app/README.md).
+- Engine: [`engine/`](engine/) e [`engine/README.md`](engine/README.md).
+- Runtime/core: [`VECTRA_CORE.md`](VECTRA_CORE.md).
+- Arquitetura de execução: [`docs/architecture/VM_EXECUTION_FLOW.md`](docs/architecture/VM_EXECUTION_FLOW.md).
+- Guia low-level: [`docs/active/LOWLEVEL_BRANCHLESS_SANS_HEAP_GUIDE.md`](docs/active/LOWLEVEL_BRANCHLESS_SANS_HEAP_GUIDE.md).
 
-- `bug/`: [`bug/README.md`](bug/README.md) e [`bug/FILES_MAP.md`](bug/FILES_MAP.md).
+### Governança, segurança, compliance e autoria
+- Segurança: [`SECURITY.md`](SECURITY.md), [`docs/THREAT_MODEL.md`](docs/THREAT_MODEL.md).
+- Privacidade: [`PRIVACY.md`](PRIVACY.md).
+- Contribuição: [`CONTRIBUTING.md`](CONTRIBUTING.md).
+- Licenças: [`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md), [`LICENSES_REGISTER.md`](LICENSES_REGISTER.md).
+- Autoria/clean-room: [`AUTHORSHIP_CLEANROOM_PLAN.md`](AUTHORSHIP_CLEANROOM_PLAN.md), [`CREDITS_INSPIRATION.md`](CREDITS_INSPIRATION.md).
+- Assets: [`resources/compliance/ASSET_CLEANROOM_POLICY.md`](resources/compliance/ASSET_CLEANROOM_POLICY.md), [`resources/compliance/ASSET_PROVENANCE_REGISTER.csv`](resources/compliance/ASSET_PROVENANCE_REGISTER.csv).
 
+### Estado, histórico e manutenção
+- Estado atual: [`PROJECT_STATE.md`](PROJECT_STATE.md).
+- Changelog: [`CHANGELOG.md`](CHANGELOG.md).
+- Notas de release: [`RELEASE_NOTES.md`](RELEASE_NOTES.md).
+- Troubleshooting: [`TROUBLESHOOTING.md`](TROUBLESHOOTING.md).
+- Correções: [`FIXES_SUMMARY.md`](FIXES_SUMMARY.md).
+- Estabilidade: [`VERSION_STABILITY.md`](VERSION_STABILITY.md).
+- Histórico: [`archive/`](archive/), [`bug/archive/`](bug/archive/).
 
-## Domínio de bugs (`bug/`)
-- Escopo, objetivo e relação com `docs/`, `reports/` e raiz: [`bug/README.md`](bug/README.md).
-- Mapa arquivo-a-arquivo com função e status: [`bug/FILES_MAP.md`](bug/FILES_MAP.md).
-- Nomenclatura alinhada ao padrão (`README.md` + `FILES_MAP.md`) usado em `engine/`, `tools/` e `docs/`.
+### Organização documental e ingestão
+- Hub técnico: [`docs/README.md`](docs/README.md).
+- Navegação por audiência: [`docs/navigation/INDEX.md`](docs/navigation/INDEX.md).
+- Plano de organização: [`docs/organization/DOC_ORGANIZATION_PLAN_2026-06-02.md`](docs/organization/DOC_ORGANIZATION_PLAN_2026-06-02.md).
+- Inventário de fragmentos: [`docs/organization/LOOSE_FILES_AND_FRAGMENTS_INVENTORY_2026-06-02.md`](docs/organization/LOOSE_FILES_AND_FRAGMENTS_INVENTORY_2026-06-02.md).
+- Auditoria de condições necessárias: [`docs/organization/NECESSARY_CONDITIONS_AUDIT_2026-06-02.md`](docs/organization/NECESSARY_CONDITIONS_AUDIT_2026-06-02.md).
+- Matriz de entrega de dados: [`docs/organization/NECESSARY_DATA_DELIVERY_MATRIX_2026-06-02.md`](docs/organization/NECESSARY_DATA_DELIVERY_MATRIX_2026-06-02.md).
+- Manifesto de ingressos: [`docs/organization/INGRESS_ARTIFACTS_MANIFEST_2026-06-02.md`](docs/organization/INGRESS_ARTIFACTS_MANIFEST_2026-06-02.md).
+- Sincronização código/documentação: [`docs/organization/SOURCE_ARCHITECTURE_SYNC_2026-06-02.md`](docs/organization/SOURCE_ARCHITECTURE_SYNC_2026-06-02.md).
 
-## Documentos técnicos especializados
-- Narrativa em 5 níveis (executivo/técnico/operacional/verificabilidade/adoção): [`docs/navigation/BIGTECH_REVOLUTION_ANNOUNCE.md`](docs/navigation/BIGTECH_REVOLUTION_ANNOUNCE.md)
-- Auditoria de cobertura Markdown por domínio (2026-04-07): [`docs/active/DOCUMENTATION_COVERAGE_AUDIT_2026-04-07.md`](docs/active/DOCUMENTATION_COVERAGE_AUDIT_2026-04-07.md)
-- Catálogo completo de arquivos Markdown (2026-04-07): [`docs/active/ALL_MARKDOWN_FILES_2026-04-07.md`](docs/active/ALL_MARKDOWN_FILES_2026-04-07.md)
-- Arquitetura: `docs/ARCHITECTURE.md`, `docs/RAFAELIA_COHESION_ENTERPRISE_STACK.md`
-- Operação: `docs/OPERATIONS.md`, `docs/BLUEPRINT_FLUXOS_VM.md`
-- Performance: `docs/PERFORMANCE_INTEGRITY.md`, `docs/BENCHMARKS.md`
-- Conformidade: `docs/LEGAL_AND_LICENSES.md`, `docs/IP_MAP.md`, `THIRD_PARTY_NOTICES.md`
-- Build/release para IA: `docs/AI_BUILD_RELEASE_INDEX.md`
-- **Low-level sem heap (expandido)**: [`docs/active/LOWLEVEL_BRANCHLESS_SANS_HEAP_GUIDE.md`](docs/active/LOWLEVEL_BRANCHLESS_SANS_HEAP_GUIDE.md)
-- **Compilador/pré-compilador não-acadêmico**: [`docs/active/VECTRA_COMPILER_PRECOMPILER_NONACADEMIC_2026-06-05.md`](docs/active/VECTRA_COMPILER_PRECOMPILER_NONACADEMIC_2026-06-05.md)
+## Critérios para IA e humanos
 
-
-## Governança operacional (CI e segurança)
-- CI Android (wrapper de entrada): [`.github/workflows/android.yml`](.github/workflows/android.yml).
-- CI Android canônico: [`.github/workflows/android-ci.yml`](.github/workflows/android-ci.yml).
-- CI Engine/host canônico: [`.github/workflows/host-ci.yml`](.github/workflows/host-ci.yml).
-- Automação de dependências: [`.github/dependabot.yml`](.github/dependabot.yml).
-- Security allowlist de artefatos sensíveis: [`security/sensitive-artifacts-allowlist.txt`](security/sensitive-artifacts-allowlist.txt).
-- Verificador de artefatos sensíveis: [`tools/check_sensitive_artifacts.sh`](tools/check_sensitive_artifacts.sh).
-
-## Núcleo Engine RMR
-- Cabeçalhos low-level: [`engine/rmr/include/rmr_corelib.h`](engine/rmr/include/rmr_corelib.h), [`engine/rmr/include/rmr_ll_ops.h`](engine/rmr/include/rmr_ll_ops.h), [`engine/rmr/include/rmr_ll_tuning.h`](engine/rmr/include/rmr_ll_tuning.h), [`engine/rmr/include/rmr_math_fabric.h`](engine/rmr/include/rmr_math_fabric.h).
-- Implementações C: [`engine/rmr/src/rmr_corelib.c`](engine/rmr/src/rmr_corelib.c), [`engine/rmr/src/rmr_ll_ops.c`](engine/rmr/src/rmr_ll_ops.c), [`engine/rmr/src/rmr_ll_tuning.c`](engine/rmr/src/rmr_ll_tuning.c), [`engine/rmr/src/rmr_math_fabric.c`](engine/rmr/src/rmr_math_fabric.c).
-
-## Matriz de testes (app)
-- Suite unitária de VM/runtime: [`app/src/test/java/com/vectras/vm/`](app/src/test/java/com/vectras/vm/).
-- Suite unitária de terminal: [`app/src/test/java/com/vectras/vterm/`](app/src/test/java/com/vectras/vterm/).
-- Contratos utilitários/QMP: [`app/src/test/java/com/vectras/qemu/utils/`](app/src/test/java/com/vectras/qemu/utils/).
-
-## Relatórios e bugfix
-- Relatório consolidado de correções: [`docs/BUGFIX_REPORT.md`](docs/BUGFIX_REPORT.md).
-
-## RAFAELIA — 8 Caminhos Metodológicos (v1.8)
-- Manifesto de estabilidade: [`VERSION_STABILITY.md`](VERSION_STABILITY.md) — checklist completo, 8 blocos.
-- 8 Esferas Metodológicas: [`docs/ESFERAS_METODOLOGICAS_RAFAELIA.md`](docs/ESFERAS_METODOLOGICAS_RAFAELIA.md) — expandido de 5→8.
-- Constantes de caminhos: [`app/src/main/java/com/vectras/vm/rafaelia/RafaeliaMethodPaths.java`](app/src/main/java/com/vectras/vm/rafaelia/RafaeliaMethodPaths.java).
-- Validador runtime: [`app/src/main/java/com/vectras/vm/rafaelia/RafaeliaPathValidator.java`](app/src/main/java/com/vectras/vm/rafaelia/RafaeliaPathValidator.java).
-- Testes unitários: [`app/src/test/java/com/vectras/vm/rafaelia/RafaeliaPathValidatorTest.java`](app/src/test/java/com/vectras/vm/rafaelia/RafaeliaPathValidatorTest.java).
-
-## CI canonical reference (Android/Host)
-
-- Canonical Android pipeline: `.github/workflows/android-ci.yml`.
-- Android wrapper entrypoint: `.github/workflows/android.yml`.
-- Auxiliary Android ABI compatibility matrix: `.github/workflows/compile-matrix.yml`.
-- Canonical host pipeline: `.github/workflows/host-ci.yml`.
-- Orchestration and final gates: `.github/workflows/pipeline-orchestrator.yml` and `.github/workflows/quality-gates.yml`.
-- Canonical matrix documentation: `docs/ci/workflow-matrix.md`.
-
-- reports/UNIFIED_COHERENCE_TECHNICAL_MAP.md — consolidação de coerência operacional técnica em camadas.
-- reports/CORE_LOWLEVEL_IMPLEMENTATION_DOC.md — finalização da documentação do código low-level em core/.
+- Se a informação for estado atual, confirme em [`PROJECT_STATE.md`](PROJECT_STATE.md) e nos relatórios/workflows vinculados.
+- Se a informação for execução, use [`BUILDING.md`](BUILDING.md) e não o diretório legado [`android/`](android/).
+- Se a informação for localização documental, use este índice antes de inferir.
+- Se a informação vier de [`Incluir/`](Incluir/), [`addthis/`](addthis/) ou [`_incoming/`](_incoming/), trate como ingestão/experimental até revisão.
+- Se a informação vier de [`archive/`](archive/) ou [`bug/archive/`](bug/archive/), trate como histórico até revalidação no commit corrente.
