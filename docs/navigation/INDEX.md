@@ -2,6 +2,15 @@
 
 # Navegação por audiência — Vectras VM Android
 
+## Metadados canônicos
+
+- Versão do documento: 2.1.
+- Última revisão: 2026-06-08.
+- Escopo: navegação por audiência para humanos, agentes de IA, engenharia, pesquisa, produto, operação, release e compliance.
+- Status: canônico vigente.
+- Commit de referência: `HEAD`.
+- Fonte de verdade relacionada: [`../../DOC_INDEX.md`](../../DOC_INDEX.md), [`../README.md`](../README.md), [`../DOCUMENTATION_STANDARDS.md`](../DOCUMENTATION_STANDARDS.md) e [`../ci/workflow-matrix.md`](../ci/workflow-matrix.md).
+
 Este índice direciona pessoas e agentes de IA para o documento certo conforme intenção, responsabilidade e nível de evidência necessário. Ele complementa a entrada curta [`../../README.md`](../../README.md), o índice global [`../../DOC_INDEX.md`](../../DOC_INDEX.md), o hub técnico [`../README.md`](../README.md), o estado real [`../../PROJECT_STATE.md`](../../PROJECT_STATE.md) e o guia de execução [`../../BUILDING.md`](../../BUILDING.md).
 
 ## Trilha universal de 5 passos
@@ -54,10 +63,3 @@ Este índice direciona pessoas e agentes de IA para o documento certo conforme i
 - **IA**: minimize inferências, cite a fonte, preserve distinção entre canônico/legado/experimental/histórico.
 - **Operação**: uma trilha só é confiável quando conecta documento, código, workflow, comando e resultado.
 - **Governança**: coerência vale mais que fluidez; material latente ou esquecido deve ser incluído como hipótese até ser validado.
-
-## Metadados
-
-- Versão do documento: 2.0.
-- Última revisão: 2026-06-08.
-- Papel: navegação por audiência.
-- Commit de referência: `HEAD`.

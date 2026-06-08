@@ -1,6 +1,15 @@
-<!-- DOC_ORG_SCAN: 2026-04-07 | source-scan: pending-manual-by-domain -->
+<!-- DOC_METADATA_SYNC: 2026-06-08 | role: build-release-guide -->
 
 # BUILDING
+
+## Metadados canônicos
+
+- Versão do documento: 2.1.
+- Última revisão: 2026-06-08.
+- Escopo: build local, CI Android, NDK/JNI, signing, release, matriz ABI e validação de artefatos.
+- Status: canônico vigente para execução operacional; requer validação no commit corrente antes de afirmar sucesso de build.
+- Commit de referência: `HEAD`.
+- Fonte de verdade relacionada: [`.github/workflows/android-ci.yml`](.github/workflows/android-ci.yml), [`.github/workflows/release-dual-track.yml`](.github/workflows/release-dual-track.yml), [`tools/ci/`](tools/ci/) e [`docs/ci/workflow-matrix.md`](docs/ci/workflow-matrix.md).
 
 ## CLI prerequisites
 - JDK 17 (baseline runtime)
@@ -293,7 +302,6 @@ python3 tools/ci/resolve_abi_profile.py --profile internal_4abi
 
 A matriz ABI textual não deve ser duplicada em documentação/workflows; consulte sempre o contrato JSON.
 
-
 ## CMake presets (host + Android ARM32/ARM64)
 Use `CMakePresets.json` para compilar de forma determinística com o mesmo baseline do CI.
 
@@ -361,7 +369,6 @@ Strictness control by pipeline context:
   - permite `-PALLOW_UNSIGNED_RELEASE=true` ou `-Psigning_mode=unsigned`;
   - permite placeholder Firebase **somente** com sinal explícito `-PCI_INTERNAL_VALIDATION=true` (opcionalmente junto de `-PALLOW_PLACEHOLDER_FIREBASE_FOR_RELEASE=true`);
   - usada para CI interno quando segredos de produção não estão disponíveis.
-
 
 ## Selftest matrix expectations
 Canonical gate names:
