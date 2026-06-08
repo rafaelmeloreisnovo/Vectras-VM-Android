@@ -34,7 +34,7 @@ Rationale técnico:
 - contratos de AGP, SDK/Build Tools, NDK, CMake, ABI e signing são centralizados no projeto Gradle da **raiz**;
 - manter `android/` como fonte de verdade cria drift de versão e ambiguidades de entrypoint;
 - CI/release oficial valida e publica artefatos exclusivamente a partir da raiz (`:app:*`).
-- A orquestração em `.github/workflows/pipeline-orchestrator.yml` compila release **unsigned e signed** em `arm64-v8a+armeabi-v7a` via `android-ci.yml` e publica artefatos por lane.
+- O fluxo oficial de release é `.github/workflows/release-dual-track.yml`, acionado por tag `v*.*.*` ou despacho manual com `release_tag`, que delega build/assinatura para `.github/workflows/android-ci.yml`; somente esse par pode publicar artefato oficial assinado. `.github/workflows/sign-release.yml` é legado/compatibilidade e é bloqueado para publicação oficial.
 
 Comandos canônicos (raiz):
 ```bash
@@ -91,11 +91,12 @@ Comandos canônicos (raiz):
 - Para forçar trilha ZIP embutida, use `-DTERMUX_BOOTSTRAP_MODE=embedded-zip` (falha sem payload).
 
 ### Assinatura em CI (contrato canônico)
-- Workflow Android CI usa `tools/ci/prepare_release_signing.sh` como fonte de verdade para assinatura.
-- `signing_mode=auto`:
-  - com segredos `ANDROID_KEYSTORE_*` válidos: executa release assinado;
-  - sem segredos: executa release interno unsigned (sem degradar trilha oficial `signing_mode=signed`).
-- `signing_mode=signed` sem segredos falha explicitamente (não há fallback silencioso).
+- O fluxo oficial de publicação é `.github/workflows/release-dual-track.yml` + `.github/workflows/android-ci.yml`.
+- `android-ci.yml` usa `tools/ci/prepare_android_env.sh`, `tools/ci/prepare_release_signing.sh`, `tools/ci/materialize_android_ci_artifacts.sh` e o gate Gradle `:app:verifyDeliveredCompiledArtifacts` como cadeia única de build, assinatura, verificação e staging de artefatos.
+- Segredos oficiais usam exclusivamente o namespace `VECTRAS_RELEASE_*`: `VECTRAS_RELEASE_KEYSTORE_BASE64`, `VECTRAS_RELEASE_STORE_PASSWORD`, `VECTRAS_RELEASE_KEY_ALIAS` e `VECTRAS_RELEASE_KEY_PASSWORD`.
+- `signing_mode=auto`: com segredos `VECTRAS_RELEASE_*` válidos executa release assinado; sem segredos executa release interno unsigned apenas quando a lane permite validação interna.
+- `signing_mode=signed` sem segredos `VECTRAS_RELEASE_*` falha explicitamente; não há fallback silencioso nem ponte `ANDROID_*` para release oficial.
+- `.github/workflows/sign-release.yml` permanece apenas como compatibilidade manual bloqueada para publicação oficial; ele delega para `android-ci.yml` e não cria GitHub Release.
 
 
 ### Lane -> abi_profile -> uso permitido
@@ -211,7 +212,7 @@ Backend RAFCoder selecionado no CMake JNI:
 A seleção é registrada no configure CMake por ABI com log:
 `[RAFCoder] ABI=<abi> selected primitives backend: <backend>`.
 
-### 4) APK release unsigned e signed (segredos `ANDROID_*`)
+### 4) APK release unsigned e signed (segredos `VECTRAS_RELEASE_*`)
 Unsigned (validação interna):
 ```bash
 ./tools/gradle_with_jdk21.sh :app:assembleRelease \
@@ -229,12 +230,12 @@ Signed (oficial), usando injeção Gradle e segredos de CI:
   -Pandroid.injected.signing.key.password="$VECTRAS_RELEASE_KEY_PASSWORD"
 ```
 
-Compatibilidade com segredos `ANDROID_*` (legado/ponte para CI interno):
+Materialização canônica da assinatura em CI/local controlado:
 ```bash
-export VECTRAS_RELEASE_KEYSTORE_B64="$ANDROID_SIGNING_KEYSTORE"
-export VECTRAS_RELEASE_STORE_PASSWORD="$ANDROID_SIGNING_STORE_PASSWORD"
-export VECTRAS_RELEASE_KEY_ALIAS="$ANDROID_SIGNING_KEY_ALIAS"
-export VECTRAS_RELEASE_KEY_PASSWORD="$ANDROID_SIGNING_KEY_PASSWORD"
+export VECTRAS_RELEASE_KEYSTORE_BASE64="$(base64 -w0 /path/to/release.jks)"
+export VECTRAS_RELEASE_STORE_PASSWORD="***"
+export VECTRAS_RELEASE_KEY_ALIAS="***"
+export VECTRAS_RELEASE_KEY_PASSWORD="***"
 ./tools/ci/prepare_release_signing.sh --mode signed
 ```
 
@@ -252,7 +253,7 @@ Ambos estão exportados e consumidos por `MainActivity`, servindo como smoke pat
 
 ### 6) Roadmap DevOps curto (Android/NDK/JNI)
 1. CI matrix ABI obrigatório para `armeabi-v7a` + `arm64-v8a` em build JNI (`externalNativeBuild`) e CMake puro (`android-cmake-matrix-*`).
-2. Assinatura: convergir segredos para namespace único (`VECTRAS_RELEASE_*`) com ponte de compatibilidade `ANDROID_*` apenas em trilha interna controlada.
+2. Assinatura: manter namespace único (`VECTRAS_RELEASE_*`) sem fallback `ANDROID_*` na trilha oficial.
 3. Hardening de release: reforçar gates de alinhamento ABI/SDK/JVM + verificação de cadeia de signing antes de upload.
 4. Testes nativos: promover smoke JNI (`nativeMessage`/`nativeSectorSummary`) para check automatizado em CI (instrumentado) e manter selftests low-level por ABI.
 
@@ -375,7 +376,9 @@ Expected per architecture:
 
 ## CI canonical reference (Android/Host)
 
+- Official release publisher: `.github/workflows/release-dual-track.yml` delegating to `.github/workflows/android-ci.yml`.
 - Canonical Android pipeline: `.github/workflows/android-ci.yml`.
+- Legacy compatibility only, no official publication: `.github/workflows/sign-release.yml`.
 - Android wrapper entrypoint: `.github/workflows/android.yml`.
 - Auxiliary Android ABI compatibility matrix: `.github/workflows/compile-matrix.yml`.
 - Canonical host pipeline: `.github/workflows/host-ci.yml`.
