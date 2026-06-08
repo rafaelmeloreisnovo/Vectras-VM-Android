@@ -97,6 +97,8 @@ Comandos canônicos (raiz):
 - `signing_mode=auto`: com segredos `VECTRAS_RELEASE_*` válidos executa release assinado; sem segredos executa release interno unsigned apenas quando a lane permite validação interna.
 - `signing_mode=signed` sem segredos `VECTRAS_RELEASE_*` falha explicitamente; não há fallback silencioso nem ponte `ANDROID_*` para release oficial.
 - `.github/workflows/sign-release.yml` permanece apenas como compatibilidade manual bloqueada para publicação oficial; ele delega para `android-ci.yml` e não cria GitHub Release.
+- Ledger esperado de evidência: `docs/RELEASE_EVIDENCE_LEDGER.md`. Ao finalizar uma lane que gere APK/AAB, registre data UTC, commit, workflow/lane, ABI profile, signing mode, caminho do APK/AAB, SHA-256, relatório ABI, status de upload e bloqueios.
+- Vocabulário sem mistura: `release-unsigned-internal`, `debug-signed` e `signed-internal` são **validação interna**; `release-signed-official` com `signing_mode=signed` e segredos `VECTRAS_RELEASE_*` é **distribuição oficial**.
 
 
 ### Lane -> abi_profile -> uso permitido

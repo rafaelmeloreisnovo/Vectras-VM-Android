@@ -13,13 +13,20 @@
 - Rotação simples: `audit-ledger.prev.jsonl`
 - Campos: `ts_mono`, `ts_wall`, `vm_id`, `state_from`, `state_to`, `cause_code`, `dropped_logs`, `bytes`, `stall_ms`, `action_taken`
 
+
+## Release Evidence Ledger
+- Arquivo: `docs/RELEASE_EVIDENCE_LEDGER.md`.
+- Uso: registrar evidência de APK/AAB por data UTC, commit, workflow/lane, ABI profile, signing mode, SHA-256, relatório ABI, status de upload e bloqueios.
+- Classificação obrigatória: `unsigned`, `debug-signed` e `signed-internal` são **validação interna**; somente `signed` na lane `release-signed-official` é **distribuição oficial**.
+- Operação segura: se falta SHA-256, relatório ABI ou upload oficial, registre bloqueio explícito no ledger em vez de inferir sucesso.
+
 ## Matriz de gates de CI (auditoria de processo)
 | Gate | Objetivo | Etapa no workflow | Evidência/auditoria |
 |---|---|---|---|
 | Build Android | Garantir compilação de artefatos Debug/Release com toolchain suportada | `Build Debug APK` e `Build Release APK` | Logs do job `build` + APKs gerados |
 | Dependências de arquivos do repositório | Validar integridade de dependências declaradas em arquivos do repo antes da build | `Verify repository file dependencies` (`./tools/gradle_with_jdk21.sh verifyRepoFileDependencies`) | Saída do Gradle no job CI; falha bloqueia build |
 | Documentação crítica | Verificar links markdown locais em docs essenciais para evitar referências quebradas | `Validate local Markdown links (optional)` | Log da etapa (não bloqueante por `continue-on-error`) |
-| Artefatos | Publicar APKs para rastreabilidade e distribuição interna | `Upload Debug APK as artifact` e `Upload Release APK as artifact` | Artefatos versionados no GitHub Actions |
+| Artefatos | Publicar APKs para rastreabilidade e validação interna | `Upload Debug APK as artifact` e `Upload Release APK as artifact` | Artefatos versionados no GitHub Actions; registrar evidência em `docs/RELEASE_EVIDENCE_LEDGER.md` quando houver APK/AAB |
 
 ## Cenário de teste manual: flood
 1. Iniciar VM.
@@ -40,7 +47,7 @@
 | Build Android (debug + release) | Garantir integridade de compilação dos módulos Android antes de distribuição | Workflow canônico Android `android-ci.yml` via `workflow_call`; para publicação oficial, a entrada obrigatória é `release-dual-track.yml`, que executa lanes unsigned interna e signed oficial antes do gate final. | Artefatos `android-artifacts-*`, manifests de staging e APK/AAB publicados pelo Actions. |
 | Dependências de arquivos de repositório | Bloquear divergências entre documentação, mapeamentos e cadeia de arquivos essenciais | Etapa explícita `./tools/gradle_with_jdk21.sh verifyRepoFileDependencies` executada antes das etapas de build. | Log da etapa `Verify repository file dependencies` no job de CI. |
 | Documentação crítica (links locais markdown) | Detectar referências quebradas em `README.md` e `docs/**/*.md` | Etapa opcional `Validate local markdown links` em Python (com `continue-on-error`) verifica caminhos locais não-HTTP. | Relatório no log da etapa, com lista de links inválidos quando detectados. |
-| Artefatos de distribuição | Assegurar rastreabilidade de binários gerados na pipeline | `android-ci.yml` materializa artefatos com `tools/ci/materialize_android_ci_artifacts.sh`; somente `release-dual-track.yml` pode baixar a lane assinada oficial e criar GitHub Release. `sign-release.yml` é legado e bloqueado para publicação oficial. | Artefatos versionados por run no GitHub Actions, manifests `artifact-manifest.*` e release assets oficiais somente após gate signed verde. |
+| Artefatos de distribuição | Assegurar rastreabilidade de binários gerados na pipeline | `android-ci.yml` materializa artefatos com `tools/ci/materialize_android_ci_artifacts.sh`; somente `release-dual-track.yml` pode baixar a lane assinada oficial e criar GitHub Release. `sign-release.yml` é legado e bloqueado para publicação oficial. | Artefatos versionados por run no GitHub Actions, manifests `artifact-manifest.*`, ledger `docs/RELEASE_EVIDENCE_LEDGER.md` e release assets oficiais somente após gate signed verde. |
 
 
 
