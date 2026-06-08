@@ -234,7 +234,7 @@ Signed (oficial), usando injeção Gradle e segredos de CI:
 
 Materialização canônica da assinatura em CI/local controlado:
 ```bash
-export VECTRAS_RELEASE_KEYSTORE_BASE64="$(base64 -w0 /path/to/release.jks)"
+export VECTRAS_RELEASE_KEYSTORE_B64="$(base64 -w0 /path/to/release.jks)"
 export VECTRAS_RELEASE_STORE_PASSWORD="***"
 export VECTRAS_RELEASE_KEY_ALIAS="***"
 export VECTRAS_RELEASE_KEY_PASSWORD="***"
