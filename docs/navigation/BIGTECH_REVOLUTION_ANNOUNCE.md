@@ -1,5 +1,10 @@
 <!-- DOC_ORG_SCAN: 2026-04-07 | source-scan: pending-manual-by-domain -->
 
+> **Classificação:** `NARRATIVE`
+> **Natureza:** comunicação institucional e orientação executiva.
+> **Obrigação de evidência:** qualquer leitura de performance deste documento deve apontar para artefatos em [`../../bench/`](../../bench/), [`../../reports/metrics/`](../../reports/metrics/), [`../../tools/perf/`](../../tools/perf/) ou CI em [`.github/workflows/`](../../.github/workflows/). Sem esse vínculo, a redação deve permanecer como intenção, método ou navegação — nunca como resultado medido.
+> **Abstenção técnica:** este anúncio não fixa ganhos, rankings, percentuais, promessas de aceleração ou superioridade sem benchmark reproduzível anexado.
+
 # BIGTECH Revolution Announce — Vectras VM Android
 
 ## Objetivo
@@ -66,6 +71,13 @@ Comandos sugeridos:
 rg -n "METRIC_COUNT|rmr_hw_detect|RMR_BENCH" engine docs bench
 rg -n "PERFORMANCE_INTEGRITY|BENCHMARK_MANAGER" docs
 ```
+
+
+### Gate de evidência para performance
+- **Fontes aceitas:** [`../../bench/`](../../bench/), [`../../reports/metrics/`](../../reports/metrics/), [`../../tools/perf/`](../../tools/perf/) e artefatos/checks produzidos por [`.github/workflows/`](../../.github/workflows/).
+- **Regra operacional:** termos como _benchmark_, _throughput_, _latência_, _eficiência_, _fast-path_, _NEON_ ou _ganho_ devem ser acompanhados de commit, dispositivo/host, ABI/variant, comando executado e arquivo bruto de resultado.
+- **Rapport homem + IA:** humanos podem usar a narrativa para priorização e decisão; agentes de IA devem tratá-la como mapa de navegação e não inferir performance além dos artefatos citados.
+- **Abstenção segura:** se o artefato não existir, declarar apenas intenção arquitetural, hipótese ou protocolo de medição.
 
 ---
 

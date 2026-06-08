@@ -5,6 +5,8 @@ ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 ARTIFACT_ROOT="${ROOT_DIR}/ci-artifacts"
 STAGING_ROOT="${ARTIFACT_ROOT}/upload-staging"
 TIMESTAMP_UTC="$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
+RELEASE_EVIDENCE_LEDGER="docs/RELEASE_EVIDENCE_LEDGER.md"
+RELEASE_EVIDENCE_LEDGER_PATH="${ROOT_DIR}/${RELEASE_EVIDENCE_LEDGER}"
 
 LANE="${ABI_PROFILE:-${ARTIFACT_LANE:-}}"
 EXPECT_APP_ARTIFACTS="${EXPECT_APP_ARTIFACTS:-false}"
@@ -17,6 +19,8 @@ PERF_RUNS="${PERF_RUNS:-}"
 usage() {
   cat <<USAGE
 Uso: $0 --lane <lane> [--expect-app-artifacts true|false] [--expect-native-matrix true|false] [--expect-perf-results true|false]
+
+Materializa manifests de artefatos e aponta para ${RELEASE_EVIDENCE_LEDGER} como ledger esperado para evidência de release.
 USAGE
 }
 
@@ -148,6 +152,9 @@ write_manifests() {
     printf '  "run_id": "%s",\n' "$(json_escape "${GITHUB_RUN_ID:-local}")"
     printf '  "run_attempt": "%s",\n' "$(json_escape "${GITHUB_RUN_ATTEMPT:-1}")"
     printf '  "repository": "%s",\n' "$(json_escape "${GITHUB_REPOSITORY:-local}")"
+    printf '  "release_evidence_ledger": "%s",\n' "$(json_escape "${RELEASE_EVIDENCE_LEDGER}")"
+    printf '  "release_evidence_required_fields": "%s",\n' "data UTC; commit; workflow/lane; ABI profile; signing mode; APK/AAB gerado; SHA-256; relatório ABI; status de upload; observações/bloqueios"
+    printf '  "signing_vocabulary": "%s",\n' "unsigned/debug-signed/signed-internal=validação interna; signed=distribuição oficial"
     printf '  "ref": "%s",\n' "$(json_escape "${GITHUB_REF:-local}")"
     printf '  "sha": "%s",\n' "$(json_escape "${GITHUB_SHA:-local}")"
     printf '  "required": %s,\n' "${required}"
@@ -200,10 +207,18 @@ write_manifests() {
 - abi_mix_detected: ${abi_mix_detected}
 - abi_policy_violation: ${abi_policy_violation}
 - json_manifest: artifact-manifest.json
+- release_evidence_ledger: ${RELEASE_EVIDENCE_LEDGER}
+- release_evidence_required_fields: data UTC; commit; workflow/lane; ABI profile; signing mode; APK/AAB gerado; SHA-256; relatório ABI; status de upload; observações/bloqueios
+- signing_vocabulary: unsigned/debug-signed/signed-internal=validação interna; signed=distribuição oficial
 EOF
 
   printf '%s\n' "${destination}"
 }
+
+if [[ ! -f "${RELEASE_EVIDENCE_LEDGER_PATH}" ]]; then
+  echo "Ledger esperado não encontrado: ${RELEASE_EVIDENCE_LEDGER_PATH}" >&2
+  exit 1
+fi
 
 mkdir -p "${STAGING_ROOT}"
 
@@ -217,7 +232,9 @@ artifacts_out="$(write_manifests "android-artifacts" "${EXPECT_APP_ARTIFACTS}" "
 native_out="$(write_manifests "native-matrix" "${EXPECT_NATIVE_MATRIX}" "${matrix_dir}")"
 perf_out="$(write_manifests "perf-results" "${EXPECT_PERF_RESULTS}" "${perf_dir}")"
 
-echo "Materialized deterministic Android CI artifact manifests (lane=${LANE}):"
+echo "Materialized deterministic Android CI artifact manifests (lane=${LANE})."
+echo "Expected release evidence ledger format: ${RELEASE_EVIDENCE_LEDGER}"
+echo "Manifests:"
 echo " - ${logs_out}/artifact-manifest.json"
 echo " - ${artifacts_out}/artifact-manifest.json"
 echo " - ${native_out}/artifact-manifest.json"

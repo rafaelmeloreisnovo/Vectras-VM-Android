@@ -205,7 +205,7 @@ jobs:
           if [[ "${lane}" == "auto" ]]; then
             lane="${abi_profile}"
           fi
-          lane_label="$(echo "${lane}" | tr '[:upper:]' '[:lower:]' | tr -cs 'a-z0-9._-' '-')"
+          lane_label="$(printf '%s' "${lane}" | tr '[:upper:]' '[:lower:]' | tr -cs 'a-z0-9._-' '-')"
           echo "abi_profile=${abi_profile}" >> "$GITHUB_OUTPUT"
           echo "lane=${lane}" >> "$GITHUB_OUTPUT"
           echo "lane_label=${lane_label}" >> "$GITHUB_OUTPUT"
@@ -322,10 +322,10 @@ jobs:
         if: ${{ contains(needs.resolve.outputs.artifact_variants, 'release') }}
         shell: bash
         env:
-          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
-          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
-          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
-          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          VECTRAS_RELEASE_KEYSTORE_B64: ${{ secrets.VECTRAS_RELEASE_KEYSTORE_B64 }}
+          VECTRAS_RELEASE_STORE_PASSWORD: ${{ secrets.VECTRAS_RELEASE_STORE_PASSWORD }}
+          VECTRAS_RELEASE_KEY_ALIAS: ${{ secrets.VECTRAS_RELEASE_KEY_ALIAS }}
+          VECTRAS_RELEASE_KEY_PASSWORD: ${{ secrets.VECTRAS_RELEASE_KEY_PASSWORD }}
         run: |
           set -euo pipefail
           ./tools/ci/prepare_release_signing.sh --mode "${{ needs.resolve.outputs.signing_mode_effective }}"

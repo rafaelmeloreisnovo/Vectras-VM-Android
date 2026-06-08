@@ -1,60 +1,67 @@
-name: Sign & Release APK — Vectras VM Android
+name: Legacy Sign Release APK — compatibility only
 
 on:
-  push:
-    tags: ['v*.*.*']
   workflow_dispatch:
     inputs:
-      create_release:
-        description: Create a GitHub release from the signed APK
+      allow_compat_artifact:
+        description: "Build a signed compatibility artifact only; cannot publish official GitHub Release"
         type: boolean
         default: false
+      run_native_checks:
+        description: "Run canonical native CMake/NDK checks through android-ci.yml"
+        type: boolean
+        default: true
+      log_level:
+        description: "Gradle log level passed to android-ci.yml"
+        type: choice
+        default: lifecycle
+        options: [lifecycle, info, debug]
 
 permissions:
-  contents: write
+  contents: read
+
+concurrency:
+  group: legacy-sign-release-${{ github.ref }}
+  cancel-in-progress: false
 
 jobs:
-  sign-release:
+  legacy-publication-block:
+    name: Block official publication from legacy workflow
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Declare legacy-only release policy
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat <<'MSG'
+          sign-release.yml is legacy/compatibility only.
+          Official signed release publication is blocked here by policy.
+          Signing secrets in this compatibility path are inherited by android-ci.yml
+          only through the canonical VECTRAS_RELEASE_* contract; RELEASE_* and
+          ANDROID_* signing namespaces are not configured in this workflow.
+          Use .github/workflows/release-dual-track.yml, which delegates build/signing
+          to .github/workflows/android-ci.yml and is the only workflow allowed to
+          publish official release artifacts.
+          MSG
+          if [[ "${{ inputs.allow_compat_artifact }}" != "true" ]]; then
+            echo "::error::Set allow_compat_artifact=true only when a non-official compatibility artifact is required."
+            exit 1
+          fi
 
-      - uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: '17'
-          cache: gradle
-
-      # Decode keystore — written outside workspace to avoid accidental inclusion
-      - name: Decode release keystore
-        run: printf '%s' "$KEYSTORE_B64" | base64 -d > /tmp/release.jks
-        env:
-          KEYSTORE_B64: ${{ secrets.RELEASE_KEYSTORE_BASE64 }}
-
-      - name: Build signed release APK
-        env:
-          VECTRAS_RELEASE_STORE_FILE: /tmp/release.jks
-          VECTRAS_RELEASE_STORE_PASSWORD: ${{ secrets.RELEASE_KEYSTORE_PASSWORD }}
-          VECTRAS_RELEASE_KEY_ALIAS: ${{ secrets.RELEASE_KEY_ALIAS }}
-          VECTRAS_RELEASE_KEY_PASSWORD: ${{ secrets.RELEASE_KEY_PASSWORD }}
-          ciRelease: "true"
-          signing_mode: signed
-        run: ./gradlew app:assembleRelease
-
-      - name: Upload signed APK (artifact)
-        uses: actions/upload-artifact@v4
-        with:
-          name: vectras-vm-signed-${{ github.ref_name }}
-          path: app/build/outputs/apk/release/*.apk
-          retention-days: 30
-          if-no-files-found: error
-
-      - name: Create GitHub release
-        if: startsWith(github.ref, 'refs/tags/') || inputs.create_release == true
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: ${{ github.ref_name }}
-          files: app/build/outputs/apk/release/*.apk
-          generate_release_notes: true
-          draft: false
-          prerelease: ${{ contains(github.ref_name, '-beta') || contains(github.ref_name, '-rc') }}
+  signed-compat-artifact:
+    name: Signed compatibility artifact (no official publication)
+    needs: legacy-publication-block
+    uses: ./.github/workflows/android-ci.yml
+    permissions:
+      contents: read
+    with:
+      ci_lane: release-signed-official-arm32-arm64
+      run_workfile: release_gate
+      build_variant: release
+      signing_mode: signed
+      abi_profile: official_arm32_arm64
+      native_matrix_profile: canonical
+      run_lint: true
+      run_native_checks: ${{ inputs.run_native_checks }}
+      log_level: ${{ inputs.log_level }}
+    secrets: inherit

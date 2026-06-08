@@ -1,6 +1,16 @@
-<!-- DOC_ORG_SCAN: 2026-04-07 | source-scan: complete -->
+<!-- DOC_METADATA_SYNC: 2026-06-08 | role: project-state -->
 
 # PROJECT_STATE
+
+## Metadados canônicos
+
+- Versão do documento: 2.1.
+- Última revisão: 2026-06-08.
+- Escopo: estado operacional validado, bloqueios, riscos, limitações e critérios para não inferir build/release sem evidência atual.
+- Status: canônico vigente; estado técnico declarado continua condicionado às validações registradas no próprio documento.
+- Commit de referência: `HEAD`.
+- Fonte de verdade relacionada: [`reports/CANONICAL_BUILD_STATUS.md`](reports/CANONICAL_BUILD_STATUS.md), [`BUILDING.md`](BUILDING.md), [`DOC_INDEX.md`](DOC_INDEX.md), [`.github/workflows/android-ci.yml`](.github/workflows/android-ci.yml) e [`.github/workflows/host-ci.yml`](.github/workflows/host-ci.yml).
+
 
 Estado atual do projeto: `BETA_BLOCKED`.
 
@@ -28,6 +38,7 @@ Veja `FIXES_SUMMARY.md` para tabela completa.
 - `reports/DOC_SYNC_2026-05-24.md` — sincronização documental determinística (inventário, consolidação e gaps desta rodada)
 - `FIXES_SUMMARY.md` — tabela completa 57 fixes
 - `docs/SETUP_SDK_NDK.md` — setup local
+- `docs/RELEASE_EVIDENCE_LEDGER.md` — ledger padrão para evidência de release, SHA-256, ABI, assinatura, upload e bloqueios.
 - `tools/qemu_launch.yml` — QEMU configuration
 - `archive/root-history/IMPLEMENTATION_COMPLETE.md`
 - Política de overlays: ZIPs na raiz não são fonte de verdade; somente a árvore Git é oficial, com bloqueio em CI para conteúdo duplicado.
@@ -43,11 +54,11 @@ Veja `FIXES_SUMMARY.md` para tabela completa.
 - Orchestration and final gates: `.github/workflows/pipeline-orchestrator.yml` and `.github/workflows/quality-gates.yml`.
 - Canonical matrix documentation: `docs/ci/workflow-matrix.md`.
 
-
 ## Coerência operacional de release
 - Branch padrão operacional inclui `master` no orquestrador, mantendo `main`, `develop` e `feature/**`.
-- `release-unsigned-internal` é exclusivo para validação interna dual ARM (`internal_arm32_arm64`) sem assinatura.
-- `release-signed-official` é exclusivo para distribuição oficial `official_arm64` com assinatura.
+- `release-unsigned-internal` é exclusivo para **validação interna** dual ARM (`internal_arm32_arm64`) sem assinatura.
+- `release-signed-official` é exclusivo para **distribuição oficial** `official_arm64` com assinatura oficial.
+- Evidências de APK/AAB devem seguir `docs/RELEASE_EVIDENCE_LEDGER.md`; release unsigned nunca deve ser descrita como distribuição oficial.
 - `VECTRA_CORE_ENABLED` permanece ativo em release com gates de validação determinística.
 - Status canônico de build só é atualizado após CI real concluída.
 

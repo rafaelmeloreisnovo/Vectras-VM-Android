@@ -1,6 +1,15 @@
-<!-- DOC_ORG_SCAN: 2026-04-30 | source-scan: workflow-classification-refresh -->
+<!-- DOC_METADATA_SYNC: 2026-06-08 | role: ci-workflow-matrix -->
 
 # CI workflow matrix (canonical + classification)
+
+## Metadados canônicos
+
+- Versão do documento: 2.1.
+- Última revisão: 2026-06-08.
+- Escopo: matriz canônica de workflows, entradas de CI, gates, release, signing, ABIs e publicação de artefatos.
+- Status: canônico técnico vigente.
+- Commit de referência: `HEAD`.
+- Fonte de verdade relacionada: [`../../BUILDING.md`](../../BUILDING.md), [`../AI_BUILD_RELEASE_INDEX.md`](../AI_BUILD_RELEASE_INDEX.md), [`.github/workflows/android-ci.yml`](../../.github/workflows/android-ci.yml) e [`.github/workflows/release-dual-track.yml`](../../.github/workflows/release-dual-track.yml).
 
 ## Classificação oficial
 
@@ -10,7 +19,8 @@
 |---|---|---|
 | `.github/workflows/pipeline-orchestrator.yml` | `push`, `pull_request`, `workflow_dispatch` | Orquestra perfil (`host_only`/`android_only`/`full`) e chama trilhas canônicas. |
 | `.github/workflows/host-ci.yml` | direto por evento e/ou `workflow_call` | Pipeline host canônica (build, contratos e evidências host). |
-| `.github/workflows/android-ci.yml` | `workflow_call` | Pipeline Android canônica parametrizada (Gradle/NDK/CMake/JNI/testes/artefatos). |
+| `.github/workflows/android-ci.yml` | `workflow_call` | Pipeline Android canônica parametrizada (Gradle/NDK/CMake/JNI/testes/artefatos); é a fonte de verdade executável usada pelo release oficial. |
+| `.github/workflows/release-dual-track.yml` | `push` tag `v*.*.*`, `workflow_dispatch` com `release_tag` quando publicar | **Único workflow autorizado a publicar artefato oficial**; delega as lanes unsigned interna e signed oficial para `android-ci.yml` e só cria GitHub Release após gate signed verde. |
 | `.github/workflows/quality-gates.yml` | `workflow_call` | Gate final consolidando resultado host + android por perfil. |
 
 ### 2) Wrapper permitido
@@ -26,6 +36,7 @@
 |---|---|---|
 | `.github/workflows/android-native-ci.yml` | evento direto e/ou `workflow_call` | Matriz nativa Android (debug/release por perfil ABI) para cobertura técnica complementar. |
 | `.github/workflows/compile-matrix.yml` | `workflow_call` | Matriz auxiliar de compatibilidade ABI/variant para regressão. |
+| `.github/workflows/sign-release.yml` | `workflow_dispatch` manual | Legado/compatibilidade; bloqueado para publicação oficial e sem trigger de tag. |
 
 ### 4) Legado/arquivado
 
@@ -36,16 +47,14 @@
 
 ## Como os workflows são usados na prática
 
-1. **Entrada principal recomendada:** `pipeline-orchestrator.yml`.
-2. Orquestrador resolve perfil e dispara:
-   - `host-ci`;
-   - `android-native-ci` (oficial e arm32+arm64);
-   - `android-ci` para release binaries arm32+arm64 (signed/unsigned conforme lane);
-   - `quality-gates` no final.
-3. Workflows wrapper (`android.yml`, `ci.yml`) são permitidos para compatibilidade, sem virar fonte de verdade de política.
+1. **Entrada principal de validação contínua:** `pipeline-orchestrator.yml` para branches/PRs.
+2. **Entrada oficial de publicação:** `release-dual-track.yml`; ele chama `android-ci.yml` duas vezes, uma lane `release-unsigned-internal` e uma lane `release-signed-official-arm32-arm64`, valida ambas e publica somente a saída assinada oficial.
+3. `android-ci.yml` aplica `prepare_android_env.sh`, `prepare_release_signing.sh`, `:app:verifyDeliveredCompiledArtifacts`, política `APP_ABI_POLICY`/`SUPPORTED_ABIS` resolvida por `abi_profiles_contract.json` e `materialize_android_ci_artifacts.sh`.
+4. Workflows wrapper (`android.yml`, `ci.yml`) são permitidos para compatibilidade, sem virar fonte de verdade de política.
+5. `sign-release.yml` não é caminho oficial: é manual, legado, exige confirmação `allow_compat_artifact=true` e não publica GitHub Release.
 
 ## Política ABI resumida
 
-- **Oficial:** `official_arm64`.
+- **Oficial de publicação neste fluxo dual-track:** `official_arm32_arm64` para pacote compatível arm32+arm64 assinado. `official_arm64` continua reservado para perfil store arm64-only quando acionado por lane específica.
 - **Validação interna controlada:** `official_arm32_arm64`, `internal_arm32_arm64` e matrizes expandidas conforme lane/profile.
 - **NEON:** existe sinalização de build e inclusão condicional de fontes por ABI ARM; classificação de implementação deve sempre ser comprovada por execução/teste, não só por flag.
