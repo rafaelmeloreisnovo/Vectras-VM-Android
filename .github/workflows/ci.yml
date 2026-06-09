@@ -2,10 +2,6 @@ name: ci-legacy-alias
 
 on:
   workflow_call:
-  push:
-    branches: [main, master, dev, "release/**"]
-  pull_request:
-    branches: [main, master, dev, "release/**"]
   workflow_dispatch:
 
 permissions:
