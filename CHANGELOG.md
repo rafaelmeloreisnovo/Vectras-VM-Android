@@ -8,6 +8,10 @@ The format is based on Keep a Changelog.
 ## [Unreleased]
 
 ### Added
+- Módulo VECTRA_OS adicionado ao engine RMR: cabeçalho `engine/rmr/include/rmr_vectra_os.h`, implementação `engine/rmr/src/rmr_vectra_os.c` e 4 arquivos ASM de interoperabilidade em `engine/rmr/interop/` (ARM64, x86-64, ARMv7, RV64). Provê contrato de compilação zero-abstração: macros Q16.16 sem FPU/libm (`VOS_Q16_MUL` etc.), alocador bump-pointer BSS-backed sem malloc (`VOS_ARENA_ALLOC`), rollback O(1) de arena (`VOS_MARK`/`VOS_RESTORE`), seleção branchless (`VOS_CSEL`), verificação de atrator FRAF 48 iterações (`VOS_FRAF_CONVERGE`), benchmark de mediana 31 amostras sem heap (`VOS_BENCH_RUN`), failsafe por arquitetura (`VOS_FAILSAFE`: WFI em ARM64, HLT em x86, return-0 em JNI) e registro de flags de capacidade de hardware 8 bits com cadeia CRC32C (`VOS_CAP_CRC32C_HW`, `VOS_CAP_NEON_128`, `VOS_CAP_CNTVCT`, `VOS_CAP_RDTSC`, `VOS_CAP_SSE42`).
+- Build gc-sections ativado para o módulo VECTRA_OS: `-ffunction-sections -fdata-sections -fvisibility=hidden -Wl,--gc-sections -Wl,--exclude-libs,ALL` no `CMakeLists.txt`. O sinal de eliminação correto é `-Wunused-function` (indica código removido pelo linker), não um problema a suprimir.
+- Condição de compilação ASM ARM64 ausente adicionada ao `CMakeLists.txt` para habilitar corretamente os primitivos assembly ARM64 do módulo VECTRA_OS.
+- Todos os símbolos ASM do módulo VECTRA_OS marcados `.hidden` (STV_HIDDEN, fora do `.dynsym`); cabeçalho usa `#pragma GCC visibility push/pop`. Apenas 3 símbolos com visibilidade DEFAULT exportados: `vos_init`, `vos_selftest`, `vos_caps_report`.
 - Módulo BITOMEGA adicionado ao engine RMR com API pública em `engine/rmr/include/bitomega.h` e implementação determinística em `engine/rmr/src/bitomega.c`.
 - Política ABI `arm32-arm64` ativada no branch de desenvolvimento: artefatos compilados para `arm64-v8a` (NEON/SIMD + CRC32HW, `-march=armv8-a+crc+simd`) e `armeabi-v7a` (NEON, `-march=armv7-a -mfpu=neon`).
 
