@@ -142,7 +142,12 @@ u8 RmR_TCGCache_Insert(RmR_TCGCache *cache,
     if (!rmr_isorf_set_byte(&cache->store, toroidal_addr + i, host_block[i])) return 0u;
   }
 
-  dst->flags = 0u;
+  /* HOTFIX: preserve RMR_TCG_BLOCK_COLLAPSING across the flag reset so that the
+   * guard at rmr_tcg_should_collapse() line 25 ("if already collapsing, skip") can
+   * actually fire on subsequent updates.  Previously dst->flags = 0u wiped the
+   * COLLAPSING bit that was just set on line 130, making the guard permanently dead
+   * and causing every qualifying block to increment collapse_count on every update. */
+  dst->flags = (dst->flags & RMR_TCG_BLOCK_COLLAPSING) | RMR_TCG_BLOCK_VALIDATED;
   dst->guest_crc32c = guest_crc32c;
   dst->host_size = host_size;
   dst->toroidal_addr = toroidal_addr;
@@ -150,7 +155,6 @@ u8 RmR_TCGCache_Insert(RmR_TCGCache *cache,
   dst->attractor_class = (u8)attractor_class;
   dst->miss_var = miss_var;
   dst->coherence_score = (u16)(128u + RmR_Attractor_RetentionBias(attractor_class));
-  dst->flags = RMR_TCG_BLOCK_VALIDATED;
   return 1u;
 }
 

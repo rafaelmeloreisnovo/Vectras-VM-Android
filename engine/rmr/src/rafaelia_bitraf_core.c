@@ -642,7 +642,10 @@ static void raf_append_point(
   {
     u32 mix = (u32)noise_hint + (u32)(payload64 ^ (payload64>>32));
     u32 shift = cfg ? (u32)cfg->noise_mix_shift : 0u;
-    st->noise_acc += (mix >> shift);
+    /* HOTFIX: saturate noise_acc instead of wrapping — overflow would corrupt
+     * noise_avg = noise_acc/count in raf_autotune_config, skewing adaptive weights. */
+    u32 delta = (mix >> shift);
+    st->noise_acc = (st->noise_acc > 0xFFFFFFFFu - delta) ? 0xFFFFFFFFu : st->noise_acc + delta;
   }
   p->noise = (u16)(st->noise_acc & 0xFFFFu);
 
@@ -664,12 +667,14 @@ static void raf_append_point(
     p->crc16 = raf_crc16(buf, 24);
   }
 
-  if(raf_is_attractor42_cfg(p, cfg)) st->attract++;
+  /* HOTFIX: saturate attract and count — wrapping to 0 corrupts autotune ratios
+   * (attract/count comparisons in raf_autotune_config) and division by near-zero. */
+  if(raf_is_attractor42_cfg(p, cfg) && st->attract < 0xFFFFFFFFu) st->attract++;
   raf_update_best42(st, p, cfg);
 
   /* avança ring */
   st->head = (st->head + 1u) % RAF_POINTS_MAX;
-  st->count++;
+  if(st->count < 0xFFFFFFFFu) st->count++;
 }
 
 /* ==== Motor BITRAF: 4 ciclos (input/process/output/semântica) ==== */
