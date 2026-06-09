@@ -113,7 +113,12 @@ u32 RmR_VectorField_RunIndex(RmR_VectorFieldState *state, u32 index, u32 correct
   state->audit_crc = rmr_vf_mix(state->audit_crc, state->toroid_node);
   state->audit_crc = rmr_vf_mix(state->audit_crc, state->phi_q8 ^ state->flags);
 
-  if (state->n_mod42 >= RMR_VECTOR_MOD_BASE || state->arc_deg >= RMR_VECTOR_ARC_BASE) {
+  /* HOTFIX: n_mod42 = n_raw % MOD_BASE is always < MOD_BASE by definition, so the
+   * previous condition (>= MOD_BASE) was mathematically impossible — a dead safety
+   * net.  The real convergence hazard is gap_q16/spiral_q16 reaching 0 after ~78
+   * rmr_vf_step_contract multiplications by sqrt(3)/2 in Q16.16; once zero, the
+   * state degenerates (audit_crc xor'd with 0 every step).  Guard that instead. */
+  if (state->gap_q16 == 0u || state->spiral_q16 == 0u) {
     *state = rollback;
     state->flags |= RMR_VECTOR_FLAG_ROLLBACK | RMR_VECTOR_FLAG_FAILSAFE;
   }
