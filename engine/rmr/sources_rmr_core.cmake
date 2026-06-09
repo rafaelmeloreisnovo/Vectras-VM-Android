@@ -8,6 +8,7 @@
 #   - asm-per-arch
 
 set(RMR_SOURCE_GROUP_CORE
+  engine/rmr/src/rmr_vectra_os.c
   engine/rmr/src/bitomega.c
   engine/rmr/src/rmr_cycles.c
   engine/rmr/src/rmr_external_engine.c
@@ -57,10 +58,12 @@ set(RMR_SOURCE_GROUP_HOST_ONLY
 set(RMR_SOURCE_GROUP_ASM_X86_64
   engine/rmr/interop/rmr_lowlevel_x86_64.S
   engine/rmr/interop/rmr_casm_x86_64.S
+  engine/rmr/interop/rmr_vectra_os_x86_64.S
 )
 
 set(RMR_SOURCE_GROUP_ASM_ARM64
   engine/rmr/interop/rmr_casm_arm64.S
+  engine/rmr/interop/rmr_vectra_os_arm64.S
 )
 
 # NEON/SIMD source must be ABI-scoped to ARM to avoid accidental cross-ABI
@@ -71,6 +74,7 @@ set(RMR_SOURCE_GROUP_ASM_ARM64_NEON
 
 set(RMR_SOURCE_GROUP_ASM_RISCV64
   engine/rmr/interop/rmr_casm_riscv64.S
+  engine/rmr/interop/rmr_vectra_os_riscv64.S
 )
 
 function(rmr_manifest_apply_base OUT_VAR)
@@ -87,4 +91,5 @@ endfunction()
 
 set(RMR_SOURCE_GROUP_ASM_ARM32
   engine/rmr/interop/rmr_stability_armv7.S
+  engine/rmr/interop/rmr_vectra_os_armv7.S
 )
