@@ -6,34 +6,13 @@ on:
       profile_set:
         type: string
         default: all
-  pull_request:
-    paths:
-      - 'app/**'
-      - 'engine/**'
-      - 'terminal-emulator/**'
-      - 'shell-loader/**'
-      - 'gradle/**'
-      - '**/*.gradle'
-      - '**/*.gradle.kts'
-      - 'settings.gradle'
-      - 'settings.gradle.kts'
-      - 'gradle.properties'
-      - '.github/workflows/android-native-ci.yml'
-  push:
-    branches: [main, master, develop, 'release/**']
-    paths:
-      - 'app/**'
-      - 'engine/**'
-      - 'terminal-emulator/**'
-      - 'shell-loader/**'
-      - 'gradle/**'
-      - '**/*.gradle'
-      - '**/*.gradle.kts'
-      - 'settings.gradle'
-      - 'settings.gradle.kts'
-      - 'gradle.properties'
-      - '.github/workflows/android-native-ci.yml'
   workflow_dispatch:
+    inputs:
+      profile_set:
+        description: 'ABI profile set to run'
+        type: choice
+        default: all
+        options: [all, official, official_arm32_arm64]
 
 permissions:
   contents: read

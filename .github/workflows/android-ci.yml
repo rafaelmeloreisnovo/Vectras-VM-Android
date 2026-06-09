@@ -45,6 +45,7 @@ concurrency:
 jobs:
   resolve:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     permissions:
       contents: read
     outputs:
@@ -214,6 +215,7 @@ jobs:
 
   abi-contract-gate:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     permissions:
       contents: read
     needs: resolve
@@ -226,6 +228,7 @@ jobs:
 
   build:
     runs-on: ubuntu-latest
+    timeout-minutes: 120
     permissions:
       contents: read
     needs: [resolve, abi-contract-gate]

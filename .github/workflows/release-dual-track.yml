@@ -74,6 +74,7 @@ jobs:
   release-dual-gate:
     name: Release dual gate
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     if: always()
     needs: [release-unsigned-internal, release-signed-official]
     steps:
@@ -93,6 +94,7 @@ jobs:
   publish-official-release:
     name: Publish official GitHub Release
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     needs: [release-dual-gate, release-signed-official]
     if: ${{ needs.release-signed-official.result == 'success' && (startsWith(github.ref, 'refs/tags/') || (github.event_name == 'workflow_dispatch' && inputs.publish_github_release)) }}
     permissions:

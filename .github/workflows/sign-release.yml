@@ -28,6 +28,7 @@ jobs:
   legacy-publication-block:
     name: Block official publication from legacy workflow
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
       - name: Declare legacy-only release policy
         shell: bash
