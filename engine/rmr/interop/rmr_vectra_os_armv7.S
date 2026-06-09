@@ -18,7 +18,9 @@
    Returns   : r1:r0 = 64-bit cycle count (high:low — AAPCS32 u64 return)
    Requirement: Linux userspace (PMUSERENR.EN = 1 set by kernel).
    ───────────────────────────────────────────────────────────────────────── */
+    /* .hidden: gc-sections eliminates this section if pmccntr path unused. */
     .global vos_rdcnt_av7
+    .hidden vos_rdcnt_av7
     .type   vos_rdcnt_av7, %function
 vos_rdcnt_av7:
     /* PMCCNTR: MRC p15, 0, Rd, c9, c13, 0 */
@@ -35,6 +37,7 @@ vos_rdcnt_av7:
    Instruction: MOVcc (conditional move, 1 cycle, no prediction cost)
    ───────────────────────────────────────────────────────────────────────── */
     .global vos_csel_u32_av7
+    .hidden vos_csel_u32_av7
     .type   vos_csel_u32_av7, %function
 vos_csel_u32_av7:
     cmp     r2, #0              /* set ZF if cond == 0                       */
@@ -51,6 +54,7 @@ vos_csel_u32_av7:
    Instruction: SMULL (signed long multiply) → r1:r0, shift right 16.
    ───────────────────────────────────────────────────────────────────────── */
     .global vos_q16_mul_av7
+    .hidden vos_q16_mul_av7
     .type   vos_q16_mul_av7, %function
 vos_q16_mul_av7:
     smull   r0, r1, r0, r1      /* r1:r0 = sign(r0) × sign(r1) (64-bit)    */
@@ -66,6 +70,7 @@ vos_q16_mul_av7:
    Args      : r0 = dst (8-byte aligned), r1 = len (multiple of 8)
    ───────────────────────────────────────────────────────────────────────── */
     .global vos_memzero_n_av7
+    .hidden vos_memzero_n_av7
     .type   vos_memzero_n_av7, %function
 vos_memzero_n_av7:
     cmp     r1, #0
@@ -85,6 +90,7 @@ vos_memzero_n_av7:
    Returns   : r0 = F_{n+1} (Q16.16)
    ───────────────────────────────────────────────────────────────────────── */
     .global vos_fraf_step_av7
+    .hidden vos_fraf_step_av7
     .type   vos_fraf_step_av7, %function
 vos_fraf_step_av7:
     /* r1 = FRAF_SCALE_Q16 = 0xDDB4 = 56756 */

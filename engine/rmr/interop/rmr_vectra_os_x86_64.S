@@ -24,7 +24,9 @@
    Throughput: 8-byte chunks via CRC32Q (1 cycle/8B on Haswell+)
    ───────────────────────────────────────────────────────────────────────── */
 #if defined(__SSE4_2__)
+    /* .hidden: not in .dynsym → gc-sections removes if unreferenced (SSE4.2 absent). */
     .global vos_crc32c_hw_x64
+    .hidden vos_crc32c_hw_x64
     .type   vos_crc32c_hw_x64, @function
 vos_crc32c_hw_x64:
     movl    %edx, %eax          /* eax = ~init (inverted seed)               */
@@ -75,6 +77,7 @@ vos_crc32c_hw_x64:
    Cost      : ~7 cycles (lfence=3, rdtsc=4 on modern Intel)
    ───────────────────────────────────────────────────────────────────────── */
     .global vos_rdtsc_x64
+    .hidden vos_rdtsc_x64
     .type   vos_rdtsc_x64, @function
 vos_rdtsc_x64:
     lfence                      /* serialize: drain OOO pipe                 */
@@ -91,6 +94,7 @@ vos_rdtsc_x64:
    Returns   : eax = a if cond != 0, else b
    ───────────────────────────────────────────────────────────────────────── */
     .global vos_cmov_u32_x64
+    .hidden vos_cmov_u32_x64
     .type   vos_cmov_u32_x64, @function
 vos_cmov_u32_x64:
     testl   %edx, %edx          /* set ZF if cond == 0                       */
@@ -106,6 +110,7 @@ vos_cmov_u32_x64:
    Returns   : eax = (a × b) >> 16 (Q16.16 result)
    ───────────────────────────────────────────────────────────────────────── */
     .global vos_q16_mul_x64
+    .hidden vos_q16_mul_x64
     .type   vos_q16_mul_x64, @function
 vos_q16_mul_x64:
     movslq  %edi, %rax          /* sign-extend a to 64-bit                   */
@@ -121,6 +126,7 @@ vos_q16_mul_x64:
    Args      : rdi = dst (16-byte aligned), esi = len (multiple of 16)
    ───────────────────────────────────────────────────────────────────────── */
     .global vos_memzero_n_x64
+    .hidden vos_memzero_n_x64
     .type   vos_memzero_n_x64, @function
 vos_memzero_n_x64:
     testl   %esi, %esi
@@ -142,6 +148,7 @@ vos_memzero_n_x64:
    Returns   : eax = (key × PHI64) >> (64 - bits)
    ───────────────────────────────────────────────────────────────────────── */
     .global vos_phi_hash_x64
+    .hidden vos_phi_hash_x64
     .type   vos_phi_hash_x64, @function
 vos_phi_hash_x64:
     movabsq $0x9E3779B97F4A7C15, %rax   /* PHI64 constant                   */

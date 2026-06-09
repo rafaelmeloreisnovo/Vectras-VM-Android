@@ -16,7 +16,9 @@
    Returns   : a0 = time CSR (monotonic 64-bit counter)
    Requirement: Linux userspace (time CSR exposed at U-mode via vDSO).
    ───────────────────────────────────────────────────────────────────────── */
+    /* .hidden: gc-sections removes RISC-V section when not target arch. */
     .global vos_rdtime_rv64
+    .hidden vos_rdtime_rv64
     .type   vos_rdtime_rv64, @function
 vos_rdtime_rv64:
     rdtime  a0                  /* CSR 0xC01: userspace-accessible time      */
@@ -31,6 +33,7 @@ vos_rdtime_rv64:
    Method    : arithmetic mask: mask = -(cond != 0)
    ───────────────────────────────────────────────────────────────────────── */
     .global vos_csel_u32_rv64
+    .hidden vos_csel_u32_rv64
     .type   vos_csel_u32_rv64, @function
 vos_csel_u32_rv64:
     /* mask = -(a2 != 0): snez gives 0 or 1; negation gives 0 or -1 (0xFFF...) */
@@ -50,6 +53,7 @@ vos_csel_u32_rv64:
    Returns   : a0 = (a × b) >> 16 (Q16.16)
    ───────────────────────────────────────────────────────────────────────── */
     .global vos_q16_mul_rv64
+    .hidden vos_q16_mul_rv64
     .type   vos_q16_mul_rv64, @function
 vos_q16_mul_rv64:
     /* Sign-extend 32-bit inputs to 64-bit for correct signed multiply. */
@@ -67,6 +71,7 @@ vos_q16_mul_rv64:
    Returns   : a0 = (key × PHI64) >> (64 - bits)
    ───────────────────────────────────────────────────────────────────────── */
     .global vos_phi_hash_rv64
+    .hidden vos_phi_hash_rv64
     .type   vos_phi_hash_rv64, @function
 vos_phi_hash_rv64:
     /* Load PHI64 = 0x9E3779B97F4A7C15 in two 32-bit halves + shift. */
@@ -88,6 +93,7 @@ vos_phi_hash_rv64:
    Returns   : a0 = F_{n+1} (Q16.16)
    ───────────────────────────────────────────────────────────────────────── */
     .global vos_fraf_step_rv64
+    .hidden vos_fraf_step_rv64
     .type   vos_fraf_step_rv64, @function
 vos_fraf_step_rv64:
     li      t0, 0xDDB4          /* FRAF_SCALE_Q16 = 56756                   */

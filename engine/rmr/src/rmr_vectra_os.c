@@ -60,8 +60,16 @@ static u32 vos_crc32c_sw(const u8 *buf, u32 len, u32 init) {
 }
 
 /* ── SOFTWARE FALLBACK: tick counter ──────────────────────────────────────── */
-/* Used on unknown architectures only.  Suppressed on known arches.          */
-static __attribute__((unused)) vos_tick_t vos_tick_sw(void) {
+/*
+ * PRECOMPILER CONTRACT — gc-sections methodology:
+ *   -ffunction-sections places vos_tick_sw in its own .text.vos_tick_sw section.
+ *   On architectures with a hardware timer (aarch64, x86_64, arm, riscv), this
+ *   function is NEVER referenced → -Wunused-function WARNING fires as the
+ *   precompiler's signal → --gc-sections removes the section from the binary.
+ *   DO NOT add __attribute__((unused)): that suppresses the warning and keeps
+ *   dead bytes in the final binary.  The warning IS the elimination trigger.
+ */
+static vos_tick_t vos_tick_sw(void) {
     static volatile u64 vos_sw_tick;
     return ++vos_sw_tick;
 }

@@ -35,6 +35,27 @@
 
 #include "rmr_types.h"
 
+/*
+ * VISIBILITY CONTRACT — symbol reduction methodology:
+ *   All declarations below default to hidden visibility (-fvisibility=hidden
+ *   enforced via compile flag + this pragma).  Only symbols explicitly marked
+ *   __attribute__((visibility("default"))) appear in the .dynsym export table.
+ *   Hidden symbols still link internally but are stripped by --gc-sections when
+ *   unreferenced.  Public API functions at the end of this header are the ONLY
+ *   entries that survive into the final binary's symbol table.
+ *
+ *   Precompiler/linker pipeline:
+ *     1. -ffunction-sections  → each fn in .text.<name> section
+ *     2. -fvisibility=hidden  → all symbols default to STV_HIDDEN
+ *     3. -Wunused-function    → warning fires for unreferenced sections (signal)
+ *     4. --gc-sections        → linker removes all unreferenced sections
+ *     5. --exclude-libs,ALL   → suppresses re-export of hidden archive symbols
+ *   Result: binary contains only the reachable call graph from public API.
+ */
+#if defined(__GNUC__) || defined(__clang__)
+#  pragma GCC visibility push(hidden)
+#endif
+
 /* ── 1. PRIMITIVE TYPES ────────────────────────────────────────────────── */
 
 /* Signed complements (rmr_types.h provides only unsigned). */
@@ -316,16 +337,29 @@ extern u8                    *vos_g_arena_mark;            /* rollback mark  */
 #define VOS_FNV_FEED(h, byte) \
     ((u64)((((u64)(h)) ^ (u8)(byte)) * VOS_FNV_PRIME))
 
-/* ── 15. PUBLIC INITIALIZER (call once at process/JNI start) ────────────── */
+/* ── 15. PUBLIC API — explicit default visibility (survives gc-sections) ─── */
+/*
+ * These three functions are the ONLY symbols exported from this module.
+ * All internal helpers (vos_crc32c_sw, vos_detect_caps, vos_init_dispatch,
+ * vos_build_hwcap_matrix, vos_tick_sw, per-arch HW primitives) carry hidden
+ * visibility and are eliminated from .dynsym by --gc-sections if unreferenced.
+ *
+ * PRECOMPILER NOTE: unused internal functions will generate -Wunused-function
+ * warnings.  This is INTENTIONAL — it is the gc-sections elimination signal.
+ * Do NOT suppress these warnings with __attribute__((unused)).
+ */
+#if defined(__GNUC__) || defined(__clang__)
+#  pragma GCC visibility pop
+#endif
 
 /* vos_init(): detects HWCAP, builds dispatch tables, verifies FRAF attractor.
    Returns 1 on success, 0 on invariant failure.                             */
-u32 vos_init(void);
+__attribute__((visibility("default"))) u32 vos_init(void);
 
 /* vos_selftest(): re-verifies A.1..A.4 at runtime.  Returns 1 = pass.      */
-u32 vos_selftest(void);
+__attribute__((visibility("default"))) u32 vos_selftest(void);
 
 /* vos_caps_report(): writes capability hex tag to out[0..3].               */
-void vos_caps_report(u32 *out);
+__attribute__((visibility("default"))) void vos_caps_report(u32 *out);
 
 #endif /* RMR_VECTRA_OS_H */

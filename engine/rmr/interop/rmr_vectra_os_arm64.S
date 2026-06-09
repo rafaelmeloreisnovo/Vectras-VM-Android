@@ -32,7 +32,15 @@
    ───────────────────────────────────────────────────────────────────────── */
 #if defined(__ARM_FEATURE_CRC32)
 
+    /*
+     * .hidden: STV_HIDDEN ELF visibility — symbol NOT exported to .dynsym.
+     * Callable internally (static linkage), but --gc-sections removes it if
+     * no translation unit references it (e.g. CRC32C_HW cap not detected).
+     * This is the assembler-level gc-sections methodology: structured directives
+     * embedded as code annotations, not documentation.
+     */
     .global vos_crc32c_hw_a64
+    .hidden vos_crc32c_hw_a64
     .type   vos_crc32c_hw_a64, %function
 vos_crc32c_hw_a64:
     /* w2 = running crc; inverted as per CRC32C convention (~init). */
@@ -85,6 +93,7 @@ vos_crc32c_hw_a64:
    Barrier   : ISB before read guarantees ordering with preceding stores.
    ───────────────────────────────────────────────────────────────────────── */
     .global vos_rdcnt_a64
+    .hidden vos_rdcnt_a64
     .type   vos_rdcnt_a64, %function
 vos_rdcnt_a64:
     isb                         /* flush pipeline; fence before timer read   */
@@ -100,6 +109,7 @@ vos_rdcnt_a64:
    Instruction: SMULL = signed multiply long (32×32→64), then SSHR 16.
    ───────────────────────────────────────────────────────────────────────── */
     .global vos_q16_mul_a64
+    .hidden vos_q16_mul_a64
     .type   vos_q16_mul_a64, %function
 vos_q16_mul_a64:
     smull   x0, w0, w1          /* x0 = sign-extended(w0) × sign-extended(w1)*/
@@ -115,6 +125,7 @@ vos_q16_mul_a64:
    Maps to   : CSEL (1 cycle, no branch, no prediction unit involvement)
    ───────────────────────────────────────────────────────────────────────── */
     .global vos_csel_u32_a64
+    .hidden vos_csel_u32_a64
     .type   vos_csel_u32_a64, %function
 vos_csel_u32_a64:
     cmp     w2, #0              /* set flags: ZF=1 if cond==0                */
@@ -130,6 +141,7 @@ vos_csel_u32_a64:
    Use case  : arena reset, zero-init BSS pools T05
    ───────────────────────────────────────────────────────────────────────── */
     .global vos_memzero_n_a64
+    .hidden vos_memzero_n_a64
     .type   vos_memzero_n_a64, %function
 vos_memzero_n_a64:
     cbz     w1, .Lzero_done_a64
@@ -151,6 +163,7 @@ vos_memzero_n_a64:
    Dispersal : uniform over [0, 2^bits) without division or modulo.
    ───────────────────────────────────────────────────────────────────────── */
     .global vos_phi_hash_a64
+    .hidden vos_phi_hash_a64
     .type   vos_phi_hash_a64, %function
 vos_phi_hash_a64:
     mov     x2, #0x7C15                    /* PHI64 low 16                  */
@@ -173,6 +186,7 @@ vos_phi_hash_a64:
    Constants : SCALE=0xDDB4 (56756), OFFSET=0x31A1E (203294)
    ───────────────────────────────────────────────────────────────────────── */
     .global vos_fraf_step_a64
+    .hidden vos_fraf_step_a64
     .type   vos_fraf_step_a64, %function
 vos_fraf_step_a64:
     mov     w1, #0xDDB4         /* FRAF_SCALE_Q16 = 56756 = √3/2 × 2^16     */
@@ -192,6 +206,7 @@ vos_fraf_step_a64:
    SCALE < ONE → |SCALE/ONE| < 1 → ln < 0 → stable.
    ───────────────────────────────────────────────────────────────────────── */
     .global vos_lyapunov_verify_a64
+    .hidden vos_lyapunov_verify_a64
     .type   vos_lyapunov_verify_a64, %function
 vos_lyapunov_verify_a64:
     mov     w0, #0xDDB4         /* FRAF_SCALE_Q16 = 56756                    */
@@ -209,6 +224,7 @@ vos_lyapunov_verify_a64:
    Algorithm : Binary GCD (Stein's), O(log²n), no division instruction.
    ───────────────────────────────────────────────────────────────────────── */
     .global vos_gcd_probe_a64
+    .hidden vos_gcd_probe_a64
     .type   vos_gcd_probe_a64, %function
 vos_gcd_probe_a64:
     cbz     w0, .Lgcd_ret_b_a64
