@@ -134,12 +134,12 @@ public class LorieView extends SurfaceView implements InputStub {
         }
     }
 
-    private boolean requestFocusSafely() {
+    public boolean requestFocusSafely() {
         ensureFocusableState();
         if (hasFocus()) {
             return true;
         }
-        if (!isAttachedToWindow() || getWindowToken() == null || getVisibility() != View.VISIBLE) {
+        if (!isAttachedToWindow() || getWindowToken() == null || !isShown()) {
             return false;
         }
         return requestFocus();

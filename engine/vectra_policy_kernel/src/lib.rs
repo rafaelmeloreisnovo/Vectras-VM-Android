@@ -576,6 +576,7 @@ impl PolicyKernel {
         let mut offset = 0u64;
         let mut out = Vec::new();
         let mut buffer = vec![0u8; config.chunk_size];
+        let mut crc_kernel = UnifiedKernelHandle::new(0, 0);
 
         loop {
             let read_len = reader.read(&mut buffer)?;
@@ -599,7 +600,7 @@ impl PolicyKernel {
                 sequence,
                 offset,
                 len: read_len,
-                crc32c: verified_crc32c(&chunk, sequence),
+                crc32c: verified_crc32c(&mut crc_kernel, &chunk),
                 optional_hash: fnv1a64(&chunk),
                 entropy_milli: entropy_milli(&chunk),
                 flags,
@@ -675,6 +676,7 @@ fn stream_chunks<R: Read>(
     let mut offset = 0u64;
     let mut out = Vec::new();
     let mut buffer = vec![0u8; chunk_size];
+    let mut crc_kernel = UnifiedKernelHandle::new(0, 0);
 
     loop {
         let read_len = reader.read(&mut buffer)?;
@@ -697,7 +699,7 @@ fn stream_chunks<R: Read>(
             sequence,
             offset,
             len: read_len,
-            crc32c: verified_crc32c(&chunk, sequence),
+            crc32c: verified_crc32c(&mut crc_kernel, &chunk),
             optional_hash: fnv1a64(&chunk),
             entropy_milli: entropy_milli(&chunk),
             flags,
@@ -768,9 +770,10 @@ fn route_label(target: RouteTarget) -> &'static str {
     }
 }
 
-fn verified_crc32c(data: &[u8], sequence: u64) -> u32 {
-    UnifiedKernelHandle::new(sequence as u32, 0)
-        .and_then(|mut kernel| kernel.verify_crc32c(data))
+fn verified_crc32c(kernel: &mut Option<UnifiedKernelHandle>, data: &[u8]) -> u32 {
+    kernel
+        .as_mut()
+        .and_then(|kernel| kernel.verify_crc32c(data))
         .unwrap_or_else(|| crc32c(data))
 }
 
