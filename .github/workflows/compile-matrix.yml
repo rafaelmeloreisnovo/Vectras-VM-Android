@@ -32,6 +32,7 @@ on:
 jobs:
   abi-contract-gate:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
       - name: Validate lowlevel ABI contract (mandatory gate)
@@ -39,6 +40,7 @@ jobs:
 
   matrix-contract:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     needs: abi-contract-gate
     outputs:
       matrix_abis: ${{ steps.contract.outputs.matrix_abis }}
@@ -53,6 +55,7 @@ jobs:
 
   android-matrix:
     runs-on: ubuntu-latest
+    timeout-minutes: 90
     needs: [abi-contract-gate, matrix-contract]
     strategy:
       fail-fast: true
@@ -91,6 +94,7 @@ jobs:
             ["tools.version"]="TOOLS_VERSION"
             ["ndk.version"]="NDK_VERSION"
             ["cmake.version"]="CMAKE_VERSION"
+            ["java.language.version"]="JAVA_VERSION"
           )
           for key in "${!key_map[@]}"; do
             env_key="${key_map[$key]}"
@@ -107,7 +111,7 @@ jobs:
 
       - uses: actions/setup-java@v4
         with:
-          java-version: '17'
+          java-version: ${{ env.JAVA_VERSION }}
           distribution: 'temurin'
 
       - uses: android-actions/setup-android@v3

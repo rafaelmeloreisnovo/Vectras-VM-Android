@@ -85,6 +85,7 @@ jobs:
   matrix-build:
     name: Determine Matrix
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     outputs:
       should_run_host: ${{ steps.profile.outputs.should_run_host }}
       should_run_android: ${{ steps.profile.outputs.should_run_android }}
@@ -113,6 +114,7 @@ jobs:
   abi-preflight:
     name: ABI Preflight
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
       - name: Validate consolidated lowlevel ABI guard

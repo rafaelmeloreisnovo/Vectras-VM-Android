@@ -13,20 +13,50 @@ on:
       - 'tools/ci/build_apk_matrix.sh'
       - 'docs/build-release.md'
 
+permissions:
+  contents: read
+
 jobs:
   build:
     runs-on: ubuntu-latest
+    timeout-minutes: 90
     steps:
       - uses: actions/checkout@v4
+
+      - name: Resolve canonical build versions
+        shell: bash
+        run: |
+          set -euo pipefail
+          declare -A key_map=(
+            ["compile.api"]="COMPILE_API"
+            ["tools.version"]="TOOLS_VERSION"
+            ["ndk.version"]="NDK_VERSION"
+            ["cmake.version"]="CMAKE_VERSION"
+            ["java.language.version"]="JAVA_VERSION"
+          )
+          for key in "${!key_map[@]}"; do
+            env_key="${key_map[$key]}"
+            value="$(awk -F= -v key="$key" '$1==key {print $2; exit}' gradle.properties | tr -d '[:space:]')"
+            if [[ -z "${value}" ]]; then
+              echo "Missing '${key}' in gradle.properties" >&2
+              exit 1
+            fi
+            echo "${env_key}=${value}" >> "$GITHUB_ENV"
+          done
+
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: '21'
+          java-version: ${{ env.JAVA_VERSION }}
       - uses: android-actions/setup-android@v3
       - name: Accept licenses + install SDK packages
+        shell: bash
         run: |
-          yes | sdkmanager --licenses
-          sdkmanager "platform-tools" "platforms;android-34" "build-tools;34.0.0" "ndk;26.3.11579264" "cmake;3.22.1"
+          set -euo pipefail
+          set +o pipefail
+          yes | sdkmanager --licenses >/dev/null
+          set -o pipefail
+          sdkmanager "platform-tools" "platforms;android-${COMPILE_API}" "build-tools;${TOOLS_VERSION}" "ndk;${NDK_VERSION}" "cmake;${CMAKE_VERSION}"
       - name: Build APK matrix
         env:
           ANDROID_HOME: ${{ env.ANDROID_HOME }}

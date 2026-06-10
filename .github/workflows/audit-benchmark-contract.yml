@@ -8,8 +8,11 @@ on:
 jobs:
   audit-benchmark:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
+        with:
+          lfs: true
       - name: Install deps
         run: sudo apt-get update && sudo apt-get install -y ripgrep
       - name: Validate audit claims
