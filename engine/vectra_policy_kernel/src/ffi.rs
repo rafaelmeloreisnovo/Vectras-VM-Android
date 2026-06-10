@@ -25,7 +25,6 @@ pub struct RmR_UnifiedConfig {
     pub arena_bytes: u32,
 }
 
-
 #[repr(C)]
 #[derive(Clone, Copy, Debug, Default)]
 pub struct RmR_ToroidalAddr7D {

@@ -21,6 +21,7 @@ import android.view.ViewConfiguration;
 import androidx.annotation.IntDef;
 import androidx.core.math.MathUtils;
 
+import com.vectras.vm.x11.LorieView;
 import com.vectras.vm.x11.X11Activity;
 import com.vectras.vm.x11.utils.SamsungDexUtils;
 
@@ -168,8 +169,13 @@ public class TouchInputHandler {
             event.offsetLocation(-offsetX, -offsetY);
         }
 
-        if (!view.isFocused() && event.getAction() == MotionEvent.ACTION_DOWN)
-            view.requestFocus();
+        if (!view.isFocused() && event.getAction() == MotionEvent.ACTION_DOWN) {
+            if (view instanceof LorieView) {
+                ((LorieView) view).requestFocusSafely();
+            } else {
+                view.requestFocus();
+            }
+        }
 
         if (event.getAction() == MotionEvent.ACTION_UP)
             setCapturingEnabled(true);

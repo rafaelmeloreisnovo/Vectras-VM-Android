@@ -19,6 +19,7 @@ import android.view.KeyEvent;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
+import android.view.View;
 
 import androidx.annotation.Keep;
 import androidx.annotation.NonNull;
@@ -45,6 +46,7 @@ public class LorieView extends SurfaceView implements InputStub {
     private static boolean clipboardSyncEnabled = false;
     private static boolean hardwareKbdScancodesWorkaround = false;
     private Callback mCallback;
+    private boolean mFocusRegenerateInFlight;
     private final Point p = new Point();
     private final SurfaceHolder.Callback mSurfaceCallback = new SurfaceHolder.Callback() {
         @Override public void surfaceCreated(@NonNull SurfaceHolder holder) {
@@ -95,9 +97,8 @@ public class LorieView extends SurfaceView implements InputStub {
     }
 
     public void triggerCallback() {
-        setFocusable(true);
-        setFocusableInTouchMode(true);
-        requestFocus();
+        ensureFocusableState();
+        requestFocusSafely();
 
         setBackground(new ColorDrawable(Color.TRANSPARENT) {
             public boolean isStateful() {
@@ -109,10 +110,10 @@ public class LorieView extends SurfaceView implements InputStub {
         });
 
         Rect r = getHolder().getSurfaceFrame();
-        getActivity().runOnUiThread(() -> mSurfaceCallback.surfaceChanged(getHolder(), PixelFormat.BGRA_8888, r.width(), r.height()));
+        post(() -> mSurfaceCallback.surfaceChanged(getHolder(), PixelFormat.BGRA_8888, r.width(), r.height()));
     }
 
-    private Activity getActivity() {
+    private Activity findActivity() {
         Context context = getContext();
         while (context instanceof ContextWrapper) {
             if (context instanceof Activity) {
@@ -121,7 +122,27 @@ public class LorieView extends SurfaceView implements InputStub {
             context = ((ContextWrapper) context).getBaseContext();
         }
 
-        throw new NullPointerException();
+        return null;
+    }
+
+    private void ensureFocusableState() {
+        if (!isFocusable()) {
+            setFocusable(true);
+        }
+        if (!isFocusableInTouchMode()) {
+            setFocusableInTouchMode(true);
+        }
+    }
+
+    public boolean requestFocusSafely() {
+        ensureFocusableState();
+        if (hasFocus()) {
+            return true;
+        }
+        if (!isAttachedToWindow() || getWindowToken() == null || !isShown()) {
+            return false;
+        }
+        return requestFocus();
     }
 
     void getDimensionsFromSettings() {
@@ -207,7 +228,7 @@ public class LorieView extends SurfaceView implements InputStub {
     @Override
     public boolean dispatchKeyEventPreIme(KeyEvent event) {
         if (hardwareKbdScancodesWorkaround) return false;
-        Activity a = getActivity();
+        Activity a = findActivity();
         return (a instanceof X11Activity) && ((X11Activity) a).handleKey(event);
     }
 
@@ -263,10 +284,20 @@ public class LorieView extends SurfaceView implements InputStub {
     @Override
     public void onWindowFocusChanged(boolean hasFocus) {
         super.onWindowFocusChanged(hasFocus);
-        if (hasFocus)
-            regenerate();
+        if (hasFocus && !mFocusRegenerateInFlight) {
+            mFocusRegenerateInFlight = true;
+            post(() -> {
+                if (hasWindowFocus()) {
+                    regenerate();
+                    requestFocusSafely();
+                }
+                mFocusRegenerateInFlight = false;
+            });
+        }
 
-        requestFocus();
+        if (hasFocus) {
+            requestFocusSafely();
+        }
 
         if (clipboardSyncEnabled && hasFocus) {
             clipboard.addPrimaryClipChangedListener(clipboardListener);

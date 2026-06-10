@@ -1154,17 +1154,20 @@ public class X11Activity extends AppCompatActivity implements View.OnApplyWindow
         super.onResume();
 
         setTerminalToolbarView();
-        getLorieView().requestFocus();
+        getLorieView().requestFocusSafely();
     }
 
     @Override
     public void onPause() {
         View view = getCurrentFocus();
         if (view == null) {
-            view = getLorieView();
-            view.requestFocus();
+            LorieView lorieView = getLorieView();
+            lorieView.requestFocusSafely();
+            view = lorieView;
         }
-        inputMethodManager.hideSoftInputFromWindow(view.getWindowToken(), 0);
+        if (view.getWindowToken() != null) {
+            inputMethodManager.hideSoftInputFromWindow(view.getWindowToken(), 0);
+        }
 
         super.onPause();
     }
@@ -1257,14 +1260,14 @@ public class X11Activity extends AppCompatActivity implements View.OnApplyWindow
 
                     pager.setVisibility(show ? View.VISIBLE : View.INVISIBLE);
 
-                    getLorieView().requestFocus();
+                    getLorieView().requestFocusSafely();
                 });
     }
 
     public void toggleExtraKeys() {
         int visibility = getTerminalToolbarViewPager().getVisibility();
         toggleExtraKeys(visibility != View.VISIBLE, true);
-        getLorieView().requestFocus();
+        getLorieView().requestFocusSafely();
     }
 
     public boolean handleKey(KeyEvent e) {
@@ -1284,10 +1287,13 @@ public class X11Activity extends AppCompatActivity implements View.OnApplyWindow
         if (newConfig.orientation != orientation) {
             View view = getCurrentFocus();
             if (view == null) {
-                view = getLorieView();
-                view.requestFocus();
+                LorieView lorieView = getLorieView();
+                lorieView.requestFocusSafely();
+                view = lorieView;
             }
-            inputMethodManager.hideSoftInputFromWindow(view.getWindowToken(), 0);
+            if (view.getWindowToken() != null) {
+                inputMethodManager.hideSoftInputFromWindow(view.getWindowToken(), 0);
+            }
         }
 
         orientation = newConfig.orientation;
