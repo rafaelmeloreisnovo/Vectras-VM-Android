@@ -35,6 +35,11 @@ Mapa arquivo-a-arquivo em três linhas por item: papel, ligação e comando de i
 - **Inspeção**: `file "demo_cli/src/policy_kernel_selftest.c"` e, quando texto, `sed -n "1,80p" "demo_cli/src/policy_kernel_selftest.c"`.
 
 
+## `demo_cli/src/rmr_tcg_cache_selftest.c`
+- **Papel**: auto-teste do cache TCG — miss como estado, mutação seletiva de bits (delta XOR), colapso pegajoso e replay determinístico.
+- **Liga com**: [`engine/rmr/src/rmr_tcg_cache.c`](../engine/rmr/src/rmr_tcg_cache.c), [`docs/active/VECTRA_COMPILER_PRECOMPILER_NONACADEMIC_2026-06-05.md`](../docs/active/VECTRA_COMPILER_PRECOMPILER_NONACADEMIC_2026-06-05.md), [`Makefile`](../Makefile) e [`CMakeLists.txt`](../CMakeLists.txt).
+- **Inspeção**: `file "demo_cli/src/rmr_tcg_cache_selftest.c"` e, quando texto, `sed -n "1,180p" "demo_cli/src/rmr_tcg_cache_selftest.c"`.
+
 ## `demo_cli/src/rmr_unified_arena_selftest.c`
 - **Papel**: código-fonte de auto-teste da arena unificada com cenários de fragmentação/reuso.
 - **Liga com**: [`engine/rmr/src/rmr_unified_kernel.c`](../engine/rmr/src/rmr_unified_kernel.c), [`Makefile`](../Makefile) e [`CMakeLists.txt`](../CMakeLists.txt).

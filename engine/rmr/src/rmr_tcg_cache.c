@@ -2,14 +2,6 @@
 
 #include "zero_compat.h"
 
-static u8 rmr_isorf_set_byte(RmR_ISOraf_Store *st, u64 byte_offset, u8 value) {
-  u64 bit = byte_offset << 3u;
-  for (u32 i = 0u; i < 8u; ++i) {
-    if (!RmR_ISOraf_SetBit(st, bit + i, (u8)((value >> i) & 1u))) return 0u;
-  }
-  return 1u;
-}
-
 static u8 rmr_isorf_get_byte(const RmR_ISOraf_Store *st, u64 byte_offset) {
   u8 out = 0u;
   u64 bit = byte_offset << 3u;
@@ -17,6 +9,27 @@ static u8 rmr_isorf_get_byte(const RmR_ISOraf_Store *st, u64 byte_offset) {
     out |= (u8)(RmR_ISOraf_GetBit(st, bit + i) << i);
   }
   return out;
+}
+
+/* Escrita por delta XOR: o conjunto de 8 bits não é substituído — apenas os
+ * bits divergentes entre o byte residente e o byte candidato são tocados.
+ * Bits iguais permanecem intactos e bits 0 sobre página ausente nunca alocam
+ * página no ISOraf, preservando o físico esparso do store. */
+static u8 rmr_isorf_write_byte_delta(RmR_ISOraf_Store *st,
+                                     u64 byte_offset,
+                                     u8 value,
+                                     u32 *flipped_out) {
+  u8 current = rmr_isorf_get_byte(st, byte_offset);
+  u8 delta = (u8)(current ^ value);
+  u64 bit = byte_offset << 3u;
+  u32 flipped = 0u;
+  for (u32 i = 0u; i < 8u; ++i) {
+    if (((delta >> i) & 1u) == 0u) continue;
+    if (!RmR_ISOraf_SetBit(st, bit + i, (u8)((value >> i) & 1u))) return 0u;
+    flipped += 1u;
+  }
+  if (flipped_out) *flipped_out = flipped;
+  return 1u;
 }
 
 static u8 rmr_tcg_block_is_valid(const RmR_TCGBlock *block) {
@@ -138,8 +151,16 @@ u8 RmR_TCGCache_Insert(RmR_TCGCache *cache,
     toroidal_addr = dst->toroidal_addr;
   }
 
-  for (u32 i = 0u; i < host_size; ++i) {
-    if (!rmr_isorf_set_byte(&cache->store, toroidal_addr + i, host_block[i])) return 0u;
+  {
+    u64 flipped_total = 0u;
+    for (u32 i = 0u; i < host_size; ++i) {
+      u32 flipped = 0u;
+      if (!rmr_isorf_write_byte_delta(&cache->store, toroidal_addr + i,
+                                      host_block[i], &flipped)) return 0u;
+      flipped_total += flipped;
+    }
+    cache->delta_bits_flipped += flipped_total;
+    cache->delta_bits_preserved += ((u64)host_size << 3u) - flipped_total;
   }
 
   /* HOTFIX: preserve RMR_TCG_BLOCK_COLLAPSING across the flag reset so that the
@@ -175,4 +196,17 @@ u32 RmR_TCGCache_ReuseRate(const RmR_TCGCache *cache) {
   if (!cache) return 0u;
   if (cache->block_count == 0u) return 0u;
   return (u32)((cache->reuse_count * 100u) / cache->block_count);
+}
+
+u64 RmR_TCGCache_DeltaBitsFlipped(const RmR_TCGCache *cache) {
+  if (!cache) return 0u;
+  return cache->delta_bits_flipped;
+}
+
+u32 RmR_TCGCache_DeltaPreservedPct(const RmR_TCGCache *cache) {
+  u64 total;
+  if (!cache) return 0u;
+  total = cache->delta_bits_flipped + cache->delta_bits_preserved;
+  if (!total) return 0u;
+  return (u32)((cache->delta_bits_preserved * 100u) / total);
 }
