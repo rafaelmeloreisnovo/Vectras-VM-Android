@@ -8,6 +8,9 @@ The format is based on Keep a Changelog.
 ## [Unreleased]
 
 ### Added
+- Mutação seletiva de bits no cache TCG (`engine/rmr/src/rmr_tcg_cache.c`): a reinserção de bloco grava apenas o delta XOR entre o byte residente e o candidato, preservando bits iguais e o físico esparso do ISOraf; novas métricas `delta_bits_flipped`/`delta_bits_preserved` com acessores `RmR_TCGCache_DeltaBitsFlipped` e `RmR_TCGCache_DeltaPreservedPct`.
+- Selftest host `demo_cli/src/rmr_tcg_cache_selftest.c` (registrado em `Makefile` e `CMakeLists.txt`): miss como estado explícito, reinserção idêntica custa zero bits, mutação de 1 bit custa exatamente 1 bit, colapso pegajoso responde MISS por política e replay reproduz a mesma identidade ISOraf.
+- Seção 10 em `docs/active/VECTRA_COMPILER_PRECOMPILER_NONACADEMIC_2026-06-05.md`: miss como próxima instrução, delta XOR bit-a-bit e orientação da leitura como ponto de vista.
 - Módulo BITOMEGA adicionado ao engine RMR com API pública em `engine/rmr/include/bitomega.h` e implementação determinística em `engine/rmr/src/bitomega.c`.
 - Política ABI `arm32-arm64` ativada no branch de desenvolvimento: artefatos compilados para `arm64-v8a` (NEON/SIMD + CRC32HW, `-march=armv8-a+crc+simd`) e `armeabi-v7a` (NEON, `-march=armv7-a -mfpu=neon`).
 

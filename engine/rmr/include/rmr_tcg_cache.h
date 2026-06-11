@@ -37,6 +37,8 @@ typedef struct {
   u32 collapse_count;
   u32 reuse_count;
   u32 lookup_epoch;
+  u64 delta_bits_flipped;
+  u64 delta_bits_preserved;
   RmR_ISOraf_Page pages[RMR_TCG_CACHE_MAX_BLOCKS];
   u64 data_words[1048576u];
   u8 host_block_scratch[RMR_TCG_HOST_BLOCK_MAX];
@@ -54,6 +56,8 @@ u8 RmR_TCGCache_Insert(RmR_TCGCache *cache,
 u32 RmR_TCGCache_HitRatio(const RmR_TCGCache *cache);
 u32 RmR_TCGCache_CollapseCount(const RmR_TCGCache *cache);
 u32 RmR_TCGCache_ReuseRate(const RmR_TCGCache *cache);
+u64 RmR_TCGCache_DeltaBitsFlipped(const RmR_TCGCache *cache);
+u32 RmR_TCGCache_DeltaPreservedPct(const RmR_TCGCache *cache);
 
 #ifdef __cplusplus
 }

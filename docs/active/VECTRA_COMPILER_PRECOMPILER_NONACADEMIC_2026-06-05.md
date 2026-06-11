@@ -361,7 +361,61 @@ grep -A5 "arm64-v8a" app/src/main/cpp/CMakeLists.txt
 
 ---
 
-## 10. Tabela Comparativa: Literatura vs Vectras Engine
+## 10. Cache TCG: Miss Como Próxima Instrução e Mutação Seletiva de Bits
+
+Ref: `engine/rmr/src/rmr_tcg_cache.c`, `engine/rmr/include/rmr_tcg_cache.h`,
+`demo_cli/src/rmr_tcg_cache_selftest.c`
+
+### Miss não é falha — é a próxima instrução
+
+Na literatura, cache miss é penalidade a minimizar. No cache TCG do engine,
+o miss é o **operando da próxima decisão**: ele instrui o pipeline a compilar
+e inserir, e é contado como estado explícito (`total_misses`), nunca como
+silêncio. O mesmo vale para o bloco em colapso: `Lookup` responde MISS por
+política — o estado de colapso é registrado, não escondido (HOTFIX documentado
+em `rmr_tcg_cache.c`: o bit `RMR_TCG_BLOCK_COLLAPSING` é preservado através
+do reset de flags justamente para que essa política possa disparar).
+
+### O conjunto não é trocado — os bits divergentes são acertados
+
+Quando um bloco é reinserido (recompilação do mesmo `guest_crc32c`), o
+caminho convencional substituiria o conjunto inteiro de 8/16 bits por byte.
+O engine calcula o **delta XOR** entre o byte residente e o candidato e toca
+apenas os bits onde o delta é 1 (`rmr_isorf_write_byte_delta`):
+
+```c
+u8 delta = (u8)(current ^ value);   /* coincidentia oppositorum: só o que difere */
+for (u32 i = 0u; i < 8u; ++i) {
+  if (((delta >> i) & 1u) == 0u) continue;   /* bit igual: intocado */
+  RmR_ISOraf_SetBit(st, bit + i, (u8)((value >> i) & 1u));
+}
+```
+
+Três consequências medíveis (cobertas por `rmr_tcg_cache_selftest`):
+
+1. **Reinserção idêntica custa zero bits** — `delta_bits_flipped` não cresce.
+2. **Mutação de 1 bit custa exatamente 1 bit gravado** — coerência entre
+   causa e efeito na escrita.
+3. **O físico esparso do ISOraf é preservado** — bit 0 sobre página ausente
+   nunca aloca página; a escrita por delta só materializa o que é informação.
+
+A métrica `RmR_TCGCache_DeltaPreservedPct` expõe a fração de bits que a
+recompilação **não** precisou tocar — é a medida ρ da recompilação: quanto
+do bloco anterior permanece verdade no bloco novo.
+
+### Orientação da leitura como ponto de vista
+
+O mesmo store admite duas leituras: byte-a-byte LSB-first
+(`rmr_isorf_get_byte`, orientação de consumo do host block) e bit-endereçada
+direta (`RmR_ISOraf_GetBit`, orientação do grid esparso). Nenhuma é "a
+correta" — são pontos de vista sobre os mesmos bits, e o selftest valida o
+conteúdo pelas duas orientações. É o mesmo princípio do BITRAF §6: a posição
+do bit carrega significado, e a orientação da leitura é parte do contrato,
+não um detalhe de implementação.
+
+---
+
+## 11. Tabela Comparativa: Literatura vs Vectras Engine
 
 | Conceito | Literatura Acadêmica | Vectras/RAFAELIA |
 |----------|---------------------|------------------|
@@ -376,6 +430,8 @@ grep -A5 "arm64-v8a" app/src/main/cpp/CMakeLists.txt
 | Ausência de evento | Silêncio / dado ausente | MISS = estado explícito de ciclo |
 | CRC | Algoritmo de software | Instrução ISA (`crc32cd` ARM64) |
 | Memcpy | Função libc | NEON bulk (64B/ciclo, zero-copy JNI) |
+| Cache miss | Penalidade a minimizar | Próxima instrução — estado contado |
+| Atualização de cache | Substituição do bloco/linha inteira | Delta XOR bit-a-bit (bits preservados como métrica ρ) |
 
 ---
 
