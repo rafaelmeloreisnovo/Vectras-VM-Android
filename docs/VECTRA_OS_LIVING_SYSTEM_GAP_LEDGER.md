@@ -307,7 +307,7 @@ VECTRA_OS_LIVING_STATUS:
   csel_contract: FIXED_WITH_PROOF (máscara ~mask restaurada; tabela-verdade no selftest)
   fraf_attractor_constant: FIXED_QUANTIZED (F* = 0x17277A, ponto fixo do sistema Q16 implementado; ITERS 48→96 para honrar ε=0.001 — o contrato anterior era matematicamente insatisfazível)
   xmacro_flags: PRESENT (engine/rmr/include/rmr_vectra_flags.def — fonte única de bits; enum + máscaras + vos_flag_name gerados; prova no contract selftest)
-  flag_rollback: MISSING
+  flag_rollback: PRESENT_PARTIAL (núcleo G4: vos_g_caps_prev + VOS_FLAGS_MARK/RESTORE + RAF_TRY_FLAG, provado no contract selftest; mapeamento TTL8 PENDENTE — RAFAELIA_CODEX_TTL8_SUMMARY.txt citado em §1 não está na árvore)
   cas_layer: MISSING
   machine_codex_enforcement: MISSING
   mvp_benchmark_proof: MISSING
@@ -342,11 +342,19 @@ uniqueness, mask consistency and name lookup (including the "unknown"
 default). `vos_flag_name` is `static inline`: zero exported symbols —
 contract audit still reports exactly 3.
 
+~~G4 core done~~ — `vos_g_caps_prev`, `VOS_FLAGS_MARK()`,
+`VOS_FLAGS_RESTORE()` and `RAF_TRY_FLAG(mask, body)` added with the same
+mark/restore geometry as the arena; contract selftest proves restore
+exactness and that a false body leaves zero residue. The TTL8
+return-code mapping remains PENDING: the reference
+`RAFAELIA_CODEX_TTL8_SUMMARY.txt` cited in §1 is not in the tree — do
+not invent the state model; ingest the codex first.
+
 The next code patch should be small and proof-bearing:
 
-1. G4 — flag rollback (`vos_g_caps_prev`, `VOS_FLAGS_MARK/RESTORE`,
-   `RAF_TRY_FLAG`) and TTL8 state mapping;
-2. extend the contract selftest with flag mark/restore;
+1. G5 — atomic CAS layer (`VOS_CAS32`, `VOS_ATOMIC_LOAD32/STORE32`,
+   pointer CAS for dispatch hotswap), hosted/freestanding separated;
+2. extend the contract selftest with CAS semantics;
 3. do not touch trampoline yet.
 
 This preserves the living-system logic: every correction must leave behind a proof node.

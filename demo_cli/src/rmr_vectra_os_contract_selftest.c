@@ -13,6 +13,8 @@
  *  5. vos_caps_report expõe as constantes FRAF do contrato.
  *  6. X-macro (G3): bits únicos no .def, máscaras derivadas consistentes,
  *     vos_flag_name resolve cada entrada e "unknown" fora delas.
+ *  7. Flag rollback (G4 núcleo): MARK/RESTORE devolvem o registrador
+ *     exato; RAF_TRY_FLAG com body falso não deixa resíduo.
  */
 #include "rmr_vectra_os.h"
 
@@ -143,6 +145,40 @@ int main(void) {
     }
     if (strcmp(vos_flag_name(30u), "unknown") != 0) {
       printf("FAIL xmacro: bit nao definido deveria ser unknown\n");
+      return 1;
+    }
+  }
+
+  /* 7. flag rollback (G4 nucleo): transacao sem residuo */
+  {
+    vos_cap_t before = vos_g_caps;
+
+    VOS_FLAGS_MARK();
+    VOS_CAPS_ENABLE(VOS_CAP_MOCK);
+    if (!(vos_g_caps & VOS_CAP_MOCK)) {
+      printf("FAIL flags: enable nao ativou MOCK\n");
+      return 1;
+    }
+    VOS_FLAGS_RESTORE();
+    if (vos_g_caps != before) {
+      printf("FAIL flags: restore divergente\n");
+      return 1;
+    }
+
+    RAF_TRY_FLAG(VOS_CAP_MOCK, 0u); /* body falso: rollback total */
+    if (vos_g_caps != before) {
+      printf("FAIL try_flag: body falso deixou residuo\n");
+      return 1;
+    }
+
+    RAF_TRY_FLAG(VOS_CAP_MOCK, (vos_g_caps & VOS_CAP_MOCK)); /* body ve a flag */
+    if (!(vos_g_caps & VOS_CAP_MOCK)) {
+      printf("FAIL try_flag: body verdadeiro nao manteve a flag\n");
+      return 1;
+    }
+    VOS_CAPS_DISABLE(VOS_CAP_MOCK);
+    if (vos_g_caps != before) {
+      printf("FAIL flags: estado final divergente\n");
       return 1;
     }
   }

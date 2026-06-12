@@ -143,6 +143,34 @@ static inline const char *vos_flag_name(u32 bit_index) {
     __asm__ volatile("" ::: "memory"); \
 } while(0)
 
+/* ── 3.1 FLAG ROLLBACK (G4 núcleo) — transação sobre o registrador ─────── */
+/* Mesmo padrão do arena mark/restore: snapshot O(1), rollback O(1).
+   Nota de contrato: a propagação de return-code via estados TTL8 (G4
+   completo) aguarda o codex de referência; ver gap ledger §4 G4.          */
+extern volatile vos_cap_t vos_g_caps_prev;  /* snapshot para rollback      */
+
+#define VOS_FLAGS_MARK() do { \
+    __asm__ volatile("" ::: "memory"); \
+    vos_g_caps_prev = vos_g_caps; \
+    __asm__ volatile("" ::: "memory"); \
+} while(0)
+
+#define VOS_FLAGS_RESTORE() do { \
+    __asm__ volatile("" ::: "memory"); \
+    vos_g_caps = vos_g_caps_prev; \
+    __asm__ volatile("" ::: "memory"); \
+} while(0)
+
+/* RAF_TRY_FLAG(mask, body): transação de capability — marca o registrador,
+   habilita mask e avalia body; se body for falso, o registrador anterior é
+   restaurado integralmente (rollback sem resíduo). O resultado é observável
+   pelo próprio estado de vos_g_caps, coerente com hit/miss como estados.  */
+#define RAF_TRY_FLAG(mask, body) do { \
+    VOS_FLAGS_MARK(); \
+    VOS_CAPS_ENABLE(mask); \
+    if (!(body)) VOS_FLAGS_RESTORE(); \
+} while(0)
+
 /* ── 4. ARENA ALLOCATOR — bump-pointer, BSS, zero-overhead ─────────────── */
 
 #ifndef VOS_ARENA_SIZE

@@ -19,6 +19,7 @@ u8                    vos_g_arena[VOS_ARENA_SIZE];
 u8                   *vos_g_arena_top;
 u8                   *vos_g_arena_mark;
 volatile vos_cap_t    vos_g_caps;
+volatile vos_cap_t    vos_g_caps_prev;
 volatile vos_crc_fn_t vos_g_crc;
 volatile vos_tick_fn_t vos_g_tick;
 
