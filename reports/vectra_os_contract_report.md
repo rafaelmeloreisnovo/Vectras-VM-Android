@@ -1,7 +1,7 @@
 # VECTRA_OS contract report
 
-- Data: 2026-06-12T16:26:55Z
-- Commit: 25da9c2
+- Data: 2026-06-12T16:28:40Z
+- Commit: 407d1d9
 - Arch: x86_64
 - CC: cc
 - Flags: `-O3 -std=c11 -Wall -Wextra -DRMR_JNI_BUILD=1 -fPIC   -ffunction-sections -fdata-sections -fvisibility=hidden -shared -Wl,--gc-sections -Wl,--exclude-libs,ALL`

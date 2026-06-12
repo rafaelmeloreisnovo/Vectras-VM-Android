@@ -15,6 +15,7 @@ The format is based on Keep a Changelog.
 
 - VECTRA_OS G3 — `engine/rmr/include/rmr_vectra_flags.def` como fonte única X-macro dos bits de capability: enum `VOS_CAP_BIT_*`, `VOS_CAP_COUNT`, máscaras derivadas e `vos_flag_name` gerados do `.def`; prova de unicidade/consistência/lookup no contract selftest, sem novos símbolos exportados.
 - VECTRA_OS G4 (núcleo) — rollback transacional do registrador de capabilities: `vos_g_caps_prev`, `VOS_FLAGS_MARK()`/`VOS_FLAGS_RESTORE()` e `RAF_TRY_FLAG(mask, body)` (body falso ⇒ rollback sem resíduo), provado no contract selftest; mapeamento TTL8 permanece pendente até o codex de referência entrar na árvore.
+- VECTRA_OS G5 — camada CAS atômica por contrato sobre builtins GCC/Clang: `VOS_CAS32`, `VOS_ATOMIC_LOAD32`/`VOS_ATOMIC_STORE32` e `VOS_CAS_PTR` (hotswap de dispatch por CAS com rollback, provado no contract selftest); toolchain sem builtins atômicos gera erro de compilação explícito em vez de fallback silencioso. G1–G5 do ledger agora passam; G6 (trampoline) segue opt-in aguardando decisão.
 
 ### Fixed
 - `engine/rmr/sources_rmr_core.mk` regenerado via `tools/sync_rmr_manifest_to_mk.py` — o gate `verify-rmr-source-alignment` falhava e `rmr_vectra_os.c` não entrava na lib host do Makefile.

@@ -308,7 +308,7 @@ VECTRA_OS_LIVING_STATUS:
   fraf_attractor_constant: FIXED_QUANTIZED (F* = 0x17277A, ponto fixo do sistema Q16 implementado; ITERS 48→96 para honrar ε=0.001 — o contrato anterior era matematicamente insatisfazível)
   xmacro_flags: PRESENT (engine/rmr/include/rmr_vectra_flags.def — fonte única de bits; enum + máscaras + vos_flag_name gerados; prova no contract selftest)
   flag_rollback: PRESENT_PARTIAL (núcleo G4: vos_g_caps_prev + VOS_FLAGS_MARK/RESTORE + RAF_TRY_FLAG, provado no contract selftest; mapeamento TTL8 PENDENTE — RAFAELIA_CODEX_TTL8_SUMMARY.txt citado em §1 não está na árvore)
-  cas_layer: MISSING
+  cas_layer: PRESENT (VOS_CAS32, VOS_ATOMIC_LOAD32/STORE32, VOS_CAS_PTR sobre builtins GCC/Clang — LDREX/STREX em ARM32 via compilador; toolchain sem builtins = erro de compilação explícito; prova no contract selftest incluindo hotswap de dispatch por CAS)
   machine_codex_enforcement: MISSING
   mvp_benchmark_proof: MISSING
   trampoline_runtime_patch: MISSING_OPT_IN_REQUIRED
@@ -350,11 +350,17 @@ return-code mapping remains PENDING: the reference
 `RAFAELIA_CODEX_TTL8_SUMMARY.txt` cited in §1 is not in the tree — do
 not invent the state model; ingest the codex first.
 
-The next code patch should be small and proof-bearing:
+~~G5 done~~ — CAS layer over compiler builtins with explicit
+compile-error contract for toolchains without atomics; selftest proves
+success/failure semantics (failed CAS preserves the target and reports
+the observed value — miss as information) and pointer-CAS dispatch
+hotswap with rollback.
 
-1. G5 — atomic CAS layer (`VOS_CAS32`, `VOS_ATOMIC_LOAD32/STORE32`,
-   pointer CAS for dispatch hotswap), hosted/freestanding separated;
-2. extend the contract selftest with CAS semantics;
-3. do not touch trampoline yet.
+**Checkpoint: G1–G5 now pass.** G6 (trampoline) is unlocked by the
+ledger rule but is opt-in by design and architecturally significant
+(W^X on Android, non-atomic 5-byte patch on x86_64) — requires an
+explicit owner decision before any code. Remaining after that decision:
+G4-TTL8 (blocked on codex ingestion), G7 (Machine Codex macros),
+G8 (MVP benchmark proof layer), G9 (boundary rule, documentation-only).
 
 This preserves the living-system logic: every correction must leave behind a proof node.

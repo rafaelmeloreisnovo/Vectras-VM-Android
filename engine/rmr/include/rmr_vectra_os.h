@@ -171,6 +171,27 @@ extern volatile vos_cap_t vos_g_caps_prev;  /* snapshot para rollback      */
     if (!(body)) VOS_FLAGS_RESTORE(); \
 } while(0)
 
+/* ── 3.2 ATOMIC CAS LAYER (G5) — contrato sobre builtins do compilador ─── */
+/* Hosted/JNI e baremetal GCC/Clang: builtins __atomic_* (em ARM32 o
+   compilador emite LDREX/STREX; em ARM64, LDAXR/STLXR ou LSE).
+   Outro toolchain: falha de compilação explícita — o contrato exige
+   implementação por arquitetura, nunca um fallback silencioso não-atômico. */
+#if defined(__GNUC__) || defined(__clang__)
+#define VOS_ATOMIC_LOAD32(ptr)       __atomic_load_n((ptr), __ATOMIC_ACQUIRE)
+#define VOS_ATOMIC_STORE32(ptr, val) __atomic_store_n((ptr), (val), __ATOMIC_RELEASE)
+/* CAS u32: 1 em sucesso; em falha devolve 0 e escreve o valor observado em
+   *expected_ptr (estado observado, não descartado — miss é informação).   */
+#define VOS_CAS32(ptr, expected_ptr, desired) \
+    __atomic_compare_exchange_n((ptr), (expected_ptr), (desired), 0, \
+                                __ATOMIC_ACQ_REL, __ATOMIC_ACQUIRE)
+/* CAS de ponteiro para hotswap de dispatch (vos_g_crc / vos_g_tick).      */
+#define VOS_CAS_PTR(pptr, expected_pptr, desired) \
+    __atomic_compare_exchange_n((pptr), (expected_pptr), (desired), 0, \
+                                __ATOMIC_ACQ_REL, __ATOMIC_ACQUIRE)
+#else
+#error "VOS CAS layer: sem builtins atomicos — implementar contrato por arch"
+#endif
+
 /* ── 4. ARENA ALLOCATOR — bump-pointer, BSS, zero-overhead ─────────────── */
 
 #ifndef VOS_ARENA_SIZE

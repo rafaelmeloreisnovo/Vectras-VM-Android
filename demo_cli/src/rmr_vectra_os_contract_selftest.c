@@ -15,6 +15,8 @@
  *     vos_flag_name resolve cada entrada e "unknown" fora delas.
  *  7. Flag rollback (G4 núcleo): MARK/RESTORE devolvem o registrador
  *     exato; RAF_TRY_FLAG com body falso não deixa resíduo.
+ *  8. CAS (G5): sucesso troca o valor; falha preserva o alvo e devolve o
+ *     valor observado em expected; CAS de ponteiro faz hotswap de dispatch.
  */
 #include "rmr_vectra_os.h"
 
@@ -180,6 +182,50 @@ int main(void) {
     if (vos_g_caps != before) {
       printf("FAIL flags: estado final divergente\n");
       return 1;
+    }
+  }
+
+  /* 8. CAS (G5): semantica de sucesso/falha e hotswap por ponteiro */
+  {
+    u32 target = 5u;
+    u32 expected = 5u;
+
+    if (!VOS_CAS32(&target, &expected, 9u) || target != 9u) {
+      printf("FAIL cas32: sucesso nao trocou valor\n");
+      return 1;
+    }
+    expected = 5u; /* stale: deve falhar e observar 9 */
+    if (VOS_CAS32(&target, &expected, 7u) || expected != 9u || target != 9u) {
+      printf("FAIL cas32: falha deveria preservar alvo e observar 9\n");
+      return 1;
+    }
+
+    VOS_ATOMIC_STORE32(&target, 0x52414632u);
+    if (VOS_ATOMIC_LOAD32(&target) != 0x52414632u) {
+      printf("FAIL atomic load/store roundtrip\n");
+      return 1;
+    }
+
+    /* CAS de ponteiro sobre o dispatch ativo, com rollback */
+    {
+      vos_crc_fn_t original = vos_g_crc;
+      vos_crc_fn_t expected_fn = original;
+      u32 crc_before = VOS_CRC32C(vec, 4u, VOS_CHAIN_INIT);
+
+      if (!VOS_CAS_PTR(&vos_g_crc, &expected_fn, vos_stub_crc)) {
+        printf("FAIL cas_ptr: hotswap nao aplicado\n");
+        return 1;
+      }
+      if (VOS_CRC32C(vec, 4u, VOS_CHAIN_INIT) != 0x52414621u) {
+        printf("FAIL cas_ptr: dispatch nao trocou\n");
+        return 1;
+      }
+      expected_fn = vos_stub_crc;
+      if (!VOS_CAS_PTR(&vos_g_crc, &expected_fn, original) ||
+          VOS_CRC32C(vec, 4u, VOS_CHAIN_INIT) != crc_before) {
+        printf("FAIL cas_ptr: rollback divergente\n");
+        return 1;
+      }
     }
   }
 
