@@ -716,6 +716,7 @@ public class VMManager {
     }
 
     /** @deprecated Use {@link #startRandomVMID()} instead. */
+    @Deprecated
     @NonNull
     public static String startRamdomVMID() {
         return startRandomVMID();

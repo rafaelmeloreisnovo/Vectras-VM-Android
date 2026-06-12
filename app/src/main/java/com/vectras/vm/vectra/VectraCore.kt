@@ -708,7 +708,6 @@ class VectraCycle(
         if (event != null) {
             val payload = event.payload ?: EMPTY_PAYLOAD
             processEvent(event, payload)
-            val eventType = event.type
             Log.d(
                 TAG,
                 "event_processed timestamp=${event.timestamp} type=${event.type} priority=${event.priority}"
@@ -848,7 +847,7 @@ class VectraBitStackLog(logFile: File) {
 
     private fun writeHeader() {
         lock.withLock {
-            val headerBuffer = threadLocalBuffer16.get()
+            val headerBuffer = checkNotNull(threadLocalBuffer16.get())
             headerBuffer.clear()
             headerBuffer.putInt(MAGIC.toInt())
             headerBuffer.putInt(VERSION)
@@ -872,7 +871,7 @@ class VectraBitStackLog(logFile: File) {
             val wallClockMs = System.currentTimeMillis()
             val deterministicTick = VectraLogClock.nextTick()
 
-            val recordHeaderBuffer = appendHeaderBuffer.get()
+            val recordHeaderBuffer = checkNotNull(appendHeaderBuffer.get())
             recordHeaderBuffer.clear()
             recordHeaderBuffer.putInt(MAGIC.toInt())
             recordHeaderBuffer.putInt(len)
@@ -1030,7 +1029,7 @@ object VectraCore {
         state.setFlag(0, allOk)
         
         // Log self-test results
-        val result = threadLocalBuffer20.get()
+        val result = checkNotNull(threadLocalBuffer20.get())
         result.clear()
         result.put(if (headerOk) 1.toByte() else 0.toByte())
         result.put(if (detectsChange) 1.toByte() else 0.toByte())
