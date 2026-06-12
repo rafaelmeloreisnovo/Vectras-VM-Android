@@ -93,14 +93,41 @@ typedef u32 vos_q16_t;    /* stored as unsigned; arithmetic uses signed cast */
 
 /* ── 3. CAPABILITY FLAG REGISTER (bit-packed, mirrors x7 contract) ─────── */
 
-#define VOS_CAP_CRC32C_HW    (1u << 0u)  /* hardware CRC32C instruction      */
-#define VOS_CAP_NEON_128     (1u << 1u)  /* NEON/AdvSIMD 128-bit available   */
-#define VOS_CAP_SVE          (1u << 2u)  /* ARM SVE available                */
-#define VOS_CAP_FMA          (1u << 3u)  /* fused-multiply-add available     */
-#define VOS_CAP_CNTVCT       (1u << 4u)  /* EL0 system counter accessible    */
-#define VOS_CAP_RDTSC        (1u << 5u)  /* x86 RDTSC accessible             */
-#define VOS_CAP_SSE42        (1u << 6u)  /* SSE4.2 (includes CRC32 opcode)   */
-#define VOS_CAP_MOCK         (1u << 31u) /* simulation mode: no real HW      */
+/* Fonte única dos bits: rmr_vectra_flags.def (X-macro, ledger G3).
+   O número do bit vive SOMENTE no .def; o enum e as máscaras derivam dele. */
+enum {
+#define VOS_CAP_DEF(name, bit, str) VOS_CAP_BIT_##name = (bit),
+#include "rmr_vectra_flags.def"
+#undef VOS_CAP_DEF
+  VOS_CAP_BIT__LIMIT = 32
+};
+
+enum {
+  VOS_CAP_COUNT = 0
+#define VOS_CAP_DEF(name, bit, str) + 1
+#include "rmr_vectra_flags.def"
+#undef VOS_CAP_DEF
+};
+
+#define VOS_CAP_CRC32C_HW    (1u << VOS_CAP_BIT_CRC32C_HW) /* hardware CRC32C instruction    */
+#define VOS_CAP_NEON_128     (1u << VOS_CAP_BIT_NEON_128)  /* NEON/AdvSIMD 128-bit available */
+#define VOS_CAP_SVE          (1u << VOS_CAP_BIT_SVE)       /* ARM SVE available              */
+#define VOS_CAP_FMA          (1u << VOS_CAP_BIT_FMA)       /* fused-multiply-add available   */
+#define VOS_CAP_CNTVCT       (1u << VOS_CAP_BIT_CNTVCT)    /* EL0 system counter accessible  */
+#define VOS_CAP_RDTSC        (1u << VOS_CAP_BIT_RDTSC)     /* x86 RDTSC accessible           */
+#define VOS_CAP_SSE42        (1u << VOS_CAP_BIT_SSE42)     /* SSE4.2 (includes CRC32 opcode) */
+#define VOS_CAP_MOCK         (1u << VOS_CAP_BIT_MOCK)      /* simulation mode: no real HW    */
+
+/* Nome canônico da flag por índice de bit (fonte: .def).  static inline:
+   zero símbolo exportado; gc-sections elimina onde não referenciado.      */
+static inline const char *vos_flag_name(u32 bit_index) {
+  switch (bit_index) {
+#define VOS_CAP_DEF(name, bit, str) case (bit): return (str);
+#include "rmr_vectra_flags.def"
+#undef VOS_CAP_DEF
+    default: return "unknown";
+  }
+}
 
 /* Hotswap: enable/disable at runtime (DMB-fenced, thread-visible).
    Use VOS_HOTSWAP_CRC / VOS_HOTSWAP_TIMER rather than raw cap mutation.   */

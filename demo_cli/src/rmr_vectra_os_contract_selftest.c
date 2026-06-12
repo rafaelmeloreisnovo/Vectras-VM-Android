@@ -11,10 +11,23 @@
  *  4. Dispatch hotswap: troca de implementação ativa e retorno ao original
  *     reproduzem os mesmos resultados (rollback sem resíduo).
  *  5. vos_caps_report expõe as constantes FRAF do contrato.
+ *  6. X-macro (G3): bits únicos no .def, máscaras derivadas consistentes,
+ *     vos_flag_name resolve cada entrada e "unknown" fora delas.
  */
 #include "rmr_vectra_os.h"
 
 #include <stdio.h>
+#include <string.h>
+
+/* Tabela local gerada da mesma fonte única — prova de não-duplicação. */
+static const struct {
+  u32 bit;
+  const char *name;
+} k_cap_table[] = {
+#define VOS_CAP_DEF(name, bit, str) {(bit), (str)},
+#include "rmr_vectra_flags.def"
+#undef VOS_CAP_DEF
+};
 
 static u32 vos_stub_crc(const u8 *buf, u32 len, u32 init) {
   (void)buf;
@@ -92,6 +105,44 @@ int main(void) {
     }
     if (crc_before == 0u || crc_before == 0xFFFFFFFFu) {
       printf("FAIL crc original fora do contrato de cadeia\n");
+      return 1;
+    }
+  }
+
+  /* 6. X-macro: fonte unica de bits (ledger G3) */
+  {
+    u32 seen_mask = 0u;
+    u32 n = (u32)(sizeof(k_cap_table) / sizeof(k_cap_table[0]));
+    if (n != (u32)VOS_CAP_COUNT) {
+      printf("FAIL xmacro: tabela=%u VOS_CAP_COUNT=%u\n",
+             (unsigned)n, (unsigned)VOS_CAP_COUNT);
+      return 1;
+    }
+    for (u32 i = 0u; i < n; ++i) {
+      u32 bit = k_cap_table[i].bit;
+      if (bit >= 32u) {
+        printf("FAIL xmacro: bit %u fora do registrador\n", (unsigned)bit);
+        return 1;
+      }
+      if (seen_mask & (1u << bit)) {
+        printf("FAIL xmacro: bit %u duplicado no .def\n", (unsigned)bit);
+        return 1;
+      }
+      seen_mask |= (1u << bit);
+      if (strcmp(vos_flag_name(bit), k_cap_table[i].name) != 0) {
+        printf("FAIL xmacro: vos_flag_name(%u)=%s esperado %s\n",
+               (unsigned)bit, vos_flag_name(bit), k_cap_table[i].name);
+        return 1;
+      }
+    }
+    /* mascaras derivadas devem reproduzir o contrato historico de bits */
+    if (VOS_CAP_CRC32C_HW != (1u << 0u) || VOS_CAP_RDTSC != (1u << 5u) ||
+        VOS_CAP_SSE42 != (1u << 6u) || VOS_CAP_MOCK != (1u << 31u)) {
+      printf("FAIL xmacro: mascaras divergem do contrato de bits\n");
+      return 1;
+    }
+    if (strcmp(vos_flag_name(30u), "unknown") != 0) {
+      printf("FAIL xmacro: bit nao definido deveria ser unknown\n");
       return 1;
     }
   }

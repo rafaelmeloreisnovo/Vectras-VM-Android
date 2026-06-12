@@ -13,6 +13,8 @@ The format is based on Keep a Changelog.
 - Seção 10 em `docs/active/VECTRA_COMPILER_PRECOMPILER_NONACADEMIC_2026-06-05.md`: miss como próxima instrução, delta XOR bit-a-bit e orientação da leitura como ponto de vista.
 - VECTRA_OS — execução do "next patch target" do gap ledger: correção do `VOS_CSEL` (máscara `~mask` restaurada), correção do atrator FRAF para o ponto fixo do sistema Q16 quantizado (`F* = 0x17277A`, `ITERS` 48→96 para honrar `ε = 0.001`), selftest de contrato `demo_cli/src/rmr_vectra_os_contract_selftest.c` (G2 parcial) e auditoria executável `tools/verify_vectra_os_contract.sh` (G1: warnings `-Wunused` como sinal de eliminação, export público de exatamente 3 símbolos, efeito `--gc-sections`, varredura de símbolos proibidos), com evidência em `reports/vectra_os_contract_report.md` e alvo `make verify-vectra-os-contract`.
 
+- VECTRA_OS G3 — `engine/rmr/include/rmr_vectra_flags.def` como fonte única X-macro dos bits de capability: enum `VOS_CAP_BIT_*`, `VOS_CAP_COUNT`, máscaras derivadas e `vos_flag_name` gerados do `.def`; prova de unicidade/consistência/lookup no contract selftest, sem novos símbolos exportados.
+
 ### Fixed
 - `engine/rmr/sources_rmr_core.mk` regenerado via `tools/sync_rmr_manifest_to_mk.py` — o gate `verify-rmr-source-alignment` falhava e `rmr_vectra_os.c` não entrava na lib host do Makefile.
 - Módulo BITOMEGA adicionado ao engine RMR com API pública em `engine/rmr/include/bitomega.h` e implementação determinística em `engine/rmr/src/bitomega.c`.

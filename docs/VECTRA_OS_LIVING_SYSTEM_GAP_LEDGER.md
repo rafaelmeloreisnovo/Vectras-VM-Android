@@ -306,7 +306,7 @@ VECTRA_OS_LIVING_STATUS:
   contract_audit_report: PRESENT (tools/verify_vectra_os_contract.sh — G1; evidência em reports/vectra_os_contract_report.md)
   csel_contract: FIXED_WITH_PROOF (máscara ~mask restaurada; tabela-verdade no selftest)
   fraf_attractor_constant: FIXED_QUANTIZED (F* = 0x17277A, ponto fixo do sistema Q16 implementado; ITERS 48→96 para honrar ε=0.001 — o contrato anterior era matematicamente insatisfazível)
-  xmacro_flags: MISSING
+  xmacro_flags: PRESENT (engine/rmr/include/rmr_vectra_flags.def — fonte única de bits; enum + máscaras + vos_flag_name gerados; prova no contract selftest)
   flag_rollback: MISSING
   cas_layer: MISSING
   machine_codex_enforcement: MISSING
@@ -335,10 +335,18 @@ Additional proof nodes from the same patch:
   exposed by the new selftest; the old constant satisfied no build, test or
   script (falsifier family: "comments describe obligations nothing checks").
 
+~~G3 done~~ — `rmr_vectra_flags.def` added as the single source of bit
+numbers; `VOS_CAP_BIT_*`, `VOS_CAP_COUNT`, derived masks and
+`vos_flag_name` generated from it; contract selftest proves bit
+uniqueness, mask consistency and name lookup (including the "unknown"
+default). `vos_flag_name` is `static inline`: zero exported symbols —
+contract audit still reports exactly 3.
+
 The next code patch should be small and proof-bearing:
 
-1. G3 — `rmr_vectra_flags.def` X-macro flag source of truth + `vos_flag_name`;
-2. extend the contract selftest with the X-macro lookup;
+1. G4 — flag rollback (`vos_g_caps_prev`, `VOS_FLAGS_MARK/RESTORE`,
+   `RAF_TRY_FLAG`) and TTL8 state mapping;
+2. extend the contract selftest with flag mark/restore;
 3. do not touch trampoline yet.
 
 This preserves the living-system logic: every correction must leave behind a proof node.
