@@ -73,6 +73,7 @@ ASM_EQUIVALENCE_SELFTEST_BIN := build/demo/rmr_asm_equivalence_selftest
 ZIPRAF_CORE_SELFTEST_BIN := build/demo/zipraf_core_selftest
 TCG_CACHE_SELFTEST_BIN := build/demo/rmr_tcg_cache_selftest
 VECTRA_OS_CONTRACT_SELFTEST_BIN := build/demo/rmr_vectra_os_contract_selftest
+VECTRA_OS_MVP_BENCH_BIN := build/bench/vectra_os_mvp_bench
 SECTOR_SELFTEST_BIN := build/demo/sector_selftest
 SNAPSHOT_42_BIN := build/demo/sector_snapshot_42
 CORE_BENCH_SMOKE_BIN := build/bench/core_benchmark_smoke
@@ -214,6 +215,17 @@ $(VECTRA_OS_CONTRACT_SELFTEST_BIN): demo_cli/src/rmr_vectra_os_contract_selftest
 	@mkdir -p $(dir $@)
 	$(CC) $(CPPFLAGS) $(CFLAGS) $< $(RMR_LINK_LIBS) $(LDFLAGS) -o $@
 
+$(VECTRA_OS_MVP_BENCH_BIN): bench/src/vectra_os_mvp_bench_main.c $(LIB_STATIC) $(LIB_BITRAF_STATIC)
+	@mkdir -p $(dir $@)
+	$(CC) $(CPPFLAGS) $(CFLAGS) \
+		-DRMR_BUILD_COMMIT="\"$$(git rev-parse --short HEAD 2>/dev/null || echo unknown)\"" \
+		-DRMR_BENCH_FLAGS_STR="\"$(CFLAGS)\"" \
+		$< $(RMR_LINK_LIBS) $(LDFLAGS) -o $@
+
+run-vectra-os-mvp-bench: $(VECTRA_OS_MVP_BENCH_BIN)
+	@mkdir -p bench/results
+	./$(VECTRA_OS_MVP_BENCH_BIN) | tee bench/results/vectra_os_mvp_bench.txt
+
 $(NEON_SIMD_SELFTEST_BIN): demo_cli/src/neon_simd_selftest.c $(LIB_STATIC) $(LIB_BITRAF_STATIC)
 	@mkdir -p $(dir $@)
 	$(CC) $(CPPFLAGS) $(CFLAGS) $< $(RMR_LINK_LIBS) $(LDFLAGS) -o $@
@@ -295,7 +307,7 @@ check-engine-source-manifest:
 clean:
 	rm -rf build
 
-.PHONY: all clean verify-librmr-symbols run-demo run-casm-selftest run-selftest run-bitomega-smoketest run-bench run-baremetal-gate run-release-gate check-engine-source-manifest
+.PHONY: all clean verify-librmr-symbols run-demo run-casm-selftest run-selftest run-bitomega-smoketest run-bench run-vectra-os-mvp-bench run-baremetal-gate run-release-gate check-engine-source-manifest
 
 print-build-config:
 	@echo "RMR_JNI_BUILD=$(RMR_JNI_BUILD)"

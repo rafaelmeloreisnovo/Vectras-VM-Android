@@ -236,6 +236,7 @@ target_link_libraries(rmr_tcg_cache_selftest PRIVATE rmr)
 rmr_apply_common_flags(rmr_tcg_cache_selftest)
 
 rmr_add_host_executable(rmr_vectra_os_contract_selftest demo_cli/src/rmr_vectra_os_contract_selftest.c)
+rmr_add_host_executable(vectra_os_mvp_bench bench/src/vectra_os_mvp_bench_main.c)
 rmr_add_host_executable(vectra_external_engine_selftest demo_cli/src/vectra_external_engine_selftest.c)
 rmr_add_host_executable(rmr_external_engine_selftest demo_cli/src/rmr_external_engine_selftest.c)
 rmr_add_host_executable(rmr_policy_benchmark demo_cli/src/rmr_policy_benchmark.c)

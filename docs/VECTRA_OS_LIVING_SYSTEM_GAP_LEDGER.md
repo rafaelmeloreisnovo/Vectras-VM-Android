@@ -310,7 +310,7 @@ VECTRA_OS_LIVING_STATUS:
   flag_rollback: PRESENT_PARTIAL (núcleo G4: vos_g_caps_prev + VOS_FLAGS_MARK/RESTORE + RAF_TRY_FLAG, provado no contract selftest; mapeamento TTL8 PENDENTE — RAFAELIA_CODEX_TTL8_SUMMARY.txt citado em §1 não está na árvore)
   cas_layer: PRESENT (VOS_CAS32, VOS_ATOMIC_LOAD32/STORE32, VOS_CAS_PTR sobre builtins GCC/Clang — LDREX/STREX em ARM32 via compilador; toolchain sem builtins = erro de compilação explícito; prova no contract selftest incluindo hotswap de dispatch por CAS)
   machine_codex_enforcement: PRESENT (VOS_MC_ASSERT, VOS_MC_REQUIRE_POW2/ALIGNED via FAILSAFE, VOS_MC_RECIP_U32 com domínio declarado VOS_MC_RECIP_BOUND e prova bilateral da fronteira, VOS_MC_LOOP_BOUND em compile-time; obrigações do próprio header agora checadas onde nascem)
-  mvp_benchmark_proof: MISSING
+  mvp_benchmark_proof: PRESENT (bench/src/vectra_os_mvp_bench_main.c — 5 kernels MVP com median/p5/p95/amostras brutas/plataforma/flags/commit/hash do binário; ticks via VOS_TICK com fonte reportada; alvo make run-vectra-os-mvp-bench, evidência em bench/results/vectra_os_mvp_bench.txt)
   trampoline_runtime_patch: MISSING_OPT_IN_REQUIRED
   vm_compiler_integration: SEPARATE_LAYER_PENDING
 ```
@@ -366,13 +366,24 @@ information, proven on both sides of the border), `VOS_MC_LOOP_BOUND`
 (arena pow2/alignment, 32-bit cap register, FRAF loop budget) are now
 checked where they are born.
 
-**Checkpoint: G1–G5 + G7 pass.** Remaining:
-- G8 (MVP benchmark proof layer) — next unblocked target;
+~~G8 done~~ — MVP benchmark proof layer: the 5 kernels (FRAF Q16 to F*,
+CRC32C 4KB on the active dispatch, arena alloc 64B, T7 100 steps,
+FSM-8 + Lyapunov contraction) measured in VOS_TICK ticks with the tick
+source named; output carries every field the falsifier demands: raw
+samples (31, median-31 MC-01), median/p5/p95, platform tag, caps flag
+names (via `vos_flag_name`, G3), compiler, build flags, commit, FNV64
+of the measured binary itself. Run: `make run-vectra-os-mvp-bench`;
+evidence: `bench/results/vectra_os_mvp_bench.txt`.
+
+**Checkpoint: G1–G5 + G7 + G8 pass.** Remaining:
 - G6 (trampoline) — unlocked by the G1–G5 rule but opt-in by design and
   architecturally significant (W^X on Android, non-atomic 5-byte patch on
   x86_64) — requires an explicit owner decision before any code;
 - G4-TTL8 — blocked on codex ingestion (`RAFAELIA_CODEX_TTL8_SUMMARY.txt`
   not in tree);
-- G9 — boundary rule, documentation-only.
+- G9 — boundary rule, documentation-only: VECTRA_OS proves low-level
+  primitives; RAFAELIA-VM proves bytecode; integration only after each
+  layer has independent selftest — this rule is now satisfied for the
+  VECTRA_OS layer (contract selftest + audit + benchmark proof).
 
 This preserves the living-system logic: every correction must leave behind a proof node.
