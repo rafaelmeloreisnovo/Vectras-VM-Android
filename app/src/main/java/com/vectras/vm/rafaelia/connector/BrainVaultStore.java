@@ -62,7 +62,7 @@ public final class BrainVaultStore {
         warmFile = new File(dir, "brainvault.jsonl");
         coldFile = new File(dir, "brainvault.cold.jsonl");
         hot = Collections.synchronizedMap(new LinkedHashMap<>(HOT_CAPACITY, 0.75f, true) {
-            @Override protected boolean removeEldestEntry(Map.Entry<String, Entry> eldest) {
+            @Override protected boolean removeEldestEntry(Map.Entry<String, BrainVaultStore.Entry> eldest) {
                 return size() > HOT_CAPACITY;
             }
         });
