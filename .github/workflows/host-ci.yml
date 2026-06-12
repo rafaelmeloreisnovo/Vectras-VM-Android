@@ -3,9 +3,9 @@ name: host-ci
 on:
   workflow_call:
   push:
-    branches: [main, develop]
+    branches: [main, master, develop]
   pull_request:
-    branches: [main, develop]
+    branches: [main, master, develop]
   workflow_dispatch:
 
 permissions:
@@ -18,9 +18,19 @@ concurrency:
 jobs:
   host-engine:
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
+
+      - name: Block sensitive artifacts and credential patterns
+        run: |
+          set -euo pipefail
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            export SENSITIVE_CHECK_RANGE="${{ github.event.pull_request.base.sha }}..${{ github.event.pull_request.head.sha }}"
+          elif git rev-parse --verify HEAD~1 >/dev/null 2>&1; then
+            export SENSITIVE_CHECK_RANGE="HEAD~1..HEAD"
+          fi
+          bash tools/check_sensitive_artifacts.sh
 
       - name: Validate consolidated lowlevel ABI guard
         run: ./tools/ci/validate_lowlevel_abi.sh
@@ -57,11 +67,17 @@ jobs:
       - name: Show hosted engine config
         run: make print-build-config
 
+      - name: Run VECTRA_OS contract audit
+        run: make verify-vectra-os-contract
+
       - name: Build engine with Makefile
         run: make -j"$(nproc)"
 
       - name: Run engine selftests
         run: make run-selftest
+
+      - name: Run VECTRA_OS MVP benchmark proof
+        run: make run-vectra-os-mvp-bench
 
       - name: Gate sector reentrancy/selftest (host native)
         run: make run-sector-selftest
@@ -105,7 +121,7 @@ jobs:
         if: always()
         run: |
           mkdir -p artifacts/bin bench-results
-          find bench/results -type f \( -name '*.csv' -o -name '*.log' \) -exec cp {} bench-results/ \; 2>/dev/null || true
+          find bench/results -type f \( -name '*.csv' -o -name '*.log' -o -name '*.txt' -o -name '*.json' \) -exec cp {} bench-results/ \; 2>/dev/null || true
           find . -type f -executable -not -path './build-cmake/*' -not -path './.git/*' | head -20 | xargs -r -I {} cp {} artifacts/bin/
           find . -name '*.so' -not -path './build-cmake/*' -exec cp {} artifacts/bin/ \; 2>/dev/null || true
           cp -r build-cmake/bin/* artifacts/bin/ 2>/dev/null || true
