@@ -1,3 +1,12 @@
 asset_path,asset_type,author,source_url,license_spdx,permission_proof,risk_class,status,notes,last_review_date
 resources/compliance/examples/authored_placeholder_01.txt,text,Project Team,internal,MIT,n/a,A,approved,authored placeholder for pipeline validation,2026-05-25
 resources/compliance/examples/authored_placeholder_02.txt,text,Project Team,internal,MIT,n/a,A,approved,authored placeholder for pipeline validation,2026-05-25
+app/src/main/jniLibs/arm64-v8a/libXlorie.so,binary-so,TOKEN_VAZIO,TOKEN_VAZIO,TOKEN_VAZIO,TOKEN_VAZIO,CRITICAL,blocked,"needs upstream/build recipe/license/hash before release; audit 2026-06-12 found committed binary without provenance",2026-06-12
+app/src/main/jniLibs/armeabi-v7a/libXlorie.so,binary-so,TOKEN_VAZIO,TOKEN_VAZIO,TOKEN_VAZIO,TOKEN_VAZIO,CRITICAL,blocked,"needs upstream/build recipe/license/hash before release; audit 2026-06-12 found committed binary without provenance",2026-06-12
+app/src/main/jniLibs/x86/libXlorie.so,binary-so,TOKEN_VAZIO,TOKEN_VAZIO,TOKEN_VAZIO,TOKEN_VAZIO,CRITICAL,blocked,"needs upstream/build recipe/license/hash before release; audit 2026-06-12 found committed binary without provenance",2026-06-12
+app/src/main/jniLibs/x86_64/libXlorie.so,binary-so,TOKEN_VAZIO,TOKEN_VAZIO,TOKEN_VAZIO,TOKEN_VAZIO,CRITICAL,blocked,"needs upstream/build recipe/license/hash before release; audit 2026-06-12 found committed binary without provenance",2026-06-12
+**/*alpine*.tar*,rootfs-tarball,TOKEN_VAZIO,TOKEN_VAZIO,TOKEN_VAZIO,TOKEN_VAZIO,CRITICAL,blocked,"glob guard only; replace with exact path/version/hash/license before release",2026-06-12
+**/*OVMF*,firmware,TOKEN_VAZIO,TOKEN_VAZIO,TOKEN_VAZIO,TOKEN_VAZIO,CRITICAL,blocked,"glob guard only; replace with exact path/version/hash/license before release",2026-06-12
+**/*BIOS*,firmware,TOKEN_VAZIO,TOKEN_VAZIO,TOKEN_VAZIO,TOKEN_VAZIO,CRITICAL,blocked,"glob guard only; replace with exact path/version/hash/license before release",2026-06-12
+RAFAELMELOREIS/MIT/NAOCOMERCIAL/,license-zone,Rafael,internal,NOASSERTION,TOKEN_VAZIO,CRITICAL,excluded-from-release,"non-commercial restriction conflicts with GPLv2-compatible combined distribution until explicit legal decision",2026-06-12
+addthis/,experimental-directory,TOKEN_VAZIO,TOKEN_VAZIO,TOKEN_VAZIO,TOKEN_VAZIO,HIGH,excluded-from-release,"40 MB experimental directory reported by audit; add README/provenance or quarantine/remove from release",2026-06-12
