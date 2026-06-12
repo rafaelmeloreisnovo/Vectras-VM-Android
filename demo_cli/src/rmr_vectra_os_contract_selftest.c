@@ -1,0 +1,371 @@
+/* rmr_vectra_os_contract_selftest - prova executável do contrato VECTRA_OS.
+ *
+ * Ref: docs/VECTRA_OS_LIVING_SYSTEM_GAP_LEDGER.md §3 (tabela-verdade VOS_CSEL
+ * exigida), §4 G2 e §8 (next patch target). Cobre os itens do contrato que
+ * existem hoje; X-macro/CAS/trampoline são gaps G3-G6 e ficam fora por design.
+ *
+ * Invariantes cobertas:
+ *  1. Tabela-verdade VOS_CSEL — os 4 casos exigidos pelo ledger.
+ *  2. vos_init() e vos_selftest() retornam 1 (FRAF converge, CRC íntegro).
+ *  3. Arena mark/restore: após restore, o mesmo endereço é devolvido.
+ *  4. Dispatch hotswap: troca de implementação ativa e retorno ao original
+ *     reproduzem os mesmos resultados (rollback sem resíduo).
+ *  5. vos_caps_report expõe as constantes FRAF do contrato.
+ *  6. X-macro (G3): bits únicos no .def, máscaras derivadas consistentes,
+ *     vos_flag_name resolve cada entrada e "unknown" fora delas.
+ *  7. Flag rollback (G4 núcleo): MARK/RESTORE devolvem o registrador
+ *     exato; RAF_TRY_FLAG com body falso não deixa resíduo.
+ *  8. CAS (G5): sucesso troca o valor; falha preserva o alvo e devolve o
+ *     valor observado em expected; CAS de ponteiro faz hotswap de dispatch.
+ *  9. Machine Codex (G7): REQUIRE_* honram o protocolo FAILSAFE nos dois
+ *     sentidos (passa e falha), e o recíproco Q32 é provado no domínio.
+ * 10. Trampoline encoder (G6, opt-in): codifica o desvio correto por arch,
+ *     rejeita desalinhamento e fora-de-alcance — sem tocar .text vivo.
+ */
+#include "rmr_vectra_os.h"
+
+#include <stdio.h>
+#include <string.h>
+
+/* Tabela local gerada da mesma fonte única — prova de não-duplicação. */
+static const struct {
+  u32 bit;
+  const char *name;
+} k_cap_table[] = {
+#define VOS_CAP_DEF(name, bit, str) {(bit), (str)},
+#include "rmr_vectra_flags.def"
+#undef VOS_CAP_DEF
+};
+
+static u32 vos_stub_crc(const u8 *buf, u32 len, u32 init) {
+  (void)buf;
+  (void)len;
+  (void)init;
+  return 0x52414621u; /* "RAF!" — marcador do caminho trocado */
+}
+
+/* Sondas do protocolo FAILSAFE: REQUIRE_* devolvem do chamador em falha. */
+static u32 mc_probe_pass(void) {
+  VOS_MC_REQUIRE_POW2(VOS_ARENA_ALIGN);
+  VOS_MC_REQUIRE_ALIGNED(vos_g_arena, VOS_ARENA_ALIGN);
+  return 1u;
+}
+
+static u32 mc_probe_fail(void) {
+  VOS_MC_REQUIRE_POW2(12u); /* 12 nao e pow2: FAILSAFE deve devolver 0 */
+  return 1u;
+}
+
+int main(void) {
+  static const u8 vec[4] = {0x01u, 0x02u, 0x03u, 0x04u};
+  u32 caps_out[4];
+
+  /* 1. tabela-verdade VOS_CSEL (ledger §3) */
+  if (VOS_CSEL(0, 10u, 20u) != 20u) {
+    printf("FAIL csel(0,10,20)\n");
+    return 1;
+  }
+  if (VOS_CSEL(1, 10u, 20u) != 10u) {
+    printf("FAIL csel(1,10,20)\n");
+    return 1;
+  }
+  if (VOS_CSEL(0, 0xAAAAAAAAu, 0x55555555u) != 0x55555555u) {
+    printf("FAIL csel(0,AA,55)\n");
+    return 1;
+  }
+  if (VOS_CSEL(1, 0xAAAAAAAAu, 0x55555555u) != 0xAAAAAAAAu) {
+    printf("FAIL csel(1,AA,55)\n");
+    return 1;
+  }
+
+  /* 2. init + selftest publicos */
+  if (vos_init() != 1u) {
+    printf("FAIL vos_init\n");
+    return 1;
+  }
+  if (vos_selftest() != 1u) {
+    printf("FAIL vos_selftest\n");
+    return 1;
+  }
+
+  /* 3. arena mark/restore deterministico */
+  {
+    void *p1;
+    void *p2;
+    VOS_MARK();
+    p1 = VOS_ARENA_ALLOC(48u);
+    if (!p1) {
+      printf("FAIL arena alloc #1\n");
+      return 1;
+    }
+    VOS_RESTORE();
+    p2 = VOS_ARENA_ALLOC(48u);
+    if (p1 != p2) {
+      printf("FAIL arena restore: enderecos divergem\n");
+      return 1;
+    }
+    VOS_RESTORE();
+  }
+
+  /* 4. dispatch hotswap com rollback sem residuo */
+  {
+    vos_crc_fn_t original = vos_g_crc;
+    u32 crc_before = VOS_CRC32C(vec, 4u, VOS_CHAIN_INIT);
+
+    VOS_HOTSWAP_CRC(vos_stub_crc);
+    if (VOS_CRC32C(vec, 4u, VOS_CHAIN_INIT) != 0x52414621u) {
+      printf("FAIL hotswap nao ativou stub\n");
+      return 1;
+    }
+
+    VOS_HOTSWAP_CRC(original);
+    if (VOS_CRC32C(vec, 4u, VOS_CHAIN_INIT) != crc_before) {
+      printf("FAIL hotswap rollback divergente\n");
+      return 1;
+    }
+    if (crc_before == 0u || crc_before == 0xFFFFFFFFu) {
+      printf("FAIL crc original fora do contrato de cadeia\n");
+      return 1;
+    }
+  }
+
+  /* 6. X-macro: fonte unica de bits (ledger G3) */
+  {
+    u32 seen_mask = 0u;
+    u32 n = (u32)(sizeof(k_cap_table) / sizeof(k_cap_table[0]));
+    if (n != (u32)VOS_CAP_COUNT) {
+      printf("FAIL xmacro: tabela=%u VOS_CAP_COUNT=%u\n",
+             (unsigned)n, (unsigned)VOS_CAP_COUNT);
+      return 1;
+    }
+    for (u32 i = 0u; i < n; ++i) {
+      u32 bit = k_cap_table[i].bit;
+      if (bit >= 32u) {
+        printf("FAIL xmacro: bit %u fora do registrador\n", (unsigned)bit);
+        return 1;
+      }
+      if (seen_mask & (1u << bit)) {
+        printf("FAIL xmacro: bit %u duplicado no .def\n", (unsigned)bit);
+        return 1;
+      }
+      seen_mask |= (1u << bit);
+      if (strcmp(vos_flag_name(bit), k_cap_table[i].name) != 0) {
+        printf("FAIL xmacro: vos_flag_name(%u)=%s esperado %s\n",
+               (unsigned)bit, vos_flag_name(bit), k_cap_table[i].name);
+        return 1;
+      }
+    }
+    /* mascaras derivadas devem reproduzir o contrato historico de bits */
+    if (VOS_CAP_CRC32C_HW != (1u << 0u) || VOS_CAP_RDTSC != (1u << 5u) ||
+        VOS_CAP_SSE42 != (1u << 6u) || VOS_CAP_MOCK != (1u << 31u)) {
+      printf("FAIL xmacro: mascaras divergem do contrato de bits\n");
+      return 1;
+    }
+    if (strcmp(vos_flag_name(30u), "unknown") != 0) {
+      printf("FAIL xmacro: bit nao definido deveria ser unknown\n");
+      return 1;
+    }
+  }
+
+  /* 7. flag rollback (G4 nucleo): transacao sem residuo */
+  {
+    vos_cap_t before = vos_g_caps;
+
+    VOS_FLAGS_MARK();
+    VOS_CAPS_ENABLE(VOS_CAP_MOCK);
+    if (!(vos_g_caps & VOS_CAP_MOCK)) {
+      printf("FAIL flags: enable nao ativou MOCK\n");
+      return 1;
+    }
+    VOS_FLAGS_RESTORE();
+    if (vos_g_caps != before) {
+      printf("FAIL flags: restore divergente\n");
+      return 1;
+    }
+
+    RAF_TRY_FLAG(VOS_CAP_MOCK, 0u); /* body falso: rollback total */
+    if (vos_g_caps != before) {
+      printf("FAIL try_flag: body falso deixou residuo\n");
+      return 1;
+    }
+
+    RAF_TRY_FLAG(VOS_CAP_MOCK, (vos_g_caps & VOS_CAP_MOCK)); /* body ve a flag */
+    if (!(vos_g_caps & VOS_CAP_MOCK)) {
+      printf("FAIL try_flag: body verdadeiro nao manteve a flag\n");
+      return 1;
+    }
+    VOS_CAPS_DISABLE(VOS_CAP_MOCK);
+    if (vos_g_caps != before) {
+      printf("FAIL flags: estado final divergente\n");
+      return 1;
+    }
+  }
+
+  /* 8. CAS (G5): semantica de sucesso/falha e hotswap por ponteiro */
+  {
+    u32 target = 5u;
+    u32 expected = 5u;
+
+    if (!VOS_CAS32(&target, &expected, 9u) || target != 9u) {
+      printf("FAIL cas32: sucesso nao trocou valor\n");
+      return 1;
+    }
+    expected = 5u; /* stale: deve falhar e observar 9 */
+    if (VOS_CAS32(&target, &expected, 7u) || expected != 9u || target != 9u) {
+      printf("FAIL cas32: falha deveria preservar alvo e observar 9\n");
+      return 1;
+    }
+
+    VOS_ATOMIC_STORE32(&target, 0x52414632u);
+    if (VOS_ATOMIC_LOAD32(&target) != 0x52414632u) {
+      printf("FAIL atomic load/store roundtrip\n");
+      return 1;
+    }
+
+    /* CAS de ponteiro sobre o dispatch ativo, com rollback */
+    {
+      vos_crc_fn_t original = vos_g_crc;
+      vos_crc_fn_t expected_fn = original;
+      u32 crc_before = VOS_CRC32C(vec, 4u, VOS_CHAIN_INIT);
+
+      if (!VOS_CAS_PTR(&vos_g_crc, &expected_fn, vos_stub_crc)) {
+        printf("FAIL cas_ptr: hotswap nao aplicado\n");
+        return 1;
+      }
+      if (VOS_CRC32C(vec, 4u, VOS_CHAIN_INIT) != 0x52414621u) {
+        printf("FAIL cas_ptr: dispatch nao trocou\n");
+        return 1;
+      }
+      expected_fn = vos_stub_crc;
+      if (!VOS_CAS_PTR(&vos_g_crc, &expected_fn, original) ||
+          VOS_CRC32C(vec, 4u, VOS_CHAIN_INIT) != crc_before) {
+        printf("FAIL cas_ptr: rollback divergente\n");
+        return 1;
+      }
+    }
+  }
+
+  /* 9. Machine Codex (G7): obrigacao como checagem */
+  {
+    static const u32 divisors[] = {3u, 7u, 10u, 31u, 4096u, 65535u};
+    vos_cap_t before = vos_g_caps;
+
+    if (mc_probe_pass() != 1u) {
+      printf("FAIL mc: probe valida deveria passar\n");
+      return 1;
+    }
+
+    /* FAILSAFE em falha suja vos_g_caps de proposito (MOCK + 0xFF000000);
+       o rollback do G4 contem o residuo do teste negativo. */
+    VOS_FLAGS_MARK();
+    if (mc_probe_fail() != 0u) {
+      printf("FAIL mc: probe invalida deveria falhar via FAILSAFE\n");
+      return 1;
+    }
+    if (!(vos_g_caps & VOS_CAP_MOCK)) {
+      printf("FAIL mc: FAILSAFE nao marcou MOCK\n");
+      return 1;
+    }
+    VOS_FLAGS_RESTORE();
+    if (vos_g_caps != before) {
+      printf("FAIL mc: rollback pos-failsafe divergente\n");
+      return 1;
+    }
+
+    /* reciproco Q32 provado no DOMINIO DECLARADO (VOS_MC_RECIP_BOUND):
+       exato ate a fronteira, e a divergencia alem dela e informacao
+       esperada do contrato, nao defeito oculto */
+    for (u32 d = 0u; d < (u32)(sizeof(divisors) / sizeof(divisors[0])); ++d) {
+      u32 div = divisors[d];
+      u32 r = VOS_MC_RECIP_U32(div);
+      u32 bound = VOS_MC_RECIP_BOUND(div);
+
+      for (u32 x = 0u; x <= 100000u; x += 17u) {
+        if (VOS_MC_RECIP_DIV(x, r) != x / div) {
+          printf("FAIL mc: reciproco divergente x=%u d=%u\n",
+                 (unsigned)x, (unsigned)div);
+          return 1;
+        }
+      }
+      /* fronteira exata e regiao imediatamente abaixo dela */
+      for (u32 k = 0u; k <= 1024u && k <= bound; ++k) {
+        u32 x = bound - k;
+        if (VOS_MC_RECIP_DIV(x, r) != x / div) {
+          printf("FAIL mc: reciproco divergente dentro do dominio x=%u d=%u bound=%u\n",
+                 (unsigned)x, (unsigned)div, (unsigned)bound);
+          return 1;
+        }
+      }
+    }
+    /* prova negativa: para d=3 (bound=0x7FFFFFFF) existe divergencia
+       conhecida alem da fronteira — o limite declarado e real */
+    if (VOS_MC_RECIP_CHECK(0xFFFFFFFEu, 3u)) {
+      printf("FAIL mc: divergencia esperada alem do bound nao ocorreu\n");
+      return 1;
+    }
+    if (VOS_MC_RECIP_BOUND(3u) != 0x7FFFFFFFu ||
+        VOS_MC_RECIP_BOUND(4096u) != 0xFFFFFFFFu) {
+      printf("FAIL mc: bound declarado diverge do esperado\n");
+      return 1;
+    }
+  }
+
+  /* 10. trampoline encoder (G6, opt-in) — funcao pura, nao toca .text */
+  {
+    u8 enc[8];
+    u32 len = 0u;
+#if defined(__x86_64__) || defined(__i386__)
+    /* salto para frente: dst = src + 0x100; rel = 0x100 - 5 = 0xFB */
+    if (!vos_trampoline_encode(0x400000u, 0x400100u, enc, &len) ||
+        len != 5u || enc[0] != 0xE9u || enc[1] != 0xFBu ||
+        enc[2] != 0u || enc[3] != 0u || enc[4] != 0u) {
+      printf("FAIL trampoline x86: encode rel32 incorreto\n");
+      return 1;
+    }
+    /* fora de alcance: rel > 2 GiB */
+    if (vos_trampoline_encode(0x1000u, 0x1000u + 0x90000000ull, enc, &len)) {
+      printf("FAIL trampoline x86: fora de alcance aceito\n");
+      return 1;
+    }
+#elif defined(__aarch64__)
+    /* B para src+16: imm = 4 instrucoes => insn = 0x14000004 (LE) */
+    if (!vos_trampoline_encode(0x400000u, 0x400010u, enc, &len) ||
+        len != 4u || enc[0] != 0x04u || enc[1] != 0u ||
+        enc[2] != 0u || enc[3] != 0x14u) {
+      printf("FAIL trampoline arm64: encode B incorreto\n");
+      return 1;
+    }
+    /* desalinhamento rejeitado */
+    if (vos_trampoline_encode(0x400002u, 0x400010u, enc, &len)) {
+      printf("FAIL trampoline arm64: desalinhamento aceito\n");
+      return 1;
+    }
+    /* fora de alcance: > 128 MiB */
+    if (vos_trampoline_encode(0x400000u, 0x400000u + 0x09000000u, enc, &len)) {
+      printf("FAIL trampoline arm64: fora de alcance aceito\n");
+      return 1;
+    }
+#else
+    (void)enc;
+    (void)len;
+#endif
+    /* contrato global: opt-in desligado por padrao */
+    if (VOS_ENABLE_TRAMPOLINE != 0) {
+      printf("FAIL trampoline: opt-in nao deveria estar ligado por padrao\n");
+      return 1;
+    }
+  }
+
+  /* 5. caps report expoe as constantes FRAF do contrato */
+  vos_caps_report(caps_out);
+  if (caps_out[1] != (u32)VOS_FRAF_STAR_Q16 ||
+      caps_out[2] != (u32)VOS_FRAF_SCALE_Q16 ||
+      caps_out[3] != (u32)VOS_FRAF_OFFSET_Q16) {
+    printf("FAIL caps report constantes FRAF\n");
+    return 1;
+  }
+
+  printf("OK vectra os contract selftest caps=0x%08x fstar=0x%08x\n",
+         (unsigned)caps_out[0], (unsigned)caps_out[1]);
+  return 0;
+}
