@@ -19,6 +19,8 @@
  *     valor observado em expected; CAS de ponteiro faz hotswap de dispatch.
  *  9. Machine Codex (G7): REQUIRE_* honram o protocolo FAILSAFE nos dois
  *     sentidos (passa e falha), e o recíproco Q32 é provado no domínio.
+ * 10. Trampoline encoder (G6, opt-in): codifica o desvio correto por arch,
+ *     rejeita desalinhamento e fora-de-alcance — sem tocar .text vivo.
  */
 #include "rmr_vectra_os.h"
 
@@ -304,6 +306,52 @@ int main(void) {
     if (VOS_MC_RECIP_BOUND(3u) != 0x7FFFFFFFu ||
         VOS_MC_RECIP_BOUND(4096u) != 0xFFFFFFFFu) {
       printf("FAIL mc: bound declarado diverge do esperado\n");
+      return 1;
+    }
+  }
+
+  /* 10. trampoline encoder (G6, opt-in) — funcao pura, nao toca .text */
+  {
+    u8 enc[8];
+    u32 len = 0u;
+#if defined(__x86_64__) || defined(__i386__)
+    /* salto para frente: dst = src + 0x100; rel = 0x100 - 5 = 0xFB */
+    if (!vos_trampoline_encode(0x400000u, 0x400100u, enc, &len) ||
+        len != 5u || enc[0] != 0xE9u || enc[1] != 0xFBu ||
+        enc[2] != 0u || enc[3] != 0u || enc[4] != 0u) {
+      printf("FAIL trampoline x86: encode rel32 incorreto\n");
+      return 1;
+    }
+    /* fora de alcance: rel > 2 GiB */
+    if (vos_trampoline_encode(0x1000u, 0x1000u + 0x90000000ull, enc, &len)) {
+      printf("FAIL trampoline x86: fora de alcance aceito\n");
+      return 1;
+    }
+#elif defined(__aarch64__)
+    /* B para src+16: imm = 4 instrucoes => insn = 0x14000004 (LE) */
+    if (!vos_trampoline_encode(0x400000u, 0x400010u, enc, &len) ||
+        len != 4u || enc[0] != 0x04u || enc[1] != 0u ||
+        enc[2] != 0u || enc[3] != 0x14u) {
+      printf("FAIL trampoline arm64: encode B incorreto\n");
+      return 1;
+    }
+    /* desalinhamento rejeitado */
+    if (vos_trampoline_encode(0x400002u, 0x400010u, enc, &len)) {
+      printf("FAIL trampoline arm64: desalinhamento aceito\n");
+      return 1;
+    }
+    /* fora de alcance: > 128 MiB */
+    if (vos_trampoline_encode(0x400000u, 0x400000u + 0x09000000u, enc, &len)) {
+      printf("FAIL trampoline arm64: fora de alcance aceito\n");
+      return 1;
+    }
+#else
+    (void)enc;
+    (void)len;
+#endif
+    /* contrato global: opt-in desligado por padrao */
+    if (VOS_ENABLE_TRAMPOLINE != 0) {
+      printf("FAIL trampoline: opt-in nao deveria estar ligado por padrao\n");
       return 1;
     }
   }

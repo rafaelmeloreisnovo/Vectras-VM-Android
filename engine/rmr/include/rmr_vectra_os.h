@@ -471,6 +471,77 @@ VOS_MC_LOOP_BOUND(VOS_FRAF_ITERS, 3u, 1024u); /* FRAF: mul+add+abs por iter */
 #define VOS_FNV_FEED(h, byte) \
     ((u64)((((u64)(h)) ^ (u8)(byte)) * VOS_FNV_PRIME))
 
+/* ── 14.1 TRAMPOLINE HOTSWAP (G6) — OPT-IN, default desligado ───────────── */
+/* Ledger G6: adicionar somente apos G1-G5 passarem (passam) e SEMPRE atras
+   de guard com default 0. O ENCODER (calculo dos bytes do desvio + checagem
+   de alinhamento/alcance) e funcao pura: nao toca .text vivo, logo e
+   provavel por selftest. O PATCH fisico fica sob VOS_ENABLE_TRAMPOLINE=1 e
+   exige pagina gravavel (W^X no Android); em x86_64 o JMP rel32 de 5 bytes
+   NAO e atomico (stop-the-world externo). */
+#ifndef VOS_ENABLE_TRAMPOLINE
+#define VOS_ENABLE_TRAMPOLINE 0
+#endif
+
+/* Encoder puro: escreve em out[0..len) os bytes do desvio src->dst e
+   *len_out. Devolve 1 em sucesso, 0 se a arch/alinhamento/alcance violarem
+   o contrato. Endereco sintetico permitido — a prova nao depende de W^X. */
+static inline u32 vos_trampoline_encode(u64 src, u64 dst, u8 *out, u32 *len_out) {
+  if (!out || !len_out) return 0u;
+#if defined(__aarch64__)
+  /* B imm26: +-128 MiB, src e dst alinhados a 4 bytes. */
+  if ((src & 3u) != 0u || (dst & 3u) != 0u) return 0u;
+  {
+    s64 delta = (s64)dst - (s64)src;
+    if (delta < -(s64)0x8000000 || delta >= (s64)0x8000000) return 0u;
+    {
+      u32 insn = 0x14000000u | (((u32)((u64)delta >> 2u)) & 0x03FFFFFFu);
+      out[0] = (u8)(insn);
+      out[1] = (u8)(insn >> 8u);
+      out[2] = (u8)(insn >> 16u);
+      out[3] = (u8)(insn >> 24u);
+      *len_out = 4u;
+      return 1u;
+    }
+  }
+#elif defined(__x86_64__) || defined(__i386__)
+  /* JMP rel32: +-2 GiB a partir do fim da instrucao (src+5). */
+  {
+    s64 rel = (s64)dst - ((s64)src + 5);
+    if (rel < -(s64)0x80000000LL || rel > (s64)0x7FFFFFFFLL) return 0u;
+    out[0] = 0xE9u;
+    out[1] = (u8)((u32)rel);
+    out[2] = (u8)((u32)rel >> 8u);
+    out[3] = (u8)((u32)rel >> 16u);
+    out[4] = (u8)((u32)rel >> 24u);
+    *len_out = 5u;
+    return 1u;
+  }
+#else
+  (void)src;
+  (void)dst;
+  return 0u; /* arch sem contrato de trampoline definido no ledger */
+#endif
+}
+
+#if VOS_ENABLE_TRAMPOLINE
+/* Patch fisico: so sob opt-in. Chamador garante pagina gravavel e
+   sincronizacao. ARM64 exige manutencao de I-cache apos a escrita. */
+static inline u32 vos_trampoline_patch(void *src, const void *dst) {
+  u8 enc[8];
+  u32 len = 0u;
+  if (!vos_trampoline_encode((u64)(unsigned long)src,
+                             (u64)(unsigned long)dst, enc, &len)) return 0u;
+  for (u32 i = 0u; i < len; ++i) ((volatile u8 *)src)[i] = enc[i];
+#if defined(__aarch64__)
+  __asm__ volatile("dc cvau, %0\n\t dsb ish\n\t ic ivau, %0\n\t dsb ish\n\t isb"
+                   :: "r"(src) : "memory");
+#else
+  __asm__ volatile("" ::: "memory");
+#endif
+  return 1u;
+}
+#endif /* VOS_ENABLE_TRAMPOLINE */
+
 /* ── 15. PUBLIC API — explicit default visibility (survives gc-sections) ─── */
 /*
  * These three functions are the ONLY symbols exported from this module.

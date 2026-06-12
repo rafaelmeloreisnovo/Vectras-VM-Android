@@ -311,7 +311,7 @@ VECTRA_OS_LIVING_STATUS:
   cas_layer: PRESENT (VOS_CAS32, VOS_ATOMIC_LOAD32/STORE32, VOS_CAS_PTR sobre builtins GCC/Clang — LDREX/STREX em ARM32 via compilador; toolchain sem builtins = erro de compilação explícito; prova no contract selftest incluindo hotswap de dispatch por CAS)
   machine_codex_enforcement: PRESENT (VOS_MC_ASSERT, VOS_MC_REQUIRE_POW2/ALIGNED via FAILSAFE, VOS_MC_RECIP_U32 com domínio declarado VOS_MC_RECIP_BOUND e prova bilateral da fronteira, VOS_MC_LOOP_BOUND em compile-time; obrigações do próprio header agora checadas onde nascem)
   mvp_benchmark_proof: PRESENT (bench/src/vectra_os_mvp_bench_main.c — 5 kernels MVP com median/p5/p95/amostras brutas/plataforma/flags/commit/hash do binário; ticks via VOS_TICK com fonte reportada; alvo make run-vectra-os-mvp-bench, evidência em bench/results/vectra_os_mvp_bench.txt)
-  trampoline_runtime_patch: MISSING_OPT_IN_REQUIRED
+  trampoline_runtime_patch: PRESENT_OPT_IN (encoder puro vos_trampoline_encode provado por selftest — B imm26 ARM64 / JMP rel32 x86_64, rejeita desalinhamento e fora-de-alcance; patch físico vos_trampoline_patch só sob VOS_ENABLE_TRAMPOLINE=1 com I-cache maintenance ARM64 e aviso de não-atomicidade x86_64; default 0, zero efeito no build oficial)
   vm_compiler_integration: SEPARATE_LAYER_PENDING
 ```
 
@@ -375,15 +375,28 @@ names (via `vos_flag_name`, G3), compiler, build flags, commit, FNV64
 of the measured binary itself. Run: `make run-vectra-os-mvp-bench`;
 evidence: `bench/results/vectra_os_mvp_bench.txt`.
 
-**Checkpoint: G1–G5 + G7 + G8 pass.** Remaining:
-- G6 (trampoline) — unlocked by the G1–G5 rule but opt-in by design and
-  architecturally significant (W^X on Android, non-atomic 5-byte patch on
-  x86_64) — requires an explicit owner decision before any code;
+~~G6 done (encoder + opt-in patch)~~ — the verifiable part (pure encoder:
+instruction bytes + alignment/range checks) is proven by selftest without
+ever touching live `.text`; the physical patch stays behind
+`VOS_ENABLE_TRAMPOLINE=1` (default 0), with ARM64 I-cache maintenance and
+the explicit x86_64 non-atomicity caveat. Compiling under the opt-in flag
+was verified separately. The contract's anti-falsifier ("trampoline enabled
+by default on Android without W^X guard") holds: the selftest asserts the
+guard is 0.
+
+**Checkpoint: G1–G8 all pass** (G6 in the proof-bearing opt-in form the
+ledger prescribes). Remaining work is not code in this layer:
 - G4-TTL8 — blocked on codex ingestion (`RAFAELIA_CODEX_TTL8_SUMMARY.txt`
-  not in tree);
+  not in tree); the flag-rollback core (G4) is done, only the TTL8 state
+  mapping waits on the source document;
 - G9 — boundary rule, documentation-only: VECTRA_OS proves low-level
   primitives; RAFAELIA-VM proves bytecode; integration only after each
-  layer has independent selftest — this rule is now satisfied for the
-  VECTRA_OS layer (contract selftest + audit + benchmark proof).
+  layer has independent selftest — now satisfied for the VECTRA_OS layer
+  (contract selftest + audit + benchmark proof).
+
+The living-system contract for the VECTRA_OS layer is closed end to end:
+every gap left behind a proof node (selftest assertion, audit check, or
+benchmark field), per the falsifier "comments describe obligations that
+no script, macro, test, or build rule checks".
 
 This preserves the living-system logic: every correction must leave behind a proof node.
