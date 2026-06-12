@@ -309,7 +309,7 @@ VECTRA_OS_LIVING_STATUS:
   xmacro_flags: PRESENT (engine/rmr/include/rmr_vectra_flags.def — fonte única de bits; enum + máscaras + vos_flag_name gerados; prova no contract selftest)
   flag_rollback: PRESENT_PARTIAL (núcleo G4: vos_g_caps_prev + VOS_FLAGS_MARK/RESTORE + RAF_TRY_FLAG, provado no contract selftest; mapeamento TTL8 PENDENTE — RAFAELIA_CODEX_TTL8_SUMMARY.txt citado em §1 não está na árvore)
   cas_layer: PRESENT (VOS_CAS32, VOS_ATOMIC_LOAD32/STORE32, VOS_CAS_PTR sobre builtins GCC/Clang — LDREX/STREX em ARM32 via compilador; toolchain sem builtins = erro de compilação explícito; prova no contract selftest incluindo hotswap de dispatch por CAS)
-  machine_codex_enforcement: MISSING
+  machine_codex_enforcement: PRESENT (VOS_MC_ASSERT, VOS_MC_REQUIRE_POW2/ALIGNED via FAILSAFE, VOS_MC_RECIP_U32 com domínio declarado VOS_MC_RECIP_BOUND e prova bilateral da fronteira, VOS_MC_LOOP_BOUND em compile-time; obrigações do próprio header agora checadas onde nascem)
   mvp_benchmark_proof: MISSING
   trampoline_runtime_patch: MISSING_OPT_IN_REQUIRED
   vm_compiler_integration: SEPARATE_LAYER_PENDING
@@ -356,11 +356,23 @@ success/failure semantics (failed CAS preserves the target and reports
 the observed value — miss as information) and pointer-CAS dispatch
 hotswap with rollback.
 
-**Checkpoint: G1–G5 now pass.** G6 (trampoline) is unlocked by the
-ledger rule but is opt-in by design and architecturally significant
-(W^X on Android, non-atomic 5-byte patch on x86_64) — requires an
-explicit owner decision before any code. Remaining after that decision:
-G4-TTL8 (blocked on codex ingestion), G7 (Machine Codex macros),
-G8 (MVP benchmark proof layer), G9 (boundary rule, documentation-only).
+~~G7 done~~ — Machine Codex constants converted into obligations:
+`VOS_MC_ASSERT` (compile-time), `VOS_MC_REQUIRE_POW2`/`VOS_MC_REQUIRE_ALIGNED`
+(FAILSAFE protocol, negative path proven with G4 rollback containing the
+residue), `VOS_MC_RECIP_U32` with **declared domain** (`VOS_MC_RECIP_BOUND`:
+exact for x·e < 2^32; the divergence beyond the bound is expected contract
+information, proven on both sides of the border), `VOS_MC_LOOP_BOUND`
+(MC-01 + MC-10 cycle budget in compile-time). The header's own obligations
+(arena pow2/alignment, 32-bit cap register, FRAF loop budget) are now
+checked where they are born.
+
+**Checkpoint: G1–G5 + G7 pass.** Remaining:
+- G8 (MVP benchmark proof layer) — next unblocked target;
+- G6 (trampoline) — unlocked by the G1–G5 rule but opt-in by design and
+  architecturally significant (W^X on Android, non-atomic 5-byte patch on
+  x86_64) — requires an explicit owner decision before any code;
+- G4-TTL8 — blocked on codex ingestion (`RAFAELIA_CODEX_TTL8_SUMMARY.txt`
+  not in tree);
+- G9 — boundary rule, documentation-only.
 
 This preserves the living-system logic: every correction must leave behind a proof node.

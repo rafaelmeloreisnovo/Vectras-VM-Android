@@ -405,6 +405,58 @@ extern u8                    *vos_g_arena_mark;            /* rollback mark  */
 #define VOS_MC_LOAD_USE_STALL    4u   /* MC-09: load-use hazard stall         */
 #define VOS_MC_LOOP_OVERHEAD     2u   /* MC-10: compare+branch overhead/iter  */
 
+/* ── 12.1 MACHINE CODEX ENFORCEMENT (G7) — obrigação vira checagem ──────── */
+/* Falsificador do ledger §6: "comments describe obligations that no script,
+   macro, test, or build rule checks". As macros abaixo convertem o codex de
+   documentação em invariantes checáveis em compile-time ou via FAILSAFE.   */
+
+/* Invariante de compile-time (expressão constante).                        */
+#define VOS_MC_ASSERT(cond, msg) _Static_assert((cond), msg)
+
+/* Predicado pow2 (uso em compile-time ou runtime).                         */
+#define VOS_MC_IS_POW2(x) (((x) != 0u) && (((x) & ((x) - 1u)) == 0u))
+
+/* Obrigações de runtime no protocolo FAILSAFE (JNI: return 0; baremetal:
+   halt) — usar dentro de funções que devolvem status, como vos_init.       */
+#define VOS_MC_REQUIRE_POW2(x) VOS_FAILSAFE(VOS_MC_IS_POW2((u32)(x)))
+#define VOS_MC_REQUIRE_ALIGNED(ptr, align) \
+    VOS_FAILSAFE((((u64)(ptr)) & ((u64)(align) - 1u)) == 0u)
+
+/* Recíproco Q32: divisão por constante vira multiplicação + shift.
+   r = ceil(2^32/d), válido para d ≥ 2, com excesso e = r·d − 2^32.
+   Exatidão GARANTIDA para x·e < 2^32 (rem ≤ d−1 ⇒ exato sse
+   x·e/2^32 < d − rem; pior caso rem = d−1). O domínio é parte do
+   contrato: VOS_MC_RECIP_BOUND(d) declara o maior x garantido, e além
+   dele a divergência é esperada e informativa, não um defeito oculto.
+   d que divide 2^32 (pow2): e = 0 ⇒ exato em todo o registrador.        */
+#define VOS_MC_RECIP_U32(d)    ((u32)((0xFFFFFFFFULL + (u64)(d)) / (u64)(d)))
+#define VOS_MC_RECIP_DIV(x, r) ((u32)(((u64)(x) * (u64)(r)) >> 32u))
+#define VOS_MC_RECIP_EXCESS(d) \
+    ((u64)VOS_MC_RECIP_U32(d) * (u64)(d) - 0x100000000ULL)
+#define VOS_MC_RECIP_BOUND(d) \
+    ((u32)(VOS_MC_RECIP_EXCESS(d) == 0u \
+        ? 0xFFFFFFFFu \
+        : (u32)(0xFFFFFFFFULL / VOS_MC_RECIP_EXCESS(d))))
+#define VOS_MC_RECIP_CHECK(x, d) \
+    (VOS_MC_RECIP_DIV((x), VOS_MC_RECIP_U32(d)) == ((u32)(x) / (u32)(d)))
+
+/* MC-01 + MC-10: orçamento de loop provado em compile-time — n iterações
+   com insns úteis por iteração (≥ MC-01) mais overhead MC-10 devem caber
+   no budget de ciclos declarado. Limite visível ao compilador = unrolling
+   (doc de compilador §3.4: a chave é a constante em compile-time).         */
+#define VOS_MC_LOOP_BOUND(n, insns_per_iter, budget_cyc) \
+    VOS_MC_ASSERT((u64)(insns_per_iter) >= VOS_MC_LOOP_MIN_INSN && \
+                  (u64)(n) * ((u64)(insns_per_iter) + VOS_MC_LOOP_OVERHEAD) \
+                      <= (u64)(budget_cyc), \
+                  "MC-01/MC-10: loop fora do orcamento de ciclos")
+
+/* Obrigações do próprio header, agora checadas onde nascem:                */
+VOS_MC_ASSERT(VOS_MC_IS_POW2(VOS_ARENA_ALIGN), "MC: arena align deve ser pow2");
+VOS_MC_ASSERT((VOS_ARENA_SIZE & (VOS_ARENA_ALIGN - 1u)) == 0u,
+              "MC: arena size deve ser multiplo do alinhamento");
+VOS_MC_ASSERT(VOS_CAP_COUNT <= 32, "MC: registrador de capabilities = 32 bits");
+VOS_MC_LOOP_BOUND(VOS_FRAF_ITERS, 3u, 1024u); /* FRAF: mul+add+abs por iter */
+
 /* ── 13. PHI64 INDEX HASH — T36: Knuth multiplicative (replaces modulo) ─── */
 
 #define VOS_PHI64  0x9E3779B97F4A7C15ULL

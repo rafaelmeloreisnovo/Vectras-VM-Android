@@ -17,6 +17,8 @@
  *     exato; RAF_TRY_FLAG com body falso não deixa resíduo.
  *  8. CAS (G5): sucesso troca o valor; falha preserva o alvo e devolve o
  *     valor observado em expected; CAS de ponteiro faz hotswap de dispatch.
+ *  9. Machine Codex (G7): REQUIRE_* honram o protocolo FAILSAFE nos dois
+ *     sentidos (passa e falha), e o recíproco Q32 é provado no domínio.
  */
 #include "rmr_vectra_os.h"
 
@@ -38,6 +40,18 @@ static u32 vos_stub_crc(const u8 *buf, u32 len, u32 init) {
   (void)len;
   (void)init;
   return 0x52414621u; /* "RAF!" — marcador do caminho trocado */
+}
+
+/* Sondas do protocolo FAILSAFE: REQUIRE_* devolvem do chamador em falha. */
+static u32 mc_probe_pass(void) {
+  VOS_MC_REQUIRE_POW2(VOS_ARENA_ALIGN);
+  VOS_MC_REQUIRE_ALIGNED(vos_g_arena, VOS_ARENA_ALIGN);
+  return 1u;
+}
+
+static u32 mc_probe_fail(void) {
+  VOS_MC_REQUIRE_POW2(12u); /* 12 nao e pow2: FAILSAFE deve devolver 0 */
+  return 1u;
 }
 
 int main(void) {
@@ -226,6 +240,71 @@ int main(void) {
         printf("FAIL cas_ptr: rollback divergente\n");
         return 1;
       }
+    }
+  }
+
+  /* 9. Machine Codex (G7): obrigacao como checagem */
+  {
+    static const u32 divisors[] = {3u, 7u, 10u, 31u, 4096u, 65535u};
+    vos_cap_t before = vos_g_caps;
+
+    if (mc_probe_pass() != 1u) {
+      printf("FAIL mc: probe valida deveria passar\n");
+      return 1;
+    }
+
+    /* FAILSAFE em falha suja vos_g_caps de proposito (MOCK + 0xFF000000);
+       o rollback do G4 contem o residuo do teste negativo. */
+    VOS_FLAGS_MARK();
+    if (mc_probe_fail() != 0u) {
+      printf("FAIL mc: probe invalida deveria falhar via FAILSAFE\n");
+      return 1;
+    }
+    if (!(vos_g_caps & VOS_CAP_MOCK)) {
+      printf("FAIL mc: FAILSAFE nao marcou MOCK\n");
+      return 1;
+    }
+    VOS_FLAGS_RESTORE();
+    if (vos_g_caps != before) {
+      printf("FAIL mc: rollback pos-failsafe divergente\n");
+      return 1;
+    }
+
+    /* reciproco Q32 provado no DOMINIO DECLARADO (VOS_MC_RECIP_BOUND):
+       exato ate a fronteira, e a divergencia alem dela e informacao
+       esperada do contrato, nao defeito oculto */
+    for (u32 d = 0u; d < (u32)(sizeof(divisors) / sizeof(divisors[0])); ++d) {
+      u32 div = divisors[d];
+      u32 r = VOS_MC_RECIP_U32(div);
+      u32 bound = VOS_MC_RECIP_BOUND(div);
+
+      for (u32 x = 0u; x <= 100000u; x += 17u) {
+        if (VOS_MC_RECIP_DIV(x, r) != x / div) {
+          printf("FAIL mc: reciproco divergente x=%u d=%u\n",
+                 (unsigned)x, (unsigned)div);
+          return 1;
+        }
+      }
+      /* fronteira exata e regiao imediatamente abaixo dela */
+      for (u32 k = 0u; k <= 1024u && k <= bound; ++k) {
+        u32 x = bound - k;
+        if (VOS_MC_RECIP_DIV(x, r) != x / div) {
+          printf("FAIL mc: reciproco divergente dentro do dominio x=%u d=%u bound=%u\n",
+                 (unsigned)x, (unsigned)div, (unsigned)bound);
+          return 1;
+        }
+      }
+    }
+    /* prova negativa: para d=3 (bound=0x7FFFFFFF) existe divergencia
+       conhecida alem da fronteira — o limite declarado e real */
+    if (VOS_MC_RECIP_CHECK(0xFFFFFFFEu, 3u)) {
+      printf("FAIL mc: divergencia esperada alem do bound nao ocorreu\n");
+      return 1;
+    }
+    if (VOS_MC_RECIP_BOUND(3u) != 0x7FFFFFFFu ||
+        VOS_MC_RECIP_BOUND(4096u) != 0xFFFFFFFFu) {
+      printf("FAIL mc: bound declarado diverge do esperado\n");
+      return 1;
     }
   }
 
