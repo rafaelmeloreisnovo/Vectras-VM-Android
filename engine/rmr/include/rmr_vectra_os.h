@@ -280,7 +280,10 @@ extern u8                    *vos_g_arena_mark;            /* rollback mark  */
    Iterações: taxa de contração 0.866 ⇒ 48 passos nunca alcançam ε=0.001
    (precisa ≥ ~70 a partir de seed 1; ~79 a partir de seed 100).
    96 passos garantem |Fₙ−F*| ≤ ε para seeds até 1000 incluindo o viés de
-   truncamento do Q16_MUL (≤ 1/(1−scale) ≈ 8 LSB acumulados).             */
+   truncamento do Q16_MUL (≤ 1/(1−scale) ≈ 8 LSB acumulados).
+   TOKEN_VAZIO (PR #1005): este F* é o ponto fixo PROVADO do sistema Q16
+   implementado; se é o valor canônico do atrator Fibonacci-Rafael
+   aguarda recalibração do owner.                                         */
 #define VOS_FRAF_SCALE_Q16  ((vos_q16_t)0x0000DDB4u)  /* 0.866025 × 2^16   */
 #define VOS_FRAF_OFFSET_Q16 ((vos_q16_t)0x00031A1Eu)  /* 3.102356 × 2^16   */
 #define VOS_FRAF_STAR_Q16   ((vos_q16_t)0x0017277Au)  /* F* quantizado     */

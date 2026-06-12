@@ -305,7 +305,7 @@ VECTRA_OS_LIVING_STATUS:
   contract_selftest: PRESENT (demo_cli/src/rmr_vectra_os_contract_selftest.c — G2 parcial: CSEL, arena, hotswap, caps)
   contract_audit_report: PRESENT (tools/verify_vectra_os_contract.sh — G1; evidência em reports/vectra_os_contract_report.md)
   csel_contract: FIXED_WITH_PROOF (máscara ~mask restaurada; tabela-verdade no selftest)
-  fraf_attractor_constant: FIXED_QUANTIZED (F* = 0x17277A, ponto fixo do sistema Q16 implementado; ITERS 48→96 para honrar ε=0.001 — o contrato anterior era matematicamente insatisfazível)
+  fraf_attractor_constant: TOKEN_VAZIO_A_VALIDAR (a prova existente diz somente: o sistema Q16 IMPLEMENTADO converge para 0x17277A com ITERS=96 e ε=0.001, e o contrato anterior 0x172CE4/48 era insatisfazível; se 0x17277A é o valor CANÔNICO do atrator Fibonacci-Rafael é decisão do owner — recalibração pendente, conforme PR #1005)
   xmacro_flags: PRESENT (engine/rmr/include/rmr_vectra_flags.def — fonte única de bits; enum + máscaras + vos_flag_name gerados; prova no contract selftest)
   flag_rollback: PRESENT_PARTIAL (núcleo G4: vos_g_caps_prev + VOS_FLAGS_MARK/RESTORE + RAF_TRY_FLAG, provado no contract selftest; mapeamento TTL8 PENDENTE — RAFAELIA_CODEX_TTL8_SUMMARY.txt citado em §1 não está na árvore)
   cas_layer: PRESENT (VOS_CAS32, VOS_ATOMIC_LOAD32/STORE32, VOS_CAS_PTR sobre builtins GCC/Clang — LDREX/STREX em ARM32 via compilador; toolchain sem builtins = erro de compilação explícito; prova no contract selftest incluindo hotswap de dispatch por CAS)
