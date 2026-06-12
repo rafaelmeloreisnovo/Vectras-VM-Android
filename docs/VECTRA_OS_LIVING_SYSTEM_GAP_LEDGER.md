@@ -297,11 +297,15 @@ The system contract is falsified if any of these happen:
 VECTRA_OS_LIVING_STATUS:
   contract_comment_layer: PRESENT
   cmake_contract_layer: PRESENT
+  makefile_manifest_alignment: PRESENT (sources_rmr_core.mk regenerado; vectra_os na trilha host)
   no_malloc_arena_layer: PRESENT_PARTIAL
   dispatch_hotswap_layer: PRESENT_PARTIAL
   asm_primitive_layer: PRESENT
   selftest_layer: PRESENT_PARTIAL
-  csel_contract: BROKEN_LOGIC
+  contract_selftest: PRESENT (demo_cli/src/rmr_vectra_os_contract_selftest.c — G2 parcial: CSEL, arena, hotswap, caps)
+  contract_audit_report: PRESENT (tools/verify_vectra_os_contract.sh — G1; evidência em reports/vectra_os_contract_report.md)
+  csel_contract: FIXED_WITH_PROOF (máscara ~mask restaurada; tabela-verdade no selftest)
+  fraf_attractor_constant: FIXED_QUANTIZED (F* = 0x17277A, ponto fixo do sistema Q16 implementado; ITERS 48→96 para honrar ε=0.001 — o contrato anterior era matematicamente insatisfazível)
   xmacro_flags: MISSING
   flag_rollback: MISSING
   cas_layer: MISSING
@@ -313,11 +317,28 @@ VECTRA_OS_LIVING_STATUS:
 
 ## 8. Next patch target
 
+Done (proof nodes left behind):
+
+1. ~~fix `VOS_CSEL`~~ — fixed; truth table in `rmr_vectra_os_contract_selftest.c`;
+2. ~~add `rmr_vectra_os_contract_selftest.c`~~ — added;
+3. ~~register it in CMake `run_selftest`~~ — registered in CMake and Makefile;
+4. trampoline untouched, as required.
+
+Additional proof nodes from the same patch:
+
+- `tools/verify_vectra_os_contract.sh` (G1) — audits the warning→gc-sections
+  pipeline: captures `-Wunused-*` as the elimination signal, asserts the
+  3-symbol public export set, confirms `vos_tick_sw` is absent from the final
+  binary, scans forbidden hot-path symbols. Evidence:
+  `reports/vectra_os_contract_report.md`. Run: `make verify-vectra-os-contract`.
+- FRAF attractor constant corrected to the quantized fixed point (see §7) —
+  exposed by the new selftest; the old constant satisfied no build, test or
+  script (falsifier family: "comments describe obligations nothing checks").
+
 The next code patch should be small and proof-bearing:
 
-1. fix `VOS_CSEL`;
-2. add `rmr_vectra_os_contract_selftest.c`;
-3. register it in CMake `run_selftest`;
-4. do not touch trampoline yet.
+1. G3 — `rmr_vectra_flags.def` X-macro flag source of truth + `vos_flag_name`;
+2. extend the contract selftest with the X-macro lookup;
+3. do not touch trampoline yet.
 
 This preserves the living-system logic: every correction must leave behind a proof node.

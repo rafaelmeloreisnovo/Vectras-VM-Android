@@ -151,7 +151,7 @@ typedef u32 vos_q16_t;    /* stored as unsigned; arithmetic uses signed cast */
    Compiler will emit CSEL/CMOV when both a,b are register-width integers.  */
 #define VOS_CSEL(cond, a, b) \
     ((__typeof__(a))(((u32)(-(s32)((u32)(cond) != 0u)) & (u32)(a)) | \
-                     ((u32)( (s32)((u32)(cond) != 0u)) & (u32)(b))))
+                     (~(u32)(-(s32)((u32)(cond) != 0u)) & (u32)(b))))
 
 /* Branchless absolute value for Q16. */
 #define VOS_CSEL_ABS_Q16(q) \
@@ -197,13 +197,19 @@ extern u8                    *vos_g_arena_mark;            /* rollback mark  */
    √3/2  ≈ 0.866025403784  → Q16: 56756  (0xDDB4)
    sin(279°) = −sin(81°) ≈ −0.987688  → π·sin(279°) ≈ −3.102356
    Subtraction of negative = addition: offset = +3.102356
-   3.102356 × 65536 = 203358  (0x31A1E)
-   F* = 3.102356 / (1 − 0.866025) ≈ 23.158 × 65536 = 1517604 (0x172CE4)  */
+   3.102356 × 65536 = 203294  (0x31A1E)
+   F* é o ponto fixo do SISTEMA QUANTIZADO implementado, não do contínuo:
+     F* = offset / (1 − scale) em Q16 = 203294×65536/(65536−56756)
+        = 0x17277A  (≈ 23.1538; o contínuo daria ≈ 23.1589)
+   Iterações: taxa de contração 0.866 ⇒ 48 passos nunca alcançam ε=0.001
+   (precisa ≥ ~70 a partir de seed 1; ~79 a partir de seed 100).
+   96 passos garantem |Fₙ−F*| ≤ ε para seeds até 1000 incluindo o viés de
+   truncamento do Q16_MUL (≤ 1/(1−scale) ≈ 8 LSB acumulados).             */
 #define VOS_FRAF_SCALE_Q16  ((vos_q16_t)0x0000DDB4u)  /* 0.866025 × 2^16   */
 #define VOS_FRAF_OFFSET_Q16 ((vos_q16_t)0x00031A1Eu)  /* 3.102356 × 2^16   */
-#define VOS_FRAF_STAR_Q16   ((vos_q16_t)0x00172CE4u)  /* F* = 23.158 × 2^16*/
+#define VOS_FRAF_STAR_Q16   ((vos_q16_t)0x0017277Au)  /* F* quantizado     */
 #define VOS_FRAF_EPS_Q16    ((vos_q16_t)0x00000042u)  /* ε = 0.001 × 2^16  */
-#define VOS_FRAF_ITERS      48u                        /* iterations to F*  */
+#define VOS_FRAF_ITERS      96u                        /* iterations to F*  */
 #define VOS_LYAPUNOV_NEG    0x9FE9u                    /* |λ| = 0.14384 Q16 */
 
 /* Single FRAF iteration (macro = 1 inline expansion, no call overhead). */

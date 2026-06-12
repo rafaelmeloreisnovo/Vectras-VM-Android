@@ -3,6 +3,7 @@
 # Regenerate with: tools/sync_rmr_manifest_to_mk.py
 
 RMR_SOURCE_GROUP_CORE := \
+	engine/rmr/src/rmr_vectra_os.c \
 	engine/rmr/src/bitomega.c \
 	engine/rmr/src/rmr_cycles.c \
 	engine/rmr/src/rmr_external_engine.c \
@@ -45,13 +46,16 @@ RMR_SOURCE_GROUP_HOST_ONLY := \
 
 RMR_SOURCE_GROUP_ASM_X86_64 := \
 	engine/rmr/interop/rmr_lowlevel_x86_64.S \
-	engine/rmr/interop/rmr_casm_x86_64.S
+	engine/rmr/interop/rmr_casm_x86_64.S \
+	engine/rmr/interop/rmr_vectra_os_x86_64.S
 
 RMR_SOURCE_GROUP_ASM_ARM64 := \
-	engine/rmr/interop/rmr_casm_arm64.S
+	engine/rmr/interop/rmr_casm_arm64.S \
+	engine/rmr/interop/rmr_vectra_os_arm64.S
 
 RMR_SOURCE_GROUP_ASM_ARM64_NEON := \
 	engine/rmr/src/rmr_neon_simd.c
 
 RMR_SOURCE_GROUP_ASM_RISCV64 := \
-	engine/rmr/interop/rmr_casm_riscv64.S
+	engine/rmr/interop/rmr_casm_riscv64.S \
+	engine/rmr/interop/rmr_vectra_os_riscv64.S

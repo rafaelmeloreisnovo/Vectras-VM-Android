@@ -118,7 +118,31 @@ for (u32 i = 0; i < 8; i++)   /* 8 iterações → 8 cópias inline */
 A chave é que o limite seja **uma constante visível em compile-time**, não
 um parâmetro de função nem variável global não-const.
 
-### 3.5 `-fno-plt` no Baremetal — Elimina Indireção de Chamada
+### 3.5 `-Wunused` + `--gc-sections` — Warning Como Instrução, Não Como Ruído
+
+Ref: `engine/rmr/include/rmr_vectra_os.h` (contrato de visibilidade),
+`tools/verify_vectra_os_contract.sh`, `docs/VECTRA_OS_LIVING_SYSTEM_GAP_LEDGER.md`
+
+A literatura trata warnings como defeitos a silenciar. No engine, o warning
+`-Wunused-function` é um **operando do pipeline de redução de símbolos**:
+
+```
+1. -ffunction-sections  → cada função em sua própria seção ELF
+2. -fvisibility=hidden  → todo símbolo nasce STV_HIDDEN
+3. -Wunused-function    → o warning DISPARA: seção morta sinalizada
+4. -Wl,--gc-sections    → linker remove a seção sinalizada do binário
+5. -Wl,--exclude-libs   → símbolos hidden não re-exportados de archives
+```
+
+Suprimir o warning com `__attribute__((unused))` **quebra o pipeline**: a
+seção morta deixa de ser sinalizada e os bytes mortos permanecem no binário.
+O warning não é ruído — é a instrução de eliminação. A auditoria executável
+(`make verify-vectra-os-contract`) captura os warnings como evidência e
+confirma o resultado: `.dynsym` com exatamente os 3 símbolos públicos
+(`vos_init`, `vos_selftest`, `vos_caps_report`) e `vos_tick_sw` ausente do
+binário final.
+
+### 3.6 `-fno-plt` no Baremetal — Elimina Indireção de Chamada
 
 PLT (Procedure Linkage Table) adiciona um nível de indireção por chamada de
 função externa. `-fno-plt` força resolução estática em link-time: sem PLT,
@@ -432,6 +456,8 @@ não um detalhe de implementação.
 | Memcpy | Função libc | NEON bulk (64B/ciclo, zero-copy JNI) |
 | Cache miss | Penalidade a minimizar | Próxima instrução — estado contado |
 | Atualização de cache | Substituição do bloco/linha inteira | Delta XOR bit-a-bit (bits preservados como métrica ρ) |
+| Warnings de compilador | Defeitos a silenciar | Operando do pipeline de eliminação (-Wunused → gc-sections) |
+| Símbolos exportados | Tudo visível por padrão | Visibilidade hidden por contrato; .dynsym = só a API pública |
 
 ---
 

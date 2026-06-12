@@ -11,6 +11,10 @@ The format is based on Keep a Changelog.
 - Mutação seletiva de bits no cache TCG (`engine/rmr/src/rmr_tcg_cache.c`): a reinserção de bloco grava apenas o delta XOR entre o byte residente e o candidato, preservando bits iguais e o físico esparso do ISOraf; novas métricas `delta_bits_flipped`/`delta_bits_preserved` com acessores `RmR_TCGCache_DeltaBitsFlipped` e `RmR_TCGCache_DeltaPreservedPct`.
 - Selftest host `demo_cli/src/rmr_tcg_cache_selftest.c` (registrado em `Makefile` e `CMakeLists.txt`): miss como estado explícito, reinserção idêntica custa zero bits, mutação de 1 bit custa exatamente 1 bit, colapso pegajoso responde MISS por política e replay reproduz a mesma identidade ISOraf.
 - Seção 10 em `docs/active/VECTRA_COMPILER_PRECOMPILER_NONACADEMIC_2026-06-05.md`: miss como próxima instrução, delta XOR bit-a-bit e orientação da leitura como ponto de vista.
+- VECTRA_OS — execução do "next patch target" do gap ledger: correção do `VOS_CSEL` (máscara `~mask` restaurada), correção do atrator FRAF para o ponto fixo do sistema Q16 quantizado (`F* = 0x17277A`, `ITERS` 48→96 para honrar `ε = 0.001`), selftest de contrato `demo_cli/src/rmr_vectra_os_contract_selftest.c` (G2 parcial) e auditoria executável `tools/verify_vectra_os_contract.sh` (G1: warnings `-Wunused` como sinal de eliminação, export público de exatamente 3 símbolos, efeito `--gc-sections`, varredura de símbolos proibidos), com evidência em `reports/vectra_os_contract_report.md` e alvo `make verify-vectra-os-contract`.
+
+### Fixed
+- `engine/rmr/sources_rmr_core.mk` regenerado via `tools/sync_rmr_manifest_to_mk.py` — o gate `verify-rmr-source-alignment` falhava e `rmr_vectra_os.c` não entrava na lib host do Makefile.
 - Módulo BITOMEGA adicionado ao engine RMR com API pública em `engine/rmr/include/bitomega.h` e implementação determinística em `engine/rmr/src/bitomega.c`.
 - Política ABI `arm32-arm64` ativada no branch de desenvolvimento: artefatos compilados para `arm64-v8a` (NEON/SIMD + CRC32HW, `-march=armv8-a+crc+simd`) e `armeabi-v7a` (NEON, `-march=armv7-a -mfpu=neon`).
 
