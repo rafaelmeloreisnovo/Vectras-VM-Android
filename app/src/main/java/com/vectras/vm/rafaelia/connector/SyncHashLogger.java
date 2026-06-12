@@ -162,8 +162,8 @@ public final class SyncHashLogger {
 
     // ─── Hash computation (FNV-1a inspired + hex) ────────────────────────────
 
-    static String computeHash(long seq, long tsNs, Level level, String tag,
-                               String msg, String prevHash) {
+    public static String computeHash(long seq, long tsNs, Level level, String tag,
+                                     String msg, String prevHash) {
         String input = seq + "|" + tsNs + "|" + level + "|" + tag + "|" + msg + "|" + prevHash;
         byte[] bytes = input.getBytes(StandardCharsets.UTF_8);
         long h1 = 0xCBF29CE484222325L;
