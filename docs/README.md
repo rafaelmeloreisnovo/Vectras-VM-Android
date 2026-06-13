@@ -4,7 +4,7 @@
 
 ## Metadados canônicos
 
-- Versão do documento: 2.6.
+- Versão do documento: 2.7.
 - Última revisão: 2026-06-13.
 - Escopo: hub técnico de arquitetura, build/release, CI, segurança, documentação, operação e pesquisa.
 - Status: canônico vigente.
@@ -21,6 +21,7 @@ Este diretório é o hub técnico canônico. Ele aprofunda a entrada curta do [`
 - Dar contexto suficiente para navegar com excelência operacional: o leitor deve saber onde começar, onde validar e onde não assumir estado atual.
 - Registrar quando o código executando está à frente da documentação, sem confundir documentação atrasada com ausência técnica.
 - Preservar continuidade de atividade: cada rodada deve deixar trilha para humanos e IA continuarem sem recomeçar do zero.
+- Verificar o todo antes de mexer na parte, usando fluxograma holístico quando o caminho não estiver claro.
 
 ## Taxonomia documental principal
 
@@ -70,6 +71,7 @@ Este diretório é o hub técnico canônico. Ele aprofunda a entrada curta do [`
 - Ponte RAFCODEphi C→ASM→hex: [`active/VECTRA_RAFCODE_PHI_BRIDGE.md`](active/VECTRA_RAFCODE_PHI_BRIDGE.md).
 
 ### 4. Canonização anti-óbvio e documentação atrasada
+- Mapa holístico global e fluxograma: [`active/VECTRA_GLOBAL_HOLISTIC_FLOWMAP.md`](active/VECTRA_GLOBAL_HOLISTIC_FLOWMAP.md).
 - Guia de continuidade da execução e leitura: [`active/VECTRA_EXECUTION_CONTINUITY_READING_GUIDE.md`](active/VECTRA_EXECUTION_CONTINUITY_READING_GUIDE.md).
 - Cânone de conceitos da obra: [`active/VECTRA_OBRA_CONCEPTS_CANON.md`](active/VECTRA_OBRA_CONCEPTS_CANON.md).
 - Plano de excelência operacional e espaço de trabalho: [`active/VECTRA_OPERATIONAL_EXCELLENCE_WORKSPACE_PLAN.md`](active/VECTRA_OPERATIONAL_EXCELLENCE_WORKSPACE_PLAN.md).
@@ -79,6 +81,7 @@ Este diretório é o hub técnico canônico. Ele aprofunda a entrada curta do [`
 - Protocolo incubadora → core: [`active/VECTRA_INCUBATOR_TO_CORE_PROMOTION_PROTOCOL.md`](active/VECTRA_INCUBATOR_TO_CORE_PROMOTION_PROTOCOL.md).
 - Matriz de triagem de incoming/incubadora: [`active/VECTRA_INCOMING_TRIAGE_MATRIX.md`](active/VECTRA_INCOMING_TRIAGE_MATRIX.md).
 - Ledger Lote A RAFAELIA: [`active/VECTRA_RAFAELIA_LOTE_A_TRIAGE_LEDGER.md`](active/VECTRA_RAFAELIA_LOTE_A_TRIAGE_LEDGER.md).
+- Nota de continuidade B3: [`active/VECTRA_RAFAELIA_B3_CONTINUITY_NOTE.md`](active/VECTRA_RAFAELIA_B3_CONTINUITY_NOTE.md).
 
 ### 5. Segurança, compliance, autoria e privacidade
 - Modelo de ameaças: [`THREAT_MODEL.md`](THREAT_MODEL.md).
@@ -110,3 +113,4 @@ Este diretório é o hub técnico canônico. Ele aprofunda a entrada curta do [`
 - Não avance para promoção de incubadora sem usar o plano de excelência operacional e a matriz de triagem.
 - Não refatore por estética: use o protocolo de fricção determinística para separar atrito útil de desperdício real.
 - Não continue uma atividade sem declarar camada, arquivos lidos, lacuna protegida e próximo `F_NEXT`.
+- Quando a melhor rota não estiver clara, subir para o mapa holístico global antes de atuar localmente.
