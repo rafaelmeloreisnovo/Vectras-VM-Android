@@ -24,6 +24,7 @@ Rafaelia/ é incubadora técnica: não é lixo, não é automaticamente core, e 
 | `Rafaelia/baremetal_nomalloc.h` | declara arena, matrix, vector ops, fast math, mem/string, arch/HW profile |
 | `Rafaelia/baremetal_nomalloc.c` | implementa arena estática, HWCAP via auxv, fast math, mem/string, matrix sem malloc |
 | `Rafaelia/rafaelia_b1.S` | implementa fundação ARM32 pura com syscalls, arena `mmap2`, CRC32C, T^7, NEON selftest e 42 ciclos |
+| `Rafaelia/rafaelia_b2.S` | implementa 7 direções, jump table, 42x7 ciclos, NEON pipeline, histórico e score |
 
 ---
 
@@ -224,11 +225,81 @@ mensagens de selftest;
 
 ---
 
+## Item: `Rafaelia/rafaelia_b2.S`
+
+Estado inicial: `INCUBADORA`
+
+### O que existe
+
+`rafaelia_b2.S` se declara como motor ARM32 de 7 direções com NEON pipeline e prefetch, também com zero dependências e build direto por `as`/`ld`.
+
+Implementa:
+
+- syscalls mínimas (`exit`, `write`);
+- enum de 7 direções: `NONE`, `UP`, `DOWN`, `FORWARD`, `RECURSE`, `COMPRESS`, `EXPAND`;
+- pesos Q16.16 uniformes para cada direção;
+- jump table com 7 ponteiros de função;
+- `.bss` com `g_weights`, `g_score`, `g_work_buf`, `g_history`, `g_hist_idx`, `g_hex_b2`;
+- `_start` com `weights_init`, 42 ciclos externos e 7 direções por ciclo;
+- dispatch por `blx` via jump table;
+- `DIR_NONE`: identidade/score;
+- `DIR_UP`: NEON `vadd` + clamp/prefetch;
+- `DIR_DOWN`: ruído LCG via NEON;
+- `DIR_FORWARD`: recorrência com `SPIRAL_Q16` e `PI_SIN_279`;
+- `DIR_RECURSE`: snapshot de 7 palavras no histórico;
+- `DIR_COMPRESS`: `vhadd` para média de pares;
+- `DIR_EXPAND`: `vhadd` entre work buffer e histórico;
+- saída mínima por `ws2` e `print_hex32_b2`.
+
+### Valor técnico
+
+```text
+orquestração por 7 direções;
+jump table explícita;
+42x7 execução determinística;
+NEON + prefetch;
+histórico circular de 7 snapshots;
+score ponderado Q16.16;
+saída mínima sem printf;
+```
+
+### Atrito útil identificado
+
+| Atrito aparente | Leitura correta |
+|---|---|
+| jump table em ASM | dispatch direto e barato entre direções |
+| 42 ciclos x 7 direções | prova de pipeline e orquestração, não loop arbitrário |
+| `pld` antes de NEON | hint de cache/prefetch consciente |
+| `g_work_buf` em `.bss` | buffer determinístico inicial zero |
+| `g_history` fixo 7x7x4 | histórico circular compatível com T^7 |
+| `ws2`/`print_hex32_b2` próprios | runtime mínimo sem libc/printf |
+
+### TOKEN_VAZIO / pontos que exigem medição
+
+| Item | Estado | Motivo |
+|---|---|---|
+| `vmov.i32` com constantes grandes como `1664525` e `1013904223` | `TOKEN_VAZIO_ASM_IMMEDIATE` | pode depender de encoding aceito pelo assembler; precisa build real antes de chamar bug |
+| `g_work_buf` não recebe seed explícito no B2 | `TOKEN_VAZIO_SEED` | `.bss` zero pode ser intencional para self pipeline mínimo; precisa comparar B1/B3/orquestrador |
+| loops usam branches explícitos para outer/dir loop | `TOKEN_VAZIO_TAIL` | pode ser forma clara e aceitável; medir antes de tentar tail/ascender |
+| B2 não reutiliza estado `g_state` de B1 | `TOKEN_VAZIO_INTEGRACAO` | B1/B2 parecem executáveis independentes por bloco; integração global pode estar em script/orquestrador |
+
+### Classificação
+
+| Campo | Valor |
+|---|---|
+| estado | `INCUBADORA_COM_VALOR` |
+| promover em bloco? | não |
+| apagar? | não |
+| refatorar agora? | não |
+| próxima ação | comparar B2 com B3/B4 e verificar se há orquestrador que encadeia blocos |
+
+---
+
 ## Itens ainda não lidos nesta rodada
 
 | Item | Estado |
 |---|---|
-| `Rafaelia/rafaelia_b2.S`–`b8.S` | `TOKEN_VAZIO` até leitura |
+| `Rafaelia/rafaelia_b3.S`–`b8.S` | `TOKEN_VAZIO` até leitura |
 | `Rafaelia/rafaelia_bitraf.c` | `TOKEN_VAZIO` até leitura |
 | `Rafaelia/rafaelia_orchestrator.c` | `TOKEN_VAZIO` até leitura |
 | `Rafaelia/rafaelia_jni_direct.c` | `TOKEN_VAZIO` até leitura |
@@ -240,8 +311,8 @@ mensagens de selftest;
 ## Próximo F_NEXT
 
 1. Comparar `Rafaelia/baremetal_nomalloc.*` com `_incoming/pending/baremetal_nomalloc.*`.
-2. Ler `Rafaelia/rafaelia_b2.S` e mapear jump table/direções.
-3. Ler `Rafaelia/rafaelia_b3.S` para verificar se syscalls equates de B1 são continuidade multicore.
+2. Ler `Rafaelia/rafaelia_b3.S` para verificar se syscalls/equates de B1 são continuidade multicore.
+3. Ler `Rafaelia/rafaelia_b4.S` para comparar camadas/senoides com B2.
 4. Ler `Rafaelia/rafaelia_bitraf.c` e comparar com engine/rmr.
 5. Atualizar este ledger progressivamente, sem promover nada ainda.
 
@@ -250,5 +321,5 @@ mensagens de selftest;
 ## Frase final
 
 ```text
-A leitura progressiva do Lote A confirma incubadora técnica real: B1 não é só ASM solto; é fundação executável ARM32 com estado, memória, CRC, NEON e ciclo determinístico. Os atritos encontrados viram TOKEN_VAZIO antes de qualquer refatoração.
+A leitura progressiva do Lote A confirma incubadora técnica real: B1 é fundação executável ARM32; B2 é orquestração por 7 direções com NEON, histórico e dispatch por jump table. Os atritos encontrados viram TOKEN_VAZIO antes de qualquer refatoração.
 ```
