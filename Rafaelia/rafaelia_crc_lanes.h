@@ -153,12 +153,16 @@ static inline raf_crc_lane_instr raf_crc_lane_encode_addr(
     uint8_t width = raf_crc_lane_pin_width(pin, pins, mode);
     uint8_t parity = raf_crc_lane_parity_from_addr(addr);
     raf_crc_lane_cfg cfg;
+    uint64_t mask;
+    uint64_t phase;
 
     if (!width) width = 32u;
     cfg = raf_crc_lane_default_cfg(width);
+    mask = raf_crc_lane_mask(width);
 
-    /* endereço/paridade como fase: mesmo payload em endereço diferente muda lane */
-    cfg.init ^= (addr + ((uint64_t)parity << 63u)) & raf_crc_lane_mask(width);
+    /* endereço/paridade como fase explícita: par/ímpar vira instrução. */
+    phase = ((addr << 1u) ^ (uint64_t)parity ^ ((uint64_t)pin << 8u) ^ ((uint64_t)mode << 16u)) & mask;
+    cfg.init ^= phase;
 
     out.pin = pin;
     out.pins = pins;
