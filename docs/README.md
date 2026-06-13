@@ -4,7 +4,7 @@
 
 ## Metadados canônicos
 
-- Versão do documento: 2.5.
+- Versão do documento: 2.6.
 - Última revisão: 2026-06-13.
 - Escopo: hub técnico de arquitetura, build/release, CI, segurança, documentação, operação e pesquisa.
 - Status: canônico vigente.
@@ -20,6 +20,7 @@ Este diretório é o hub técnico canônico. Ele aprofunda a entrada curta do [`
 - Separar o que é canônico, legado compatível, experimental/ingestão e histórico sem mover arquivos nesta etapa.
 - Dar contexto suficiente para navegar com excelência operacional: o leitor deve saber onde começar, onde validar e onde não assumir estado atual.
 - Registrar quando o código executando está à frente da documentação, sem confundir documentação atrasada com ausência técnica.
+- Preservar continuidade de atividade: cada rodada deve deixar trilha para humanos e IA continuarem sem recomeçar do zero.
 
 ## Taxonomia documental principal
 
@@ -69,6 +70,8 @@ Este diretório é o hub técnico canônico. Ele aprofunda a entrada curta do [`
 - Ponte RAFCODEphi C→ASM→hex: [`active/VECTRA_RAFCODE_PHI_BRIDGE.md`](active/VECTRA_RAFCODE_PHI_BRIDGE.md).
 
 ### 4. Canonização anti-óbvio e documentação atrasada
+- Guia de continuidade da execução e leitura: [`active/VECTRA_EXECUTION_CONTINUITY_READING_GUIDE.md`](active/VECTRA_EXECUTION_CONTINUITY_READING_GUIDE.md).
+- Cânone de conceitos da obra: [`active/VECTRA_OBRA_CONCEPTS_CANON.md`](active/VECTRA_OBRA_CONCEPTS_CANON.md).
 - Plano de excelência operacional e espaço de trabalho: [`active/VECTRA_OPERATIONAL_EXCELLENCE_WORKSPACE_PLAN.md`](active/VECTRA_OPERATIONAL_EXCELLENCE_WORKSPACE_PLAN.md).
 - Contrato anti-óbvio de revisão: [`active/VECTRA_ANTI_OBVIOUS_REVIEW_CONTRACT.md`](active/VECTRA_ANTI_OBVIOUS_REVIEW_CONTRACT.md).
 - Ledger código à frente da documentação: [`active/VECTRA_CODE_AHEAD_OF_DOCS_LEDGER.md`](active/VECTRA_CODE_AHEAD_OF_DOCS_LEDGER.md).
@@ -106,3 +109,4 @@ Este diretório é o hub técnico canônico. Ele aprofunda a entrada curta do [`
 - Não chame item estranho de lixo/bug/duplicata antes de aplicar o contrato anti-óbvio.
 - Não avance para promoção de incubadora sem usar o plano de excelência operacional e a matriz de triagem.
 - Não refatore por estética: use o protocolo de fricção determinística para separar atrito útil de desperdício real.
+- Não continue uma atividade sem declarar camada, arquivos lidos, lacuna protegida e próximo `F_NEXT`.
