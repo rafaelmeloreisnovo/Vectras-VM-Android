@@ -4,7 +4,7 @@
 
 ## Metadados canônicos
 
-- Versão do documento: 2.7.
+- Versão do documento: 2.8.
 - Última revisão: 2026-06-13.
 - Escopo: hub técnico de arquitetura, build/release, CI, segurança, documentação, operação e pesquisa.
 - Status: canônico vigente.
@@ -82,6 +82,7 @@ Este diretório é o hub técnico canônico. Ele aprofunda a entrada curta do [`
 - Matriz de triagem de incoming/incubadora: [`active/VECTRA_INCOMING_TRIAGE_MATRIX.md`](active/VECTRA_INCOMING_TRIAGE_MATRIX.md).
 - Ledger Lote A RAFAELIA: [`active/VECTRA_RAFAELIA_LOTE_A_TRIAGE_LEDGER.md`](active/VECTRA_RAFAELIA_LOTE_A_TRIAGE_LEDGER.md).
 - Nota de continuidade B3: [`active/VECTRA_RAFAELIA_B3_CONTINUITY_NOTE.md`](active/VECTRA_RAFAELIA_B3_CONTINUITY_NOTE.md).
+- Nota de continuidade B4/build ARM32: [`active/VECTRA_RAFAELIA_B4_BUILD_CONTINUITY_NOTE.md`](active/VECTRA_RAFAELIA_B4_BUILD_CONTINUITY_NOTE.md).
 
 ### 5. Segurança, compliance, autoria e privacidade
 - Modelo de ameaças: [`THREAT_MODEL.md`](THREAT_MODEL.md).
