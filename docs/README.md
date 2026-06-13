@@ -4,7 +4,7 @@
 
 ## Metadados canônicos
 
-- Versão do documento: 2.9.
+- Versão do documento: 3.0.
 - Última revisão: 2026-06-13.
 - Escopo: hub técnico de arquitetura, build/release, CI, segurança, documentação, operação e pesquisa.
 - Status: canônico vigente.
@@ -86,6 +86,7 @@ Este diretório é o hub técnico canônico. Ele aprofunda a entrada curta do [`
 - Nota BitRAF/orquestrador RAFAELIA: [`active/VECTRA_RAFAELIA_BITRAF_ORCHESTRATOR_NOTE.md`](active/VECTRA_RAFAELIA_BITRAF_ORCHESTRATOR_NOTE.md).
 - Nota Glue/JNI RAFAELIA: [`active/VECTRA_RAFAELIA_GLUE_JNI_CONTINUITY_NOTE.md`](active/VECTRA_RAFAELIA_GLUE_JNI_CONTINUITY_NOTE.md).
 - Nota lacuna Java/app RAFAELIA: [`active/VECTRA_RAFAELIA_JAVA_APP_BRIDGE_GAP_NOTE.md`](active/VECTRA_RAFAELIA_JAVA_APP_BRIDGE_GAP_NOTE.md).
+- Nota de descoberta do runtime app: [`active/VECTRA_APP_RUNTIME_DISCOVERY_NOTE.md`](active/VECTRA_APP_RUNTIME_DISCOVERY_NOTE.md).
 
 ### 5. Segurança, compliance, autoria e privacidade
 - Modelo de ameaças: [`THREAT_MODEL.md`](THREAT_MODEL.md).
