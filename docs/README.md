@@ -1,11 +1,11 @@
-<!-- DOC_TAXONOMY_SYNC: 2026-06-08 | role: technical-hub -->
+<!-- DOC_TAXONOMY_SYNC: 2026-06-11 | role: technical-hub -->
 
 # Hub técnico — Vectras VM Android
 
 ## Metadados canônicos
 
-- Versão do documento: 2.1.
-- Última revisão: 2026-06-08.
+- Versão do documento: 2.2.
+- Última revisão: 2026-06-11.
 - Escopo: hub técnico de arquitetura, build/release, CI, segurança, documentação, operação e pesquisa.
 - Status: canônico vigente.
 - Commit de referência: `HEAD`.
@@ -62,6 +62,7 @@ Este diretório é o hub técnico canônico. Ele aprofunda a entrada curta do [`
 - Engine nativo: [`../engine/`](../engine/).
 - Guia low-level branchless/sem heap: [`active/LOWLEVEL_BRANCHLESS_SANS_HEAP_GUIDE.md`](active/LOWLEVEL_BRANCHLESS_SANS_HEAP_GUIDE.md).
 - Compilador/pré-compilador: [`active/VECTRA_COMPILER_PRECOMPILER_NONACADEMIC_2026-06-05.md`](active/VECTRA_COMPILER_PRECOMPILER_NONACADEMIC_2026-06-05.md).
+- Auditoria TCG delta XOR / ISOraf: [`active/VECTRA_TCG_DELTA_XOR_AUDIT_2026-06-11.md`](active/VECTRA_TCG_DELTA_XOR_AUDIT_2026-06-11.md).
 
 ### 4. Segurança, compliance, autoria e privacidade
 - Modelo de ameaças: [`THREAT_MODEL.md`](THREAT_MODEL.md).
@@ -86,4 +87,5 @@ Este diretório é o hub técnico canônico. Ele aprofunda a entrada curta do [`
 - Prefira links internos e arquivos canônicos antes de inferir contexto.
 - Não promova material experimental por semântica forte; promova apenas por validação técnica, compliance e rollback.
 - Não trate narrativa de performance como medição sem benchmark e relatório vinculados.
+- Não trate a auditoria TCG delta XOR como prova de aceleração geral; ela é evidência de mudança semântica, selftest e métrica local até existir benchmark comparativo.
 - Não enfraqueça o caminho de release assinado; use unsigned apenas em validação interna explícita.
