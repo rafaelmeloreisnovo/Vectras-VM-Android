@@ -4,7 +4,7 @@
 
 ## Metadados canônicos
 
-- Versão do documento: 2.4.
+- Versão do documento: 2.5.
 - Última revisão: 2026-06-13.
 - Escopo: hub técnico de arquitetura, build/release, CI, segurança, documentação, operação e pesquisa.
 - Status: canônico vigente.
@@ -72,8 +72,10 @@ Este diretório é o hub técnico canônico. Ele aprofunda a entrada curta do [`
 - Plano de excelência operacional e espaço de trabalho: [`active/VECTRA_OPERATIONAL_EXCELLENCE_WORKSPACE_PLAN.md`](active/VECTRA_OPERATIONAL_EXCELLENCE_WORKSPACE_PLAN.md).
 - Contrato anti-óbvio de revisão: [`active/VECTRA_ANTI_OBVIOUS_REVIEW_CONTRACT.md`](active/VECTRA_ANTI_OBVIOUS_REVIEW_CONTRACT.md).
 - Ledger código à frente da documentação: [`active/VECTRA_CODE_AHEAD_OF_DOCS_LEDGER.md`](active/VECTRA_CODE_AHEAD_OF_DOCS_LEDGER.md).
+- Protocolo de refatoração por fricção determinística: [`active/VECTRA_FRICTION_DETERMINISTIC_REFACTOR_PROTOCOL.md`](active/VECTRA_FRICTION_DETERMINISTIC_REFACTOR_PROTOCOL.md).
 - Protocolo incubadora → core: [`active/VECTRA_INCUBATOR_TO_CORE_PROMOTION_PROTOCOL.md`](active/VECTRA_INCUBATOR_TO_CORE_PROMOTION_PROTOCOL.md).
 - Matriz de triagem de incoming/incubadora: [`active/VECTRA_INCOMING_TRIAGE_MATRIX.md`](active/VECTRA_INCOMING_TRIAGE_MATRIX.md).
+- Ledger Lote A RAFAELIA: [`active/VECTRA_RAFAELIA_LOTE_A_TRIAGE_LEDGER.md`](active/VECTRA_RAFAELIA_LOTE_A_TRIAGE_LEDGER.md).
 
 ### 5. Segurança, compliance, autoria e privacidade
 - Modelo de ameaças: [`THREAT_MODEL.md`](THREAT_MODEL.md).
@@ -103,3 +105,4 @@ Este diretório é o hub técnico canônico. Ele aprofunda a entrada curta do [`
 - Não trate documentação atrasada como ausência de conceito quando há evidência em código, build, comentário, warning, manifesto ou artefato.
 - Não chame item estranho de lixo/bug/duplicata antes de aplicar o contrato anti-óbvio.
 - Não avance para promoção de incubadora sem usar o plano de excelência operacional e a matriz de triagem.
+- Não refatore por estética: use o protocolo de fricção determinística para separar atrito útil de desperdício real.
