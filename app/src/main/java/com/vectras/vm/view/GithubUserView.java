@@ -102,7 +102,8 @@ public class GithubUserView extends LinearLayout {
                         profileImage.setImageResource(R.drawable.account_circle_24px);
                     }
                 });
-            } catch (Exception ignored) {
+            } catch (Exception e) {
+                android.util.Log.w("GithubUserView", "Failed to load GitHub profile for user", e);
             } finally {
                 if (connection != null) {
                     connection.disconnect();

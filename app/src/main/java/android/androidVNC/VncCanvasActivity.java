@@ -1809,11 +1809,11 @@ public abstract class VncCanvasActivity extends AppCompatActivity {
     }
 
     public void onConnected() {
-
+        Log.i("VncCanvasActivity", "VNC session connected");
     }
 
     public void onDisconnected() {
-
+        Log.i("VncCanvasActivity", "VNC session disconnected");
     }
 
     public void reconnect() {

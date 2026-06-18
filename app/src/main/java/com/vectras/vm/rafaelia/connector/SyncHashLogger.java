@@ -90,7 +90,9 @@ public final class SyncHashLogger {
                 p = new JSONObject();
                 p.put("exception", t.getClass().getName());
                 p.put("message", t.getMessage());
-            } catch (JSONException ignored) {}
+            } catch (JSONException e) {
+                android.util.Log.w("SyncHashLogger", "Failed to build exception payload for error log", e);
+            }
         }
         write(Level.ERROR, tag, msg, p);
     }
