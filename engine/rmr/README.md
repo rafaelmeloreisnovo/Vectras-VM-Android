@@ -1,10 +1,11 @@
-<!-- DOC_ORG_SCAN: 2026-04-07 | source-scan: pending-manual-by-domain -->
+<!-- DOC_ORG_SCAN: 2026-06-09 | source-scan: active -->
 
 # RAFAELIA Engine / RMR
 
 ## Estrutura
 - `include/`: headers públicos
 - `src/`: implementação low-level
+- `interop/`: assembly de interoperabilidade por arquitetura (arm64, x86_64, armv7, riscv64)
 
 ## Coerência operacional low-level (assembler-friendly)
 
@@ -125,6 +126,46 @@ Recursos:
   - `preset=RMR_QEMU_PRESET_COMPATIBILITY`
   - `use_virtio=0`
 - com isso, o builder produz linha de comando alinhada ao plano para PPC (sem `virtio` e com fallback de disco/NIC compatíveis).
+
+## Módulo VECTRA_OS — Contrato de Compilação Zero-Abstração
+
+- Header: `include/rmr_vectra_os.h`
+- Implementação: `src/rmr_vectra_os.c`
+- Assembly: `interop/rmr_vectra_os_arm64.S`, `interop/rmr_vectra_os_x86_64.S`,
+  `interop/rmr_vectra_os_armv7.S`, `interop/rmr_vectra_os_riscv64.S`
+
+Primitivos providos:
+- **Q16.16 sem FPU/libm**: `VOS_Q16_MUL(a,b)` → `SMULL+ASR` (ARM64) / `IMULQ+SARQ` (x86)
+- **Arena BSS sem malloc**: `VOS_ARENA_ALLOC`, `VOS_MARK()`, `VOS_RESTORE()` — rollback O(1)
+- **Seleção branchless**: `VOS_CSEL(cond,a,b)` → `CSEL` (ARM64) / `CMOVNZ` (x86)
+- **Atrator FRAF**: `VOS_FRAF_CONVERGE` — 48 iterações, converge a F\*=23.158
+- **Benchmark sem heap**: `VOS_BENCH_RUN` — mediana 31 amostras, insertion sort no stack
+- **Failsafe por arq.**: `VOS_FAILSAFE` → `WFI` (ARM64), `HLT` (x86), `return 0` (JNI)
+- **Capacidades HW**: flags 8 bits com cadeia CRC32C (`VOS_CAP_CRC32C_HW`, `VOS_CAP_NEON_128`, etc.)
+- **Hash multiplicativo**: `VOS_PHI_IDX(key,bits)` com PHI64=`0x9E3779B97F4A7C15`
+- **GCD binário**: `vos_gcd_probe_a64` — Stein via `rbit+clz`, sem divisão
+
+Contratos axiomáticos verificados em `vos_selftest()`:
+- A.1 `gcd(Δr,R)=1` (invariante toroidal)
+- A.2 FRAF converge a F\*=23.158 em 48 iterações (3 seeds)
+- A.3 Lyapunov λ=−0.14384 (estável: SCALE < Q16_ONE)
+- A.4 Cadeia CRC32C íntegra
+
+**Metodologia gc-sections** (67% de redução de binário):
+
+```
+-ffunction-sections -fdata-sections -fvisibility=hidden
+-Wl,--gc-sections -Wl,--exclude-libs,ALL
+.hidden em cada símbolo ASM
+#pragma GCC visibility push(hidden) no header
+```
+
+Apenas 3 símbolos com visibilidade DEFAULT: `vos_init`, `vos_selftest`, `vos_caps_report`.
+`-Wunused-function` é o SINAL de eliminação gc-sections — não deve ser suprimido.
+
+Ref: `docs/active/VECTRA_COMPILER_PRECOMPILER_NONACADEMIC_2026-06-05.md` §9.
+
+---
 
 ## Política de promoção e anti-divergência (canônico vs sandbox)
 

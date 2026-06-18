@@ -1,11 +1,11 @@
-<!-- DOC_TAXONOMY_SYNC: 2026-06-08 | role: global-complete-index -->
+<!-- DOC_TAXONOMY_SYNC: 2026-06-09 | role: global-complete-index -->
 
 # Índice global de documentação — Vectras VM Android
 
 ## Metadados canônicos
 
 - Versão do documento: 2.1.
-- Última revisão: 2026-06-08.
+- Última revisão: 2026-06-09.
 - Escopo: índice global, taxonomia documental, status dos documentos, donos lógicos e vínculos com código/workflow.
 - Status: canônico vigente.
 - Commit de referência: `HEAD`.
@@ -46,7 +46,7 @@ Este é o índice global completo e a fonte de navegação documental do reposit
 | Caminho | Papel | Status | Dono lógico | Última revisão | Vínculo com código/workflow |
 |---|---|---|---|---|---|
 | [`README.md`](README.md) | Entrada institucional e operacional curta. | Canônico vigente | Governança documental / release engineering | 2026-06-08 | Ponte para [`PROJECT_STATE.md`](PROJECT_STATE.md), [`DOC_INDEX.md`](DOC_INDEX.md), [`BUILDING.md`](BUILDING.md) e diretórios canônicos. |
-| [`DOC_INDEX.md`](DOC_INDEX.md) | Índice global completo. | Canônico vigente | Governança documental / technical writing | 2026-06-08 | Referencia app, engine, CI, docs, estado e workflows. |
+| [`DOC_INDEX.md`](DOC_INDEX.md) | Índice global completo. | Canônico vigente | Governança documental / technical writing | 2026-06-09 | Referencia app, engine, CI, docs, estado e workflows. |
 | [`docs/README.md`](docs/README.md) | Hub técnico. | Canônico vigente | Arquitetura / engenharia Android-NDK | 2026-06-08 | Vínculo com [`docs/architecture/VM_EXECUTION_FLOW.md`](docs/architecture/VM_EXECUTION_FLOW.md), [`docs/AI_BUILD_RELEASE_INDEX.md`](docs/AI_BUILD_RELEASE_INDEX.md) e [`docs/ci/workflow-matrix.md`](docs/ci/workflow-matrix.md). |
 | [`docs/navigation/INDEX.md`](docs/navigation/INDEX.md) | Navegação por audiência. | Canônico vigente | Enablement / documentação técnica | 2026-06-08 | Direciona leitura para arquitetura, operação, benchmark, pesquisa, auditoria e governança. |
 | [`docs/DOCUMENTATION_STANDARDS.md`](docs/DOCUMENTATION_STANDARDS.md) | Padrão de metadados, escrita, navegação e rastreabilidade documental. | Canônico de governança | Governança documental / technical writing | 2026-06-08 | Define bloco `Metadados canônicos`, regras de revisão para workflow/build/release e vínculo com índices canônicos. |
@@ -66,6 +66,7 @@ Este é o índice global completo e a fonte de navegação documental do reposit
 | [`resources/compliance/ASSET_CLEANROOM_POLICY.md`](resources/compliance/ASSET_CLEANROOM_POLICY.md) | Política clean-room de assets. | Canônico compliance | Compliance / design assets | 2026-06-08 por vínculo documental | Vínculo com [`resources/`](resources/) e proveniência de assets. |
 | [`resources/compliance/ASSET_PROVENANCE_REGISTER.csv`](resources/compliance/ASSET_PROVENANCE_REGISTER.csv) | Registro de proveniência de assets. | Canônico compliance | Compliance / assets | 2026-06-08 por vínculo documental | Vínculo com assets versionados. |
 | [`VECTRA_CORE.md`](VECTRA_CORE.md) | Referência conceitual do runtime/core. | Canônico técnico | Runtime/engine | 2026-06-08 por vínculo documental | Vínculo com [`engine/`](engine/) e contratos low-level. |
+| [`engine/rmr/include/rmr_vectra_os.h`](engine/rmr/include/rmr_vectra_os.h) + [`engine/rmr/src/rmr_vectra_os.c`](engine/rmr/src/rmr_vectra_os.c) | Contrato de compilação zero-abstração VECTRA_OS: Q16, arena NoMalloc, dispatch de hardware, FRAF, gc-sections. | Canônico técnico | Engine / arquitetura low-level | 2026-06-09 | [`engine/rmr/interop/rmr_vectra_os_*.S`](engine/rmr/interop/), `CMakeLists.txt` (`-ffunction-sections -fvisibility=hidden --gc-sections`). |
 | [`docs/active/LOWLEVEL_BRANCHLESS_SANS_HEAP_GUIDE.md`](docs/active/LOWLEVEL_BRANCHLESS_SANS_HEAP_GUIDE.md) | Guia low-level branchless/sem heap. | Canônico técnico especializado | Engine/native performance | 2026-06-08 por vínculo documental | Vínculo com [`engine/`](engine/) e validações low-level. |
 | [`tools/compliance/check_lowlevel_constraints.py`](tools/compliance/check_lowlevel_constraints.py) | Verificador estático low-level. | Canônico operacional | Engine/native performance | 2026-06-08 por vínculo documental | Executável para checagem de restrições low-level. |
 | [`docs/active/DIRECTORY_ALIGNMENT_MATRIX.md`](docs/active/DIRECTORY_ALIGNMENT_MATRIX.md) | Matriz de alinhamento de diretórios críticos. | Apoio canônico | Governança documental / arquitetura | 2026-06-08 por vínculo documental | Complementa esta classificação de diretórios. |
