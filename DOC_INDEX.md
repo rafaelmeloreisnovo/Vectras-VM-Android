@@ -147,6 +147,14 @@ Este é o índice global completo e a fonte de navegação documental do reposit
 - Cabeçalhos low-level: [`engine/rmr/include/rmr_corelib.h`](engine/rmr/include/rmr_corelib.h), [`engine/rmr/include/rmr_ll_ops.h`](engine/rmr/include/rmr_ll_ops.h), [`engine/rmr/include/rmr_ll_tuning.h`](engine/rmr/include/rmr_ll_tuning.h), [`engine/rmr/include/rmr_math_fabric.h`](engine/rmr/include/rmr_math_fabric.h).
 - Implementações C: [`engine/rmr/src/rmr_corelib.c`](engine/rmr/src/rmr_corelib.c), [`engine/rmr/src/rmr_ll_ops.c`](engine/rmr/src/rmr_ll_ops.c), [`engine/rmr/src/rmr_ll_tuning.c`](engine/rmr/src/rmr_ll_tuning.c), [`engine/rmr/src/rmr_math_fabric.c`](engine/rmr/src/rmr_math_fabric.c).
 
+## VECTRA_OS — contrato low-level com proof nodes
+- Gap ledger (estado vivo G1–G9): [`docs/VECTRA_OS_LIVING_SYSTEM_GAP_LEDGER.md`](docs/VECTRA_OS_LIVING_SYSTEM_GAP_LEDGER.md).
+- Header do contrato: [`engine/rmr/include/rmr_vectra_os.h`](engine/rmr/include/rmr_vectra_os.h); implementação: [`engine/rmr/src/rmr_vectra_os.c`](engine/rmr/src/rmr_vectra_os.c); fonte única de capability flags (X-macro): [`engine/rmr/include/rmr_vectra_flags.def`](engine/rmr/include/rmr_vectra_flags.def).
+- Selftest de contrato (G2): [`demo_cli/src/rmr_vectra_os_contract_selftest.c`](demo_cli/src/rmr_vectra_os_contract_selftest.c).
+- Auditoria executável de símbolos/warnings (G1): [`tools/verify_vectra_os_contract.sh`](tools/verify_vectra_os_contract.sh) → evidência [`reports/vectra_os_contract_report.md`](reports/vectra_os_contract_report.md); alvo `make verify-vectra-os-contract`.
+- Prova de benchmark MVP (G8): [`bench/src/vectra_os_mvp_bench_main.c`](bench/src/vectra_os_mvp_bench_main.c) → evidência [`bench/results/vectra_os_mvp_bench.txt`](bench/results/vectra_os_mvp_bench.txt); alvo `make run-vectra-os-mvp-bench`.
+- Cache TCG por delta XOR e selftest: [`engine/rmr/src/rmr_tcg_cache.c`](engine/rmr/src/rmr_tcg_cache.c), [`demo_cli/src/rmr_tcg_cache_selftest.c`](demo_cli/src/rmr_tcg_cache_selftest.c).
+
 ## Matriz de testes (app)
 - Suite unitária de VM/runtime: [`app/src/test/java/com/vectras/vm/`](app/src/test/java/com/vectras/vm/).
 - Suite unitária de terminal: [`app/src/test/java/com/vectras/vterm/`](app/src/test/java/com/vectras/vterm/).

@@ -1,0 +1,24 @@
+/* rmr_vectra_flags.def — fonte única X-macro das capability flags VECTRA_OS.
+ *
+ * Ref: docs/VECTRA_OS_LIVING_SYSTEM_GAP_LEDGER.md §4 G3.
+ * Contrato: o número do bit existe SOMENTE aqui. Consumidores definem
+ * VOS_CAP_DEF(name, bit, str) e incluem este arquivo (sem include guard —
+ * inclusão repetida é o mecanismo X-macro).
+ *
+ * Geração em rmr_vectra_os.h:
+ *   - enum VOS_CAP_BIT_<name>  (índice do bit)
+ *   - VOS_CAP_COUNT            (total de entradas)
+ *   - máscaras VOS_CAP_<name>  (derivadas do enum, sem duplicar o bit)
+ *   - vos_flag_name(bit)       (lookup de nome canônico)
+ *
+ * Prova: rmr_vectra_os_contract_selftest verifica unicidade dos bits,
+ * consistência das máscaras e o lookup de nomes.
+ */
+VOS_CAP_DEF(CRC32C_HW, 0,  "crc32c_hw")
+VOS_CAP_DEF(NEON_128,  1,  "neon_128")
+VOS_CAP_DEF(SVE,       2,  "sve")
+VOS_CAP_DEF(FMA,       3,  "fma")
+VOS_CAP_DEF(CNTVCT,    4,  "cntvct")
+VOS_CAP_DEF(RDTSC,     5,  "rdtsc")
+VOS_CAP_DEF(SSE42,     6,  "sse42")
+VOS_CAP_DEF(MOCK,      31, "mock")

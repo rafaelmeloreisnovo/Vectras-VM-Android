@@ -226,6 +226,17 @@ rmr_add_host_executable(rmr_unified_arena_selftest demo_cli/src/rmr_unified_aren
 rmr_add_host_executable(rmr_legacy_kernel_selftest demo_cli/src/rmr_legacy_kernel_selftest.c)
 rmr_add_host_executable(rmr_hw_detect_selftest demo_cli/src/rmr_hw_detect_selftest.c)
 rmr_add_host_executable(zipraf_core_selftest demo_cli/src/zipraf_core_selftest.c)
+# Cache TCG é grupo ANDROID_ONLY; o selftest host compila as fontes direto.
+add_executable(rmr_tcg_cache_selftest
+  demo_cli/src/rmr_tcg_cache_selftest.c
+  engine/rmr/src/rmr_tcg_cache.c
+  engine/rmr/src/rmr_attractor.c
+)
+target_link_libraries(rmr_tcg_cache_selftest PRIVATE rmr)
+rmr_apply_common_flags(rmr_tcg_cache_selftest)
+
+rmr_add_host_executable(rmr_vectra_os_contract_selftest demo_cli/src/rmr_vectra_os_contract_selftest.c)
+rmr_add_host_executable(vectra_os_mvp_bench bench/src/vectra_os_mvp_bench_main.c)
 rmr_add_host_executable(vectra_external_engine_selftest demo_cli/src/vectra_external_engine_selftest.c)
 rmr_add_host_executable(rmr_external_engine_selftest demo_cli/src/rmr_external_engine_selftest.c)
 rmr_add_host_executable(rmr_policy_benchmark demo_cli/src/rmr_policy_benchmark.c)
@@ -248,6 +259,8 @@ set(RMR_RUN_SELFTEST_COMMANDS
   rmr_hw_detect_selftest
   rmr_asm_equivalence_selftest
   zipraf_core_selftest
+  rmr_tcg_cache_selftest
+  rmr_vectra_os_contract_selftest
   vectra_external_engine_selftest
   bitomega_smoketest
   rmr_external_engine_selftest
@@ -266,6 +279,8 @@ set(RMR_RUN_SELFTEST_DEPENDS
   rmr_hw_detect_selftest
   rmr_asm_equivalence_selftest
   zipraf_core_selftest
+  rmr_tcg_cache_selftest
+  rmr_vectra_os_contract_selftest
   vectra_external_engine_selftest
   bitomega_smoketest
   rmr_external_engine_selftest

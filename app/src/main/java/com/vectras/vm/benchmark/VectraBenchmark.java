@@ -229,6 +229,7 @@ public class VectraBenchmark {
          * Legacy compatibility - returns 100 for valid results.
          * @deprecated Use rawValue and formattedValue for actual metrics
          */
+        @Deprecated
         public int score() { return rawValue > 0 ? 100 : 0; }
     }
     
@@ -1810,6 +1811,7 @@ public class VectraBenchmark {
      * Calculate total benchmark score (deprecated - use raw metrics instead).
      * @deprecated Use formatted values with real engineering units instead
      */
+    @Deprecated
     public static int calculateTotalScore(BenchmarkResult[] results) {
         int validCount = 0;
         for (BenchmarkResult r : results) {
@@ -1824,6 +1826,7 @@ public class VectraBenchmark {
      * Calculate category scores (deprecated - use raw metrics instead).
      * @deprecated Use formatted values with real engineering units instead
      */
+    @Deprecated
     public static int[] calculateCategoryScores(BenchmarkResult[] results) {
         int[] scores = new int[6]; // CPU, CPU-MT, Memory, Storage, Integrity, Emulation
         int[] counts = new int[6];

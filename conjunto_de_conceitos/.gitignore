@@ -1,0 +1,7 @@
+# build outputs (freestanding binaries / objects)
+discador
+discador.arm64
+discador.arm32
+discador.host
+*.o
+*.elf

@@ -1,11 +1,11 @@
-<!-- DOC_TAXONOMY_SYNC: 2026-06-08 | role: technical-hub -->
+<!-- DOC_TAXONOMY_SYNC: 2026-06-13 | role: technical-hub -->
 
 # Hub técnico — Vectras VM Android
 
 ## Metadados canônicos
 
-- Versão do documento: 2.1.
-- Última revisão: 2026-06-08.
+- Versão do documento: 3.2.
+- Última revisão: 2026-06-13.
 - Escopo: hub técnico de arquitetura, build/release, CI, segurança, documentação, operação e pesquisa.
 - Status: canônico vigente.
 - Commit de referência: `HEAD`.
@@ -19,6 +19,9 @@ Este diretório é o hub técnico canônico. Ele aprofunda a entrada curta do [`
 - Reduzir inferência silenciosa para humanos e IA: cada trilha deve indicar documento, status e vínculo com código/workflow.
 - Separar o que é canônico, legado compatível, experimental/ingestão e histórico sem mover arquivos nesta etapa.
 - Dar contexto suficiente para navegar com excelência operacional: o leitor deve saber onde começar, onde validar e onde não assumir estado atual.
+- Registrar quando o código executando está à frente da documentação, sem confundir documentação atrasada com ausência técnica.
+- Preservar continuidade de atividade: cada rodada deve deixar trilha para humanos e IA continuarem sem recomeçar do zero.
+- Verificar o todo antes de mexer na parte, usando fluxograma holístico quando o caminho não estiver claro.
 
 ## Taxonomia documental principal
 
@@ -62,8 +65,32 @@ Este diretório é o hub técnico canônico. Ele aprofunda a entrada curta do [`
 - Engine nativo: [`../engine/`](../engine/).
 - Guia low-level branchless/sem heap: [`active/LOWLEVEL_BRANCHLESS_SANS_HEAP_GUIDE.md`](active/LOWLEVEL_BRANCHLESS_SANS_HEAP_GUIDE.md).
 - Compilador/pré-compilador: [`active/VECTRA_COMPILER_PRECOMPILER_NONACADEMIC_2026-06-05.md`](active/VECTRA_COMPILER_PRECOMPILER_NONACADEMIC_2026-06-05.md).
+- Auditoria TCG delta XOR / ISOraf: [`active/VECTRA_TCG_DELTA_XOR_AUDIT_2026-06-11.md`](active/VECTRA_TCG_DELTA_XOR_AUDIT_2026-06-11.md).
+- Contrato de warning como intenção: [`active/LOWLEVEL_WARNING_INTENT_CONTRACT.md`](active/LOWLEVEL_WARNING_INTENT_CONTRACT.md).
+- Contrato freestanding `void`: [`active/VECTRA_FREESTANDING_VOID_CONTRACT.md`](active/VECTRA_FREESTANDING_VOID_CONTRACT.md).
+- Ponte RAFCODEphi C→ASM→hex: [`active/VECTRA_RAFCODE_PHI_BRIDGE.md`](active/VECTRA_RAFCODE_PHI_BRIDGE.md).
 
-### 4. Segurança, compliance, autoria e privacidade
+### 4. Canonização anti-óbvio e documentação atrasada
+- Mapa holístico global e fluxograma: [`active/VECTRA_GLOBAL_HOLISTIC_FLOWMAP.md`](active/VECTRA_GLOBAL_HOLISTIC_FLOWMAP.md).
+- Guia de continuidade da execução e leitura: [`active/VECTRA_EXECUTION_CONTINUITY_READING_GUIDE.md`](active/VECTRA_EXECUTION_CONTINUITY_READING_GUIDE.md).
+- Cânone de conceitos da obra: [`active/VECTRA_OBRA_CONCEPTS_CANON.md`](active/VECTRA_OBRA_CONCEPTS_CANON.md).
+- Contrato de invariante do fundo de dados: [`active/VECTRA_DATA_FOUNDATION_INVARIANT_CONTRACT.md`](active/VECTRA_DATA_FOUNDATION_INVARIANT_CONTRACT.md).
+- Plano de excelência operacional e espaço de trabalho: [`active/VECTRA_OPERATIONAL_EXCELLENCE_WORKSPACE_PLAN.md`](active/VECTRA_OPERATIONAL_EXCELLENCE_WORKSPACE_PLAN.md).
+- Contrato anti-óbvio de revisão: [`active/VECTRA_ANTI_OBVIOUS_REVIEW_CONTRACT.md`](active/VECTRA_ANTI_OBVIOUS_REVIEW_CONTRACT.md).
+- Ledger código à frente da documentação: [`active/VECTRA_CODE_AHEAD_OF_DOCS_LEDGER.md`](active/VECTRA_CODE_AHEAD_OF_DOCS_LEDGER.md).
+- Protocolo de refatoração por fricção determinística: [`active/VECTRA_FRICTION_DETERMINISTIC_REFACTOR_PROTOCOL.md`](active/VECTRA_FRICTION_DETERMINISTIC_REFACTOR_PROTOCOL.md).
+- Protocolo incubadora → core: [`active/VECTRA_INCUBATOR_TO_CORE_PROMOTION_PROTOCOL.md`](active/VECTRA_INCUBATOR_TO_CORE_PROMOTION_PROTOCOL.md).
+- Matriz de triagem de incoming/incubadora: [`active/VECTRA_INCOMING_TRIAGE_MATRIX.md`](active/VECTRA_INCOMING_TRIAGE_MATRIX.md).
+- Ledger Lote A RAFAELIA: [`active/VECTRA_RAFAELIA_LOTE_A_TRIAGE_LEDGER.md`](active/VECTRA_RAFAELIA_LOTE_A_TRIAGE_LEDGER.md).
+- Nota de continuidade B3: [`active/VECTRA_RAFAELIA_B3_CONTINUITY_NOTE.md`](active/VECTRA_RAFAELIA_B3_CONTINUITY_NOTE.md).
+- Nota de continuidade B4/build ARM32: [`active/VECTRA_RAFAELIA_B4_BUILD_CONTINUITY_NOTE.md`](active/VECTRA_RAFAELIA_B4_BUILD_CONTINUITY_NOTE.md).
+- Nota BitRAF/orquestrador RAFAELIA: [`active/VECTRA_RAFAELIA_BITRAF_ORCHESTRATOR_NOTE.md`](active/VECTRA_RAFAELIA_BITRAF_ORCHESTRATOR_NOTE.md).
+- Nota Glue/JNI RAFAELIA: [`active/VECTRA_RAFAELIA_GLUE_JNI_CONTINUITY_NOTE.md`](active/VECTRA_RAFAELIA_GLUE_JNI_CONTINUITY_NOTE.md).
+- Nota lacuna Java/app RAFAELIA: [`active/VECTRA_RAFAELIA_JAVA_APP_BRIDGE_GAP_NOTE.md`](active/VECTRA_RAFAELIA_JAVA_APP_BRIDGE_GAP_NOTE.md).
+- Nota de descoberta do runtime app: [`active/VECTRA_APP_RUNTIME_DISCOVERY_NOTE.md`](active/VECTRA_APP_RUNTIME_DISCOVERY_NOTE.md).
+- Nota de entrypoints runtime RAFAELIA: [`active/VECTRA_RAFAELIA_RUNTIME_ENTRYPOINTS_NOTE.md`](active/VECTRA_RAFAELIA_RUNTIME_ENTRYPOINTS_NOTE.md).
+
+### 5. Segurança, compliance, autoria e privacidade
 - Modelo de ameaças: [`THREAT_MODEL.md`](THREAT_MODEL.md).
 - Segurança: [`../SECURITY.md`](../SECURITY.md).
 - Privacidade: [`../PRIVACY.md`](../PRIVACY.md).
@@ -71,7 +98,7 @@ Este diretório é o hub técnico canônico. Ele aprofunda a entrada curta do [`
 - Autoria clean-room: [`../AUTHORSHIP_CLEANROOM_PLAN.md`](../AUTHORSHIP_CLEANROOM_PLAN.md).
 - Assets clean-room: [`../resources/compliance/ASSET_CLEANROOM_POLICY.md`](../resources/compliance/ASSET_CLEANROOM_POLICY.md).
 
-### 5. Navegação por audiência e inclusão informacional
+### 6. Navegação por audiência e inclusão informacional
 - Índice por audiência: [`navigation/INDEX.md`](navigation/INDEX.md).
 - Operações/performance: [`navigation/PERFORMANCE_OPERATIONS.md`](navigation/PERFORMANCE_OPERATIONS.md).
 - Empresas: [`navigation/ENTERPRISE_COMPANIES.md`](navigation/ENTERPRISE_COMPANIES.md).
@@ -86,4 +113,11 @@ Este diretório é o hub técnico canônico. Ele aprofunda a entrada curta do [`
 - Prefira links internos e arquivos canônicos antes de inferir contexto.
 - Não promova material experimental por semântica forte; promova apenas por validação técnica, compliance e rollback.
 - Não trate narrativa de performance como medição sem benchmark e relatório vinculados.
+- Não trate a auditoria TCG delta XOR como prova de aceleração geral; ela é evidência de mudança semântica, selftest e métrica local até existir benchmark comparativo.
 - Não enfraqueça o caminho de release assinado; use unsigned apenas em validação interna explícita.
+- Não trate documentação atrasada como ausência de conceito quando há evidência em código, build, comentário, warning, manifesto ou artefato.
+- Não chame item estranho de lixo/bug/duplicata antes de aplicar o contrato anti-óbvio.
+- Não avance para promoção de incubadora sem usar o plano de excelência operacional e a matriz de triagem.
+- Não refatore por estética: use o protocolo de fricção determinística para separar atrito útil de desperdício real.
+- Não continue uma atividade sem declarar camada, arquivos lidos, lacuna protegida e próximo `F_NEXT`.
+- Quando a melhor rota não estiver clara, subir para o mapa holístico global antes de atuar localmente.

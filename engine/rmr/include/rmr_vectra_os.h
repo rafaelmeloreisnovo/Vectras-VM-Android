@@ -93,14 +93,41 @@ typedef u32 vos_q16_t;    /* stored as unsigned; arithmetic uses signed cast */
 
 /* ── 3. CAPABILITY FLAG REGISTER (bit-packed, mirrors x7 contract) ─────── */
 
-#define VOS_CAP_CRC32C_HW    (1u << 0u)  /* hardware CRC32C instruction      */
-#define VOS_CAP_NEON_128     (1u << 1u)  /* NEON/AdvSIMD 128-bit available   */
-#define VOS_CAP_SVE          (1u << 2u)  /* ARM SVE available                */
-#define VOS_CAP_FMA          (1u << 3u)  /* fused-multiply-add available     */
-#define VOS_CAP_CNTVCT       (1u << 4u)  /* EL0 system counter accessible    */
-#define VOS_CAP_RDTSC        (1u << 5u)  /* x86 RDTSC accessible             */
-#define VOS_CAP_SSE42        (1u << 6u)  /* SSE4.2 (includes CRC32 opcode)   */
-#define VOS_CAP_MOCK         (1u << 31u) /* simulation mode: no real HW      */
+/* Fonte única dos bits: rmr_vectra_flags.def (X-macro, ledger G3).
+   O número do bit vive SOMENTE no .def; o enum e as máscaras derivam dele. */
+enum {
+#define VOS_CAP_DEF(name, bit, str) VOS_CAP_BIT_##name = (bit),
+#include "rmr_vectra_flags.def"
+#undef VOS_CAP_DEF
+  VOS_CAP_BIT__LIMIT = 32
+};
+
+enum {
+  VOS_CAP_COUNT = 0
+#define VOS_CAP_DEF(name, bit, str) + 1
+#include "rmr_vectra_flags.def"
+#undef VOS_CAP_DEF
+};
+
+#define VOS_CAP_CRC32C_HW    (1u << VOS_CAP_BIT_CRC32C_HW) /* hardware CRC32C instruction    */
+#define VOS_CAP_NEON_128     (1u << VOS_CAP_BIT_NEON_128)  /* NEON/AdvSIMD 128-bit available */
+#define VOS_CAP_SVE          (1u << VOS_CAP_BIT_SVE)       /* ARM SVE available              */
+#define VOS_CAP_FMA          (1u << VOS_CAP_BIT_FMA)       /* fused-multiply-add available   */
+#define VOS_CAP_CNTVCT       (1u << VOS_CAP_BIT_CNTVCT)    /* EL0 system counter accessible  */
+#define VOS_CAP_RDTSC        (1u << VOS_CAP_BIT_RDTSC)     /* x86 RDTSC accessible           */
+#define VOS_CAP_SSE42        (1u << VOS_CAP_BIT_SSE42)     /* SSE4.2 (includes CRC32 opcode) */
+#define VOS_CAP_MOCK         (1u << VOS_CAP_BIT_MOCK)      /* simulation mode: no real HW    */
+
+/* Nome canônico da flag por índice de bit (fonte: .def).  static inline:
+   zero símbolo exportado; gc-sections elimina onde não referenciado.      */
+static inline const char *vos_flag_name(u32 bit_index) {
+  switch (bit_index) {
+#define VOS_CAP_DEF(name, bit, str) case (bit): return (str);
+#include "rmr_vectra_flags.def"
+#undef VOS_CAP_DEF
+    default: return "unknown";
+  }
+}
 
 /* Hotswap: enable/disable at runtime (DMB-fenced, thread-visible).
    Use VOS_HOTSWAP_CRC / VOS_HOTSWAP_TIMER rather than raw cap mutation.   */
@@ -115,6 +142,55 @@ typedef u32 vos_q16_t;    /* stored as unsigned; arithmetic uses signed cast */
     vos_g_caps &= ~(mask); \
     __asm__ volatile("" ::: "memory"); \
 } while(0)
+
+/* ── 3.1 FLAG ROLLBACK (G4 núcleo) — transação sobre o registrador ─────── */
+/* Mesmo padrão do arena mark/restore: snapshot O(1), rollback O(1).
+   Nota de contrato: a propagação de return-code via estados TTL8 (G4
+   completo) aguarda o codex de referência; ver gap ledger §4 G4.          */
+extern volatile vos_cap_t vos_g_caps_prev;  /* snapshot para rollback      */
+
+#define VOS_FLAGS_MARK() do { \
+    __asm__ volatile("" ::: "memory"); \
+    vos_g_caps_prev = vos_g_caps; \
+    __asm__ volatile("" ::: "memory"); \
+} while(0)
+
+#define VOS_FLAGS_RESTORE() do { \
+    __asm__ volatile("" ::: "memory"); \
+    vos_g_caps = vos_g_caps_prev; \
+    __asm__ volatile("" ::: "memory"); \
+} while(0)
+
+/* RAF_TRY_FLAG(mask, body): transação de capability — marca o registrador,
+   habilita mask e avalia body; se body for falso, o registrador anterior é
+   restaurado integralmente (rollback sem resíduo). O resultado é observável
+   pelo próprio estado de vos_g_caps, coerente com hit/miss como estados.  */
+#define RAF_TRY_FLAG(mask, body) do { \
+    VOS_FLAGS_MARK(); \
+    VOS_CAPS_ENABLE(mask); \
+    if (!(body)) VOS_FLAGS_RESTORE(); \
+} while(0)
+
+/* ── 3.2 ATOMIC CAS LAYER (G5) — contrato sobre builtins do compilador ─── */
+/* Hosted/JNI e baremetal GCC/Clang: builtins __atomic_* (em ARM32 o
+   compilador emite LDREX/STREX; em ARM64, LDAXR/STLXR ou LSE).
+   Outro toolchain: falha de compilação explícita — o contrato exige
+   implementação por arquitetura, nunca um fallback silencioso não-atômico. */
+#if defined(__GNUC__) || defined(__clang__)
+#define VOS_ATOMIC_LOAD32(ptr)       __atomic_load_n((ptr), __ATOMIC_ACQUIRE)
+#define VOS_ATOMIC_STORE32(ptr, val) __atomic_store_n((ptr), (val), __ATOMIC_RELEASE)
+/* CAS u32: 1 em sucesso; em falha devolve 0 e escreve o valor observado em
+   *expected_ptr (estado observado, não descartado — miss é informação).   */
+#define VOS_CAS32(ptr, expected_ptr, desired) \
+    __atomic_compare_exchange_n((ptr), (expected_ptr), (desired), 0, \
+                                __ATOMIC_ACQ_REL, __ATOMIC_ACQUIRE)
+/* CAS de ponteiro para hotswap de dispatch (vos_g_crc / vos_g_tick).      */
+#define VOS_CAS_PTR(pptr, expected_pptr, desired) \
+    __atomic_compare_exchange_n((pptr), (expected_pptr), (desired), 0, \
+                                __ATOMIC_ACQ_REL, __ATOMIC_ACQUIRE)
+#else
+#error "VOS CAS layer: sem builtins atomicos — implementar contrato por arch"
+#endif
 
 /* ── 4. ARENA ALLOCATOR — bump-pointer, BSS, zero-overhead ─────────────── */
 
@@ -151,7 +227,7 @@ typedef u32 vos_q16_t;    /* stored as unsigned; arithmetic uses signed cast */
    Compiler will emit CSEL/CMOV when both a,b are register-width integers.  */
 #define VOS_CSEL(cond, a, b) \
     ((__typeof__(a))(((u32)(-(s32)((u32)(cond) != 0u)) & (u32)(a)) | \
-                     ((u32)( (s32)((u32)(cond) != 0u)) & (u32)(b))))
+                     (~(u32)(-(s32)((u32)(cond) != 0u)) & (u32)(b))))
 
 /* Branchless absolute value for Q16. */
 #define VOS_CSEL_ABS_Q16(q) \
@@ -197,13 +273,22 @@ extern u8                    *vos_g_arena_mark;            /* rollback mark  */
    √3/2  ≈ 0.866025403784  → Q16: 56756  (0xDDB4)
    sin(279°) = −sin(81°) ≈ −0.987688  → π·sin(279°) ≈ −3.102356
    Subtraction of negative = addition: offset = +3.102356
-   3.102356 × 65536 = 203358  (0x31A1E)
-   F* = 3.102356 / (1 − 0.866025) ≈ 23.158 × 65536 = 1517604 (0x172CE4)  */
+   3.102356 × 65536 = 203294  (0x31A1E)
+   F* é o ponto fixo do SISTEMA QUANTIZADO implementado, não do contínuo:
+     F* = offset / (1 − scale) em Q16 = 203294×65536/(65536−56756)
+        = 0x17277A  (≈ 23.1538; o contínuo daria ≈ 23.1589)
+   Iterações: taxa de contração 0.866 ⇒ 48 passos nunca alcançam ε=0.001
+   (precisa ≥ ~70 a partir de seed 1; ~79 a partir de seed 100).
+   96 passos garantem |Fₙ−F*| ≤ ε para seeds até 1000 incluindo o viés de
+   truncamento do Q16_MUL (≤ 1/(1−scale) ≈ 8 LSB acumulados).
+   TOKEN_VAZIO (PR #1005): este F* é o ponto fixo PROVADO do sistema Q16
+   implementado; se é o valor canônico do atrator Fibonacci-Rafael
+   aguarda recalibração do owner.                                         */
 #define VOS_FRAF_SCALE_Q16  ((vos_q16_t)0x0000DDB4u)  /* 0.866025 × 2^16   */
 #define VOS_FRAF_OFFSET_Q16 ((vos_q16_t)0x00031A1Eu)  /* 3.102356 × 2^16   */
-#define VOS_FRAF_STAR_Q16   ((vos_q16_t)0x00172CE4u)  /* F* = 23.158 × 2^16*/
+#define VOS_FRAF_STAR_Q16   ((vos_q16_t)0x0017277Au)  /* F* quantizado     */
 #define VOS_FRAF_EPS_Q16    ((vos_q16_t)0x00000042u)  /* ε = 0.001 × 2^16  */
-#define VOS_FRAF_ITERS      48u                        /* iterations to F*  */
+#define VOS_FRAF_ITERS      96u                        /* iterations to F*  */
 #define VOS_LYAPUNOV_NEG    0x9FE9u                    /* |λ| = 0.14384 Q16 */
 
 /* Single FRAF iteration (macro = 1 inline expansion, no call overhead). */
@@ -323,6 +408,58 @@ extern u8                    *vos_g_arena_mark;            /* rollback mark  */
 #define VOS_MC_LOAD_USE_STALL    4u   /* MC-09: load-use hazard stall         */
 #define VOS_MC_LOOP_OVERHEAD     2u   /* MC-10: compare+branch overhead/iter  */
 
+/* ── 12.1 MACHINE CODEX ENFORCEMENT (G7) — obrigação vira checagem ──────── */
+/* Falsificador do ledger §6: "comments describe obligations that no script,
+   macro, test, or build rule checks". As macros abaixo convertem o codex de
+   documentação em invariantes checáveis em compile-time ou via FAILSAFE.   */
+
+/* Invariante de compile-time (expressão constante).                        */
+#define VOS_MC_ASSERT(cond, msg) _Static_assert((cond), msg)
+
+/* Predicado pow2 (uso em compile-time ou runtime).                         */
+#define VOS_MC_IS_POW2(x) (((x) != 0u) && (((x) & ((x) - 1u)) == 0u))
+
+/* Obrigações de runtime no protocolo FAILSAFE (JNI: return 0; baremetal:
+   halt) — usar dentro de funções que devolvem status, como vos_init.       */
+#define VOS_MC_REQUIRE_POW2(x) VOS_FAILSAFE(VOS_MC_IS_POW2((u32)(x)))
+#define VOS_MC_REQUIRE_ALIGNED(ptr, align) \
+    VOS_FAILSAFE((((u64)(ptr)) & ((u64)(align) - 1u)) == 0u)
+
+/* Recíproco Q32: divisão por constante vira multiplicação + shift.
+   r = ceil(2^32/d), válido para d ≥ 2, com excesso e = r·d − 2^32.
+   Exatidão GARANTIDA para x·e < 2^32 (rem ≤ d−1 ⇒ exato sse
+   x·e/2^32 < d − rem; pior caso rem = d−1). O domínio é parte do
+   contrato: VOS_MC_RECIP_BOUND(d) declara o maior x garantido, e além
+   dele a divergência é esperada e informativa, não um defeito oculto.
+   d que divide 2^32 (pow2): e = 0 ⇒ exato em todo o registrador.        */
+#define VOS_MC_RECIP_U32(d)    ((u32)((0xFFFFFFFFULL + (u64)(d)) / (u64)(d)))
+#define VOS_MC_RECIP_DIV(x, r) ((u32)(((u64)(x) * (u64)(r)) >> 32u))
+#define VOS_MC_RECIP_EXCESS(d) \
+    ((u64)VOS_MC_RECIP_U32(d) * (u64)(d) - 0x100000000ULL)
+#define VOS_MC_RECIP_BOUND(d) \
+    ((u32)(VOS_MC_RECIP_EXCESS(d) == 0u \
+        ? 0xFFFFFFFFu \
+        : (u32)(0xFFFFFFFFULL / VOS_MC_RECIP_EXCESS(d))))
+#define VOS_MC_RECIP_CHECK(x, d) \
+    (VOS_MC_RECIP_DIV((x), VOS_MC_RECIP_U32(d)) == ((u32)(x) / (u32)(d)))
+
+/* MC-01 + MC-10: orçamento de loop provado em compile-time — n iterações
+   com insns úteis por iteração (≥ MC-01) mais overhead MC-10 devem caber
+   no budget de ciclos declarado. Limite visível ao compilador = unrolling
+   (doc de compilador §3.4: a chave é a constante em compile-time).         */
+#define VOS_MC_LOOP_BOUND(n, insns_per_iter, budget_cyc) \
+    VOS_MC_ASSERT((u64)(insns_per_iter) >= VOS_MC_LOOP_MIN_INSN && \
+                  (u64)(n) * ((u64)(insns_per_iter) + VOS_MC_LOOP_OVERHEAD) \
+                      <= (u64)(budget_cyc), \
+                  "MC-01/MC-10: loop fora do orcamento de ciclos")
+
+/* Obrigações do próprio header, agora checadas onde nascem:                */
+VOS_MC_ASSERT(VOS_MC_IS_POW2(VOS_ARENA_ALIGN), "MC: arena align deve ser pow2");
+VOS_MC_ASSERT((VOS_ARENA_SIZE & (VOS_ARENA_ALIGN - 1u)) == 0u,
+              "MC: arena size deve ser multiplo do alinhamento");
+VOS_MC_ASSERT(VOS_CAP_COUNT <= 32, "MC: registrador de capabilities = 32 bits");
+VOS_MC_LOOP_BOUND(VOS_FRAF_ITERS, 3u, 1024u); /* FRAF: mul+add+abs por iter */
+
 /* ── 13. PHI64 INDEX HASH — T36: Knuth multiplicative (replaces modulo) ─── */
 
 #define VOS_PHI64  0x9E3779B97F4A7C15ULL
@@ -336,6 +473,77 @@ extern u8                    *vos_g_arena_mark;            /* rollback mark  */
 #define VOS_FNV_PRIME  0x00000100000001B3ULL
 #define VOS_FNV_FEED(h, byte) \
     ((u64)((((u64)(h)) ^ (u8)(byte)) * VOS_FNV_PRIME))
+
+/* ── 14.1 TRAMPOLINE HOTSWAP (G6) — OPT-IN, default desligado ───────────── */
+/* Ledger G6: adicionar somente apos G1-G5 passarem (passam) e SEMPRE atras
+   de guard com default 0. O ENCODER (calculo dos bytes do desvio + checagem
+   de alinhamento/alcance) e funcao pura: nao toca .text vivo, logo e
+   provavel por selftest. O PATCH fisico fica sob VOS_ENABLE_TRAMPOLINE=1 e
+   exige pagina gravavel (W^X no Android); em x86_64 o JMP rel32 de 5 bytes
+   NAO e atomico (stop-the-world externo). */
+#ifndef VOS_ENABLE_TRAMPOLINE
+#define VOS_ENABLE_TRAMPOLINE 0
+#endif
+
+/* Encoder puro: escreve em out[0..len) os bytes do desvio src->dst e
+   *len_out. Devolve 1 em sucesso, 0 se a arch/alinhamento/alcance violarem
+   o contrato. Endereco sintetico permitido — a prova nao depende de W^X. */
+static inline u32 vos_trampoline_encode(u64 src, u64 dst, u8 *out, u32 *len_out) {
+  if (!out || !len_out) return 0u;
+#if defined(__aarch64__)
+  /* B imm26: +-128 MiB, src e dst alinhados a 4 bytes. */
+  if ((src & 3u) != 0u || (dst & 3u) != 0u) return 0u;
+  {
+    s64 delta = (s64)dst - (s64)src;
+    if (delta < -(s64)0x8000000 || delta >= (s64)0x8000000) return 0u;
+    {
+      u32 insn = 0x14000000u | (((u32)((u64)delta >> 2u)) & 0x03FFFFFFu);
+      out[0] = (u8)(insn);
+      out[1] = (u8)(insn >> 8u);
+      out[2] = (u8)(insn >> 16u);
+      out[3] = (u8)(insn >> 24u);
+      *len_out = 4u;
+      return 1u;
+    }
+  }
+#elif defined(__x86_64__) || defined(__i386__)
+  /* JMP rel32: +-2 GiB a partir do fim da instrucao (src+5). */
+  {
+    s64 rel = (s64)dst - ((s64)src + 5);
+    if (rel < -(s64)0x80000000LL || rel > (s64)0x7FFFFFFFLL) return 0u;
+    out[0] = 0xE9u;
+    out[1] = (u8)((u32)rel);
+    out[2] = (u8)((u32)rel >> 8u);
+    out[3] = (u8)((u32)rel >> 16u);
+    out[4] = (u8)((u32)rel >> 24u);
+    *len_out = 5u;
+    return 1u;
+  }
+#else
+  (void)src;
+  (void)dst;
+  return 0u; /* arch sem contrato de trampoline definido no ledger */
+#endif
+}
+
+#if VOS_ENABLE_TRAMPOLINE
+/* Patch fisico: so sob opt-in. Chamador garante pagina gravavel e
+   sincronizacao. ARM64 exige manutencao de I-cache apos a escrita. */
+static inline u32 vos_trampoline_patch(void *src, const void *dst) {
+  u8 enc[8];
+  u32 len = 0u;
+  if (!vos_trampoline_encode((u64)(unsigned long)src,
+                             (u64)(unsigned long)dst, enc, &len)) return 0u;
+  for (u32 i = 0u; i < len; ++i) ((volatile u8 *)src)[i] = enc[i];
+#if defined(__aarch64__)
+  __asm__ volatile("dc cvau, %0\n\t dsb ish\n\t ic ivau, %0\n\t dsb ish\n\t isb"
+                   :: "r"(src) : "memory");
+#else
+  __asm__ volatile("" ::: "memory");
+#endif
+  return 1u;
+}
+#endif /* VOS_ENABLE_TRAMPOLINE */
 
 /* ── 15. PUBLIC API — explicit default visibility (survives gc-sections) ─── */
 /*

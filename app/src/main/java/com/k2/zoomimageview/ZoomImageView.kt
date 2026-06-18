@@ -15,7 +15,6 @@ import android.view.animation.DecelerateInterpolator
 import android.widget.OverScroller
 import androidx.core.animation.doOnCancel
 import androidx.core.animation.doOnEnd
-import androidx.core.view.ViewCompat
 import kotlin.math.absoluteValue
 
 /**
@@ -143,7 +142,7 @@ class ZoomImageView : androidx.appcompat.widget.AppCompatImageView {
                     flingRunnable.lastX.toInt(), flingRunnable.lastY.toInt(), -velocityX.toInt(),
                     -velocityY.toInt(), 0, maxX, 0, maxY
                 )
-                ViewCompat.postOnAnimation(this@ZoomImageView, flingRunnable)
+                this@ZoomImageView.postOnAnimation(flingRunnable)
                 return true
             }
 
@@ -170,7 +169,7 @@ class ZoomImageView : androidx.appcompat.widget.AppCompatImageView {
                 panImage((curX - lastX), (curY - lastY))
                 lastX = curX
                 lastY = curY
-                ViewCompat.postOnAnimation(this@ZoomImageView, this)
+                this@ZoomImageView.postOnAnimation(this)
             }
         }
     }

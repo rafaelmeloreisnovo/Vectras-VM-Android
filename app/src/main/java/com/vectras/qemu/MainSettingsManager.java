@@ -1187,11 +1187,13 @@ public class MainSettingsManager extends AppCompatActivity
     }
 
     /** @deprecated Use {@link #setForceRefreshVNCDisplay(Context, Boolean)} instead. TODO(remove in v3.5): retained temporarily for binary compatibility. */
+    @Deprecated
     public static void setForceRefeshVNCDisplay(Context context, Boolean _boolean) {
         setForceRefreshVNCDisplay(context, _boolean);
     }
 
     /** @deprecated Use {@link #getForceRefreshVNCDisplay(Context)} instead. TODO(remove in v3.5): retained temporarily for binary compatibility. */
+    @Deprecated
     public static Boolean getForceRefeshVNCDisplay(Context context) {
         return getForceRefreshVNCDisplay(context);
     }
