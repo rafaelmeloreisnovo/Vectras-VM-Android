@@ -1,0 +1,42 @@
+name: RAFAELIA Static Inventory
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ master, main ]
+    paths:
+      - 'tools/rafaelia_zrf_netraf_audit.sh'
+      - 'docs/RAFAELOS_ZRF_NETRAF_APK_PROTOCOL.md'
+      - '.github/workflows/rafaelia-static-inventory.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  inventory:
+    name: Static inventory
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run inventory
+        shell: bash
+        run: |
+          chmod +x tools/rafaelia_zrf_netraf_audit.sh
+          bash tools/rafaelia_zrf_netraf_audit.sh . reports
+
+      - name: Summary
+        shell: bash
+        run: |
+          echo '## RAFAELIA static inventory' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Static catalog only. No execution of repository artifacts.' >> "$GITHUB_STEP_SUMMARY"
+          echo '```tsv' >> "$GITHUB_STEP_SUMMARY"
+          head -n 30 reports/rafaelia_zrf_netraf_inventory.tsv >> "$GITHUB_STEP_SUMMARY" || true
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: rafaelia-static-inventory
+          path: reports/
