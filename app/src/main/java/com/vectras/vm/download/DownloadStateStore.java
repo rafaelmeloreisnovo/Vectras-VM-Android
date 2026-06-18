@@ -2,6 +2,7 @@ package com.vectras.vm.download;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -145,7 +146,8 @@ public class DownloadStateStore {
             object.put("expectedSha256", state.expectedSha256);
             object.put("status", state.status);
             object.put("updatedAt", state.updatedAt);
-        } catch (JSONException ignored) {
+        } catch (JSONException e) {
+            android.util.Log.w("DownloadStateStore", "Failed to serialize DownloadItemState id=" + state.id, e);
         }
         return object;
     }

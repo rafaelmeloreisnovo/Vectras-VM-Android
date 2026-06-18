@@ -553,11 +553,13 @@ public class VMCreatorActivity extends AppCompatActivity {
         try {
             getContentResolver().takePersistableUriPermission(uri, writeFlags);
             return;
-        } catch (SecurityException ignored) {
+        } catch (SecurityException e) {
+            android.util.Log.d("VMCreatorActivity", "Write permission not grantable for uri=" + uri + ", falling back to read-only");
         }
         try {
             getContentResolver().takePersistableUriPermission(uri, readFlags);
-        } catch (SecurityException ignored) {
+        } catch (SecurityException e) {
+            android.util.Log.w("VMCreatorActivity", "No persistable permission available for uri=" + uri, e);
         }
     }
 

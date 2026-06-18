@@ -154,7 +154,8 @@ final class LocalTelemetrySink implements TelemetrySink {
             JSONObject json = new JSONObject(new String(payload, StandardCharsets.UTF_8));
             seq = json.optLong(TelemetrySchema.FIELD_SEQUENCE, 0L);
             tick = json.optLong(TelemetrySchema.FIELD_TICK, 0L);
-        } catch (JSONException ignored) {
+        } catch (JSONException e) {
+            Log.w("LocalTelemetrySink", "Failed to parse payload for bitstack seq/tick extraction", e);
         }
 
         ByteBuffer header = ByteBuffer.allocate(BITSTACK_HEADER_BYTES).order(ByteOrder.LITTLE_ENDIAN);

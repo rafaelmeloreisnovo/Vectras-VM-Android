@@ -2377,7 +2377,7 @@ public final class TerminalEmulator {
         setCursorPosition(col, mCursorRow);
     }
 
-    /** TODO: Better name, distinguished from {@link #setCursorPosition(int, int)} by not regarding origin mode. */
+    /** Sets cursor to absolute (row, col) clamped to screen bounds, ignoring DECSET_BIT_ORIGIN_MODE margins. */
     private void setCursorRowCol(int row, int col) {
         mCursorRow = Math.max(0, Math.min(row, mRows - 1));
         mCursorCol = Math.max(0, Math.min(col, mColumns - 1));

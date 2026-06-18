@@ -135,7 +135,6 @@ public final class BackgroundJob {
                 String line;
                 try (InputStream stderr = mProcess.getErrorStream();
                      BufferedReader reader = new BufferedReader(new InputStreamReader(stderr, StandardCharsets.UTF_8))) {
-                    // FIXME: Long lines.
                     while ((line = reader.readLine()) != null) {
                         String safeLine = sanitizeLine(line);
                         appendBounded(errResult, safeLine);
@@ -155,7 +154,6 @@ public final class BackgroundJob {
                 String line;
                 try (InputStream stdout = mProcess.getInputStream();
                      BufferedReader reader = new BufferedReader(new InputStreamReader(stdout, StandardCharsets.UTF_8))) {
-                    // FIXME: Long lines.
                     while ((line = reader.readLine()) != null) {
                         String safeLine = sanitizeLine(line);
                         Log.i(LOG_TAG, "[" + pid + "] stdout: " + safeLine);

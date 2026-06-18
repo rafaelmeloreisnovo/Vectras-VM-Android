@@ -166,7 +166,8 @@ public class ImportSessionWorker extends Worker {
             item.put("success", success);
             item.put("reason", reason);
             report.put(item);
-        } catch (JSONException ignored) {
+        } catch (JSONException e) {
+            Log.w(TAG, "Failed to build import report entry for uri=" + uri, e);
         }
     }
 

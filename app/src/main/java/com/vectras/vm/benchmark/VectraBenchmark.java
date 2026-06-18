@@ -1,5 +1,7 @@
 package com.vectras.vm.benchmark;
 
+import android.util.Log;
+
 import com.vectras.vm.core.BareMetalProfile;
 import com.vectras.vm.core.NativeFastPath;
 
@@ -225,12 +227,6 @@ public class VectraBenchmark {
             return rawValue / 1_000_000_000.0; // Default: ns to seconds
         }
         
-        /**
-         * Legacy compatibility - returns 100 for valid results.
-         * @deprecated Use rawValue and formattedValue for actual metrics
-         */
-        @Deprecated
-        public int score() { return rawValue > 0 ? 100 : 0; }
     }
     
     /**
@@ -915,13 +911,15 @@ public class VectraBenchmark {
         if (ctx.dstArenaHandle > 0) {
             try {
                 NativeFastPath.freeArena(ctx.dstArenaHandle);
-            } catch (Throwable ignored) {
+            } catch (Throwable t) {
+                Log.e("VectraBenchmark", "freeArena failed for dstArenaHandle=" + ctx.dstArenaHandle, t);
             }
         }
         if (ctx.srcArenaHandle > 0) {
             try {
                 NativeFastPath.freeArena(ctx.srcArenaHandle);
-            } catch (Throwable ignored) {
+            } catch (Throwable t) {
+                Log.e("VectraBenchmark", "freeArena failed for srcArenaHandle=" + ctx.srcArenaHandle, t);
             }
         }
     }
@@ -1805,55 +1803,6 @@ public class VectraBenchmark {
         } finally {
             teardownArenaBenchmarkContext(arenaCtx);
         }
-    }
-    
-    /**
-     * Calculate total benchmark score (deprecated - use raw metrics instead).
-     * @deprecated Use formatted values with real engineering units instead
-     */
-    @Deprecated
-    public static int calculateTotalScore(BenchmarkResult[] results) {
-        int validCount = 0;
-        for (BenchmarkResult r : results) {
-            if (r != null && r.rawValue() > 0) {
-                validCount++;
-            }
-        }
-        return validCount * 100; // Each valid metric contributes 100
-    }
-    
-    /**
-     * Calculate category scores (deprecated - use raw metrics instead).
-     * @deprecated Use formatted values with real engineering units instead
-     */
-    @Deprecated
-    public static int[] calculateCategoryScores(BenchmarkResult[] results) {
-        int[] scores = new int[6]; // CPU, CPU-MT, Memory, Storage, Integrity, Emulation
-        int[] counts = new int[6];
-        
-        for (BenchmarkResult r : results) {
-            if (r == null) continue;
-            int id = r.metricId();
-            int category;
-            if (id < 20) category = 0;
-            else if (id < 30) category = 1;
-            else if (id < 45) category = 2;
-            else if (id < 60) category = 3;
-            else if (id < 70) category = 4;
-            else category = 5;
-            
-            if (r.rawValue() > 0) {
-                scores[category] += 100;
-                counts[category]++;
-            }
-        }
-        
-        // Average per category
-        for (int i = 0; i < 6; i++) {
-            if (counts[i] > 0) scores[i] /= counts[i];
-        }
-        
-        return scores;
     }
     
     /**

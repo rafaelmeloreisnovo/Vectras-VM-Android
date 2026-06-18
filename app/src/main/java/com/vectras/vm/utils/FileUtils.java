@@ -65,8 +65,9 @@ public class FileUtils {
 	public static void chmod(File file, int mode) {
 		try {
 			Os.chmod(file.getAbsolutePath(), mode);
+		} catch (ErrnoException e) {
+			Log.w(TAG, "chmod failed on " + file.getAbsolutePath() + " mode=" + mode, e);
 		}
-		catch (ErrnoException e) {}
 	}
 
 	private static Uri contentUri = null;
@@ -761,7 +762,7 @@ public class FileUtils {
 			inStream.close();
 			outStream.close();
 		} catch (IOException e) {
-
+			Log.e(TAG, "copyAFile failed: " + _sourceFile + " -> " + _destFile, e);
 		}
 
 	}

@@ -30,14 +30,17 @@ public class Utils {
 	public static ActivityManager getActivityManager(Context context)
 	{
 		ActivityManager result = (ActivityManager)context.getSystemService(Context.ACTIVITY_SERVICE);
-		if (result == null)
-			throw new UnsupportedOperationException("Could not retrieve ActivityManager");
+		if (result == null) {
+			android.util.Log.e("androidVNC", "ActivityManager unavailable for context=" + context);
+			return null;
+		}
 		return result;
 	}
 	
 	public static MemoryInfo getMemoryInfo(Context _context) {
 		MemoryInfo info = new MemoryInfo();
-		getActivityManager(_context).getMemoryInfo(info);
+		ActivityManager am = getActivityManager(_context);
+		if (am != null) am.getMemoryInfo(info);
 		return info;
 	}
 	

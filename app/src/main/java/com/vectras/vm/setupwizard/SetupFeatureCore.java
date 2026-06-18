@@ -798,7 +798,7 @@ public class SetupFeatureCore {
     }
 
     public static boolean extractSystemFiles(Context context, String fromAsset, String extractTo, @Nullable String expectedSha256) {
-        String randomFileName = VMManager.startRamdomVMID();
+        String randomFileName = VMManager.startRandomVMID();
         final String[] selectedAssetHolder = new String[1];
         String assetPath = resolveAssetPath(context, fromAsset, selectedAssetHolder);
         if (assetPath == null) {
