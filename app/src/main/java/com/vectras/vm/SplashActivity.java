@@ -153,6 +153,11 @@ public class SplashActivity extends AppCompatActivity implements Runnable {
         if (MainSettingsManager.getShowLastCrashLog(this)) {
             startActivity(new Intent(this, LastCrashActivity.class));
         } else if (SetupFeatureCore.isInstalledQemu(this)) {
+            // ARM32 devices and Android 14+ require VNC UI mode — apply unconditionally
+            // so that devices already past the setup wizard are also covered.
+            if (!DeviceUtils.is64bit() || Build.VERSION.SDK_INT >= 34) {
+                MainSettingsManager.setVmUi(this, "VNC");
+            }
             if (MainSettingsManager.getStandardSetupVersion(this) != AppConfig.standardSetupVersion &&
                     !MainSettingsManager.getsetUpWithManualSetupBefore(this)) {
                 Intent intent = new Intent();
