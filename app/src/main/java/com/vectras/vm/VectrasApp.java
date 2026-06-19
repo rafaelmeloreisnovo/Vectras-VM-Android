@@ -55,10 +55,22 @@ public class VectrasApp extends Application {
 //			overrideFont("DEFAULT", R.font.gilroy);
 //		}
 		setupAppConfig(getApplicationContext());
-		DownloadStateReconciler.reconcileOnAppStart(getApplicationContext());
-		DeterministicRuntimeMatrix.Snapshot runtimeSnapshot = DeterministicRuntimeMatrix.capture();
-		android.util.Log.i("VectraRuntime", "arch=" + runtimeSnapshot.arch + " cores=" + runtimeSnapshot.cores + " ptr=" + runtimeSnapshot.pointerBits + " page=" + runtimeSnapshot.pageBytes + " line=" + runtimeSnapshot.cacheLineBytes + " feat=" + runtimeSnapshot.features + " ioq=" + runtimeSnapshot.ioQuantumBytes + " irqUs=" + runtimeSnapshot.irqPeriodMicros + " workers=" + runtimeSnapshot.workerParallelism + " det=" + runtimeSnapshot.deterministicProduct);
-		VectraCore.init(this, null);
+		try {
+			DownloadStateReconciler.reconcileOnAppStart(getApplicationContext());
+		} catch (Throwable t) {
+			android.util.Log.e("VectrasApp", "DownloadStateReconciler failed — skipping reconciliation", t);
+		}
+		try {
+			DeterministicRuntimeMatrix.Snapshot runtimeSnapshot = DeterministicRuntimeMatrix.capture();
+			android.util.Log.i("VectraRuntime", "arch=" + runtimeSnapshot.arch + " cores=" + runtimeSnapshot.cores + " ptr=" + runtimeSnapshot.pointerBits + " page=" + runtimeSnapshot.pageBytes + " line=" + runtimeSnapshot.cacheLineBytes + " feat=" + runtimeSnapshot.features + " ioq=" + runtimeSnapshot.ioQuantumBytes + " irqUs=" + runtimeSnapshot.irqPeriodMicros + " workers=" + runtimeSnapshot.workerParallelism + " det=" + runtimeSnapshot.deterministicProduct);
+		} catch (Throwable t) {
+			android.util.Log.e("VectrasApp", "DeterministicRuntimeMatrix.capture() failed", t);
+		}
+		try {
+			VectraCore.init(this, null);
+		} catch (Throwable t) {
+			android.util.Log.e("VectrasApp", "VectraCore.init() failed — running in degraded mode", t);
+		}
 
         registerActivityLifecycleCallbacks(new ActivityLifecycleCallbacks() {
             @Override
