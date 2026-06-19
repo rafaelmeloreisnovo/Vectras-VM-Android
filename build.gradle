@@ -452,6 +452,45 @@ tasks.register("auditNonMdInventory") {
     }
 }
 
+tasks.register("verifyPrebuiltNativeLibraries") {
+    group = "verification"
+    description = "Verifica que todos os .so prebuilt necessários existem para as ABIs em SUPPORTED_ABIS"
+    doLast {
+        validatePrebuiltNativeLibraries(true)
+    }
+}
+
+def validatePrebuiltNativeLibraries(boolean strictMode = true) {
+    // Maps each module's jniLibs dir to the .so files that must be present per ABI.
+    // Only checked when the packaging policy actually includes that ABI.
+    def requiredSoPerModule = [
+        'terminal-emulator/src/main/jniLibs': ['libtermux.so'],
+        'app/src/main/jniLibs'              : ['libXlorie.so'],
+    ]
+
+    def missing = []
+    supportedAbis.each { abi ->
+        requiredSoPerModule.each { relDir, requiredFiles ->
+            requiredFiles.each { soName ->
+                def soFile = new File(rootDir, "${relDir}/${abi}/${soName}")
+                if (!soFile.exists()) {
+                    missing << "${relDir}/${abi}/${soName}"
+                }
+            }
+        }
+    }
+
+    if (!missing.isEmpty()) {
+        def message = "Prebuilt native libraries missing for SUPPORTED_ABIS=${supportedAbis}:\n" +
+                missing.collect { "  - ${it}" }.join('\n') + "\n" +
+                "Build will produce an APK that crashes on affected ABI at runtime. " +
+                "Recompile the missing .so files or change APP_ABI_POLICY."
+        emitValidationMessage('validatePrebuiltNativeLibraries', message, strictMode)
+    } else {
+        println "Prebuilt native libraries validated for ABIs=${supportedAbis}."
+    }
+}
+
 // ==================== EXECUÇÃO AUTOMÁTICA NO TASK GRAPH ====================
 gradle.taskGraph.whenReady { graph ->
     def hasAndroidPackagingTask = graph.allTasks.any { task ->
@@ -462,6 +501,7 @@ gradle.taskGraph.whenReady { graph ->
     if (hasAndroidPackagingTask) {
         validateMinApiAbiCompatibility(resolveStrictModeForApiAbi(graph))
         validateAndroidSdkPackages()
+        validatePrebuiltNativeLibraries(resolveStrictModeForApiAbi(graph))
     }
 
     if (graph.allTasks.any { it.name.toLowerCase().contains('release') }) {

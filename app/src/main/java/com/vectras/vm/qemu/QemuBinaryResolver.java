@@ -5,6 +5,8 @@ import android.util.Log;
 
 import androidx.annotation.Nullable;
 
+import android.os.Build;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -46,9 +48,27 @@ public final class QemuBinaryResolver {
     public static String primaryBinaryForArch(String arch) {
         String normalized = normalizeArch(arch);
         if ("I386".equals(normalized)) return "qemu-system-i386";
-        if ("ARM64".equals(normalized)) return "qemu-system-aarch64";
+        if ("ARM64".equals(normalized)) {
+            if (!isHost64Bit()) {
+                Log.w(DEFAULT_LOG_TAG,
+                        "qemu-system-aarch64 is a 64-bit binary but host ABI is 32-bit ("
+                                + (Build.SUPPORTED_ABIS.length > 0 ? Build.SUPPORTED_ABIS[0] : "unknown")
+                                + "). QEMU will fail to launch.");
+            }
+            return "qemu-system-aarch64";
+        }
         if ("PPC".equals(normalized)) return "qemu-system-ppc";
+        if (!isHost64Bit()) {
+            Log.w(DEFAULT_LOG_TAG,
+                    "qemu-system-x86_64 is a 64-bit binary but host ABI is 32-bit. QEMU will fail to launch.");
+        }
         return "qemu-system-x86_64";
+    }
+
+    public static boolean isHost64Bit() {
+        if (Build.SUPPORTED_ABIS == null || Build.SUPPORTED_ABIS.length == 0) return true;
+        String primary = Build.SUPPORTED_ABIS[0];
+        return primary.equals("arm64-v8a") || primary.equals("x86_64") || primary.equals("riscv64");
     }
 
     public static String normalizeArch(@Nullable String arch) {

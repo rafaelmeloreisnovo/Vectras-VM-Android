@@ -1,5 +1,6 @@
 package com.vectras.vm.core;
 
+import android.os.Build;
 import android.util.Log;
 
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -942,7 +943,20 @@ public final class NativeFastPath {
                 hardwareFallbackLogged = true;
                 System.err.println("NativeFastPath compatibility fallback (hardware): " + reason);
             }
-            return new HardwareProfile(ARCH_UNKNOWN, 32, 64, 4096, 0, 0, 0, 0, 0, 0);
+            int pointerBits = detectHostPointerBits();
+            return new HardwareProfile(ARCH_UNKNOWN, pointerBits, 64, 4096, 0, 0, 0, 0, 0, 0);
+        }
+
+        private static int detectHostPointerBits() {
+            if (Build.SUPPORTED_ABIS != null && Build.SUPPORTED_ABIS.length > 0) {
+                String primaryAbi = Build.SUPPORTED_ABIS[0];
+                if (primaryAbi.equals("arm64-v8a")
+                        || primaryAbi.equals("x86_64")
+                        || primaryAbi.equals("riscv64")) {
+                    return 64;
+                }
+            }
+            return 32;
         }
 
         static KernelUnitProfile kernelUnitProfile(String reason) {
