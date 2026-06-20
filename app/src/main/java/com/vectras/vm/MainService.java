@@ -14,7 +14,13 @@ import android.util.Log;
 import androidx.core.app.NotificationCompat;
 
 import com.vectras.vm.main.core.MainStartVM;
+import com.vectras.vm.runtime.ExpandedRuntimePreflight;
+import com.vectras.vm.runtime.QemuArgvContract;
+import com.vectras.vm.runtime.QemuRuntimeProbe;
+import com.vectras.vm.runtime.RuntimeSessionReport;
 import com.vectras.vterm.Terminal;
+
+import java.io.File;
 
 public class MainService extends Service {
     public static String CHANNEL_ID = "Vectras VM Service";
@@ -59,6 +65,7 @@ public class MainService extends Service {
         if (command != null) {
             Context targetContext = ctx != null ? ctx : getApplicationContext();
             MainStartVM.ensureLastVmIdInitialized(MainStartVM.lastVMID);
+            persistLaunchProof(targetContext, command, "foreground_service_on_create");
             Terminal vterm = new Terminal(targetContext);
             vterm.executeShellCommand2(command, true, targetContext);
         } else {
@@ -122,6 +129,7 @@ public class MainService extends Service {
 
     public static void startCommand(String _env, Context _context) {
         MainStartVM.ensureLastVmIdInitialized(MainStartVM.lastVMID);
+        persistLaunchProof(_context, _env, "existing_service_start_command");
         Terminal vterm = new Terminal(_context);
         vterm.executeShellCommand2(_env, true, _context);
     }
@@ -135,6 +143,28 @@ public class MainService extends Service {
     public static Context getActivityContext() {
         synchronized (LOCK) {
             return activityContext;
+        }
+    }
+
+    private static void persistLaunchProof(Context context, String command, String phase) {
+        if (context == null) return;
+        try {
+            String vmId = MainStartVM.ensureLastVmIdInitialized(MainStartVM.lastVMID);
+            ExpandedRuntimePreflight.Result preflight = ExpandedRuntimePreflight.run(context, null, null);
+            QemuArgvContract contract = QemuArgvContract.fromShellCommand(command);
+            File out = RuntimeSessionReport.begin(vmId, MainStartVM.lastVMName)
+                    .phase("main_service", "dispatch", phase)
+                    .putString("channel_id", CHANNEL_ID)
+                    .putCommand(contract)
+                    .putExpandedPreflight(preflight)
+                    .putRuntimeProbe(QemuRuntimeProbe.captureNoProcessReference())
+                    .putNativeSnapshot()
+                    .persist(context);
+            if (out != null) {
+                Log.i("MainService", "Runtime proof persisted: " + out.getAbsolutePath());
+            }
+        } catch (Exception e) {
+            Log.w("MainService", "Unable to persist runtime launch proof", e);
         }
     }
 
