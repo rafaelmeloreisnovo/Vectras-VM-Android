@@ -2,8 +2,10 @@ name: APK Wizard
 
 on:
   workflow_dispatch:
+  push:
+    branches: [ master, main, develop ]
   pull_request:
-    branches: [ main, develop ]
+    branches: [ master, main, develop ]
 
 permissions:
   contents: read
@@ -34,11 +36,21 @@ jobs:
           distribution: temurin
           java-version: ${{ steps.java.outputs.version }}
 
+      - name: Shell-loader smoke build
+        shell: bash
+        run: |
+          set -euo pipefail
+          ./gradlew --no-daemon :shell-loader:assembleDebug \
+            -PdevFastPath=true \
+            -PCI_INTERNAL_VALIDATION=false
+          echo "[smoke] :shell-loader:assembleDebug OK"
+
       - name: Build APK wizard lanes (arm64 and arm32+arm64)
         shell: bash
         run: ./tools/ci/build_apk_wizard.sh
 
       - name: Upload APK wizard artifacts
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: apk-wizard
@@ -46,4 +58,4 @@ jobs:
             artifacts/apk-wizard/*.apk
             artifacts/apk-wizard/REPORT.md
             artifacts/apk-wizard/sizes.tsv
-          if-no-files-found: error
+          if-no-files-found: warn

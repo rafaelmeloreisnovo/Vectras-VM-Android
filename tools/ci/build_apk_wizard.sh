@@ -23,7 +23,8 @@ build_lane() {
   "${GRADLEW}" --no-daemon :app:clean :app:assembleDebug \
     -PAPP_ABI_POLICY="${policy}" \
     -PSUPPORTED_ABIS="${abis}" \
-    -PCI_INTERNAL_VALIDATION="${ci_internal}"
+    -PCI_INTERNAL_VALIDATION="${ci_internal}" \
+    -PdevFastPath=true
 
   if [[ ! -f "${apk_src}" ]]; then
     echo "[wizard][error] APK not found for lane=${lane_name}: ${apk_src}" >&2
