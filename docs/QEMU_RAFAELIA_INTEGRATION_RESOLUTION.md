@@ -36,6 +36,16 @@ Em termos operacionais:
 5. `VectrasRuntimePreflight` bloqueia o start se QEMU/PRoot/rootfs/shell estiverem ausentes.
 6. O runtime grava evidência de sessão: VM id, QEMU path, SHA, arch, UI mode, QMP/VNC, status e erro.
 
+## Ferramentas adicionadas no consumidor
+
+```bash
+tools/qemu/verify_qemu_rafaelia_artifact.sh --artifact qemu-rafaelia-artifact-<sha>.tar.gz
+tools/qemu/import_qemu_rafaelia_artifact.sh --artifact qemu-rafaelia-artifact-<sha>.tar.gz
+```
+
+- `verify_qemu_rafaelia_artifact.sh` valida `qemu-exec.json`, `BUILD_INFO.json`, `SHA256SUMS.txt`, binários executáveis e consistência de SHA.
+- `import_qemu_rafaelia_artifact.sh` só importa depois da verificação e registra `.qemu-rafaelia-import.json`.
+
 ## Fronteiras de responsabilidade
 
 | Camada | Repositório responsável | Observação |
@@ -43,6 +53,7 @@ Em termos operacionais:
 | Código QEMU e RAFAELIA IPC | `qemu_rafaelia` | Mantém core, hub, IPC e binários QEMU customizados. |
 | Build QEMU | `qemu_rafaelia` | Deve gerar artifacts por arquitetura e checksums. |
 | Manifesto de fonte externa | `Vectras-VM-Android` | Pinagem do repo/branch/SHA. |
+| Verificação/importação de artifact | `Vectras-VM-Android` | Scripts em `tools/qemu/*`. |
 | Instalação/descoberta do binário | `Vectras-VM-Android` | `qemu-exec.json`, resolver e preflight. |
 | Execução Android | `Vectras-VM-Android` | `StartVM`, `MainStartVM`, `MainService`, `Terminal`. |
 | Auditoria de sessão | `Vectras-VM-Android` | Ledger, trace e relatório runtime. |
@@ -55,14 +66,6 @@ Em termos operacionais:
 - Não declarar release estável sem CI/artifact/logcat/ledger do commit atual.
 
 ## Próximo gate recomendado
-
-Adicionar ao Vectras:
-
-```text
-tools/qemu/import_qemu_rafaelia_artifact.sh
-tools/qemu/verify_qemu_artifact.sh
-docs/QEMU_RAFAELIA_ARTIFACT_CONSUMPTION.md
-```
 
 Adicionar ao runtime:
 
