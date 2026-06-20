@@ -149,8 +149,9 @@ jobs:
           eval "$(python3 ./tools/ci/resolve_abi_profile.py \
             --profile official_arm64 \
             --allow-generic-fallback)"
-          echo "app_abi_policy=${app_abi_policy}" >> "$GITHUB_OUTPUT"
-          echo "supported_abis=${supported_abis}"  >> "$GITHUB_OUTPUT"
+          echo "app_abi_policy=${app_abi_policy}"             >> "$GITHUB_OUTPUT"
+          echo "supported_abis=${supported_abis}"             >> "$GITHUB_OUTPUT"
+          echo "ci_internal_validation=${ci_internal_validation}" >> "$GITHUB_OUTPUT"
 
       - name: Build APK (arm64-v8a)
         shell: bash
@@ -165,8 +166,9 @@ jobs:
           ./tools/gradle_with_jdk21.sh \
             -PAPP_ABI_POLICY="${{ steps.abi.outputs.app_abi_policy }}" \
             -PSUPPORTED_ABIS="${{ steps.abi.outputs.supported_abis }}" \
-            -PCI_INTERNAL_VALIDATION=false \
+            -PCI_INTERNAL_VALIDATION="${{ steps.abi.outputs.ci_internal_validation }}" \
             -PbuildStrict=false \
+            -PdevFastPath=true \
             --no-daemon \
             --stacktrace \
             ${task}
@@ -266,8 +268,9 @@ VNC, benchmark e todas as funções Java-only continuam operacionais."
           eval "$(python3 ./tools/ci/resolve_abi_profile.py \
             --profile official_arm32_arm64 \
             --allow-generic-fallback)"
-          echo "app_abi_policy=${app_abi_policy}" >> "$GITHUB_OUTPUT"
-          echo "supported_abis=${supported_abis}"  >> "$GITHUB_OUTPUT"
+          echo "app_abi_policy=${app_abi_policy}"             >> "$GITHUB_OUTPUT"
+          echo "supported_abis=${supported_abis}"             >> "$GITHUB_OUTPUT"
+          echo "ci_internal_validation=${ci_internal_validation}" >> "$GITHUB_OUTPUT"
 
       - name: Build APK (arm64-v8a + armeabi-v7a)
         shell: bash
@@ -282,8 +285,9 @@ VNC, benchmark e todas as funções Java-only continuam operacionais."
           ./tools/gradle_with_jdk21.sh \
             -PAPP_ABI_POLICY="${{ steps.abi.outputs.app_abi_policy }}" \
             -PSUPPORTED_ABIS="${{ steps.abi.outputs.supported_abis }}" \
-            -PCI_INTERNAL_VALIDATION=false \
+            -PCI_INTERNAL_VALIDATION="${{ steps.abi.outputs.ci_internal_validation }}" \
             -PbuildStrict=false \
+            -PdevFastPath=true \
             --no-daemon \
             --stacktrace \
             ${task}
