@@ -145,6 +145,7 @@ fi
 
 if [[ -f "$LOCAL_PROPERTIES_PATH" ]]; then
   tmp_file="$(mktemp)"
+  trap 'rm -f "$tmp_file"' EXIT
   awk -v sdk_dir="$SDK_ROOT" '
       BEGIN {
         replaced = 0

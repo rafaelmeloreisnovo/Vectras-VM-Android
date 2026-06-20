@@ -5,11 +5,11 @@ plugins {
 android {
     namespace 'com.termux.x11.stub'
     buildToolsVersion rootProject.ext.toolsVersion
-    compileSdkVersion rootProject.ext.compileApi
+    compileSdk rootProject.ext.compileApi
     defaultConfig {
-        minSdkVersion rootProject.ext.minApi
+        minSdk rootProject.ext.minApi
         //noinspection ExpiredTargetSdkVersion
-        targetSdkVersion rootProject.ext.targetApi
+        targetSdk rootProject.ext.targetApi
     }
     buildFeatures {
         buildConfig false

@@ -6,7 +6,7 @@ if ! command -v sdkmanager >/dev/null 2>&1; then
   exit 3
 fi
 
-yes | sdkmanager --licenses >/dev/null
+(yes 2>/dev/null || true) | sdkmanager --licenses >/dev/null
 sdkmanager \
   "platform-tools" \
   "platforms;android-34" \

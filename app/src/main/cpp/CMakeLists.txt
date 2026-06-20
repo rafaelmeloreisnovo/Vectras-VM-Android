@@ -56,7 +56,7 @@ if(RMR_ASM_CORE_EXPERIMENTAL AND ANDROID AND VECTRA_ANDROID_ABI STREQUAL "arm64-
     list(APPEND VECTRA_CASM_SOURCES ${VECTRA_ENGINE_ASM_ARM64_SOURCES})
 endif()
 
-if(ANDROID AND (VECTRA_ANDROID_ABI STREQUAL "arm64-v8a" OR VECTRA_ANDROID_ABI STREQUAL "armeabi-v7a"))
+if(ANDROID AND VECTRA_ANDROID_ABI STREQUAL "arm64-v8a")
     list(APPEND VECTRA_NEON_SOURCES ${VECTRA_ENGINE_ARM64_NEON_SOURCES})
 endif()
 
@@ -144,6 +144,9 @@ set(TERMUX_BOOTSTRAP_SUPPORTED_ANDROID_ABIS "arm64-v8a;armeabi-v7a;x86;x86_64" C
 set(TERMUX_BOOTSTRAP_REQUIRE_EMBEDDED_PAYLOAD OFF CACHE BOOL "Fail configure when termux-bootstrap payload symbols are not wired")
 set(TERMUX_BOOTSTRAP_PAYLOAD_SOURCE "" CACHE FILEPATH "Optional C/ASM source file that defines TERMUX_BOOTSTRAP_PAYLOAD_DATA and TERMUX_BOOTSTRAP_PAYLOAD_SIZE")
 set(TERMUX_BOOTSTRAP_MODE "assets-loader" CACHE STRING "Bootstrap mode: assets-loader or embedded-zip")
+if(NOT TERMUX_BOOTSTRAP_MODE STREQUAL "assets-loader" AND NOT TERMUX_BOOTSTRAP_MODE STREQUAL "embedded-zip")
+    message(FATAL_ERROR "Invalid TERMUX_BOOTSTRAP_MODE='${TERMUX_BOOTSTRAP_MODE}'; expected 'assets-loader' or 'embedded-zip'.")
+endif()
 
 set(TERMUX_BOOTSTRAP_BUILD_ENABLED OFF)
 
@@ -214,7 +217,7 @@ if(RMR_ENABLE_BITRAF_MODULE)
 endif()
 
 if(ANDROID)
-    find_library(log-lib log)
+    find_library(log-lib log REQUIRED)
 else()
     find_package(JNI REQUIRED COMPONENTS JVM)
     set(log-lib "")
@@ -235,6 +238,9 @@ set(VECTRA_FREESTANDING_COMPILE_OPTIONS
     -DRMR_BUILD_HOST_TOOLING=1)
 set(VECTRA_ABI_COMPILE_OPTIONS)
 set(VECTRA_LTO_MODE "${VECTRA_LTO_MODE}" CACHE STRING "LTO mode from CI perf decisions")
+if(VECTRA_LTO_MODE AND NOT VECTRA_LTO_MODE STREQUAL "thin" AND NOT VECTRA_LTO_MODE STREQUAL "full")
+    message(FATAL_ERROR "Invalid VECTRA_LTO_MODE='${VECTRA_LTO_MODE}'; expected 'thin', 'full', or empty.")
+endif()
 set(VECTRA_INLINE_POLICY "${VECTRA_INLINE_POLICY}" CACHE STRING "Inline policy from CI perf decisions")
 
 # Flag arm64 vinda do Gradle: baseline (-march=armv8-a) e tuning opcional (-mcpu=<valor>).
