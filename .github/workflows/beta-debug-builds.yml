@@ -1,0 +1,371 @@
+name: Beta APK Builds — ARM32 & ARM64
+
+# ─────────────────────────────────────────────────────────────────────
+# Propósito: compilar APKs debug/release-unsigned para instalação direta
+# no dispositivo (ARM32 Motorola E7 Power e ARM64) sem depender dos
+# scripts de CI internos que exigem infra extra.
+#
+# Artefatos gerados (baixar em Actions → run → Artifacts):
+#   vectras-beta-arm64-<run>          ← APK arm64-v8a puro
+#   vectras-beta-arm32-arm64-<run>    ← APK fat (arm64-v8a + armeabi-v7a)
+#
+# NOTA ARM32: libtermux.so armeabi-v7a é pré-built ausente — o terminal
+# não funcionará no ARM32, mas VNC e benchmark estão operacionais.
+# ─────────────────────────────────────────────────────────────────────
+
+on:
+  push:
+    branches: [master, main, 'claude/**', 'hotfix/**', 'release/**']
+    paths:
+      - 'app/**'
+      - 'terminal-emulator/**'
+      - 'terminal-view/**'
+      - 'shell-loader/**'
+      - '**/*.gradle'
+      - '**/*.gradle.kts'
+      - 'gradle.properties'
+      - 'CMakeLists.txt'
+      - '.github/workflows/beta-debug-builds.yml'
+  workflow_dispatch:
+    inputs:
+      build_variant:
+        description: 'Variante de build'
+        type: choice
+        default: debug
+        options:
+          - debug
+          - release-unsigned
+      abi_target:
+        description: 'Arquiteturas alvo'
+        type: choice
+        default: both
+        options:
+          - arm64-only
+          - arm32-arm64
+          - both
+
+env:
+  GRADLE_OPTS: "-Xmx4g -Dfile.encoding=UTF-8"
+  CI: "true"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: beta-builds-${{ github.ref }}
+  cancel-in-progress: true
+
+# ─────────────────────────────────────────────────────────────────────
+# JOB 1 — Resolve parâmetros uma vez, compartilha com os jobs de build
+# ─────────────────────────────────────────────────────────────────────
+jobs:
+  setup:
+    name: Resolve build parameters
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      java_version:    ${{ steps.ver.outputs.java_version }}
+      compile_api:     ${{ steps.ver.outputs.compile_api }}
+      tools_version:   ${{ steps.ver.outputs.tools_version }}
+      ndk_version:     ${{ steps.ver.outputs.ndk_version }}
+      cmake_version:   ${{ steps.ver.outputs.cmake_version }}
+      run_arm64:       ${{ steps.targets.outputs.run_arm64 }}
+      run_arm32_arm64: ${{ steps.targets.outputs.run_arm32_arm64 }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Read versions from gradle.properties
+        id: ver
+        shell: bash
+        run: |
+          set -euo pipefail
+          read_prop() {
+            awk -F= -v k="$1" '$1==k { gsub(/[[:space:]]/, "", $2); print $2; exit }' gradle.properties
+          }
+          java_version="$(read_prop 'java.language.version')"
+          compile_api="$(read_prop 'compile.api')"
+          tools_version="$(read_prop 'tools.version')"
+          ndk_version="$(read_prop 'ndk.version')"
+          cmake_version="$(read_prop 'cmake.version')"
+
+          for var in java_version compile_api tools_version ndk_version cmake_version; do
+            val="${!var}"
+            [[ -n "$val" ]] || { echo "ERROR: '$var' not found in gradle.properties" >&2; exit 1; }
+            echo "${var}=${val}" >> "$GITHUB_OUTPUT"
+          done
+
+      - name: Resolve ABI targets
+        id: targets
+        shell: bash
+        run: |
+          target="${{ github.event.inputs.abi_target || 'both' }}"
+          case "$target" in
+            arm64-only)  echo "run_arm64=true";  echo "run_arm32_arm64=false" ;;
+            arm32-arm64) echo "run_arm64=false"; echo "run_arm32_arm64=true"  ;;
+            both|*)      echo "run_arm64=true";  echo "run_arm32_arm64=true"  ;;
+          esac >> "$GITHUB_OUTPUT"
+
+# ─────────────────────────────────────────────────────────────────────
+# JOB 2 — ARM64-only (dispositivos modernos)
+# ─────────────────────────────────────────────────────────────────────
+  build-arm64:
+    name: "Build: arm64-v8a"
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    needs: setup
+    if: needs.setup.outputs.run_arm64 == 'true'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: true
+
+      - name: Setup JDK ${{ needs.setup.outputs.java_version }}
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ needs.setup.outputs.java_version }}
+          distribution: temurin
+          cache: gradle
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install NDK, CMake and build-tools
+        shell: bash
+        run: |
+          set -euo pipefail
+          set +o pipefail; yes | sdkmanager --licenses >/dev/null 2>&1; set -o pipefail
+          sdkmanager \
+            "platform-tools" \
+            "platforms;android-${{ needs.setup.outputs.compile_api }}" \
+            "build-tools;${{ needs.setup.outputs.tools_version }}" \
+            "cmake;${{ needs.setup.outputs.cmake_version }}" \
+            "ndk;${{ needs.setup.outputs.ndk_version }}"
+
+      - name: Resolve ABI profile (official_arm64)
+        id: abi
+        shell: bash
+        run: |
+          set -euo pipefail
+          eval "$(python3 ./tools/ci/resolve_abi_profile.py \
+            --profile official_arm64 \
+            --allow-generic-fallback)"
+          echo "app_abi_policy=${app_abi_policy}" >> "$GITHUB_OUTPUT"
+          echo "supported_abis=${supported_abis}"  >> "$GITHUB_OUTPUT"
+
+      - name: Build APK (arm64-v8a)
+        shell: bash
+        run: |
+          set -euo pipefail
+          variant="${{ github.event.inputs.build_variant || 'debug' }}"
+          case "$variant" in
+            debug)            task=":app:assembleDebug"   ;;
+            release-unsigned) task=":app:assembleRelease" ;;
+            *) echo "Variante desconhecida: $variant" >&2; exit 1 ;;
+          esac
+          ./tools/gradle_with_jdk21.sh \
+            -PAPP_ABI_POLICY="${{ steps.abi.outputs.app_abi_policy }}" \
+            -PSUPPORTED_ABIS="${{ steps.abi.outputs.supported_abis }}" \
+            -PCI_INTERNAL_VALIDATION=false \
+            -PbuildStrict=false \
+            --no-daemon \
+            --stacktrace \
+            ${task}
+
+      - name: Stage APK with versioned name
+        id: stage
+        shell: bash
+        run: |
+          set -euo pipefail
+          sha="${GITHUB_SHA::7}"
+          date_tag="$(date -u +%Y%m%d)"
+          variant="${{ github.event.inputs.build_variant || 'debug' }}"
+          mkdir -p dist
+          apk="$(find app/build/outputs/apk -name "*.apk" -type f | sort | head -1)"
+          [[ -n "$apk" ]] || { echo "Nenhum APK encontrado em app/build/outputs/apk" >&2; exit 1; }
+          dest="dist/vectras-beta-arm64-${variant}-${date_tag}-${sha}.apk"
+          cp "$apk" "$dest"
+          echo "apk_name=$(basename "$dest")" >> "$GITHUB_OUTPUT"
+          sha256sum "$dest" | tee dist/SHA256SUMS.txt
+
+      - name: Upload artifact — arm64
+        uses: actions/upload-artifact@v4
+        with:
+          name: vectras-beta-arm64-${{ github.run_number }}
+          path: dist/
+          retention-days: 14
+          if-no-files-found: error
+
+      - name: Job summary
+        shell: bash
+        run: |
+          echo "### APK ARM64-only" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Campo | Valor |" >> "$GITHUB_STEP_SUMMARY"
+          echo "|-------|-------|" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Arquivo | \`${{ steps.stage.outputs.apk_name }}\` |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| ABI | arm64-v8a |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Variante | ${{ github.event.inputs.build_variant || 'debug' }} |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Artifact | \`vectras-beta-arm64-${{ github.run_number }}\` |" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "\`\`\`" >> "$GITHUB_STEP_SUMMARY"
+          cat dist/SHA256SUMS.txt >> "$GITHUB_STEP_SUMMARY"
+          echo "\`\`\`" >> "$GITHUB_STEP_SUMMARY"
+
+# ─────────────────────────────────────────────────────────────────────
+# JOB 3 — ARM32+ARM64 fat APK (Motorola E7 Power e similares)
+# ─────────────────────────────────────────────────────────────────────
+  build-arm32-arm64:
+    name: "Build: armeabi-v7a + arm64-v8a (fat)"
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    needs: setup
+    if: needs.setup.outputs.run_arm32_arm64 == 'true'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: true
+
+      - name: Check armeabi-v7a/libtermux.so availability
+        shell: bash
+        run: |
+          if [[ ! -f terminal-emulator/src/main/jniLibs/armeabi-v7a/libtermux.so ]]; then
+            echo "::warning title=libtermux.so ARM32 ausente::\
+terminal-emulator/src/main/jniLibs/armeabi-v7a/libtermux.so não encontrado. \
+O terminal PTY não funcionará em dispositivos ARM32. \
+VNC, benchmark e todas as funções Java-only continuam operacionais."
+          else
+            echo "libtermux.so ARM32: OK"
+          fi
+
+      - name: Setup JDK ${{ needs.setup.outputs.java_version }}
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ needs.setup.outputs.java_version }}
+          distribution: temurin
+          cache: gradle
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install NDK, CMake and build-tools
+        shell: bash
+        run: |
+          set -euo pipefail
+          set +o pipefail; yes | sdkmanager --licenses >/dev/null 2>&1; set -o pipefail
+          sdkmanager \
+            "platform-tools" \
+            "platforms;android-${{ needs.setup.outputs.compile_api }}" \
+            "build-tools;${{ needs.setup.outputs.tools_version }}" \
+            "cmake;${{ needs.setup.outputs.cmake_version }}" \
+            "ndk;${{ needs.setup.outputs.ndk_version }}"
+
+      - name: Resolve ABI profile (official_arm32_arm64)
+        id: abi
+        shell: bash
+        run: |
+          set -euo pipefail
+          eval "$(python3 ./tools/ci/resolve_abi_profile.py \
+            --profile official_arm32_arm64 \
+            --allow-generic-fallback)"
+          echo "app_abi_policy=${app_abi_policy}" >> "$GITHUB_OUTPUT"
+          echo "supported_abis=${supported_abis}"  >> "$GITHUB_OUTPUT"
+
+      - name: Build APK (arm64-v8a + armeabi-v7a)
+        shell: bash
+        run: |
+          set -euo pipefail
+          variant="${{ github.event.inputs.build_variant || 'debug' }}"
+          case "$variant" in
+            debug)            task=":app:assembleDebug"   ;;
+            release-unsigned) task=":app:assembleRelease" ;;
+            *) echo "Variante desconhecida: $variant" >&2; exit 1 ;;
+          esac
+          ./tools/gradle_with_jdk21.sh \
+            -PAPP_ABI_POLICY="${{ steps.abi.outputs.app_abi_policy }}" \
+            -PSUPPORTED_ABIS="${{ steps.abi.outputs.supported_abis }}" \
+            -PCI_INTERNAL_VALIDATION=false \
+            -PbuildStrict=false \
+            --no-daemon \
+            --stacktrace \
+            ${task}
+
+      - name: Stage APK with versioned name
+        id: stage
+        shell: bash
+        run: |
+          set -euo pipefail
+          sha="${GITHUB_SHA::7}"
+          date_tag="$(date -u +%Y%m%d)"
+          variant="${{ github.event.inputs.build_variant || 'debug' }}"
+          mkdir -p dist
+          apk="$(find app/build/outputs/apk -name "*.apk" -type f | sort | head -1)"
+          [[ -n "$apk" ]] || { echo "Nenhum APK encontrado em app/build/outputs/apk" >&2; exit 1; }
+          dest="dist/vectras-beta-arm32-arm64-${variant}-${date_tag}-${sha}.apk"
+          cp "$apk" "$dest"
+          echo "apk_name=$(basename "$dest")" >> "$GITHUB_OUTPUT"
+          sha256sum "$dest" | tee dist/SHA256SUMS.txt
+
+      - name: Upload artifact — arm32-arm64
+        uses: actions/upload-artifact@v4
+        with:
+          name: vectras-beta-arm32-arm64-${{ github.run_number }}
+          path: dist/
+          retention-days: 14
+          if-no-files-found: error
+
+      - name: Job summary
+        shell: bash
+        run: |
+          echo "### APK ARM32+ARM64 (fat APK)" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Campo | Valor |" >> "$GITHUB_STEP_SUMMARY"
+          echo "|-------|-------|" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Arquivo | \`${{ steps.stage.outputs.apk_name }}\` |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| ABIs | arm64-v8a + armeabi-v7a |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Variante | ${{ github.event.inputs.build_variant || 'debug' }} |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Artifact | \`vectras-beta-arm32-arm64-${{ github.run_number }}\` |" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "**Instalar no Motorola E7 Power:**" >> "$GITHUB_STEP_SUMMARY"
+          echo "\`\`\`bash" >> "$GITHUB_STEP_SUMMARY"
+          echo "adb install -r ${{ steps.stage.outputs.apk_name }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "\`\`\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "\`\`\`" >> "$GITHUB_STEP_SUMMARY"
+          cat dist/SHA256SUMS.txt >> "$GITHUB_STEP_SUMMARY"
+          echo "\`\`\`" >> "$GITHUB_STEP_SUMMARY"
+
+# ─────────────────────────────────────────────────────────────────────
+# JOB 4 — Gate final: falha se algum build solicitado falhou
+# ─────────────────────────────────────────────────────────────────────
+  status-gate:
+    name: Beta build gate
+    runs-on: ubuntu-latest
+    needs: [setup, build-arm64, build-arm32-arm64]
+    if: always()
+    steps:
+      - name: Evaluate build results
+        shell: bash
+        run: |
+          set -euo pipefail
+          arm64="${{ needs.build-arm64.result }}"
+          arm32="${{ needs.build-arm32-arm64.result }}"
+
+          echo "arm64-only   : $arm64"
+          echo "arm32-arm64  : $arm32"
+
+          failed=false
+          [[ "$arm64" == "failure" || "$arm64" == "cancelled" ]] && failed=true
+          [[ "$arm32" == "failure" || "$arm32" == "cancelled" ]] && failed=true
+
+          echo "### Beta Build Gate" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Build | Resultado |" >> "$GITHUB_STEP_SUMMARY"
+          echo "|-------|-----------|" >> "$GITHUB_STEP_SUMMARY"
+          echo "| arm64-only | $arm64 |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| arm32+arm64 | $arm32 |" >> "$GITHUB_STEP_SUMMARY"
+
+          if [[ "$failed" == "true" ]]; then
+            echo "" >> "$GITHUB_STEP_SUMMARY"
+            echo "❌ Um ou mais builds falharam." >> "$GITHUB_STEP_SUMMARY"
+            exit 1
+          fi
+
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "✅ Todos os builds beta concluídos. Baixe os APKs na aba Artifacts." >> "$GITHUB_STEP_SUMMARY"
