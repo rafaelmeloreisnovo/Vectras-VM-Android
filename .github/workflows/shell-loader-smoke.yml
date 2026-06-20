@@ -1,0 +1,42 @@
+name: Shell-Loader Smoke
+
+on:
+  push:
+    branches: [ master, main, develop ]
+  pull_request:
+    branches: [ master, main, develop ]
+
+permissions:
+  contents: read
+
+jobs:
+  shell-loader-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Resolve Java baseline
+        id: java
+        shell: bash
+        run: |
+          set -euo pipefail
+          java_version="$(awk -F= '$1=="java.language.version"{gsub(/[[:space:]]/,"",$2);print $2;exit}' gradle.properties)"
+          [[ -n "$java_version" ]] || { echo "java.language.version not found in gradle.properties" >&2; exit 1; }
+          echo "version=${java_version}" >> "$GITHUB_OUTPUT"
+
+      - name: Setup JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: ${{ steps.java.outputs.version }}
+
+      - name: Build shell-loader (debug, fast-path)
+        shell: bash
+        run: |
+          set -euo pipefail
+          ./gradlew --no-daemon :shell-loader:assembleDebug \
+            -PdevFastPath=true \
+            -PCI_INTERNAL_VALIDATION=false
+          echo "[smoke] :shell-loader:assembleDebug OK"
