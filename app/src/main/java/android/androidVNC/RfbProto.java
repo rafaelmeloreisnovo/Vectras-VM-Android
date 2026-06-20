@@ -209,7 +209,7 @@ public class RfbProto {
                     try {
                         sos.write(data0);
                     } catch (IOException e) {
-                        e.printStackTrace();
+                        Log.e(TAG, "Error writing VNC data", e);
                     }
                 }
             });
@@ -224,9 +224,7 @@ public class RfbProto {
                     try {
                         sos.write(buffer0);
                     } catch (IOException e) {
-                        Log.w(TAG, "Error while sending VNC data");
-                        if(Config.debug)
-                            e.printStackTrace();
+                        Log.e(TAG, "Error while sending VNC data", e);
                     }
                 }
             });
@@ -243,7 +241,7 @@ public class RfbProto {
                     try {
                         sos.write(buffer0, offset0, count0);
                     } catch (IOException e) {
-                        e.printStackTrace();
+                        Log.e(TAG, "Error writing VNC data", e);
                     }
                 }
             });
@@ -370,7 +368,7 @@ public class RfbProto {
     try {
       os.close();
     } catch (Exception ex) {
-      ex.printStackTrace();
+      Log.e(TAG, "Error closing output stream", ex);
     }
     if (sock != null) {
       try {
@@ -385,7 +383,7 @@ public class RfbProto {
 
       } */
       } catch (Exception e) {
-        e.printStackTrace();
+        Log.e(TAG, "Error closing socket", e);
       }
     }
 
@@ -1215,7 +1213,7 @@ public class RfbProto {
       writeModifierKeyEvents(0);
       os.write(eventBuf, 0, eventBufLen);
     } catch (IOException e) {
-      e.printStackTrace();
+      Log.e(TAG, "Error writing key event", e);
     }
   }
 
@@ -1238,7 +1236,7 @@ public class RfbProto {
 		  writeModifierKeyEvents(0);
 		  os.write(eventBuf, 0, eventBufLen);
 	  } catch (IOException e) {
-		  e.printStackTrace();
+      Log.e(TAG, "Error writing key event", e);
 	  }
   }
 
@@ -1261,7 +1259,7 @@ public class RfbProto {
       writeModifierKeyEvents(0);
       os.write(eventBuf, 0, eventBufLen);
     } catch (IOException e) {
-      e.printStackTrace();
+      Log.e(TAG, "Error writing key event", e);
     }
   }
 
@@ -1284,7 +1282,7 @@ public class RfbProto {
       writeModifierKeyEvents(0);
       os.write(eventBuf, 0, eventBufLen);
     } catch (IOException e) {
-      e.printStackTrace();
+      Log.e(TAG, "Error writing key event", e);
     }
   }
 
@@ -1307,7 +1305,7 @@ public class RfbProto {
       writeModifierKeyEvents(0);
       os.write(eventBuf, 0, eventBufLen);
     } catch (IOException e) {
-      e.printStackTrace();
+      Log.e(TAG, "Error writing key event", e);
     }
   }
 
@@ -1330,7 +1328,7 @@ public class RfbProto {
       writeModifierKeyEvents(0);
       os.write(eventBuf, 0, eventBufLen);
     } catch (IOException e) {
-      e.printStackTrace();
+      Log.e(TAG, "Error writing key event", e);
     }
   }
     

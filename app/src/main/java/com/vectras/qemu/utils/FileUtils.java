@@ -83,7 +83,7 @@ public class FileUtils {
         try {
             filePath = URLDecoder.decode(filePath, "UTF-8");
         } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
+            Log.e(TAG, "Failed to decode file path", e);
         }
 
         return filePath;
@@ -440,7 +440,7 @@ public class FileUtils {
                 try {
                     os.close();
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    Log.e(TAG, "Failed to close output stream", e);
                 }
             }
 
@@ -498,8 +498,7 @@ public class FileUtils {
         if(data == null)
             return null;
         Bundle b = data.getExtras();
-        String file = b.getString("currDir");
-        return file;
+        return b != null ? b.getString("currDir") : null;
     }
 
 
@@ -507,8 +506,7 @@ public class FileUtils {
         if(data == null)
             return null;
         Bundle b = data.getExtras();
-        String file = b.getString("file");
-        return file;
+        return b != null ? b.getString("file") : null;
     }
 
     public static class FileInfo {

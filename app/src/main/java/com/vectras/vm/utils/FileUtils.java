@@ -233,12 +233,16 @@ public class FileUtils {
 				try {
 					cursor = context.getContentResolver()
 							.query(uri, projection, selection, selectionArgs, null);
-					int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
-					if (cursor.moveToFirst()) {
-						return cursor.getString(column_index);
+					if (cursor != null) {
+						int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+						if (cursor.moveToFirst()) {
+							return cursor.getString(column_index);
+						}
 					}
 				} catch (Exception e) {
 					Log.e("FileUtils", "Failed to query media store for file path", e);
+				} finally {
+					if (cursor != null) cursor.close();
 				}
 			}
 		}
@@ -334,49 +338,55 @@ public class FileUtils {
 		Uri returnUri = uri;
 
 		Cursor returnCursor = context.getContentResolver().query(returnUri, new String[]{
-				OpenableColumns.DISPLAY_NAME,OpenableColumns.SIZE
+				OpenableColumns.DISPLAY_NAME, OpenableColumns.SIZE
 		}, null, null, null);
 
+		if (returnCursor == null) {
+			Log.e("FileUtils", "query() returned null cursor for uri: " + uri);
+			return null;
+		}
 
-		/*
-		 * Get the column indexes of the data in the Cursor,
-		 *     * move to the first row in the Cursor, get the data,
-		 *     * and display it.
-		 * */
-		int nameIndex = returnCursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
-		int sizeIndex = returnCursor.getColumnIndex(OpenableColumns.SIZE);
-		returnCursor.moveToFirst();
-		String name = (returnCursor.getString(nameIndex));
-		String size = (Long.toString(returnCursor.getLong(sizeIndex)));
+		String name;
+		try {
+			int nameIndex = returnCursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
+			returnCursor.moveToFirst();
+			name = returnCursor.getString(nameIndex);
+		} finally {
+			returnCursor.close();
+		}
+
+		if (name == null) {
+			Log.e("FileUtils", "Could not determine file name for uri: " + uri);
+			return null;
+		}
 
 		File output;
-		if(!newDirName.equals("")) {
+		if (!newDirName.equals("")) {
 			File dir = new File(context.getFilesDir() + "/" + newDirName);
 			if (!dir.exists()) {
 				dir.mkdir();
 			}
 			output = new File(context.getFilesDir() + "/" + newDirName + "/" + name);
-		}
-		else{
+		} else {
 			output = new File(context.getFilesDir() + "/" + name);
 		}
 		try {
 			InputStream inputStream = context.getContentResolver().openInputStream(uri);
-			FileOutputStream outputStream = new FileOutputStream(output);
-			int read = 0;
-			int bufferSize = 1024;
-			final byte[] buffers = new byte[bufferSize];
-			while ((read = inputStream.read(buffers)) != -1) {
-				outputStream.write(buffers, 0, read);
+			if (inputStream == null) {
+				Log.e("FileUtils", "openInputStream() returned null for uri: " + uri);
+				return null;
 			}
-
-			inputStream.close();
-			outputStream.close();
-
-		}
-		catch (Exception e) {
-
-			Log.e("Exception", e.getMessage());
+			try (FileOutputStream outputStream = new FileOutputStream(output)) {
+				int read;
+				final byte[] buffers = new byte[1024];
+				while ((read = inputStream.read(buffers)) != -1) {
+					outputStream.write(buffers, 0, read);
+				}
+			} finally {
+				inputStream.close();
+			}
+		} catch (Exception e) {
+			Log.e("FileUtils", "Failed to copy file to internal storage", e);
 		}
 
 		return output.getPath();

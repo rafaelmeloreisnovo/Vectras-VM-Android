@@ -109,19 +109,13 @@ public class QmpClient {
 				}
 			} catch (java.net.ConnectException e) {
 				Log.w(TAG, "Could not connect to QMP", e);
-				if(Config.debugQmp)
-					e.printStackTrace();
 			} catch (InterruptedException e) {
 				Thread.currentThread().interrupt();
 				Log.e(TAG, "Interrupted while waiting for QMP response", e);
 			} catch (IOException e) {
 				Log.e(TAG, "I/O error while connecting to QMP", e);
-				if(Config.debugQmp)
-					e.printStackTrace();
 			} catch(Exception e) {
 				Log.e(TAG, "Error while connecting to QMP", e);
-				if(Config.debugQmp)
-					e.printStackTrace();
 			} finally {
 				if (out != null)
 					out.close();
@@ -351,9 +345,7 @@ public class QmpClient {
 					break;
 			}
 		} catch (Exception ex) {
-			Log.e(TAG, "Could not get response: " + ex.getMessage());
-			if (Config.debugQmp)
-				ex.printStackTrace();
+			Log.e(TAG, "Could not get response", ex);
 		}
 		return stringBuilder.toString();
 	}

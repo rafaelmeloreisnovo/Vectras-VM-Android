@@ -174,8 +174,9 @@ public class RomInfo extends AppCompatActivity {
     private void openVmCreatorWithRom(@NonNull String romPath, @Nullable String romUri, @NonNull String selectedFileName) {
         Intent intent = new Intent();
 
+        String iconExtra = getIntent().getStringExtra("icon");
         if (getIntent().hasExtra("icon") &&
-                !Objects.requireNonNull(getIntent().getStringExtra("icon")).isEmpty() &&
+                iconExtra != null && !iconExtra.isEmpty() &&
                 (!selectedFileName.endsWith(".cvbi")
                         || !selectedFileName.endsWith(".cvbi.zip"))) {
 
