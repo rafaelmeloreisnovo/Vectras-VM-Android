@@ -152,7 +152,7 @@ public class FileUtils {
 								Uri.parse("content://downloads/public_downloads"), Long.valueOf(id));
 					}
 					catch (NumberFormatException e) {
-						e.printStackTrace();
+						Log.e("FileUtils", "Invalid download ID format", e);
 					}
 					if (contentUri != null) {
 
@@ -238,7 +238,7 @@ public class FileUtils {
 						return cursor.getString(column_index);
 					}
 				} catch (Exception e) {
-					e.printStackTrace();
+					Log.e("FileUtils", "Failed to query media store for file path", e);
 				}
 			}
 		}
@@ -619,7 +619,7 @@ public class FileUtils {
 				fdOwners.remove(fd);
 				return 0; // success for Native side
 			} catch (IOException e) {
-				e.printStackTrace();
+				Log.e("FileUtils", "Failed to close ParcelFileDescriptor fd=" + fd, e);
 			}
 
 		}
@@ -677,7 +677,7 @@ public class FileUtils {
 			outputWriter.write(data);
 			outputWriter.close();
 		} catch (Exception e) {
-			e.printStackTrace();
+			Log.e("FileUtils", "Failed to write to file: " + file, e);
 		}
 	}
 

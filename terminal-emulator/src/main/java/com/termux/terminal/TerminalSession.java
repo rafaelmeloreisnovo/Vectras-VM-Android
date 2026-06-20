@@ -68,8 +68,7 @@ public final class TerminalSession extends TerminalOutput {
             descriptorField.setAccessible(true);
             descriptorField.set(result, fileDescriptor);
         } catch (NoSuchFieldException | IllegalAccessException | IllegalArgumentException e) {
-            Log.wtf(EmulatorDebug.LOG_TAG, "Error accessing FileDescriptor#descriptor private field", e);
-            System.exit(1);
+            throw new RuntimeException("Cannot access FileDescriptor#descriptor — terminal session cannot be created", e);
         }
         return result;
     }

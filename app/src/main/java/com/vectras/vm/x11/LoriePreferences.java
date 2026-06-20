@@ -288,8 +288,9 @@ public class LoriePreferences extends AppCompatActivity {
                                 .setNegativeButton("OK", null)
                                 .create()
                                 .show();
-                    } else //noinspection CallToPrintStackTrace
-                        e.printStackTrace();
+                    } else {
+                        Log.e("LoriePreferences", "Unexpected error applying secure setting: " + key, e);
+                    }
                     return false;
                 }
             }
@@ -441,8 +442,9 @@ public class LoriePreferences extends AppCompatActivity {
                                                 "Please, launch this command using ADB:\n" +
                                                 "adb shell pm grant com.vectras.vm.x11 android.permission.WRITE_SECURE_SETTINGS");
                                         return;
-                                    } else //noinspection CallToPrintStackTrace
-                                        e.printStackTrace();
+                                    } else {
+                                        Log.e("LoriePreferences", "Unexpected error applying secure setting: show_ime_with_hard_keyboard", e);
+                                    }
                                 }
                                 break;
                             }

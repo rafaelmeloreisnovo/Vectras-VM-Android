@@ -21,7 +21,9 @@ public final class LowLevelBridge {
         try {
             System.loadLibrary("vectra_core_accel");
             sLoaded = true;
-        } catch (UnsatisfiedLinkError ignored) {}
+        } catch (UnsatisfiedLinkError e) {
+            android.util.Log.w("LowLevelBridge", "vectra_core_accel not available, falling back to SW implementation", e);
+        }
         return sLoaded;
     }
 
