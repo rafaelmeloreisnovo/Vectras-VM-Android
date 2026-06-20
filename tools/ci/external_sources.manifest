@@ -3,4 +3,4 @@
 #   - pinned_commit_sha is mandatory; verify_external_sources.sh enforces
 #     remote branch contains that commit and sync-clone checks it out.
 androidx_RmR|https://github.com/wojcikiewicz17/androidx_RmR|androidx-main|.third_party_forks/androidx_RmR|e3c10c6ac1acff50774d14417d93eaa6b5f8169a
-qemu_rafaelia|https://github.com/wojcikiewicz17/qemu_rafaelia|master|.third_party_forks/qemu_rafaelia|3af509a66222c6fa2b73952a735864624064a1de
+qemu_rafaelia|https://github.com/rafaelmeloreisnovo/qemu_rafaelia|master|.third_party_forks/qemu_rafaelia|2346c30c2ba77881c2930add83523ea903b173fe
