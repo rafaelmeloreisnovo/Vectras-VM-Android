@@ -23,15 +23,18 @@ public final class QemuArgvContract {
     private final String commandString;
     private final String argvSha256;
     private final boolean parsedFromShellString;
+    private final int qemuTokenIndex;
 
     private QemuArgvContract(String qemuBinary,
                              List<String> argv,
                              String commandString,
-                             boolean parsedFromShellString) {
+                             boolean parsedFromShellString,
+                             int qemuTokenIndex) {
         this.qemuBinary = safe(qemuBinary);
         this.argv = Collections.unmodifiableList(new ArrayList<>(argv == null ? Collections.emptyList() : argv));
         this.commandString = safe(commandString);
         this.parsedFromShellString = parsedFromShellString;
+        this.qemuTokenIndex = qemuTokenIndex;
         this.argvSha256 = sha256(stablePayload(this.qemuBinary, this.argv, this.commandString));
     }
 
@@ -47,7 +50,7 @@ public final class QemuArgvContract {
                 command.append(arg.trim());
             }
         }
-        return new QemuArgvContract(qemuBinary, argv, command.toString(), false);
+        return new QemuArgvContract(qemuBinary, argv, command.toString(), false, 0);
     }
 
     /**
@@ -57,9 +60,15 @@ public final class QemuArgvContract {
      */
     public static QemuArgvContract fromShellCommand(String commandString) {
         List<String> tokens = splitShellLike(commandString);
-        String binary = tokens.isEmpty() ? "" : tokens.get(0);
-        List<String> args = tokens.size() <= 1 ? Collections.emptyList() : tokens.subList(1, tokens.size());
-        return new QemuArgvContract(binary, args, commandString, true);
+        int qemuIndex = findQemuTokenIndex(tokens);
+        if (qemuIndex < 0) {
+            String binary = tokens.isEmpty() ? "" : tokens.get(0);
+            List<String> args = tokens.size() <= 1 ? Collections.emptyList() : tokens.subList(1, tokens.size());
+            return new QemuArgvContract(binary, args, commandString, true, -1);
+        }
+        String binary = tokens.get(qemuIndex);
+        List<String> args = qemuIndex + 1 >= tokens.size() ? Collections.emptyList() : tokens.subList(qemuIndex + 1, tokens.size());
+        return new QemuArgvContract(binary, args, commandString, true, qemuIndex);
     }
 
     public String getQemuBinary() {
@@ -82,6 +91,10 @@ public final class QemuArgvContract {
         return parsedFromShellString;
     }
 
+    public int getQemuTokenIndex() {
+        return qemuTokenIndex;
+    }
+
     public JSONObject toJson() {
         JSONObject json = new JSONObject();
         JSONArray args = new JSONArray();
@@ -92,11 +105,25 @@ public final class QemuArgvContract {
             json.put("command_string", commandString);
             json.put("argv_sha256", argvSha256);
             json.put("parsed_from_shell_string", parsedFromShellString);
+            json.put("qemu_token_index", qemuTokenIndex);
             json.put("arg_count", argv.size());
         } catch (Exception ignored) {
             // JSONObject.put should not fail for primitive/String payloads here.
         }
         return json;
+    }
+
+    private static int findQemuTokenIndex(List<String> tokens) {
+        if (tokens == null) return -1;
+        for (int i = 0; i < tokens.size(); i++) {
+            String token = tokens.get(i);
+            if (token == null) continue;
+            String normalized = token.trim();
+            int slash = Math.max(normalized.lastIndexOf('/'), normalized.lastIndexOf('\\'));
+            String base = slash >= 0 ? normalized.substring(slash + 1) : normalized;
+            if (base.startsWith("qemu-system-")) return i;
+        }
+        return -1;
     }
 
     private static List<String> splitShellLike(String value) {
