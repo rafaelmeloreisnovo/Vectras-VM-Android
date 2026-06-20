@@ -3,6 +3,7 @@ package com.vectras.vm.utils;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.os.AsyncTask;
+import android.util.Log;
 import com.vectras.vm.AppConfig;
 import com.vectras.vm.R;
 import java.io.BufferedReader;
@@ -50,11 +51,11 @@ public class AppUpdater extends AsyncTask<String, String, String> {
             }
 			return sb.toString();
         } catch (ExceptionInInitializerError ex) {
-            ex.printStackTrace();
+            Log.e("AppUpdater", "Initialization error fetching update", ex);
             return "Error on getting data: " + ex.getMessage();
 
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.e("AppUpdater", "Error fetching update data", e);
             return "Error on getting data: " + e.getMessage();
 
         }

@@ -145,7 +145,7 @@ public class RomReceiverActivity extends AppCompatActivity {
                     result = decoded2.replace("file://", "");
                 }
             } catch (UnsupportedEncodingException _e) {
-                _e.printStackTrace();
+                Log.e("RomReceiverActivity", "Failed to decode URI encoding", _e);
             }
         } else {
             result = _uri.getPath();
