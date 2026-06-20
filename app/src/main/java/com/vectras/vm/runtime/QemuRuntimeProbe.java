@@ -1,13 +1,13 @@
 package com.vectras.vm.runtime;
 
 import com.vectras.qemu.Config;
+import com.vectras.vm.core.ProcessRuntimeOps;
 
 import org.json.JSONObject;
 
 import java.io.File;
 import java.net.InetSocketAddress;
 import java.net.Socket;
-import java.util.Locale;
 
 /**
  * Low-cost runtime probes for separating "process alive" from "VM service ready".
@@ -71,7 +71,7 @@ public final class QemuRuntimeProbe {
     }
 
     public static Snapshot capture(Process process, int tcpTimeoutMs) {
-        long pid = safePid(process);
+        long pid = ProcessRuntimeOps.safePid(process);
         boolean alive = process != null && process.isAlive();
         String qmp = Config.getLocalQMPSocketPath();
         String vnc = Config.getLocalVNCSocketPath();
@@ -99,15 +99,6 @@ public final class QemuRuntimeProbe {
             return true;
         } catch (Exception ignored) {
             return false;
-        }
-    }
-
-    private static long safePid(Process process) {
-        if (process == null) return -1L;
-        try {
-            return process.pid();
-        } catch (Throwable ignored) {
-            return -1L;
         }
     }
 
