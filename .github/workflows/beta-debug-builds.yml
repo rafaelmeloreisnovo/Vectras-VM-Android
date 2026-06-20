@@ -230,10 +230,7 @@ jobs:
         shell: bash
         run: |
           if [[ ! -f terminal-emulator/src/main/jniLibs/armeabi-v7a/libtermux.so ]]; then
-            echo "::warning title=libtermux.so ARM32 ausente::\
-terminal-emulator/src/main/jniLibs/armeabi-v7a/libtermux.so não encontrado. \
-O terminal PTY não funcionará em dispositivos ARM32. \
-VNC, benchmark e todas as funções Java-only continuam operacionais."
+            echo "::warning title=libtermux.so ARM32 ausente::terminal-emulator/src/main/jniLibs/armeabi-v7a/libtermux.so não encontrado. O terminal PTY não funcionará em dispositivos ARM32. VNC, benchmark e todas as funções Java-only continuam operacionais."
           else
             echo "libtermux.so ARM32: OK"
           fi

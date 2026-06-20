@@ -10,6 +10,9 @@ on:
       - 'docs/STABILITY_ASM_BUILD.md'
       - '.github/workflows/stability-asm-ci.yml'
 
+permissions:
+  contents: read
+
 jobs:
   build-stability-asm:
     runs-on: ubuntu-latest
@@ -25,3 +28,4 @@ jobs:
           path: |
             out/stability_asm/*.o
             out/stability_asm/manifest.txt
+          if-no-files-found: error
