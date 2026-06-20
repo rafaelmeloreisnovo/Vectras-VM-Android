@@ -2,13 +2,13 @@ apply plugin: 'com.android.library'
 
 android {
     namespace "com.termux.view"
-    compileSdkVersion rootProject.ext.compileApi
+    compileSdk rootProject.ext.compileApi
     buildToolsVersion rootProject.ext.toolsVersion
 
     defaultConfig {
-        minSdkVersion rootProject.ext.minApi
+        minSdk rootProject.ext.minApi
         //noinspection ExpiredTargetSdkVersion
-        targetSdkVersion rootProject.ext.targetApi
+        targetSdk rootProject.ext.targetApi
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 

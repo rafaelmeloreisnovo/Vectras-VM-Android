@@ -28,6 +28,7 @@ public class DeviceUtils {
     public static double totalMemoryCapacity(Context context) {
         ActivityManager.MemoryInfo memoryInfo = new ActivityManager.MemoryInfo();
         ActivityManager activityManager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
+        if (activityManager == null) return 0;
         activityManager.getMemoryInfo(memoryInfo);
         return memoryInfo.totalMem;
     }
@@ -51,7 +52,9 @@ public class DeviceUtils {
         } else {
             StorageManager storageManager = (StorageManager) context.getSystemService(Context.STORAGE_SERVICE);
             StorageStatsManager statsManager = (StorageStatsManager) context.getSystemService(Context.STORAGE_STATS_SERVICE);
-
+            if (storageManager == null || statsManager == null) {
+                return false;
+            }
             try {
                 UUID uuid = storageManager.getUuidForPath(Environment.getDataDirectory());
                 long availableBytes = statsManager.getFreeBytes(uuid);

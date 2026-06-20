@@ -46,7 +46,11 @@ public class CrashHandler implements Thread.UncaughtExceptionHandler {
             head.put("Time Of Crash", time);
             head.put("Device", String.format("%s, %s", Build.MANUFACTURER, Build.MODEL));
             head.put("Android Version", String.format(Locale.US,"%s (%d)", Build.VERSION.RELEASE, Build.VERSION.SDK_INT));
-            head.put("App Version", String.format(Locale.US, "%s (%d)", context.getString(R.string.app_version), context.getResources().getInteger(R.integer.app_version_code)));
+            try {
+                head.put("App Version", String.format(Locale.US, "%s (%d)", context.getString(R.string.app_version), context.getResources().getInteger(R.integer.app_version_code)));
+            } catch (Exception ex) {
+                head.put("App Version", "unknown");
+            }
             head.put("Kernel", DeviceUtils.getKernel());
             head.put("Support Abis",
                     Build.SUPPORTED_ABIS != null

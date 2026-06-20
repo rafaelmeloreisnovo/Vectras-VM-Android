@@ -90,6 +90,11 @@ public class MainStartVM {
     private static final AtomicLong TRANSIENT_VM_ID_COUNTER = new AtomicLong(0L);
     private static final String TRANSIENT_VM_ID_PREFIX = "launch-";
 
+    private static int parseVncDisplayPort(String display) {
+        if (display == null || display.isEmpty()) return 5900;
+        try { return Integer.parseInt(display) + 5900; } catch (NumberFormatException e) { return 5900; }
+    }
+
     private static boolean isNullOrEmpty(String value) {
         return value == null || value.trim().isEmpty();
     }
@@ -645,7 +650,7 @@ public class MainStartVM {
                                 Config.currentVNCServervmID = vmId;
                                 DialogUtils.oneDialog(launchContext,
                                         launchContext.getString(R.string.vnc_server),
-                                        launchContext.getString(R.string.running_vm_with_vnc_server_content) + " " + (Integer.parseInt(MainSettingsManager.getVncExternalDisplay(launchContext)) + 5900) + ".",
+                                        launchContext.getString(R.string.running_vm_with_vnc_server_content) + " " + (parseVncDisplayPort(MainSettingsManager.getVncExternalDisplay(launchContext))) + ".",
                                         R.drawable.cast_24px
                                 );
                             } else {
