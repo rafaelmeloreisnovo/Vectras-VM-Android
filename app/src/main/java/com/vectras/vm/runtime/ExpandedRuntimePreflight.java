@@ -11,13 +11,9 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Locale;
 
 /**
  * Expanded launch-time preflight for the real VM runtime surface.
@@ -29,6 +25,8 @@ import java.util.Locale;
  */
 public final class ExpandedRuntimePreflight {
     public enum Severity { PASS, WARN, FAIL, BLOCKER }
+
+    private static final String HASH_DEFERRED = "hash_deferred_startup_safe";
 
     public static final class Item {
         public final String id;
@@ -106,6 +104,7 @@ public final class ExpandedRuntimePreflight {
                 json.put("host_abi", hostAbi);
                 json.put("host_64_bit", host64Bit);
                 json.put("summary", shortSummary());
+                json.put("hash_mode", "deferred_during_launch");
                 json.put("items", arr);
             } catch (Exception ignored) {
             }
@@ -211,28 +210,13 @@ public final class ExpandedRuntimePreflight {
 
     private static Item fileItem(String id, File path, Severity severity, String msg, boolean withHash) {
         long size = path != null && path.isFile() ? path.length() : 0L;
-        String hash = withHash && path != null && path.isFile() ? sha256(path) : "";
+        String hash = withHash && path != null && path.isFile() ? HASH_DEFERRED + ":size=" + size : "";
         return new Item(id, path == null ? "" : path.getAbsolutePath(), severity, msg, size, hash);
     }
 
     private static String hostAbi() {
         if (Build.SUPPORTED_ABIS == null || Build.SUPPORTED_ABIS.length == 0) return "unknown";
         return Build.SUPPORTED_ABIS[0];
-    }
-
-    private static String sha256(File file) {
-        try (FileInputStream fis = new FileInputStream(file)) {
-            MessageDigest digest = MessageDigest.getInstance("SHA-256");
-            byte[] buf = new byte[8192];
-            int read;
-            while ((read = fis.read(buf)) > 0) digest.update(buf, 0, read);
-            byte[] raw = digest.digest();
-            StringBuilder sb = new StringBuilder(raw.length * 2);
-            for (byte b : raw) sb.append(String.format(Locale.US, "%02x", b & 0xff));
-            return sb.toString();
-        } catch (Exception e) {
-            return "sha256-error:" + e.getClass().getSimpleName();
-        }
     }
 
     private static String safe(String value) {
