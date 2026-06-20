@@ -2,15 +2,15 @@ apply plugin: 'com.android.library'
 
 android {
     namespace "com.termux.terminal"
-    compileSdkVersion rootProject.ext.compileApi
+    compileSdk rootProject.ext.compileApi
     buildToolsVersion rootProject.ext.toolsVersion
 
     ndkVersion rootProject.ext.ndkVersion
 
     defaultConfig {
-        minSdkVersion rootProject.ext.minApi
+        minSdk rootProject.ext.minApi
         //noinspection ExpiredTargetSdkVersion
-        targetSdkVersion rootProject.ext.targetApi
+        targetSdk rootProject.ext.targetApi
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
         // Obtém a lista de ABIs suportadas do projeto raiz
@@ -100,7 +100,7 @@ android {
     // ================================================================
     // 3. EXCLUSÃO DE BIBLIOTECAS JNI NÃO UTILIZADAS (LIMPEZA DO ESPAÇO DE FASES)
     // ================================================================
-    packagingOptions {
+    packaging {
         jniLibs {
             def allAbis = ['arm64-v8a', 'armeabi-v7a', 'x86', 'x86_64', 'riscv64']
             def supportedSet = (rootProject.ext.supportedAbis ?: []) as List<String>

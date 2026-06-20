@@ -828,7 +828,9 @@ public class FileUtils {
 		try {
 			if (cursor != null && cursor.moveToFirst()) {
 				int nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
-				result = cursor.getString(nameIndex);
+				if (nameIndex >= 0) {
+					result = cursor.getString(nameIndex);
+				}
 			}
 		} finally {
 			if (cursor != null) {

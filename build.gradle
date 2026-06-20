@@ -19,7 +19,7 @@ def abiPolicyIntent = [
 
 buildscript {
     ext {
-        kotlin_version = properties.get('KOTLIN_VERSION', '1.9.24')
+        kotlin_version = properties.get('KOTLIN_VERSION', '1.9.25')
         agp_version = properties.get('AGP_VERSION', '8.5.2')
     }
     repositories {

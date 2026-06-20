@@ -1141,7 +1141,7 @@ public class SetupFeatureCore {
     public static void setDNS(Context context) {
         String filesDir = context.getFilesDir().getAbsolutePath();
         File rootDir = new File(filesDir + "/distro/root");
-        if (!rootDir.exists()) if(!rootDir.mkdir()) Log.e(TAG, "extractSystemFiles: Unable to create folder " + filesDir + "/distro/root");
+        if (!rootDir.exists() && !rootDir.mkdir()) Log.e(TAG, "extractSystemFiles: Unable to create folder " + filesDir + "/distro/root");
 
         File resolv = new File(filesDir + "/distro/etc/resolv.conf");
         if(!Objects.requireNonNull(resolv.getParentFile()).mkdirs()) Log.e(TAG, "extractSystemFiles: Unable to add DNS.");

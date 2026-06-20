@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 # verify_vectra_os_contract.sh — G1 do VECTRA_OS_LIVING_SYSTEM_GAP_LEDGER.
 #
 # Prova executável do contrato pré-compilador/linker de redução de símbolos:
