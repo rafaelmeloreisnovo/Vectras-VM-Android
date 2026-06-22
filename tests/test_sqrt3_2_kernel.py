@@ -29,18 +29,3 @@ def test_kernel_falsification_guards_are_explicit():
     assert "1σ" in text
     assert "packing density" in text or "empacotamento" in text
     assert "Attractor #22" in text
-
-
-def test_cosmology_pivot_is_diagnostic_not_constant_claim():
-    payload = sgl.sqrt3_2_kernel(samples=4)
-    pivot = payload["cosmology_pivot"]
-    assert math.isclose(pivot["a_h"], math.sqrt(3) / 2, rel_tol=0, abs_tol=1e-15)
-    assert math.isclose(pivot["z_h"], (2 / math.sqrt(3)) - 1, rel_tol=0, abs_tol=1e-15)
-    assert "not an established cosmological constant" in pivot["role"]
-    assert pivot["comparators"] == ["flat_lcdm", "cpl", "rll_rafaelia"]
-
-
-def test_cosmology_formula_flat_lcdm_at_pivot():
-    value = sgl.FORMULAS["sqrt3_2_flat_lcdm_E_at_pivot"]["calc"]({"omega_m": 0.315})
-    expected = math.sqrt(0.315 / ((math.sqrt(3) / 2) ** 3) + 0.685)
-    assert math.isclose(value, expected, rel_tol=0, abs_tol=1e-15)

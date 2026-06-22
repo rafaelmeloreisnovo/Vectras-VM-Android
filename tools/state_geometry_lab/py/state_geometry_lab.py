@@ -112,18 +112,6 @@ FORMULAS = {
         "desc": "Ganho reverso para reconstrução/expansão controlada.",
         "calc": lambda _: 2 / math.sqrt(3),
     },
-    "sqrt3_2_cosmology_pivot_z": {
-        "expr": "z_h = 1/(sqrt(3)/2) - 1 = 2/sqrt(3) - 1",
-        "params": [],
-        "desc": "Redshift diagnóstico quando o fator de escala a_h é sqrt(3)/2.",
-        "calc": lambda _: (2 / math.sqrt(3)) - 1,
-    },
-    "sqrt3_2_flat_lcdm_E_at_pivot": {
-        "expr": "E(a_h)=sqrt(Ωm/a_h^3 + 1 - Ωm)",
-        "params": ["omega_m"],
-        "desc": "H(a_h)/H0 em ΛCDM plano para comparar com CPL/RLL sem declarar nova constante cosmológica.",
-        "calc": lambda p: math.sqrt(float(p.get("omega_m", 0.315)) / (SQRT3_OVER_2 ** 3) + (1 - float(p.get("omega_m", 0.315)))),
-    },
 }
 
 
@@ -216,19 +204,6 @@ def sqrt3_2_kernel(samples: int = 42, entry_q16: int = Q16_SCALE) -> Dict[str, o
         "tenth_life_cycles": math.log(0.1) / math.log(SQRT3_OVER_2),
         "hundredth_life_cycles": math.log(0.01) / math.log(SQRT3_OVER_2),
         "infinite_sum": 1 / (1 - SQRT3_OVER_2),
-        "cosmology_pivot": {
-            "a_h": SQRT3_OVER_2,
-            "z_h": (2 / math.sqrt(3)) - 1,
-            "role": "diagnostic pivot, not an established cosmological constant",
-            "comparators": ["flat_lcdm", "cpl", "rll_rafaelia"],
-        },
-        "procedures": [
-            "Implement sqrt3_2_hex_grid with x=m+n/2 and y=n*h for maps/simulation slices.",
-            "Implement recursive stability filter S_next=X_n+h*S_n for noise, memory and residuals.",
-            "Use a_h=sqrt(3)/2 and z_h=2/sqrt(3)-1 as cosmology diagnostic pivot.",
-            "Compare H_LCDM(z_h), H_CPL(z_h), and H_RLL(z_h); report delta_chi2, not claims.",
-            "Use h as Euclidean reference for curved-space triangle-height deviation tests.",
-        ],
         "modules": [
             "geometry_hex_grid",
             "recursive_decay_filter",
