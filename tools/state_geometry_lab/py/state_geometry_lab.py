@@ -22,7 +22,7 @@ METHODS = [
     "random_permutations_72", "rgb_cmyb_interpolate", "angular_moments", "polynomial_square_borrow",
     "spiral_matrix_cycles", "inverse_antiderivative_stack", "spectral_64bit_signature", "base_projection",
     "rafaelia_formula_catalog", "rafaelia_toroidal_map7", "rafaelia_triangular_core",
-    "grassberger_procaccia_probe", "language_viscosity_metrics", "quantum_link_hamiltonian",
+    "grassberger_procaccia_probe", "language_viscosity_metrics", "quantum_link_hamiltonian", "sqrt3_2_kernel",
 ]
 # Backwards-compatible alias used by older scripts.
 METHODS_21 = METHODS
@@ -87,6 +87,30 @@ FORMULAS = {
         "params": ["pairs_below_eps", "N"],
         "desc": "Integral de correlação Grassberger-Procaccia.",
         "calc": lambda p: float(p.get("pairs_below_eps", 0)) / (float(p.get("N", 1)) ** 2),
+    },
+    "sqrt3_2_half_life_cycles": {
+        "expr": "n_1/2 = ln(0.5)/ln(sqrt(3)/2)",
+        "params": [],
+        "desc": "Meia-vida em ciclos do filtro recursivo por sqrt(3)/2.",
+        "calc": lambda _: math.log(0.5) / math.log(SQRT3_OVER_2),
+    },
+    "sqrt3_2_tenth_life_cycles": {
+        "expr": "n_10% = ln(0.1)/ln(sqrt(3)/2)",
+        "params": [],
+        "desc": "Ciclos para o filtro cair a 10%.",
+        "calc": lambda _: math.log(0.1) / math.log(SQRT3_OVER_2),
+    },
+    "sqrt3_2_infinite_sum": {
+        "expr": "S = 1/(1 - sqrt(3)/2)",
+        "params": [],
+        "desc": "Limite da soma geométrica do kernel de decaimento.",
+        "calc": lambda _: 1 / (1 - SQRT3_OVER_2),
+    },
+    "sqrt3_2_reverse_gain": {
+        "expr": "g = 2/sqrt(3)",
+        "params": [],
+        "desc": "Ganho reverso para reconstrução/expansão controlada.",
+        "calc": lambda _: 2 / math.sqrt(3),
     },
 }
 
@@ -159,6 +183,42 @@ def poincare_sphere_sections(mods: Sequence[int], sections: int = 42) -> List[Tu
         out.append((m, theta, angular_momentum))
     return out
 
+def sqrt3_2_kernel(samples: int = 42, entry_q16: int = Q16_SCALE) -> Dict[str, object]:
+    """Return the measurable sqrt(3)/2 kernel contract without heap-heavy state.
+
+    The Python lab emits lists for inspection; native hot paths should keep the
+    same Q16 constants and stream values instead of allocating buffers.
+    """
+    samples = max(1, min(samples, 256))
+    q = int(entry_q16)
+    decay: List[int] = []
+    for _ in range(samples):
+        decay.append(q)
+        q = (q * Q16_SQRT3_OVER_2) >> 16
+    return {
+        "kernel": "RAFAELIA_H_KERNEL",
+        "h_float": SQRT3_OVER_2,
+        "h_q16": Q16_SQRT3_OVER_2,
+        "reverse_gain": 2 / math.sqrt(3),
+        "half_life_cycles": math.log(0.5) / math.log(SQRT3_OVER_2),
+        "tenth_life_cycles": math.log(0.1) / math.log(SQRT3_OVER_2),
+        "hundredth_life_cycles": math.log(0.01) / math.log(SQRT3_OVER_2),
+        "infinite_sum": 1 / (1 - SQRT3_OVER_2),
+        "modules": [
+            "geometry_hex_grid",
+            "recursive_decay_filter",
+            "signal_6fold_projection",
+            "regression_angle_map",
+            "risk_buffer_smoother",
+        ],
+        "falsification": [
+            "Do not map sqrt(3)/2 directly to 1σ or z-score without angular projection evidence.",
+            "Do not call sqrt(3)/2 the 2D circle-packing density; use pi/(2*sqrt(3)) for that metric.",
+            "Attractor #22 remains VOID/paradox-flagged; this kernel does not patch attractor topology.",
+        ],
+        "decay_q16": decay,
+    }
+
 def spectral_64bit_signature(values: Sequence[int]) -> int:
     mask = (1 << 64) - 1
     sig = 0x9E3779B97F4A7C15
@@ -220,6 +280,10 @@ def main() -> None:
     if ns.method:
         if ns.method not in METHODS and ns.method != "list":
             raise SystemExit(f"unknown method: {ns.method}")
+        if ns.method == "sqrt3_2_kernel":
+            payload = sqrt3_2_kernel(samples=42)
+            print(json.dumps(payload, ensure_ascii=False, indent=2) if ns.json else payload)
+            return
         print(json.dumps(METHODS_21) if ns.json else "\n".join(METHODS_21))
         return
 
