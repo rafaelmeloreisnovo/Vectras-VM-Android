@@ -187,6 +187,10 @@ if (devFastPath && strictValidationRequired) {
 gateLog("ABI_CONTRACT", allowLocalHeavyValidationBypass
     ? "Gate degradado (modo local): pré-validação pesada de ABI/freestanding foi desativada."
     : "Contrato ABI/freestanding permanece ativo.")
+if ((rootProject.ext.appAbiPolicy ?: '').toString() == 'arm32-debug' && (releaseLikeRequested || ciRelease || releaseSigningMode == 'signed')) {
+    throw new GradleException("APP_ABI_POLICY=arm32-debug é somente debug/beta interno; proibido com release, ciRelease=true ou signing_mode=signed.")
+}
+
 gateLog("BOOTSTRAP", allowLocalHeavyValidationBypass
     ? "Gate degradado (modo local): validações pesadas de bootstrap/shell-loader foram desativadas."
     : "Validações de bootstrap/shell-loader permanecem ativas.")
@@ -464,7 +468,7 @@ if (!checkVariant) {
 def checkVariantTaskSuffix = checkVariant.substring(0, 1).toUpperCase() + checkVariant.substring(1)
 def checkVariantAssembleTask = "assemble${checkVariantTaskSuffix}"
 def termuxBootstrapLibName = "libtermux-bootstrap.so"
-def supportedAppAbiPolicies = ['arm64-only', 'arm32-arm64', 'internal-4abi', 'internal-5abi'] as Set<String>
+def supportedAppAbiPolicies = ['arm64-only', 'arm32-arm64', 'arm32-debug', 'internal-4abi', 'internal-5abi'] as Set<String>
 def abiPoliciesThatRequireTermuxBootstrap = java.util.Collections.unmodifiableSet(['arm64-only', 'arm32-arm64', 'internal-4abi'] as LinkedHashSet<String>)
 
 tasks.register("verifyTermuxBootstrapAbiCoverage") {
@@ -498,6 +502,17 @@ tasks.register("verifyTermuxBootstrapAbiCoverage") {
                 }
                 if (supportedAbis != expectedDualArmAbis) {
                     throw new GradleException("APP_ABI_POLICY=arm32-arm64 exige SUPPORTED_ABIS=${expectedDualArmAbis} (atual: ${supportedAbis}).")
+                }
+                break
+            case "arm32-debug":
+                if (!ciInternalValidationEnabled) {
+                    throw new GradleException("APP_ABI_POLICY=arm32-debug exige CI_INTERNAL_VALIDATION=true para beta/debug interno.")
+                }
+                if (supportedAbis != ['armeabi-v7a']) {
+                    throw new GradleException("APP_ABI_POLICY=arm32-debug exige SUPPORTED_ABIS=armeabi-v7a (atual: ${supportedAbis}).")
+                }
+                if (releaseLikeRequested || ciRelease || releaseSigningMode == 'signed') {
+                    throw new GradleException("APP_ABI_POLICY=arm32-debug é proibido para release, ciRelease=true ou signing_mode=signed.")
                 }
                 break
             case "internal-5abi":
@@ -1089,6 +1104,18 @@ tasks.register("verifyTermuxBootstrapPackagingRules") {
 
         if (!supportedAbis.every { it in allowedAbis }) {
             throw new GradleException("SUPPORTED_ABIS (${supportedAbis}) contém ABI fora da matriz permitida (${allowedAbis}).")
+        }
+
+        if (appAbiPolicy == 'arm32-debug') {
+            if (!ciInternalValidationEnabled) {
+                throw new GradleException("APP_ABI_POLICY=arm32-debug exige CI_INTERNAL_VALIDATION=true para beta/debug interno.")
+            }
+            if (supportedAbis != ['armeabi-v7a']) {
+                throw new GradleException("APP_ABI_POLICY=arm32-debug exige SUPPORTED_ABIS=armeabi-v7a (atual: ${supportedAbis}).")
+            }
+            if (releaseLikeRequested || ciRelease || releaseSigningMode == 'signed') {
+                throw new GradleException("APP_ABI_POLICY=arm32-debug é proibido para release, ciRelease=true ou signing_mode=signed.")
+            }
         }
 
         if (appAbiPolicy in abiPoliciesThatRequireTermuxBootstrap) {
