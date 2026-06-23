@@ -20,6 +20,13 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
+      - name: Resolve ARM32 beta ABI profile
+        id: abi
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tools/ci/resolve_abi_profile.py --profile moto-e7-arm32-beta --format shell >> "$GITHUB_OUTPUT"
+
       - name: Install Android SDK, NDK and CMake
         shell: bash
         run: |
@@ -36,9 +43,9 @@ jobs:
         run: |
           set -euo pipefail
           ./gradlew --no-daemon \
-            -PAPP_ABI_POLICY=arm32-debug \
-            -PSUPPORTED_ABIS=armeabi-v7a \
-            -PCI_INTERNAL_VALIDATION=true \
+            -PAPP_ABI_POLICY="${{ steps.abi.outputs.app_abi_policy }}" \
+            -PSUPPORTED_ABIS="${{ steps.abi.outputs.supported_abis }}" \
+            -PCI_INTERNAL_VALIDATION="${{ steps.abi.outputs.ci_internal_validation }}" \
             -Psigning_mode=unsigned \
             -PdevFastPath=false \
             :app:clean :app:assembleDebug --stacktrace
@@ -54,8 +61,8 @@ jobs:
             exit 1
           fi
           python3 tools/ci/verify_apk_abi_contract.py "${apks[0]}" \
-            --policy arm32-debug \
-            --supported-abis armeabi-v7a \
+            --policy "${{ steps.abi.outputs.app_abi_policy }}" \
+            --supported-abis "${{ steps.abi.outputs.supported_abis }}" \
             --target-device "Motorola E7 Power" \
             --target-android "Android 10"
 

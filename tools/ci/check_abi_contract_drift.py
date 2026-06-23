@@ -101,11 +101,11 @@ def main() -> int:
                 fail(f"{wf_path} matrix.abi contém ABIs fora do contrato: {unknown}")
 
         for literal in re.findall(r"-PAPP_ABI_POLICY=\"([^\"]+)\"", text):
-            if literal and literal not in {"${app_abi_policy}", "${{ needs.resolve.outputs.app_abi_policy }}"}:
+            if literal and literal not in {"${app_abi_policy}", "${{ needs.resolve.outputs.app_abi_policy }}", "${{ steps.abi.outputs.app_abi_policy }}"}:
                 fail(f"{wf_path} usa APP_ABI_POLICY literal ('{literal}'); resolva via resolve_abi_profile.py")
 
         for literal in re.findall(r"-PSUPPORTED_ABIS=\"([^\"]+)\"", text):
-            if literal and literal not in {"${supported_abis}", "${{ needs.resolve.outputs.supported_abis }}"}:
+            if literal and literal not in {"${supported_abis}", "${{ needs.resolve.outputs.supported_abis }}", "${{ steps.abi.outputs.supported_abis }}"}:
                 fail(f"{wf_path} usa SUPPORTED_ABIS literal ('{literal}'); resolva via resolve_abi_profile.py")
 
     print("ABI contract drift check: OK")
