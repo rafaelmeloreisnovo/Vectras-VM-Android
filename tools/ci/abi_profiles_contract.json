@@ -2,7 +2,9 @@
   "profiles": {
     "official_arm64": {
       "app_abi_policy": "arm64-only",
-      "supported_abis": ["arm64-v8a"],
+      "supported_abis": [
+        "arm64-v8a"
+      ],
       "ci_internal_validation": false,
       "channel": "official",
       "release_track": "store-official",
@@ -10,7 +12,10 @@
     },
     "official_arm32_arm64": {
       "app_abi_policy": "arm32-arm64",
-      "supported_abis": ["arm64-v8a", "armeabi-v7a"],
+      "supported_abis": [
+        "arm64-v8a",
+        "armeabi-v7a"
+      ],
       "ci_internal_validation": false,
       "channel": "compatibility",
       "release_track": "compat-non-store",
@@ -18,45 +23,95 @@
     },
     "internal_arm64": {
       "app_abi_policy": "arm64-only",
-      "supported_abis": ["arm64-v8a"],
+      "supported_abis": [
+        "arm64-v8a"
+      ],
       "ci_internal_validation": true,
       "channel": "internal"
     },
     "internal_arm32_arm64": {
       "app_abi_policy": "arm32-arm64",
-      "supported_abis": ["arm64-v8a", "armeabi-v7a"],
+      "supported_abis": [
+        "arm64-v8a",
+        "armeabi-v7a"
+      ],
       "ci_internal_validation": true,
       "channel": "internal"
     },
     "internal_4abi": {
       "app_abi_policy": "internal-4abi",
-      "supported_abis": ["arm64-v8a", "armeabi-v7a", "x86", "x86_64"],
+      "supported_abis": [
+        "arm64-v8a",
+        "armeabi-v7a",
+        "x86",
+        "x86_64"
+      ],
       "ci_internal_validation": true,
       "channel": "internal"
     },
     "internal_5abi": {
       "app_abi_policy": "internal-5abi",
-      "supported_abis": ["arm64-v8a", "armeabi-v7a", "x86", "x86_64", "riscv64"],
+      "supported_abis": [
+        "arm64-v8a",
+        "armeabi-v7a",
+        "x86",
+        "x86_64",
+        "riscv64"
+      ],
       "ci_internal_validation": true,
       "channel": "internal"
     },
     "universal_guarded": {
       "app_abi_policy": "internal-5abi",
-      "supported_abis": ["arm64-v8a", "armeabi-v7a", "x86", "x86_64", "riscv64"],
+      "supported_abis": [
+        "arm64-v8a",
+        "armeabi-v7a",
+        "x86",
+        "x86_64",
+        "riscv64"
+      ],
       "ci_internal_validation": true,
       "channel": "internal"
     },
     "internal_riscv64": {
       "app_abi_policy": "internal-5abi",
-      "supported_abis": ["arm64-v8a", "armeabi-v7a", "x86", "x86_64", "riscv64"],
+      "supported_abis": [
+        "arm64-v8a",
+        "armeabi-v7a",
+        "x86",
+        "x86_64",
+        "riscv64"
+      ],
       "ci_internal_validation": true,
       "channel": "internal"
     },
     "generic": {
       "app_abi_policy": "arm32-arm64",
-      "supported_abis": ["arm64-v8a", "armeabi-v7a"],
+      "supported_abis": [
+        "arm64-v8a",
+        "armeabi-v7a"
+      ],
       "ci_internal_validation": true,
       "channel": "internal"
+    },
+    "moto_e7_arm32_beta": {
+      "app_abi_policy": "arm32-debug",
+      "supported_abis": [
+        "armeabi-v7a"
+      ],
+      "ci_internal_validation": true,
+      "channel": "internal-beta",
+      "release_track": "manual-debug-artifact",
+      "target_device": "Motorola E7 Power",
+      "target_android": "Android 10",
+      "min_api_requirement": 16,
+      "forbidden_when": [
+        "release",
+        "ciRelease=true",
+        "signing_mode=signed",
+        "store-official"
+      ],
+      "description": "Manual beta/debug ARM32-only APK profile for Motorola E7 Power; never for official store release."
     }
   },
   "aliases": {
@@ -68,6 +123,9 @@
     "arm64-only": "official_arm64",
     "arm32-arm64": "internal_arm32_arm64",
     "official-arm32-arm64-compat": "official_arm32_arm64",
-    "dual-arm-compat": "official_arm32_arm64"
+    "dual-arm-compat": "official_arm32_arm64",
+    "arm32-debug": "moto_e7_arm32_beta",
+    "moto-e7-arm32-beta": "moto_e7_arm32_beta",
+    "moto_e7_arm32_beta": "moto_e7_arm32_beta"
   }
 }

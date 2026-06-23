@@ -3,6 +3,7 @@
 def defaultSupportedAbisByPolicy = [
     'arm64-only'   : 'arm64-v8a',
     'arm32-arm64'  : 'arm64-v8a,armeabi-v7a',
+    'arm32-debug'  : 'armeabi-v7a',
     'internal-4abi': 'arm64-v8a,armeabi-v7a,x86,x86_64',
     'internal-5abi': 'arm64-v8a,armeabi-v7a,x86,x86_64,riscv64'
 ]
@@ -13,6 +14,7 @@ def internalValidationAbisBaseline = ['arm64-v8a', 'armeabi-v7a', 'x86', 'x86_64
 def abiPolicyIntent = [
     'arm64-only'   : 'distribuição oficial (arm64 obrigatório)',
     'arm32-arm64'  : 'validação interna dual-ABI ARM (arm64-v8a + armeabi-v7a)',
+    'arm32-debug'  : 'beta/debug ARM32-only para Motorola E7 Power (armeabi-v7a, sem release oficial)',
     'internal-4abi': 'validação interna expandida em 4 ABIs compatíveis com app/bootstrap (arm64-v8a + armeabi-v7a + x86 + x86_64)',
     'internal-5abi': 'validação interna expandida em 5 ABIs (nunca para release oficial de loja)'
 ]
@@ -150,7 +152,7 @@ def validateMinApiAbiCompatibility(boolean strictMode = true) {
         'x86_64': 21,
         'riscv64': 35
     ]
-    def supportedPolicyNames = ['arm64-only', 'arm32-arm64', 'internal-4abi', 'internal-5abi'] as Set
+    def supportedPolicyNames = ['arm64-only', 'arm32-arm64', 'arm32-debug', 'internal-4abi', 'internal-5abi'] as Set
     def ciInternalValidation = Boolean.parseBoolean(properties.get('CI_INTERNAL_VALIDATION', 'false').toString())
 
     if (!supportedPolicyNames.contains(appAbiPolicy)) {
@@ -177,6 +179,21 @@ def validateMinApiAbiCompatibility(boolean strictMode = true) {
         emitValidationMessage('validateMinApiAbiCompatibility',
             "APP_ABI_POLICY=arm32-arm64 (${abiPolicyIntent['arm32-arm64']}) exige SUPPORTED_ABIS=arm64-v8a,armeabi-v7a (atual: ${supportedAbis}).",
             strictMode)
+    }
+
+    if (appAbiPolicy == 'arm32-debug') {
+        if (!ciInternalValidation) {
+            emitValidationMessage('validateMinApiAbiCompatibility', "APP_ABI_POLICY=arm32-debug exige CI_INTERNAL_VALIDATION=true para limitar uso a beta/debug/teste interno.", strictMode)
+        }
+        if (supportedAbis != ['armeabi-v7a']) {
+            emitValidationMessage('validateMinApiAbiCompatibility', "APP_ABI_POLICY=arm32-debug (${abiPolicyIntent['arm32-debug']}) exige SUPPORTED_ABIS=armeabi-v7a (atual: ${supportedAbis}).", strictMode)
+        }
+        def releaseLike = gradle.startParameter.taskNames.any { it.toLowerCase().contains('release') || it.toLowerCase().contains('bundle') }
+        def ciReleaseEnabled = Boolean.parseBoolean(properties.get('ciRelease', 'false').toString())
+        def signingMode = properties.get('signing_mode', properties.get('SIGNING_MODE', 'auto')).toString().trim().toLowerCase()
+        if (releaseLike || ciReleaseEnabled || signingMode == 'signed') {
+            emitValidationMessage('validateMinApiAbiCompatibility', "APP_ABI_POLICY=arm32-debug é permitido somente para debug/beta/teste interno; proibido com release/bundle, ciRelease=true ou signing_mode=signed.", strictMode)
+        }
     }
 
     if (appAbiPolicy == 'internal-4abi') {
