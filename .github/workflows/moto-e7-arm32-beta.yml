@@ -1,0 +1,76 @@
+name: Moto E7 Power ARM32 Beta APK
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build-arm32-beta:
+    name: Build ARM32 debug beta APK
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install Android SDK, NDK and CMake
+        shell: bash
+        run: |
+          set -euo pipefail
+          SDK_API="$(sed -n 's/^compile.api=//p' gradle.properties | tail -1)"
+          BUILD_TOOLS="$(sed -n 's/^tools.version=//p' gradle.properties | tail -1)"
+          NDK_VERSION="$(sed -n 's/^ndk.version=//p' gradle.properties | tail -1)"
+          CMAKE_VERSION="$(sed -n 's/^cmake.version=//p' gradle.properties | tail -1)"
+          yes | sdkmanager --licenses >/dev/null
+          sdkmanager "platforms;android-${SDK_API}" "build-tools;${BUILD_TOOLS}" "platform-tools" "ndk;${NDK_VERSION}" "cmake;${CMAKE_VERSION}"
+
+      - name: Build ARM32 debug beta APK
+        shell: bash
+        run: |
+          set -euo pipefail
+          ./gradlew --no-daemon \
+            -PAPP_ABI_POLICY=arm32-debug \
+            -PSUPPORTED_ABIS=armeabi-v7a \
+            -PCI_INTERNAL_VALIDATION=true \
+            -Psigning_mode=unsigned \
+            -PdevFastPath=false \
+            :app:clean :app:assembleDebug --stacktrace
+
+      - name: Verify APK ABI contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          mapfile -t apks < <(find app/build/outputs/apk/debug -type f -name "*.apk" | sort)
+          if [[ "${#apks[@]}" -ne 1 ]]; then
+            printf 'Expected exactly one debug APK, found %s\n' "${#apks[@]}" >&2
+            printf '%s\n' "${apks[@]}" >&2
+            exit 1
+          fi
+          python3 tools/ci/verify_apk_abi_contract.py "${apks[0]}" \
+            --policy arm32-debug \
+            --supported-abis armeabi-v7a \
+            --target-device "Motorola E7 Power" \
+            --target-android "Android 10"
+
+      - name: Collect artifact payload
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p ci-artifacts/moto-e7-arm32-beta
+          cp app/build/outputs/apk/debug/*.apk ci-artifacts/moto-e7-arm32-beta/
+          cp reports/APK_ARM32_BETA_CONTRACT.md ci-artifacts/moto-e7-arm32-beta/
+          cp reports/apk_arm32_beta_contract.json ci-artifacts/moto-e7-arm32-beta/
+
+      - name: Upload ARM32 beta artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: vectras-moto-e7-power-arm32-debug-beta
+          path: ci-artifacts/moto-e7-arm32-beta/
+          if-no-files-found: error
