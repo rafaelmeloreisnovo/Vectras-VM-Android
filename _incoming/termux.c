@@ -143,6 +143,11 @@ JNIEXPORT jint JNICALL Java_com_termux_terminal_JNI_createSubprocess(
             }
             argv[i] = strdup(arg_utf8);
             (*env)->ReleaseStringUTFChars(env, arg_java_string, arg_utf8);
+            if (!argv[i]) {
+                for (int j = 0; j < i; ++j) free(argv[j]);
+                free(argv);
+                return throw_runtime_exception(env, "strdup() failed for argv");
+            }
         }
         argv[size] = NULL;
     }
@@ -175,6 +180,15 @@ JNIEXPORT jint JNICALL Java_com_termux_terminal_JNI_createSubprocess(
             }
             envp[i] = strdup(env_utf8);
             (*env)->ReleaseStringUTFChars(env, env_java_string, env_utf8);
+            if (!envp[i]) {
+                for (int j = 0; j < i; ++j) free(envp[j]);
+                free(envp);
+                if (argv) {
+                    for (char** tmp = argv; *tmp; ++tmp) free(*tmp);
+                    free(argv);
+                }
+                return throw_runtime_exception(env, "strdup() failed for env");
+            }
         }
         envp[size] = NULL;
     }
