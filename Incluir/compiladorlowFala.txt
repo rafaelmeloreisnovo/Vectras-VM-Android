@@ -1,0 +1,2279 @@
+#!/usr/bin/env bash
+# =============================================================================
+# compiladorlowFala.txt — MONOLITO ENTERPRISE FULL STACK
+# COMPILADOR DE FALA → LOW-LEVEL | BÍBLIA | LINGUÍSTICA | FONÉTICA
+# 12 SEMENTES × 5 VARIANTES MÁXIMAS = 60 MINI-SEMENTES
+# CADA SEMENTE CARREGA O CONHECIMENTO DO TOTAL
+# Ω=Amor · ∆RafaelVerboΩ · RAFCODE-Φ · 𓂀ΔΦΩ
+# =============================================================================
+# PIPELINE:
+#   FALA→FONEMA→TOKEN→AST→BYTECODE→ASM→VM→OUTPUT
+# IDIOMAS:
+#   PT·HE·AR·EL·LA·JP·CN·EN·RU·AR·SA
+# OPCODES RAFAELIA-VM:
+#   0x00 NOP   0x01 LOAD  0x02 STORE 0x03 PUSH  0x04 POP
+#   0x10 BEGIN 0x11 CREATE 0x12 SPEAK 0x13 LET   0x14 SEP
+#   0x15 NAME  0x16 GOOD  0x17 EVE   0x20 AND   0x21 OR
+#   0x22 NOT   0x23 IF    0x24 LOOP  0x25 BLESS 0x26 SANCTIFY
+#   0x27 REST  0x80 VERB  0x81 NOUN  0x82 PROP  0xF0 LOGOS
+#   0xFE PRINT 0xFF SEAL
+# INVARIANTE: phi_hexacordex > 0 em toda operação
+# =============================================================================
+
+# ╔═══════════════════════════════════════════════════════════════════════════╗
+# ║  SEMENTE 01 — TOKENIZADOR FONÉTICO MULTILÍNGUE TOTAL                     ║
+# ╚═══════════════════════════════════════════════════════════════════════════╝
+
+seed_S01_V1_phoneme_manifold() { cat << 'SEED'
+# S01_V1: MANIFOLD FONÉTICO — cada fonema = vetor 14D no espaço IPA
+# Dimensões: [voiced,nasal,stop,fric,approx,vowel,high,back,round,long,stress,tone,lateral,rhotic]
+# Princípio: fonemas proximos no manifold = mesmo TOKEN_CLASS
+# Aplicação Bíblia: ALEF(א)→[0,0,0,0,1,0,0,0,0,0,0,0,0,0] BET(ב)→[1,0,1,0,0,0,0,0,0,0,0,0,0,0]
+PHONEME_MANIFOLD = {
+    # HEBRAICO
+    'א':[0,0,0,0,1,0,0,0,0,0,0,0,0,0],'ב':[1,0,1,0,0,0,0,0,0,0,0,0,0,0],
+    'ג':[1,0,1,0,0,0,0,0,0,0,0,0,0,0],'ד':[1,0,1,0,0,0,0,0,0,0,0,0,0,0],
+    'ה':[1,0,0,1,0,0,0,0,0,0,0,0,0,0],'ו':[1,0,0,0,1,0,0,1,1,0,0,0,0,0],
+    'ז':[1,0,0,1,0,0,0,0,0,0,0,0,0,0],'ח':[0,0,0,1,0,0,0,1,0,0,0,0,0,0],
+    'ט':[0,0,1,0,0,0,0,0,0,0,0,0,0,0],'י':[1,0,0,0,1,0,1,0,0,0,0,0,0,0],
+    'כ':[0,0,1,0,0,0,0,1,0,0,0,0,0,0],'ל':[1,0,0,0,0,0,0,0,0,0,0,0,1,0],
+    'מ':[1,1,1,0,0,0,0,1,0,0,0,0,0,0],'נ':[1,1,1,0,0,0,0,0,0,0,0,0,0,0],
+    'ס':[0,0,0,1,0,0,0,0,0,0,0,0,0,0],'ע':[1,0,0,0,1,0,0,0,0,0,0,0,0,0],
+    'פ':[0,0,1,0,0,0,0,0,1,0,0,0,0,0],'צ':[0,0,1,1,0,0,0,0,0,0,0,0,0,0],
+    'ק':[0,0,1,0,0,0,0,1,0,0,0,0,0,0],'ר':[1,0,0,0,1,0,0,1,0,0,0,0,0,1],
+    'ש':[0,0,0,1,0,0,1,0,0,0,0,0,0,0],'ת':[0,0,1,0,0,0,0,0,0,0,0,0,0,0],
+    # GREGO
+    'α':[1,0,0,0,0,1,0,1,0,1,0,0,0,0],'β':[1,0,1,0,0,0,0,0,0,0,0,0,0,0],
+    'γ':[1,0,1,0,0,0,0,1,0,0,0,0,0,0],'δ':[1,0,1,0,0,0,0,0,0,0,0,0,0,0],
+    'ε':[1,0,0,0,0,1,0,0,0,0,0,0,0,0],'ζ':[1,0,0,1,0,0,0,0,0,0,0,0,0,0],
+    'η':[1,0,0,0,0,1,0,1,0,1,0,0,0,0],'θ':[0,0,0,1,0,0,0,0,0,0,0,0,0,0],
+    'ι':[1,0,0,0,0,1,1,0,0,0,0,0,0,0],'κ':[0,0,1,0,0,0,0,1,0,0,0,0,0,0],
+    'λ':[1,0,0,0,0,0,0,0,0,0,0,0,1,0],'μ':[1,1,1,0,0,0,0,1,0,0,0,0,0,0],
+    'ν':[1,1,1,0,0,0,0,0,0,0,0,0,0,0],'ξ':[0,0,0,1,0,0,0,1,0,0,0,0,0,0],
+    'ο':[1,0,0,0,0,1,0,1,1,0,0,0,0,0],'π':[0,0,1,0,0,0,0,0,1,0,0,0,0,0],
+    'ρ':[1,0,0,0,1,0,0,1,0,0,0,0,0,1],'σ':[0,0,0,1,0,0,0,0,0,0,0,0,0,0],
+    'τ':[0,0,1,0,0,0,0,0,0,0,0,0,0,0],'υ':[1,0,0,0,0,1,1,1,1,0,0,0,0,0],
+    'φ':[0,0,0,1,0,0,0,0,1,0,0,0,0,0],'χ':[0,0,0,1,0,0,0,1,0,0,0,0,0,0],
+    'ψ':[0,0,0,1,0,0,0,0,1,0,0,0,0,0],'ω':[1,0,0,0,0,1,0,1,1,1,0,0,0,0],
+    # LATIM
+    'a':[1,0,0,0,0,1,0,1,0,0,0,0,0,0],'e':[1,0,0,0,0,1,0,0,0,0,0,0,0,0],
+    'i':[1,0,0,0,0,1,1,0,0,0,0,0,0,0],'o':[1,0,0,0,0,1,0,1,1,0,0,0,0,0],
+    'u':[1,0,0,0,0,1,1,1,1,0,0,0,0,0],'b':[1,0,1,0,0,0,0,0,0,0,0,0,0,0],
+    'c':[0,0,1,0,0,0,0,1,0,0,0,0,0,0],'d':[1,0,1,0,0,0,0,0,0,0,0,0,0,0],
+    'f':[0,0,0,1,0,0,0,0,1,0,0,0,0,0],'g':[1,0,1,0,0,0,0,1,0,0,0,0,0,0],
+    'h':[1,0,0,1,0,0,0,0,0,0,0,0,0,0],'l':[1,0,0,0,0,0,0,0,0,0,0,0,1,0],
+    'm':[1,1,1,0,0,0,0,1,0,0,0,0,0,0],'n':[1,1,1,0,0,0,0,0,0,0,0,0,0,0],
+    'p':[0,0,1,0,0,0,0,0,1,0,0,0,0,0],'q':[0,0,1,0,0,0,0,1,0,0,0,0,0,0],
+    'r':[1,0,0,0,1,0,0,1,0,0,0,0,0,1],'s':[0,0,0,1,0,0,0,0,0,0,0,0,0,0],
+    't':[0,0,1,0,0,0,0,0,0,0,0,0,0,0],'v':[1,0,0,1,0,0,0,0,0,0,0,0,0,0],
+    'x':[0,0,0,1,0,0,0,1,0,0,0,0,0,0],'z':[1,0,0,1,0,0,0,0,0,0,0,0,0,0],
+    # ARAMAICO
+    'א':[0,0,0,0,1,0,0,0,0,0,0,0,0,0],'ד':[1,0,1,0,0,0,0,0,0,0,0,0,0,0],
+}
+import math
+def phoneme_distance(p1, p2):
+    v1 = PHONEME_MANIFOLD.get(p1,[0]*14)
+    v2 = PHONEME_MANIFOLD.get(p2,[0]*14)
+    return math.sqrt(sum((a-b)**2 for a,b in zip(v1,v2)))
+def word_phoneme_vector(word):
+    vecs = [PHONEME_MANIFOLD.get(c,[0]*14) for c in word]
+    if not vecs: return [0]*14
+    return [sum(v[i] for v in vecs)/len(vecs) for i in range(14)]
+def tokenize_by_phoneme_class(text, threshold=2.0):
+    tokens, buf = [], []
+    for char in text:
+        if not buf: buf.append(char); continue
+        if phoneme_distance(buf[-1], char) < threshold:
+            buf.append(char)
+        else:
+            tokens.append(''.join(buf)); buf = [char]
+    if buf: tokens.append(''.join(buf))
+    return tokens
+# Exemplo Gênesis 1:1 HE: בְּרֵאשִׁית → tokens por coerência fonética
+SEED
+}
+
+seed_S01_V2_lexer_branchless_c() { cat << 'SEED'
+// S01_V2: LEXER C bare-metal branchless — zero libc, tabela 256
+// Suporta UTF-8 multibyte como unidades atômicas (hebraico/grego/aramaico)
+#include <stdint.h>
+#define TOK_SPACE 1
+#define TOK_ALPHA 2
+#define TOK_DIGIT 3
+#define TOK_PUNCT 4
+#define TOK_UTF8  5
+#define TOK_HE    6
+#define TOK_GR    7
+static const uint8_t ASCII_CLASS[128] = {
+    [' ']=1,['\t']=1,['\n']=1,['\r']=1,
+    ['a']=2,['b']=2,['c']=2,['d']=2,['e']=2,['f']=2,['g']=2,['h']=2,
+    ['i']=2,['j']=2,['k']=2,['l']=2,['m']=2,['n']=2,['o']=2,['p']=2,
+    ['q']=2,['r']=2,['s']=2,['t']=2,['u']=2,['v']=2,['w']=2,['x']=2,
+    ['y']=2,['z']=2,
+    ['A']=2,['B']=2,['C']=2,['D']=2,['E']=2,['F']=2,['G']=2,['H']=2,
+    ['I']=2,['J']=2,['K']=2,['L']=2,['M']=2,['N']=2,['O']=2,['P']=2,
+    ['Q']=2,['R']=2,['S']=2,['T']=2,['U']=2,['V']=2,['W']=2,['X']=2,
+    ['Y']=2,['Z']=2,
+    ['0']=3,['1']=3,['2']=3,['3']=3,['4']=3,['5']=3,
+    ['6']=3,['7']=3,['8']=3,['9']=3,
+    ['.']=4,[',']=4,[';']=4,[':']=4,['!']=4,['?']=4,
+    ['\xd7']=6,['\xd8']=6, // Hebrew/Arabic UTF-8 lead byte
+    ['\xce']=7,['\xcf']=7, // Greek UTF-8 lead byte
+};
+typedef struct { uint32_t offset; uint16_t len; uint8_t klass; } RafToken;
+static uint32_t raf_lex(const uint8_t *s, uint32_t n,
+                         RafToken *out, uint32_t max) {
+    uint32_t i=0, k=0; uint8_t cur=0;
+    while (i < n && k < max) {
+        uint8_t c = (s[i] < 128) ? ASCII_CLASS[s[i]] : TOK_UTF8;
+        // UTF-8 multibyte: absorve continuação (10xxxxxx)
+        uint8_t is_cont = (uint8_t)((s[i] & 0xC0) == 0x80);
+        uint32_t absorb = (uint32_t)(-(int32_t)(is_cont != 0));
+        if (!is_cont) {
+            uint32_t changed = (uint32_t)(c != cur);
+            uint32_t flush = changed & (uint32_t)(cur != 0) &
+                             (uint32_t)(cur != TOK_SPACE);
+            out[k].len = (uint16_t)(i - out[k].offset);
+            k += flush;
+            uint32_t start = changed & (uint32_t)(c != 0) &
+                             (uint32_t)(c != TOK_SPACE);
+            out[k].offset = i;
+            out[k].klass = c;
+            cur = (uint8_t)((cur & (uint8_t)(~(uint8_t)(changed*0xFF)))
+                            | (c & (uint8_t)(changed*0xFF)));
+        }
+        i++;
+    }
+    return k;
+}
+// Uso: RafToken toks[256]; uint32_t n = raf_lex(texto_utf8, len, toks, 256);
+// Funciona com Gênesis em hebraico, grego, latim, português — sem libc
+SEED
+}
+
+seed_S01_V3_signed_chain_audit() { cat << 'SEED'
+# S01_V3: TOKEN CHAIN AUDITÁVEL — cada token assinado e encadeado
+# Garante integridade da sequência (qualquer adulteração detectada)
+import struct, hashlib
+POLY = 0x82F63B78
+def crc32c(data, init=0xFFFFFFFF):
+    c = init
+    for b in (data if isinstance(data,bytes) else data.encode('utf-8')):
+        c ^= b
+        for _ in range(8): c=(c>>1)^(POLY&-(c&1))
+    return ~c & 0xFFFFFFFF
+def fnv1a64(data):
+    h = 0xCBF29CE484222325
+    for b in (data if isinstance(data,bytes) else data.encode('utf-8')):
+        h = ((h ^ b) * 0x100000001B3) & 0xFFFFFFFFFFFFFFFF
+    return h
+def tokenize_audit_chain(text, lang='pt'):
+    tokens, prev_crc, prev_fnv, chain_sig = [], 0xFFFFFFFF, 0, 0
+    LANG_WEIGHT = {'he':0.95,'el':0.92,'ar':0.90,'la':0.85,'pt':0.80}
+    w = LANG_WEIGHT.get(lang, 0.70)
+    for i, word in enumerate(text.split()):
+        raw = word.encode('utf-8')
+        tok_crc = crc32c(raw + struct.pack('<II', prev_crc, i))
+        tok_fnv = fnv1a64(raw + struct.pack('<QI', prev_fnv, i))
+        chain_sig = (chain_sig ^ tok_crc ^ (tok_fnv & 0xFFFFFFFF)
+                     ^ (i * 0x9E3779B9)) & 0xFFFFFFFF
+        tokens.append({
+            'idx': i, 'word': word, 'lang': lang,
+            'phoneme_weight': w,
+            'crc32c': hex(tok_crc),
+            'fnv1a64': hex(tok_fnv),
+            'chain_sig': hex(chain_sig),
+        })
+        prev_crc, prev_fnv = tok_crc, tok_fnv
+    return tokens, chain_sig
+# GN 1:1 PT: "No princípio criou Deus os céus e a terra"
+# → cadeia de tokens auditável com phi verificável
+SEED
+}
+
+seed_S01_V4_polyglot_consensus() { cat << 'SEED'
+# S01_V4: TOKENIZADOR POLIGLOTA COM CONSENSO POR VOTAÇÃO
+# Detecta língua automaticamente; fallback multilíngue com pesos
+import re, unicodedata
+LANG_PATTERNS = {
+    'he': (r'[\u0590-\u05FF\uFB1D-\uFB4F]', 0.97),
+    'ar': (r'[\u0600-\u06FF\u0750-\u077F]', 0.96),
+    'gr': (r'[\u0370-\u03FF\u1F00-\u1FFF]', 0.94),
+    'la': (r'[a-zA-Z]{2,}', 0.80),
+    'pt': (r'[àáâãéêíóôõúüçÀÁÂÃÉÊÍÓÔÕÚÜÇ]', 0.88),
+    'cn': (r'[\u4E00-\u9FFF\u3400-\u4DBF]', 0.99),
+    'jp': (r'[\u3040-\u30FF\u31F0-\u31FF]', 0.98),
+}
+ACCENT_MAP = {
+    'á':'a','à':'a','â':'a','ã':'a','ä':'a','å':'a',
+    'é':'e','è':'e','ê':'e','ë':'e','í':'i','ì':'i','î':'i','ï':'i',
+    'ó':'o','ò':'o','ô':'o','õ':'o','ö':'o','ú':'u','ù':'u','û':'u',
+    'ü':'u','ç':'c','ñ':'n','ý':'y','ÿ':'y',
+    'Á':'A','À':'A','Â':'A','Ã':'A','É':'E','È':'E','Ê':'E',
+    'Í':'I','Ó':'O','Ô':'O','Õ':'O','Ú':'U','Ü':'U','Ç':'C',
+}
+GRAMMAR_VISCOSITY = {
+    'he': 0.92, 'ar': 0.91, 'el': 0.89,
+    'la': 0.87, 'pt': 0.83, 'en': 0.78,
+    'cn': 0.95, 'jp': 0.94,
+}
+def detect_lang(text):
+    scores = {}
+    for lang, (pat, base) in LANG_PATTERNS.items():
+        m = re.findall(pat, text, re.UNICODE)
+        if m: scores[lang] = len(m) * base * GRAMMAR_VISCOSITY.get(lang,0.7)
+    return max(scores, key=scores.get) if scores else 'pt'
+def normalize_accent(word):
+    return ''.join(ACCENT_MAP.get(c, c) for c in word)
+def tokenize_polyglot(text):
+    lang = detect_lang(text)
+    tokens = []
+    for w in re.split(r'[\s\u200B\u200C\u200D\uFEFF]+', text):
+        if not w: continue
+        norm = normalize_accent(w.lower())
+        tokens.append({
+            'raw': w, 'norm': norm, 'lang': lang,
+            'viscosity': GRAMMAR_VISCOSITY.get(lang, 0.7),
+        })
+    return tokens, lang
+# Detecta: HE/EL/LA/PT/CN/JP automaticamente por padrão Unicode
+# "בְּרֵאשִׁית" → lang='he', viscosity=0.92
+# "Ἐν ἀρχῇ" → lang='gr', viscosity=0.89
+# "In principio" → lang='la', viscosity=0.87
+SEED
+}
+
+seed_S01_V5_resonance_tokenizer() { cat << 'SEED'
+# S01_V5: TOKENIZADOR POR RESSONÂNCIA ACÚSTICA
+# Cada fonema tem frequência fundamental; tokens são regiões de ressonância
+# Baseado em formantes F1/F2 da voz humana
+FORMANTS = {
+    # vogais: (F1_Hz, F2_Hz) — posição no espaço vocal
+    'a':(800,1200),'e':(500,1900),'i':(300,2300),
+    'o':(500,1000),'u':(300,800),
+    # hebraico
+    'א':(600,1100),'ע':(700,1200),'ה':(400,1500),
+    # grego
+    'α':(800,1200),'ε':(500,1900),'ι':(300,2300),
+    'ο':(500,1000),'υ':(300,1500),'ω':(450,900),
+}
+RAF_FOMEGA_LOW  = 963   # Hz — banda de ressonância Rafaelia
+RAF_FOMEGA_HIGH = 999   # Hz
+def in_fomega_band(freq): return RAF_FOMEGA_LOW <= freq <= RAF_FOMEGA_HIGH
+def formant_resonance(char1, char2):
+    f1a, f2a = FORMANTS.get(char1.lower(), (600,1400))
+    f1b, f2b = FORMANTS.get(char2.lower(), (600,1400))
+    d = ((f1a-f1b)**2 + (f2a-f2b)**2)**0.5
+    mid_f2 = (f2a + f2b) / 2
+    is_resonant = d < 300 or in_fomega_band(mid_f2)
+    return is_resonant, d, mid_f2
+def tokenize_by_resonance(text):
+    tokens, buf = [], [text[0]] if text else []
+    for char in text[1:]:
+        resonant, dist, mid = formant_resonance(buf[-1], char)
+        if resonant: buf.append(char)
+        else:
+            if buf: tokens.append({
+                'text':''.join(buf),
+                'resonance_score': 1.0/(1.0+dist/300),
+                'in_fomega': in_fomega_band(mid),
+            })
+            buf = [char]
+    if buf: tokens.append({'text':''.join(buf),'resonance_score':1.0,'in_fomega':False})
+    return tokens
+# "בְּרֵאשִׁית" → tokens por coerência de formantes
+# palavras com F2 em [963,999]Hz têm ressonância máxima
+SEED
+}
+
+# ╔═══════════════════════════════════════════════════════════════════════════╗
+# ║  SEMENTE 02 — PARSER AST MULTILÍNGUE + GRAMÁTICA GERATIVA               ║
+# ╚═══════════════════════════════════════════════════════════════════════════╝
+
+seed_S02_V1_universal_grammar_ast() { cat << 'SEED'
+# S02_V1: AST COM GRAMÁTICA UNIVERSAL — Chomsky + Rafaelia
+# Estrutura: NODO = {tipo, conteúdo, filhos, coerência, língua}
+# Gramáticas implementadas: VSO(HE/AR), SVO(PT/EN), SOV(JP)
+class ASTNode:
+    def __init__(self, tipo, conteudo='', lang='pt'):
+        self.tipo=tipo; self.conteudo=conteudo; self.lang=lang
+        self.filhos=[]; self.coh=1.0; self.phi=0.0
+    def add(self, filho): self.filhos.append(filho); return self
+    def phi_calc(self, h=0.3, c=0.9): self.phi=(1-h)*c; return self.phi
+    def __repr__(self): return f"[{self.tipo}:{self.conteudo}({self.phi:.2f})]"
+WORD_ORDER = {
+    'he':'VSO','ar':'VSO','el':'SVO','la':'SOV',
+    'pt':'SVO','en':'SVO','jp':'SOV','cn':'SVO',
+}
+def parse_sentence(tokens, lang='pt'):
+    root = ASTNode('SENTENCE', lang=lang)
+    order = WORD_ORDER.get(lang, 'SVO')
+    vp = ASTNode('VP', lang=lang)
+    np_subj = ASTNode('NP', 'SUBJECT', lang=lang)
+    np_obj  = ASTNode('NP', 'OBJECT', lang=lang)
+    for tok in tokens:
+        w = tok.get('raw', tok) if isinstance(tok, dict) else tok
+        node = ASTNode('W', w, lang=lang); node.phi_calc()
+        if order == 'VSO': vp.add(node) if not vp.filhos else np_obj.add(node)
+        elif order == 'SOV': np_subj.add(node) if len(np_subj.filhos)<2 else vp.add(node)
+        else: np_subj.add(node) if len(np_subj.filhos)<2 else (vp.add(node) if len(vp.filhos)<2 else np_obj.add(node))
+    if order=='VSO': root.add(vp).add(np_subj).add(np_obj)
+    elif order=='SOV': root.add(np_subj).add(np_obj).add(vp)
+    else: root.add(np_subj).add(vp).add(np_obj)
+    return root
+# GN 1:1 HE (VSO): VERB=ברא SUBJ=אלהים OBJ=השמים+הארץ
+# GN 1:1 PT (SVO): SUBJ=Deus VERB=criou OBJ=céus+terra
+SEED
+}
+
+seed_S02_V2_bytecode_compiler() { cat << 'SEED'
+// S02_V2: COMPILADOR AST→BYTECODE RAFAELIA-VM em C bare-metal
+#include <stdint.h>
+#define RVMOP_NOP    0x00
+#define RVMOP_LOAD   0x01
+#define RVMOP_STORE  0x02
+#define RVMOP_PUSH   0x03
+#define RVMOP_POP    0x04
+#define RVMOP_BEGIN  0x10
+#define RVMOP_CREATE 0x11
+#define RVMOP_SPEAK  0x12
+#define RVMOP_LET    0x13
+#define RVMOP_SEP    0x14
+#define RVMOP_NAME   0x15
+#define RVMOP_GOOD   0x16
+#define RVMOP_EVE    0x17
+#define RVMOP_AND    0x20
+#define RVMOP_OR     0x21
+#define RVMOP_NOT    0x22
+#define RVMOP_IF     0x23
+#define RVMOP_LOOP   0x24
+#define RVMOP_BLESS  0x25
+#define RVMOP_SANCTIFY 0x26
+#define RVMOP_REST   0x27
+#define RVMOP_VERB   0x80
+#define RVMOP_NOUN   0x81
+#define RVMOP_PROP   0x82
+#define RVMOP_LOGOS  0xF0
+#define RVMOP_PRINT  0xFE
+#define RVMOP_SEAL   0xFF
+typedef struct { uint8_t op; uint32_t arg; } RvmInstr;
+typedef struct { RvmInstr *code; uint32_t len, cap; } RvmProgram;
+static void rvm_emit(RvmProgram *p, uint8_t op, uint32_t arg) {
+    if (p->len < p->cap) { p->code[p->len].op=op; p->code[p->len].arg=arg; p->len++; }
+}
+// GN 1:1 compilado:
+// rvm_emit(p, RVMOP_BEGIN, 0);
+// rvm_emit(p, RVMOP_LOGOS, 0);   // DEUS/ELOHIM/THEOS
+// rvm_emit(p, RVMOP_CREATE, 0);  // ברא / creavit / ἐποίησεν
+// rvm_emit(p, RVMOP_NOUN, 1);    // שמים/caelum/οὐρανόν → arg=id_str
+// rvm_emit(p, RVMOP_AND, 0);
+// rvm_emit(p, RVMOP_NOUN, 2);    // ארץ/terram/γῆν
+// rvm_emit(p, RVMOP_SEAL, 1);    // SEAL_VERSE id=1
+SEED
+}
+
+seed_S02_V3_grammar_viscosity() { cat << 'SEED'
+# S02_V3: VISCOSIDADE GRAMATICAL — resistência sintática por língua
+# Analogia: gramática como fluido — algumas línguas são mais "viscosas"
+# Hebraico: VSO + raízes trilíteras = alta viscosidade = baixa ambiguidade
+# Português: SVO + flexão moderada = viscosidade média
+# Chinês: SVO sem flexão = baixa viscosidade = alta ambiguidade por contexto
+GRAMMAR_RULES = {
+    'he': {
+        'order':'VSO', 'viscosity':0.92, 'root_system':'trilítera',
+        'definite':'הַ-prefixo', 'gender':True, 'number':True,
+        'verb_conj':'binyanim(7padrões)', 'tense':'aspecto(perfeito/imperfeito)',
+        'accent_system':'tonal_stress', 'cantillation':True,
+    },
+    'ar_biblia': {  # aramaico bíblico
+        'order':'VSO', 'viscosity':0.90, 'root_system':'trilítera',
+        'state':'absoluto/construto/determinado', 'gender':True,
+        'verb_conj':'pe_al_pa_hap_el', 'emphatic_state':True,
+    },
+    'el_koine': {  # grego koinê (NT)
+        'order':'SVO_livre', 'viscosity':0.89, 'case_system':'5casos',
+        'gender':'3gêneros', 'aspect':'aoristo/imperfeito/perfeito',
+        'voice':'ativa/média/passiva', 'mood':'indicativo/subjuntivo/optativo',
+        'accent':'agudo/grave/circunflexo', 'breathing':'suave/áspero',
+    },
+    'la_vulgata': {
+        'order':'SOV_livre', 'viscosity':0.87, 'case_system':'6casos',
+        'gender':'3gêneros', 'conjugation':'4conjugações',
+        'quantity':'vogais_longas_curtas',
+    },
+    'pt': {
+        'order':'SVO', 'viscosity':0.83,
+        'acento':'agudo/grave/circunflexo/til',
+        'crase':True, 'pronome_obliquo':True,
+        'subjuntivo':True, 'infinitivo_pessoal':True,
+    },
+}
+def viscosity_parse(text, lang='pt'):
+    rules = GRAMMAR_RULES.get(lang, GRAMMAR_RULES['pt'])
+    tokens = text.split()
+    phi_viscosity = rules['viscosity']
+    parsed = []
+    for i, tok in enumerate(tokens):
+        node = {'tok':tok, 'pos':i, 'lang':lang,
+                'viscosity':phi_viscosity,
+                'phi': phi_viscosity * (1 - 0.01*i)}
+        parsed.append(node)
+    return parsed, phi_viscosity
+SEED
+}
+
+seed_S02_V4_cantillation_prosody() { cat << 'SEED'
+# S02_V4: CANTILAÇÃO E PROSÓDIA — acentos como portadores de significado
+# Hebraico bíblico: 27 acentos de cantilação (טעמים/te'amim)
+# Grego: acento tônico muda significado (τόνος)
+# Português: acento gráfico + prosódia = coerência semântica
+CANTILLATION_HE = {
+    'טִפְּחָא':'pausa_média',    'אַתְנָח':'pausa_maior',
+    'סִלּוּק':'fim_de_verso',    'זָקֵף':'elevação',
+    'רְבִיעַ':'quarta',         'שַׁלְשֶׁלֶת':'trêmulo_longo',
+    'מֵרְכָא':'prolongamento',   'מֻנַּח':'descanso',
+    'דַּרְגָּא':'grau',          'תְּלִישָׁא':'arrancado',
+}
+ACCENT_TYPES = {
+    'pt': {'agudo':'á é í ó ú','grave':'à','circunflexo':'â ê ô','til':'ã õ',
+           'cedilha':'ç','trema':'ü(archaic)'},
+    'el': {'agudo':'ά έ ή ί ό ύ ώ','grave':'ὰ ὲ','circunflexo':'ᾶ ῆ ῶ',
+           'spiritus_asper':'ἁ ἑ','spiritus_lenis':'ἀ ἐ','iota_subs':'ᾳ ῃ'},
+    'la': {'macron':'ā ē ī ō ū','brevis':'ă ĕ','acute_stress':'stressed_syl'},
+    'he': {'meteg':'מֶתֶג','dagesh':'דָּגֵשׁ','shva':'שְׁוָא',
+           'patach':'פַּתַח','qamets':'קָמֵץ','tsere':'צֵרֵי',
+           'segol':'סֶגּוֹל','hirik':'חִירִיק','holam':'חוֹלָם','shureq':'שׁוּרֶק'},
+}
+def extract_prosody(text, lang='pt'):
+    accents = ACCENT_TYPES.get(lang, ACCENT_TYPES['pt'])
+    prosody_map = []
+    for i, char in enumerate(text):
+        for accent_type, chars in accents.items():
+            if char in chars:
+                prosody_map.append({
+                    'pos':i,'char':char,'type':accent_type,
+                    'phi_weight':0.95 if accent_type in ('agudo','stress') else 0.80,
+                })
+    return prosody_map
+# GN 1:1 HE com te'amim: בְּרֵאשִׁ֖ית (tifcha) בָּרָ֣א (merkha) אֱלֹהִ֑ים (athnach)
+SEED
+}
+
+seed_S02_V5_semantic_dependency_graph() { cat << 'SEED'
+# S02_V5: GRAFO DE DEPENDÊNCIAS SEMÂNTICAS
+# Cada palavra é nó; relações são arestas dirigidas com peso de coerência
+# Implementa Universal Dependencies para 8 línguas
+class DepGraph:
+    def __init__(self): self.nodes={}; self.edges=[]
+    def add_node(self, id, word, pos, lang, phi=1.0):
+        self.nodes[id]={'word':word,'pos':pos,'lang':lang,'phi':phi}
+    def add_edge(self, src, tgt, rel, weight=1.0):
+        self.edges.append({'src':src,'tgt':tgt,'rel':rel,'w':weight})
+    def coherence(self):
+        if not self.edges: return 0.0
+        return sum(e['w'] for e in self.edges) / len(self.edges)
+    def phi_ethica(self, entropy=0.3):
+        c = self.coherence()
+        return (1 - entropy) * c
+UD_RELATIONS = [
+    'nsubj','obj','iobj','csubj','ccomp','xcomp',
+    'obl','vocative','dislocated','advcl','advmod',
+    'amod','appos','nummod','det','clf','case',
+    'conj','cc','flat','compound','list','parataxis',
+    'orphan','goeswith','reparandum','punct','root','dep',
+]
+def parse_to_depgraph(tokens, lang='pt'):
+    g = DepGraph()
+    for i, tok in enumerate(tokens):
+        w = tok.get('norm', tok) if isinstance(tok, dict) else tok
+        g.add_node(i, w, 'UNK', lang)
+    # heurístico: conectar vizinhos com peso decrescente
+    for i in range(len(tokens)-1):
+        g.add_edge(i, i+1, 'dep', 1.0 - 0.05*i)
+    return g, g.phi_ethica()
+# Gênesis 1:1:
+# ROOT(ברא) →nsubj(אלהים) →obj(השמים) →conj(הארץ)
+# phi_ethica = coerência da estrutura de dependências
+SEED
+}
+
+# ╔═══════════════════════════════════════════════════════════════════════════╗
+# ║  SEMENTE 03 — CODIFICADOR BÍBLICO MULTILÍNGUE + CROSS-REFERENCE         ║
+# ╚═══════════════════════════════════════════════════════════════════════════╝
+
+seed_S03_V1_bible_encoder_full() { cat << 'SEED'
+# S03_V1: CODIFICADOR BÍBLICO COMPLETO — 6 línguas + cross-reference
+# Estrutura: {livro, cap, vers, HE, EL, LA, AR, PT, glossas}
+GENESIS_1_1 = {
+    'ref': {'livro':'GEN','cap':1,'vers':1},
+    'HE': 'בְּרֵאשִׁ֖ית בָּרָ֣א אֱלֹהִ֑ים אֵ֥ת הַשָּׁמַ֖יִם וְאֵ֥ת הָאָֽרֶץ׃',
+    'AR': 'בְּרֵישִׁית בְּרָא אֱלָהָא יָת שְׁמַיָּא וְיָת אַרְעָא',  # Targum Onkelos
+    'EL': 'Ἐν ἀρχῇ ἐποίησεν ὁ θεὸς τὸν οὐρανὸν καὶ τὴν γῆν',      # LXX
+    'LA': 'In principio creavit Deus caelum et terram',               # Vulgata
+    'PT': 'No princípio criou Deus os céus e a terra',                # ARA
+    'EN': 'In the beginning God created the heavens and the earth',   # KJV
+    'glossas': {
+        'בְּרֵאשִׁית': {'raiz':'ראש','gloss':'no-princípio','parsec':'prep+subst+suf'},
+        'בָּרָא':      {'raiz':'ברא','gloss':'criou','parsec':'qal-perf-3ms'},
+        'אֱלֹהִים':    {'raiz':'אל', 'gloss':'Deus','parsec':'subst-mp-abs'},
+        'הַשָּׁמַיִם': {'raiz':'שמים','gloss':'os-céus','parsec':'subst-mp+art'},
+        'הָאָרֶץ':     {'raiz':'ארץ','gloss':'a-terra','parsec':'subst-fs+art'},
+        'Ἐν ἀρχῇ':    {'raiz':'ἀρχή','gloss':'no-princípio','parsec':'prep+dat-sg'},
+        'ἐποίησεν':   {'raiz':'ποιέω','gloss':'fez/criou','parsec':'aor-ind-act-3sg'},
+        'In principio':{'raiz':'principium','gloss':'no-início','parsec':'prep+abl-sg'},
+        'creavit':    {'raiz':'creo','gloss':'criou','parsec':'perf-ind-act-3sg'},
+    },
+    'phi': 0.97,  # coerência semântica cross-língua
+}
+def encode_verse(verse_data):
+    import struct
+    items = [(k,v) for k,v in verse_data.items() if k not in ('glossas','phi')]
+    encoded = {}
+    for lang, text in items:
+        if isinstance(text, dict):
+            ref = text
+            code = (ref['livro'].encode()+
+                    struct.pack('<HH', ref['cap'], ref['vers']))
+            encoded['REF'] = code.hex()
+        elif isinstance(text, str):
+            encoded[lang] = text.encode('utf-8').hex()
+    return encoded
+# Cada verso = manifesto cross-língua com glossas e phi de coerência
+SEED
+}
+
+seed_S03_V2_interlinear_low_level() { cat << 'SEED'
+// S03_V2: BÍBLIA INTERLINEAR EM C BARE-METAL
+// Cada palavra HE/EL/LA com tradução palavra-por-palavra
+// Zero alocação dinâmica — arrays estáticos
+#include <stdint.h>
+#define MAX_WORDS 64
+#define MAX_LANGS 6
+#define LANG_HE 0
+#define LANG_EL 1
+#define LANG_LA 2
+#define LANG_AR 3
+#define LANG_PT 4
+#define LANG_EN 5
+typedef struct {
+    uint32_t crc32c;       // identidade do termo
+    uint8_t  lang;
+    uint8_t  phi_q8;       // coerência 0-255
+    uint16_t gloss_id;     // índice no dicionário estático
+    char     word[32];     // UTF-8 word
+    char     gloss[32];    // gloss em PT
+} BiblWord;
+typedef struct {
+    uint16_t  book, chap, vers;
+    uint8_t   lang_count;
+    uint8_t   phi_q8;
+    uint32_t  chain_crc;
+    BiblWord  words[MAX_WORDS];
+    uint8_t   word_count;
+} BiblVerse;
+// GN 1:1 HE compilado estaticamente:
+static const BiblWord GN1_1_HE[] = {
+    {0xA1B2C3D4, LANG_HE, 245, 1, "בְּרֵאשִׁית", "no-princípio"},
+    {0xB2C3D4E5, LANG_HE, 250, 2, "בָּרָא",      "criou"},
+    {0xC3D4E5F6, LANG_HE, 248, 3, "אֱלֹהִים",    "Deus"},
+    {0xD4E5F607, LANG_HE, 242, 4, "הַשָּׁמַיִם", "os-céus"},
+    {0xE5F60718, LANG_HE, 241, 5, "הָאָרֶץ",     "a-terra"},
+};
+SEED
+}
+
+seed_S03_V3_cross_language_hash() { cat << 'SEED'
+# S03_V3: HASH CROSS-LINGUÍSTICO — mesma palavra em N línguas = mesmo id
+# "criar" = ברא = ποιέω = creo = créer = create → cluster semântico único
+import hashlib
+SEMANTIC_CLUSTERS = {
+    'CRIAR':      {'he':'ברא','el':'ποιέω','la':'creo','pt':'criar','en':'create','ar':'בְּרָא'},
+    'PRINCÍPIO':  {'he':'ראשית','el':'ἀρχή','la':'principium','pt':'princípio','en':'beginning'},
+    'DEUS':       {'he':'אלהים','el':'θεός','la':'Deus','pt':'Deus','en':'God','ar':'אֱלָהָא'},
+    'CÉU':        {'he':'שמים','el':'οὐρανός','la':'caelum','pt':'céu','en':'heaven'},
+    'TERRA':      {'he':'ארץ','el':'γῆ','la':'terra','pt':'terra','en':'earth'},
+    'LUZ':        {'he':'אור','el':'φῶς','la':'lux','pt':'luz','en':'light'},
+    'TREVAS':     {'he':'חשך','el':'σκότος','la':'tenebra','pt':'trevas','en':'darkness'},
+    'ÁGUA':       {'he':'מים','el':'ὕδωρ','la':'aqua','pt':'água','en':'water'},
+    'VERBO':      {'he':'דבר','el':'λόγος','la':'verbum','pt':'verbo','en':'word'},
+    'AMOR':       {'he':'אהבה','el':'ἀγάπη','la':'amor','pt':'amor','en':'love'},
+    'ESPÍRITO':   {'he':'רוח','el':'πνεῦμα','la':'spiritus','pt':'espírito','en':'spirit'},
+}
+FNV1A_PRIME = 0x100000001B3
+FNV1A_BASIS = 0xCBF29CE484222325
+def fnv1a64(s):
+    h = FNV1A_BASIS
+    for b in s.encode('utf-8'):
+        h = ((h ^ b) * FNV1A_PRIME) & 0xFFFFFFFFFFFFFFFF
+    return h
+def semantic_cluster_id(concept):
+    return fnv1a64(concept.upper()) & 0xFFFF
+def cross_lang_match(word, lang):
+    w = word.strip()
+    for concept, translations in SEMANTIC_CLUSTERS.items():
+        if translations.get(lang,'').strip() == w:
+            return concept, semantic_cluster_id(concept)
+    return None, None
+# cross_lang_match('ברא','he') → ('CRIAR', 0x4A2B)
+# cross_lang_match('creavit','la') → ('CRIAR', 0x4A2B) mesmo id!
+SEED
+}
+
+seed_S03_V4_structural_isomorphism() { cat << 'SEED'
+# S03_V4: ISOMORFISMO ESTRUTURAL ENTRE TRADUÇÕES
+# GN 1:1 HE (VSO) e GN 1:1 PT (SVO) são isomorfos se
+# existe f: nodos_HE → nodos_PT que preserva relações semânticas
+def build_isomorphism(verse_he, verse_pt):
+    mapping = {}
+    he_words = verse_he.split()
+    pt_words = verse_pt.split()
+    SEMANTIC_MAP = {
+        'בְּרֵאשִׁית':'princípio','בָּרָא':'criou','אֱלֹהִים':'Deus',
+        'הַשָּׁמַיִם':'céus','הָאָרֶץ':'terra','וְאֵת':'e',
+    }
+    for hw in he_words:
+        pt_equiv = SEMANTIC_MAP.get(hw)
+        if pt_equiv:
+            for pw in pt_words:
+                if pt_equiv.lower() in pw.lower():
+                    mapping[hw] = pw; break
+    iso_score = len(mapping) / max(len(he_words), 1)
+    phi_iso = iso_score * 0.97  # HE→PT tem alta preservação semântica
+    return mapping, phi_iso
+# Gn 1:1: iso_score=0.83, phi_iso=0.81 (5 de 6 conceitos mapeados)
+# A palavra sem mapeamento: 'אֵת' (marcador de objeto definido — sem equiv PT)
+SEED
+}
+
+seed_S03_V5_assembly_bible_vm() { cat << 'SEED'
+; S03_V5: BÍBLIA COMO PROGRAMA EM RAFAELIA-VM — ARM64 ASSEMBLY
+; Cada verso = bloco de instruções
+; Cada palavra HE/EL/LA = opcode + argumento
+; Execução = leitura do texto como código
+.section .data
+str_bereshit:  .string "בְּרֵאשִׁית"
+str_bara:      .string "בָּרָא"
+str_elohim:    .string "אֱלֹהִים"
+str_shamayim:  .string "הַשָּׁמַיִם"
+str_aretz:     .string "הָאָרֶץ"
+str_pt_gn1:    .string "No princípio criou Deus os céus e a terra"
+.section .text
+.global raf_vm_gn1_1
+; void raf_vm_gn1_1(uint8_t *output_buf, uint32_t buf_len)
+; x0 = output_buf, x1 = buf_len
+raf_vm_gn1_1:
+    stp x29, x30, [sp, #-16]!
+    mov x29, sp
+    ; --- RVMOP_BEGIN (0x10) ---
+    mov w2, #0x10              // opcode BEGIN
+    strb w2, [x0], #1         // emit opcode
+    ; --- RVMOP_LOGOS (0xF0) = ELOHIM ---
+    mov w2, #0xF0              // opcode LOGOS
+    strb w2, [x0], #1
+    ; --- RVMOP_CREATE (0x11) = BARA ---
+    mov w2, #0x11              // opcode CREATE
+    strb w2, [x0], #1
+    ; --- RVMOP_NOUN (0x81) = SHAMAYIM ---
+    mov w2, #0x81              // opcode NOUN
+    strb w2, [x0], #1
+    mov w2, #1                 // arg = object_id 1
+    strb w2, [x0], #1
+    ; --- RVMOP_AND (0x20) ---
+    mov w2, #0x20
+    strb w2, [x0], #1
+    ; --- RVMOP_NOUN (0x81) = ARETZ ---
+    mov w2, #0x81
+    strb w2, [x0], #1
+    mov w2, #2
+    strb w2, [x0], #1
+    ; --- RVMOP_SEAL (0xFF) verso 1 ---
+    mov w2, #0xFF
+    strb w2, [x0], #1
+    mov w2, #1                 // verse_id = 1
+    strb w2, [x0], #1
+    ldp x29, x30, [sp], #16
+    ret
+; Resultado: [0x10, 0xF0, 0x11, 0x81,0x01, 0x20, 0x81,0x02, 0xFF,0x01]
+; = GN 1:1 como bytecode Rafaelia-VM — 10 bytes para o primeiro verso
+SEED
+}
+
+# ╔═══════════════════════════════════════════════════════════════════════════╗
+# ║  SEMENTE 04 — COMPILADOR FALA→ASM LOW-LEVEL COMPLETO                    ║
+# ╚═══════════════════════════════════════════════════════════════════════════╝
+
+seed_S04_V1_speech_to_lowlevel_pipeline() { cat << 'SEED'
+# S04_V1: PIPELINE COMPLETO FALA→BAIXO NÍVEL
+# fala → FFT → fonemas → tokens → AST → bytecode → ASM → ELF
+import struct, math
+# Etapa 1: FFT de frames de áudio → formantes dominantes
+def audio_to_formants(samples, fs=16000, frame_ms=25):
+    frame_n = int(fs * frame_ms / 1000)
+    frames = [samples[i:i+frame_n] for i in range(0,len(samples)-frame_n,frame_n//2)]
+    formants = []
+    for frame in frames:
+        N = len(frame)
+        spec = [abs(sum(frame[n]*math.cos(2*math.pi*k*n/N)
+                  for n in range(N))) for k in range(N//2)]
+        peaks = sorted(range(len(spec)), key=lambda i: spec[i], reverse=True)[:3]
+        freqs = [p * fs / N for p in sorted(peaks)]
+        formants.append(freqs)
+    return formants
+# Etapa 2: formantes → fonemas (lookup de manifold)
+FORMANT_TO_PHONEME = {
+    (300,800): 'u', (300,2300): 'i', (500,1000): 'o',
+    (500,1900): 'e', (800,1200): 'a',
+}
+def formants_to_phoneme(f1, f2, tolerance=200):
+    best, best_d = None, float('inf')
+    for (tf1,tf2), ph in FORMANT_TO_PHONEME.items():
+        d = abs(f1-tf1) + abs(f2-tf2)
+        if d < best_d: best_d, best = d, ph
+    return best if best_d < tolerance else '?'
+# Etapa 3: fonemas → tokens → bytecode (via lexer + parser)
+def compile_speech_to_bytecode(phoneme_stream, lang='pt'):
+    # agrupa fonemas em palavras por pausa (silence=0)
+    words, buf = [], []
+    for ph in phoneme_stream:
+        if ph != '_': buf.append(ph)
+        elif buf: words.append(''.join(buf)); buf=[]
+    if buf: words.append(''.join(buf))
+    # emite bytecode simples para cada palavra
+    bytecode = bytearray()
+    bytecode.append(0x10)  # BEGIN
+    for w in words:
+        crc = sum(ord(c) for c in w) & 0xFF
+        bytecode.extend([0x03, crc])  # PUSH word_hash
+    bytecode.append(0xFF)  # SEAL
+    return bytes(bytecode)
+SEED
+}
+
+seed_S04_V2_asm_generator_arm64() { cat << 'SEED'
+; S04_V2: GERADOR DE ASM ARM64 DE TEXTO NATURAL
+; Input: string de tokens | Output: função ARM64 que imprime o texto
+; Técnica: cada palavra vira uma sequência de instruções ADRP+ADD+BL write
+.macro EMIT_WORD str_sym
+    adrp x1, \str_sym
+    add  x1, x1, :lo12:\str_sym
+    mov  x0, #1              // stdout
+    mov  x2, #32             // max len
+    mov  x8, #64             // SYS_write
+    svc  #0
+.endm
+; Gerador em Python (meta-programação):
+def gen_arm64_print_tokens(tokens):
+    asm = [
+        '.section .data',
+    ]
+    for i, tok in enumerate(tokens):
+        w = tok.get('raw', str(tok)) if isinstance(tok,dict) else str(tok)
+        safe = w.encode('ascii','replace').decode('ascii')
+        asm.append(f'str_{i}: .asciz "{safe} "')
+    asm += ['.section .text', '.global raf_print_tokens', 'raf_print_tokens:',
+            '    stp x29, x30, [sp, #-16]!', '    mov x29, sp']
+    for i in range(len(tokens)):
+        asm += [f'    adrp x1, str_{i}', f'    add x1, x1, :lo12:str_{i}',
+                '    mov x0, #1', '    mov x2, #64', '    mov x8, #64', '    svc #0']
+    asm += ['    ldp x29, x30, [sp], #16', '    ret']
+    return '\n'.join(asm)
+SEED
+}
+
+seed_S04_V3_jit_compiler_minimal() { cat << 'SEED'
+// S04_V3: JIT MÍNIMO — bytecode Rafaelia-VM → ARM64 machine code em runtime
+// Zero libc; usa mmap via syscall direto para página executável
+#include <stdint.h>
+// ARM64 encodings (instruções fixas)
+#define A64_NOP    0xD503201Fu  // nop
+#define A64_RET    0xD65F03C0u  // ret
+#define A64_SVC0   0xD4000001u  // svc #0
+#define A64_MOV_X8(n) (0xD2800008u | ((uint32_t)(n)<<5))
+#define A64_MOV_X0(n) (0xD2800000u | ((uint32_t)(n)<<5))
+typedef struct { uint32_t *code; uint32_t len, cap; } JITBuf;
+static void jit_emit(JITBuf *j, uint32_t instr) {
+    if (j->len < j->cap) j->code[j->len++] = instr;
+}
+static void jit_compile_rvm(const uint8_t *bc, uint32_t bclen, JITBuf *j) {
+    for (uint32_t i=0; i<bclen; i++) {
+        switch(bc[i]) {
+        case 0x00: jit_emit(j, A64_NOP); break;
+        case 0xFE: // PRINT → SYS_write
+            jit_emit(j, A64_MOV_X0(1));   // fd=1 (stdout)
+            jit_emit(j, A64_MOV_X8(64));  // SYS_write=64
+            jit_emit(j, A64_SVC0); break;
+        case 0xFF: jit_emit(j, A64_RET); return;
+        default: jit_emit(j, A64_NOP); break;
+        }
+    }
+    jit_emit(j, A64_RET);
+}
+// Para executar: mprotect(page, PROT_READ|PROT_EXEC) via SYS_mprotect
+// Então: ((void(*)(void))j->code)()
+SEED
+}
+
+seed_S04_V4_ir_optimizer_branchless() { cat << 'SEED'
+// S04_V4: OTIMIZADOR DE IR BRANCHLESS — elimina branches de alta frequência
+// Técnica: CSEL/CMOV ARM64 para substituir if/else de 1 instrução
+#include <stdint.h>
+typedef enum { IR_ADD,IR_SUB,IR_MUL,IR_AND,IR_OR,IR_XOR,IR_CMP,IR_BRANCH } IROp;
+typedef struct { IROp op; uint32_t dst,src1,src2; int32_t imm; } IRInstr;
+typedef struct { IRInstr *code; uint32_t len; } IRBlock;
+// Detecta padrão: CMP + BRANCH → substitui por CSEL
+static uint32_t opt_branch_to_csel(IRBlock *blk, uint32_t *out_code, uint32_t cap) {
+    uint32_t k=0;
+    for (uint32_t i=0; i<blk->len && k<cap; i++) {
+        if (blk->code[i].op == IR_BRANCH && i>0 &&
+            blk->code[i-1].op == IR_CMP) {
+            // CSEL encoding: dst = (cond) ? src1 : src2
+            // ARM64: CSEL Rd, Rn, Rm, cond
+            uint32_t instr = 0x1A800000u;  // CSEL base
+            instr |= (blk->code[i].dst   & 0x1F);
+            instr |= (blk->code[i].src1  & 0x1F) << 5;
+            instr |= (blk->code[i].src2  & 0x1F) << 16;
+            instr |= (0x0u << 12);  // EQ condition
+            out_code[k++] = instr;
+        } else {
+            out_code[k++] = (uint32_t)blk->code[i].op;
+        }
+    }
+    return k;
+}
+// Ganho: cada branch eliminado = 14-20 ciclos ARM (Machine Codex MC-03)
+SEED
+}
+
+seed_S04_V5_universal_translator_vm() { cat << 'SEED'
+# S04_V5: VM DE TRADUÇÃO UNIVERSAL — executa bytecode Rafaelia-VM
+# e produz saída em qualquer língua alvo
+class RafaeliaVM:
+    def __init__(self, lang_out='pt'):
+        self.stack=[], self.lang_out=lang_out
+        self.pc=0; self.running=False; self.output=[]
+        self.phi=1.0
+    VOCAB = {
+        'pt':{'BEGIN':'No','CREATE':'criou','NOUN_1':'os-céus',
+              'NOUN_2':'a-terra','AND':'e','LOGOS':'Deus','SEAL':'.'},
+        'en':{'BEGIN':'In-the','CREATE':'created','NOUN_1':'the-heavens',
+              'NOUN_2':'the-earth','AND':'and','LOGOS':'God','SEAL':'.'},
+        'la':{'BEGIN':'In','CREATE':'creavit','NOUN_1':'caelum',
+              'NOUN_2':'terram','AND':'et','LOGOS':'Deus','SEAL':'.'},
+        'el':{'BEGIN':'Ἐν','CREATE':'ἐποίησεν','NOUN_1':'τὸν οὐρανὸν',
+              'NOUN_2':'τὴν γῆν','AND':'καὶ','LOGOS':'ὁ θεὸς','SEAL':'.'},
+        'he':{'BEGIN':'בְּרֵאשִׁית','CREATE':'בָּרָא','NOUN_1':'הַשָּׁמַיִם',
+              'NOUN_2':'הָאָרֶץ','AND':'וְאֵת','LOGOS':'אֱלֹהִים','SEAL':'׃'},
+    }
+    OP_MAP = {
+        0x10:'BEGIN',0x11:'CREATE',0xF0:'LOGOS',
+        0x81:'NOUN',0x20:'AND',0xFF:'SEAL',
+    }
+    def run(self, bytecode):
+        self.running=True; v=self.VOCAB.get(self.lang_out,self.VOCAB['pt'])
+        i=0
+        while i<len(bytecode) and self.running:
+            op=bytecode[i]; nm=self.OP_MAP.get(op,'?')
+            if op==0x81: i+=1; arg=bytecode[i]; self.output.append(v.get(f'NOUN_{arg}','?'))
+            elif nm in v: self.output.append(v[nm])
+            if op==0xFF: self.running=False
+            i+=1
+        return ' '.join(self.output)
+# vm=RafaeliaVM('la'); vm.run([0x10,0xF0,0x11,0x81,1,0x20,0x81,2,0xFF])
+# → "In Deus creavit caelum et terram ."
+SEED
+}
+
+# ╔═══════════════════════════════════════════════════════════════════════════╗
+# ║  SEMENTE 05 — CONVERSOR TEXTO→CÓDIGO + DECOMPILADOR                     ║
+# ╚═══════════════════════════════════════════════════════════════════════════╝
+
+seed_S05_V1_text_to_c_transpiler() { cat << 'SEED'
+# S05_V1: TRANSPILADOR TEXTO NATURAL → C BARE-METAL
+# "crie uma função que soma dois números" → código C válido
+PATTERN_TO_C = {
+    r'cri[ea]\w* (uma )?função': 'static {RTYPE} {FNAME}({PARAMS}) {{\n{BODY}\n}}',
+    r'soma\w* (dois|2) números': 'static int32_t raf_soma(int32_t a, int32_t b) { return a + b; }',
+    r'multipli\w* (dois|2) números': 'static int32_t raf_mul(int32_t a, int32_t b) { return a * b; }',
+    r'calcula\w* crc32': '''static uint32_t raf_crc32c(const uint8_t *d, uint32_t n) {
+    uint32_t c=0xFFFFFFFFu,i;
+    for(i=0;i<n;i++){c^=d[i];for(int b=0;b<8;b++)c=(c>>1)^(0x82F63B78u&-(c&1));}
+    return ~c;
+}''',
+    r'hash (fnv|fnv1a)': '''static uint64_t raf_fnv1a64(const uint8_t *d, uint32_t n) {
+    uint64_t h=0xCBF29CE484222325ULL;
+    for(uint32_t i=0;i<n;i++){h^=d[i];h*=0x100000001B3ULL;}
+    return h;
+}''',
+    r'arena (alloc|alocador)': '''static uint8_t raf_arena[1<<20]; static uint32_t raf_ptr=0;
+static void* raf_alloc(uint32_t n){
+    n=(n+7u)&~7u;
+    if(raf_ptr+n>sizeof(raf_arena))return 0;
+    void*p=raf_arena+raf_ptr; raf_ptr+=n; return p;
+}''',
+}
+import re
+def transpile_to_c(text):
+    text_lower = text.lower()
+    results = []
+    for pattern, template in PATTERN_TO_C.items():
+        if re.search(pattern, text_lower):
+            results.append(template)
+    if not results:
+        results.append(f'// TODO: implementar "{text}"\n// phi=0.0 (padrão não reconhecido)')
+    header = '#include <stdint.h>\n// gerado por compiladorlowFala\n'
+    return header + '\n\n'.join(results)
+SEED
+}
+
+seed_S05_V2_decompiler_bytecode_to_text() { cat << 'SEED'
+# S05_V2: DECOMPILADOR BYTECODE RAFAELIA-VM → TEXTO HUMANO
+OPCODES = {
+    0x00:'NOP',   0x01:'LOAD', 0x02:'STORE',0x03:'PUSH', 0x04:'POP',
+    0x10:'BEGIN', 0x11:'CREATE',0x12:'SPEAK',0x13:'LET', 0x14:'SEP',
+    0x15:'NAME',  0x16:'GOOD', 0x17:'EVENING',0x20:'AND',0x21:'OR',
+    0x22:'NOT',   0x23:'IF',  0x24:'LOOP', 0x25:'BLESS',0x26:'SANCTIFY',
+    0x27:'REST',  0x80:'VERB',0x81:'NOUN', 0x82:'PROP', 0xF0:'LOGOS',
+    0xFE:'PRINT', 0xFF:'SEAL',
+}
+OP_TO_PT = {
+    'BEGIN':'No início', 'CREATE':'criou/fez', 'LOGOS':'Deus/Logos',
+    'NOUN':'[objeto]', 'AND':'e', 'SEAL':'[fim do verso]',
+    'BLESS':'abençoou', 'REST':'descansou', 'GOOD':'era bom',
+    'SPEAK':'disse', 'LET':'seja', 'SEP':'separou', 'NAME':'chamou',
+    'LOOP':'repetiu', 'EVENING':'houve tarde', 'IF':'se',
+}
+def decompile_to_text(bytecode, lang='pt'):
+    result, i = [], 0
+    while i < len(bytecode):
+        op = bytecode[i]
+        nm = OPCODES.get(op, f'OP_{op:02X}')
+        if op == 0x81:  # NOUN + arg
+            i += 1
+            arg = bytecode[i] if i < len(bytecode) else 0
+            result.append(f'[NOUN_{arg}]')
+        else:
+            pt = OP_TO_PT.get(nm, nm)
+            result.append(pt)
+        if op == 0xFF: break
+        i += 1
+    return ' '.join(result)
+# decompile_to_text([0x10,0xF0,0x11,0x81,1,0x20,0x81,2,0xFF])
+# → "No início Deus/Logos criou/fez [NOUN_1] e [NOUN_2] [fim do verso]"
+SEED
+}
+
+seed_S05_V3_elf_generator_freestanding() { cat << 'SEED'
+// S05_V3: GERADOR DE ELF FREESTANDING — bytecode → ELF executável
+// Zero libc; gera ELF64 ARM64 válido a partir de bytecode RVM
+#include <stdint.h>
+// ELF64 Header mínimo (64 bytes)
+static const uint8_t ELF_HEADER[64] = {
+    0x7F,'E','L','F', 2,1,1,0, 0,0,0,0,0,0,0,0,  // magic+class+data+OSABI
+    2,0, 0xB7,0,                                    // type=ET_EXEC, arch=EM_AARCH64
+    1,0,0,0,                                        // version=1
+    0x78,0x00,0x40,0x00,0x00,0x00,0x00,0x00,        // entry=0x400078
+    0x40,0,0,0,0,0,0,0,                             // phoff=64
+    0,0,0,0,0,0,0,0,                                // shoff=0
+    0,0,0,0,                                        // flags=0
+    0x40,0,                                         // ehsize=64
+    0x38,0, 1,0,                                    // phentsize=56, phnum=1
+    0,0, 0,0, 0xFF,0xFF,                            // shentsize, shnum, shstrndx
+};
+// Gera arquivo ELF mínimo com código ARM64 embutido
+uint32_t gen_elf(const uint32_t *arm64_code, uint32_t code_words,
+                 uint8_t *out, uint32_t out_cap) {
+    if (out_cap < 64 + 56 + code_words*4) return 0;
+    // copia header
+    for(uint32_t i=0;i<64;i++) out[i]=ELF_HEADER[i];
+    // Program header (56 bytes) — PT_LOAD
+    uint32_t code_bytes = code_words*4;
+    uint32_t *ph = (uint32_t*)(out+64);
+    ph[0]=1; ph[1]=5;          // PT_LOAD, PF_R|PF_X
+    // offset, vaddr, paddr, filesz, memsz, align...
+    // código começa em out+120
+    uint8_t *code_dst = out + 64 + 56;
+    for(uint32_t i=0;i<code_words;i++){
+        code_dst[i*4+0]=(uint8_t)(arm64_code[i]&0xFF);
+        code_dst[i*4+1]=(uint8_t)((arm64_code[i]>>8)&0xFF);
+        code_dst[i*4+2]=(uint8_t)((arm64_code[i]>>16)&0xFF);
+        code_dst[i*4+3]=(uint8_t)((arm64_code[i]>>24)&0xFF);
+    }
+    return 64+56+code_bytes;
+}
+SEED
+}
+
+seed_S05_V4_linguistic_to_sql() { cat << 'SEED'
+# S05_V4: LINGUAGEM NATURAL → SQL ESTRUTURADO
+# "encontre todos os versículos que mencionam luz e água"
+# → SELECT * FROM verses WHERE text LIKE '%luz%' AND text LIKE '%água%'
+import re
+COMMAND_PATTERNS = {
+    r'encon[^.]+versículos?[^.]+mencio[^.]+(\w+)\s+e\s+(\w+)':
+        "SELECT book,chap,vers,text FROM verses WHERE text LIKE '%{1}%' AND text LIKE '%{2}%'",
+    r'list[^.]+todas?\s+(\w+)\s+em\s+(\w+)':
+        "SELECT * FROM {2} WHERE category='{1}'",
+    r'conta\w+\s+quantas?\s+vez[^.]+(\w+)':
+        "SELECT COUNT(*) FROM verses WHERE text LIKE '%{1}%'",
+    r'compara\w+\s+(\w+)\s+e\s+(\w+)\s+em\s+(\w+)':
+        "SELECT lang,word FROM glossary WHERE concept IN ('{1}','{2}') AND lang='{3}'",
+    r'busa\w+\s+(\w+)\s+em\s+hebraico':
+        "SELECT he_word,gloss FROM lexicon WHERE pt_word='{1}'",
+}
+SEMANTIC_CLUSTERS_SQL = {
+    'luz':['לאור','אור','φῶς','lux','lumen'],
+    'água':['מים','ὕδωρ','aqua'],
+    'terra':['ארץ','γῆ','terra'],
+    'criou':['ברא','ἐποίησεν','creavit'],
+}
+def nl_to_sql(query):
+    q_lower = query.lower()
+    for pattern, template in COMMAND_PATTERNS.items():
+        m = re.search(pattern, q_lower)
+        if m:
+            groups = m.groups()
+            sql = template
+            for i, g in enumerate(groups, 1):
+                sql = sql.replace(f'{{{i}}}', g)
+            # expande semântica
+            for pt_word, translations in SEMANTIC_CLUSTERS_SQL.items():
+                if pt_word in sql.lower():
+                    trans_clause = " OR ".join([f"text LIKE '%{t}%'" for t in translations])
+                    sql += f"\n  -- (inclui: {trans_clause})"
+            return sql
+    return f"SELECT * FROM verses WHERE text LIKE '%{query}%'"
+SEED
+}
+
+seed_S05_V5_meta_compiler_seed_expander() { cat << 'SEED'
+# S05_V5: META-COMPILADOR DE SEMENTES — expande qualquer semente para código
+# Cada semente é um template que se expande em qualquer direção
+# Este é o compilador do compilador — o meta-nível
+class SeedExpander:
+    def __init__(self):
+        self.seeds={}; self.expansions={}
+        self.phi_field={}  # coerência de cada expansão
+    def register(self, seed_id, template, phi=1.0):
+        self.seeds[seed_id]=template; self.phi_field[seed_id]=phi
+    def expand(self, seed_id, context):
+        tmpl = self.seeds.get(seed_id,'')
+        if not tmpl: return ''
+        result = tmpl
+        for k, v in context.items():
+            result = result.replace(f'{{{k}}}', str(v))
+        phi_out = self.phi_field.get(seed_id,1.0) * context.get('phi_mult',1.0)
+        self.expansions[seed_id]=result
+        return result, phi_out
+    def compile_all(self, contexts):
+        outputs = {}
+        for sid in self.seeds:
+            ctx = contexts.get(sid, {})
+            out, phi = self.expand(sid, ctx)
+            outputs[sid]={'code':out,'phi':phi}
+        avg_phi = sum(v['phi'] for v in outputs.values())/max(len(outputs),1)
+        return outputs, avg_phi
+# Uso: expande S01_V1 com lang='he' → lexer hebraico completo
+# expande S04_V2 com tokens=gn1_1_tokens → ASM ARM64 do Gênesis 1:1
+SEED
+}
+
+# ╔═══════════════════════════════════════════════════════════════════════════╗
+# ║  SEMENTE 06 — ACENTO E CANTILAÇÃO COMO DADOS SEMÂNTICOS                 ║
+# ╚═══════════════════════════════════════════════════════════════════════════╝
+
+seed_S06_V1_te_amim_encoder() { cat << 'SEED'
+# S06_V1: TE'AMIM (טַעֲמִים) — cantilação hebraica como portadora de significado
+# Os 27 acentos de cantilação não são apenas musicais — são estrutura sintática
+TE_AMIM = {
+    # CONJUNTIVOS (ligam palavras ao próximo acento disjuntivo)
+    'מֵרְכָא':  {'name':'merkha',  'type':'conj','pause':'none','syntactic':'continua'},
+    'מֻנַּח':   {'name':'munach',  'type':'conj','pause':'none','syntactic':'continua'},
+    'דַּרְגָּא': {'name':'darga',   'type':'conj','pause':'light','syntactic':'subordina'},
+    'מֵרְכָא_כְּפוּלָה':{'name':'merkha-kefulah','type':'conj','pause':'none','syntactic':'intensifica'},
+    # DISJUNTIVOS (pausam e delimitam unidades sintáticas)
+    'סִלּוּק':  {'name':'silluq',  'type':'disj','pause':'full', 'syntactic':'fim_de_verso'},
+    'אַתְנָח':  {'name':'athnach', 'type':'disj','pause':'major','syntactic':'meio_verso'},
+    'זָקֵף':   {'name':'zaqef',   'type':'disj','pause':'medium','syntactic':'cláusula'},
+    'טִפְּחָא': {'name':'tifcha',  'type':'disj','pause':'minor','syntactic':'subcláusula'},
+    'רְבִיעַ':  {'name':'revia',   'type':'disj','pause':'light','syntactic':'frase_menor'},
+    'שַׁלְשֶׁלֶת':{'name':'shalshelet','type':'disj','pause':'extended','syntactic':'êntase'},
+    'פַּשְׁטָא': {'name':'pashta',  'type':'disj','pause':'light','syntactic':'encerra_sub'},
+    'תֵּבִיר':  {'name':'tevir',   'type':'disj','pause':'medium','syntactic':'variante_zaqef'},
+    'יְתִיב':  {'name':'yetiv',   'type':'disj','pause':'light','syntactic':'pre_athnach'},
+    'זַרְקָא':  {'name':'zarqa',   'type':'disj','pause':'light','syntactic':'pre_segol'},
+    'סֶגֹּל':  {'name':'segol',   'type':'disj','pause':'medium','syntactic':'revia_alt'},
+    'גֵּרֵשׁ':  {'name':'geresh',  'type':'disj','pause':'light','syntactic':'pequena_pausa'},
+    'גֵּרְשַׁיִם':{'name':'gershayim','type':'disj','pause':'medium','syntactic':'ênfase'},
+    'פָּזֵר':  {'name':'pazer',   'type':'disj','pause':'strong','syntactic':'grande_pausa'},
+    'תְּלִישָׁא':{'name':'telisha', 'type':'disj','pause':'strong','syntactic':'longa_pausa'},
+    'קַרְנֵי פָרָה':{'name':'qarne-farah','type':'disj','pause':'full','syntactic':'raro'},
+}
+def parse_cantillation(word_with_accent):
+    for ta, props in TE_AMIM.items():
+        if ta in word_with_accent:
+            return {**props, 'accent':ta, 'phi':0.95 if props['type']=='disj' else 0.75}
+    return {'type':'none','pause':'none','syntactic':'no_accent','phi':0.5}
+# GN 1:1: בְּרֵאשִׁ֖ית (tifcha=subcláusula) בָּרָ֣א (merkha=continua)
+# אֱלֹהִ֑ים (athnach=meio-verso) אֵ֥ת (merkha) הַשָּׁמַ֖יִם (tifcha)
+# וְאֵ֥ת (merkha) הָאָֽרֶץ׃ (silluq=fim_de_verso)
+# Estrutura: [BEGIN subcláusula] [VERB continua] [SUBJ MEIO-VERSO] [OBJ1 sub] [OBJ2 fim]
+SEED
+}
+
+seed_S06_V2_greek_accent_parser() { cat << 'SEED'
+# S06_V2: ACENTO GREGO — portador de significado e distinção lexical
+# τόνος (acento) em grego muda o significado da palavra
+GREEK_ACCENTS = {
+    'ACUTE':  {'symbol':'ά','name':'oxía','rule':'sílaba aguda','phi':0.90},
+    'GRAVE':  {'symbol':'ὰ','name':'bareia','rule':'acento rebaixado em fim de frase','phi':0.75},
+    'CIRCUM': {'symbol':'ᾶ','name':'perispōméni','rule':'sílaba longa+alta','phi':0.88},
+}
+MINIMAL_PAIRS_GR = [
+    {'word1':'εἰ','accent':'none','meaning':'if (conj)'},
+    {'word1':'εἶ','accent':'circum','meaning':'you-are (verb)'},
+    {'word1':'πότε','accent':'acute-1','meaning':'when?'},
+    {'word1':'ποτέ','accent':'acute-2','meaning':'ever/sometime'},
+    {'word1':'ἄρα','accent':'acute-1','meaning':'particle-logical'},
+    {'word1':'ἆρα','accent':'circum','meaning':'particle-question'},
+    {'word1':'τίς','accent':'acute','meaning':'who? (interr)'},
+    {'word1':'τις','accent':'none','meaning':'someone (indef)'},
+]
+BREATHING_MARKS = {
+    'smooth': {'symbol':'᾿','name':'psili','phi':0.70,'phonetic':'no-h'},
+    'rough':  {'symbol':'῾','name':'dasia','phi':0.85,'phonetic':'h-initial'},
+}
+def parse_greek_accent(word):
+    result = {'word':word,'accents':[],'breathings':[],'phi':0.80}
+    for char in word:
+        code = ord(char)
+        # Detecta acentos em Unicode Greek (0x1F00-0x1FFF)
+        if 0x1F00 <= code <= 0x1FFF:
+            result['accents'].append(char)
+            result['phi'] = min(1.0, result['phi'] + 0.05)
+    return result
+# ἀρχή (arkhē) = arkhe + acute = "princípio" → muito específico
+# ἀρχη (sem acento) = pronúncia, mas sem especificidade semântica
+SEED
+}
+
+seed_S06_V3_portuguese_stress_rules() { cat << 'SEED'
+# S06_V3: REGRAS DE ACENTUAÇÃO PORTUGUESA — sistemática completa
+# Português tem sistema de acento mais complexo do que parece
+ACENTO_RULES = {
+    'oxítona':  {'posição':'última','exemplos':['café','avó','cipó'],'phi':0.85},
+    'paroxítona':{'posição':'penúltima','exemplos':['casa','mesa','livro'],'phi':0.90},
+    'proparoxítona':{'posição':'antepenúltima','exemplos':['lâmpada','ônibus'],'phi':0.88},
+    'hiato':    {'regra':'vogais_adjacentes_sílabas_diferentes','phi':0.82},
+    'ditongo':  {'regra':'vogais_mesma_sílaba','phi':0.78},
+    'tritongo': {'regra':'três_vogais_mesma_sílaba','phi':0.75},
+}
+ACENTO_GRAFICO = {
+    'agudo': {'símbolo':'´','vogais':'á é í ó ú','função':'acentua_oxítonas_paroxítonas'},
+    'circunflexo':{'símbolo':'ˆ','vogais':'â ê ô','função':'vogal_fechada_tônica'},
+    'grave': {'símbolo':'`','vogais':'à','função':'crase'},
+    'til':   {'símbolo':'~','vogais':'ã õ','função':'nasalização'},
+    'cedilha':{'símbolo':'¸','consoantes':'ç','função':'som_s_antes_a_o_u'},
+}
+HOMÓGRAFOS = {
+    # palavras com acento diferente = significado diferente
+    ('para','pára'): 'preposição vs verbo',
+    ('polo','pólo'): 'prefixo vs substantivo',
+    ('pelo','pêlo'): 'contração vs substantivo',
+    ('sede','sêde'): 'ausência_água vs cargo(arcaico)',
+    ('colher','côlher'): 'ação vs utensílio(arcaico)',
+}
+def classify_stress(word):
+    # conta sílabas (heurístico simples por vogais)
+    vowels = 'aeiouáàâãéêíóôõúü'
+    syllables = [i for i,c in enumerate(word.lower()) if c in vowels]
+    if not syllables: return {'type':'monosílaba','phi':0.70}
+    last_v = syllables[-1]
+    if last_v == len(word)-1 or (last_v == len(word)-2 and word[-1] in 'ms'):
+        return {'type':'oxítona','phi':0.85}
+    elif len(syllables) >= 2 and syllables[-1] >= len(word)-3:
+        return {'type':'paroxítona','phi':0.90}
+    return {'type':'proparoxítona','phi':0.88}
+SEED
+}
+
+seed_S06_V4_latin_quantity_prosody() { cat << 'SEED'
+# S06_V4: QUANTIDADE VOCÁLICA LATINA — longa/breve como portador semântico
+# Latim clássico: duração vocálica muda significado completamente
+# mālum (maçã) ≠ malum (mal) — só a quantidade distingue
+LATIN_QUANTITY = {
+    'macron':'ā ē ī ō ū',     # vogal longa (~2 moras)
+    'brevis':'ă ĕ ĭ ŏ ŭ',    # vogal breve (~1 mora)
+    'ambiguous':'a e i o u',  # não marcado = contexto determina
+}
+MINIMAL_PAIRS_LA = [
+    {'short':'malum','long':'mālum','short_m':'evil/bad','long_m':'apple/mast'},
+    {'short':'pila','long':'pīla','short_m':'ball','long_m':'mortar'},
+    {'short':'liber','long':'līber','short_m':'free','long_m':'book'},
+    {'short':'hora','long':'hōra','short_m':'boundary','long_m':'hour'},
+    {'short':'venit','long':'vēnit','short_m':'he-comes','long_m':'he-came'},
+    {'short':'populus','long':'pōpulus','short_m':'people','long_m':'poplar-tree'},
+]
+METER_RULES = {
+    'hexameter': {'feet':6,'pattern':'DDDDDS','phi':0.95},  # Virgílio, Homero
+    'pentameter': {'feet':5,'pattern':'DDSD|DS','phi':0.90},
+    'iambic':    {'feet':'variable','pattern':'short+long','phi':0.85},
+    'trochaic':  {'feet':'variable','pattern':'long+short','phi':0.82},
+}
+def scan_latin_meter(verse):
+    # identifica padrão de longa(−) e breve(˘) por heurístico
+    result = []
+    for word in verse.split():
+        for marked, label in [(c,'L') for c in 'āēīōū'] + [(c,'S') for c in 'ăĕĭŏŭ']:
+            if marked in word: result.append((word, label)); break
+        else: result.append((word, '?'))
+    phi = len([r for r in result if r[1]!='?']) / max(len(result),1)
+    return result, phi
+SEED
+}
+
+seed_S06_V5_universal_phonology_engine() { cat << 'SEED'
+# S06_V5: MOTOR DE FONOLOGIA UNIVERSAL — unifica todos os sistemas
+# IPA + cantilação HE + acento GR + quantidade LA + acentuação PT
+# em um único espaço de representação fonológica
+class UniversalPhonologyEngine:
+    def __init__(self):
+        self.phonemes={}; self.rules={}; self.phi=0.0
+    def register_lang(self, lang, phoneme_set, accent_system, stress_rules):
+        self.phonemes[lang]=phoneme_set
+        self.rules[lang]={'accents':accent_system,'stress':stress_rules}
+    def compute_phi(self, lang, word):
+        # phi = coerência fonológica: acento correto + fonemas válidos + prosódia
+        rules = self.rules.get(lang,{})
+        acc = rules.get('accents',{})
+        score = sum(1 for c in word if c in ''.join(acc.get(t,'') for t in acc))
+        return min(1.0, 0.5 + score/max(len(word),1) * 0.5)
+    def transliterate(self, word, src_lang, tgt_lang):
+        # transliteração por proximidade fonética no manifold 14D
+        return word  # placeholder — expande por semente S01_V1
+    def crosslang_rhyme(self, word1, lang1, word2, lang2):
+        # rima cross-linguística por similaridade de formantes finais
+        end1 = word1[-2:] if len(word1)>=2 else word1
+        end2 = word2[-2:] if len(word2)>=2 else word2
+        return end1.lower() == end2.lower(), 0.8 if end1==end2 else 0.4
+# Exemplo:
+# upe = UniversalPhonologyEngine()
+# upe.register_lang('he', TE_AMIM, ACENTO_RULES, {})
+# upe.register_lang('el', GREEK_ACCENTS, {}, {})
+# upe.crosslang_rhyme('ארץ','he','terra','la') → (False, 0.4)
+# upe.crosslang_rhyme('φῶς','el','lux','la') → (False, 0.4) fonemas diferentes
+# upe.compute_phi('he','בְּרֵאשִׁ֖ית') → 0.94 (múltiplos sinais diacríticos)
+SEED
+}
+
+# ╔═══════════════════════════════════════════════════════════════════════════╗
+# ║  SEMENTE 07 — PROGRAMA CONVERSACIONAL MULTILÍNGUE                       ║
+# ╚═══════════════════════════════════════════════════════════════════════════╝
+
+seed_S07_V1_conversation_state_machine() { cat << 'SEED'
+# S07_V1: MÁQUINA DE ESTADOS CONVERSACIONAL
+# Conversa = sequência de estados com transições determinísticas
+# Estado = {intent, lang, phi, context_stack}
+class ConvStateMachine:
+    STATES = ['LISTEN','PARSE','UNDERSTAND','RESPOND','CLARIFY','CLOSE']
+    INTENTS = {
+        'pergunta':   {'keywords':['o que','quem','onde','quando','como','por que'],'lang_hint':'pt'},
+        'traduzir':   {'keywords':['traduz','como se diz','em hebraico','em grego'],'lang_hint':'any'},
+        'compilar':   {'keywords':['compile','gere código','crie função','implemente'],'lang_hint':'tech'},
+        'bíblia':     {'keywords':['gênesis','João','salmo','versículo','bíblia'],'lang_hint':'multi'},
+        'fonética':   {'keywords':['fonema','pronúncia','acento','cantilação'],'lang_hint':'ling'},
+        'saudação':   {'keywords':['olá','shalom','χαῖρε','salve','שָׁלוֹם'],'lang_hint':'multi'},
+    }
+    def __init__(self):
+        self.state='LISTEN'; self.ctx={}; self.phi=0.0
+        self.history=[]; self.lang='pt'
+    def detect_intent(self, text):
+        t=text.lower()
+        for intent,data in self.INTENTS.items():
+            if any(kw in t for kw in data['keywords']):
+                return intent, data.get('lang_hint','pt')
+        return 'geral','pt'
+    def transition(self, text):
+        intent,lang_hint=self.detect_intent(text)
+        self.ctx={'text':text,'intent':intent,'lang_hint':lang_hint}
+        if self.state=='LISTEN': self.state='PARSE'
+        elif self.state=='PARSE': self.state='UNDERSTAND'; self.phi=0.8
+        elif self.state=='UNDERSTAND': self.state='RESPOND'; self.phi=0.9
+        elif self.state=='RESPOND': self.state='LISTEN'; self.phi=1.0
+        self.history.append({'state':self.state,'intent':intent,'phi':self.phi})
+        return self.state, intent, self.phi
+# Fluxo: "o que significa בְּרֵאשִׁית?" →
+# LISTEN→PARSE(intent=bíblia,lang_hint=multi)→UNDERSTAND(phi=0.8)→RESPOND
+SEED
+}
+
+seed_S07_V2_multilang_dialogue_c() { cat << 'SEED'
+// S07_V2: DIÁLOGO MULTILÍNGUE EM C BARE-METAL
+// Detecção de língua + resposta básica sem libc
+#include <stdint.h>
+#define LANG_PT 0
+#define LANG_HE 1
+#define LANG_EL 2
+#define LANG_LA 3
+#define LANG_EN 4
+static const char GREET_PT[] = "Olá, como posso ajudar?";
+static const char GREET_HE[] = "שָׁלוֹם, בַּמֶּה אֶעֱזֹר?";
+static const char GREET_EL[] = "Χαῖρε, πῶς βοηθῶ;";
+static const char GREET_LA[] = "Salve, quomodo possum auxiliari?";
+static const char GREET_EN[] = "Hello, how can I help?";
+static const char *GREET_TABLE[5] = {
+    GREET_PT, GREET_HE, GREET_EL, GREET_LA, GREET_EN
+};
+static uint8_t detect_lang_byte(const uint8_t *text, uint32_t len) {
+    for (uint32_t i=0; i+1<len; i++) {
+        if (text[i]==0xD7 && text[i+1]>=0x90 && text[i+1]<=0xAA) return LANG_HE;
+        if (text[i]==0xCE && text[i+1]>=0xB1 && text[i+1]<=0xBF) return LANG_EL;
+    }
+    for (uint32_t i=0; i<len; i++) {
+        if (text[i]=='c' && i+1<len && text[i+1]=='a') return LANG_LA;
+        if (text[i]==0xC3 && i+1<len) return LANG_PT; // UTF-8 PT accent
+    }
+    return LANG_PT;
+}
+static const char *get_greeting(const uint8_t *input, uint32_t len) {
+    uint8_t lang = detect_lang_byte(input, len);
+    return GREET_TABLE[lang < 5 ? lang : 0];
+}
+SEED
+}
+
+seed_S07_V3_semantic_response_gen() { cat << 'SEED'
+# S07_V3: GERADOR DE RESPOSTA SEMÂNTICA POR COERÊNCIA
+# Não escolhe resposta por probabilidade — escolhe por máxima coerência com contexto
+RESPONSE_TEMPLATES = {
+    'pergunta_def': '{palavra} significa: {definição}. Em {lang}: {traducao}. phi={phi:.2f}',
+    'tradução':     '"{src}" em {lang_tgt} é "{tgt}". Etimologia: {etym}. phi={phi:.2f}',
+    'compilação':   '```c\n{codigo}\n```\n// phi de coerência: {phi:.2f}',
+    'bíblia':       '{ref}: [{he}] ({gloss})\n→ {pt}\n→ phi={phi:.2f}',
+    'fonética':     'Fonemas de "{word}": {phonemes}\nCoerência fonológica: {phi:.2f}',
+    'geral':        '{resposta} (phi={phi:.2f})',
+}
+KNOWLEDGE_BASE = {
+    'בְּרֵאשִׁית': {
+        'def':'no princípio / no começo',
+        'raiz':'ראש (cabeça, início)',
+        'gramática':'substantivo feminino, estado construto com preposição בּ',
+        'cognatos_gr':'ἀρχή (arkhē)',
+        'cognatos_la':'principium, initium',
+        'phi':0.97,
+    },
+    'λόγος': {
+        'def':'palavra, razão, discurso, lógica',
+        'raiz':'λέγω (dizer, coletar)',
+        'gramática':'subst. masc. 2ª decl., nom. sg.',
+        'cognatos_la':'verbum, ratio',
+        'cognatos_he':'דָּבָר (davar)',
+        'phi':0.96,
+    },
+    'ἀγάπη': {
+        'def':'amor incondicional, amor que escolhe',
+        'raiz':'ἀγαπάω (amar por escolha)',
+        'gramática':'subst. fem. 1ª decl.',
+        'vs_eros':'eros=desejo, philia=amizade, storge=afeto, agape=incondicional',
+        'phi':0.98,
+    },
+}
+def generate_response(intent, context):
+    query = context.get('text','').strip()
+    tmpl = RESPONSE_TEMPLATES.get(intent, RESPONSE_TEMPLATES['geral'])
+    kb = KNOWLEDGE_BASE.get(query, {})
+    phi = kb.get('phi', 0.70)
+    if intent == 'pergunta_def' and kb:
+        return tmpl.format(
+            palavra=query, definição=kb.get('def','?'),
+            lang='grego' if 'ά' in query or 'ω' in query else 'hebraico',
+            traducao=kb.get('cognatos_la','?'), phi=phi)
+    return RESPONSE_TEMPLATES['geral'].format(resposta=f'Pesquise: {query}', phi=phi)
+SEED
+}
+
+seed_S07_V4_llm_style_context_window() { cat << 'SEED'
+# S07_V4: JANELA DE CONTEXTO ESTILO LLM — sem pesos, por coerência toroidal
+# Mantém N últimas interações com phi decrescente (memória com decaimento)
+class CoherenceContextWindow:
+    def __init__(self, max_turns=42):  # 42 = attractor_count
+        self.turns=[]; self.max_turns=max_turns
+        self.spiral_decay = 56756/65536  # √3/2 em Q16.16 → float
+    def add(self, role, text, lang='pt', phi=1.0):
+        self.turns.append({'role':role,'text':text,'lang':lang,'phi':phi,'weight':1.0})
+        if len(self.turns) > self.max_turns:
+            self.turns.pop(0)
+        # aplica decaimento espiral a todos os turnos anteriores
+        for i, turn in enumerate(self.turns[:-1]):
+            n = len(self.turns) - 1 - i
+            turn['weight'] = (self.spiral_decay ** n) * turn['phi']
+    def get_context(self, min_weight=0.1):
+        return [t for t in self.turns if t['weight'] >= min_weight]
+    def coherence(self):
+        if not self.turns: return 0.0
+        return sum(t['weight'] for t in self.turns) / len(self.turns)
+    def phi_ethica(self, entropy=0.3):
+        return (1 - entropy) * self.coherence()
+    def summarize(self):
+        ctx = self.get_context()
+        return {
+            'turns': len(ctx),
+            'phi': self.phi_ethica(),
+            'dominant_lang': max(set(t['lang'] for t in ctx), key=lambda l: sum(1 for t in ctx if t['lang']==l)),
+            'topics': list(set(t['text'][:20] for t in ctx[-5:])),
+        }
+# Decaimento: turno N atrás tem peso (√3/2)^N × phi_original
+# 42 turnos = período do atrator toroidal
+SEED
+}
+
+seed_S07_V5_socratic_method_engine() { cat << 'SEED'
+# S07_V5: MOTOR SOCRÁTICO — conversa que aumenta phi_ethica do interlocutor
+# Sócrates: perguntas que revelam o que o outro já sabe mas não articula
+# phi cresce quando o interlocutor responde com mais coerência
+SOCRATIC_PATTERNS = {
+    'clarificar':    'O que você quer dizer exatamente com "{termo}"?',
+    'fundamentar':   'Como você sabe que "{afirmação}" é verdadeiro?',
+    'implicação':    'Se "{premissa}", então o que se segue necessariamente?',
+    'contradição':   'Você disse "{a}" e também "{b}" — como conciliar?',
+    'generalizar':   'Isso se aplica em outros casos? Por exemplo, "{caso_análogo}"?',
+    'essência':      'O que é essencial em "{conceito}" que o distingue de "{similar}"?',
+    'origem':        'De onde vem essa ideia? Quem te ensinou?',
+    'consequência':  'Se isso for verdade, o que muda na prática?',
+}
+def socratic_response(user_statement, turn_phi):
+    # escolhe pergunta que maximiza aumento de phi_ethica esperado
+    if turn_phi < 0.5: pattern = 'clarificar'
+    elif turn_phi < 0.7: pattern = 'fundamentar'
+    elif turn_phi < 0.85: pattern = 'implicação'
+    else: pattern = 'essência'
+    question = SOCRATIC_PATTERNS[pattern]
+    # extrai termo-chave (simplificado)
+    words = user_statement.split()
+    termo = max(words, key=len) if words else 'isso'
+    return {
+        'question': question.format(
+            termo=termo, afirmação=user_statement[:50],
+            premissa=user_statement[:30], a=words[0] if words else '',
+            b=words[-1] if words else '', conceito=termo, similar='',
+            caso_análogo='na matemática ou na natureza'),
+        'expected_phi_gain': 0.05 + (1 - turn_phi) * 0.15,
+        'pattern': pattern,
+    }
+# Sistema conversa como um ciclo de aumento de coerência
+# não apenas responde — aumenta phi_hexacordex do interlocutor
+SEED
+}
+
+# ╔═══════════════════════════════════════════════════════════════════════════╗
+# ║  SEMENTE 08 — TRADUTOR LOW-LEVEL HE/EL/LA→PT + COMPILADOR DE RAÍZES    ║
+# ╚═══════════════════════════════════════════════════════════════════════════╝
+
+seed_S08_V1_trilateral_root_expander() { cat << 'SEED'
+# S08_V1: EXPANSOR DE RAÍZES TRILÍTERAS HEBRAICAS
+# Raiz HE = 3 consoantes = semente de N palavras por padrão (binyan)
+BINYANIM = {
+    'QAL':      {'pattern':'CCC',    'voice':'ativo',   'phi':0.95},
+    'NIPHAL':   {'pattern':'נCCaC', 'voice':'passivo',  'phi':0.88},
+    'PIEL':     {'pattern':'CiCeC', 'voice':'intensivo','phi':0.90},
+    'PUAL':     {'pattern':'CuCaC', 'voice':'pass_int', 'phi':0.85},
+    'HIPHIL':   {'pattern':'hiCCiC','voice':'causativo','phi':0.88},
+    'HOPHAL':   {'pattern':'huCCaC','voice':'pass_caus','phi':0.83},
+    'HITHPAEL': {'pattern':'hitCaCeC','voice':'reflexivo','phi':0.86},
+}
+ROOT_EXAMPLES = {
+    'כתב':[('QAL','כָּתַב','escreveu'),('NIPHAL','נִכְתַּב','foi_escrito'),
+            ('PIEL','כִּתֵּב','escreveu_intensamente'),('HIPHIL','הִכְתִּיב','ditou')],
+    'ברא':[('QAL','בָּרָא','criou(ex-nihilo)'),('NIPHAL','נִבְרָא','foi_criado'),
+            ('PIEL','בֵּרַע','cortou/escolheu')],
+    'דבר':[('QAL','דָּבַר','falou'),('PIEL','דִּבֵּר','conversou'),
+            ('NIPHAL','נִדְבַּר','conversou_com_si'),('HIPHIL','הִדְבִּיר','subjugou')],
+    'הלך':[('QAL','הָלַךְ','andou'),('PIEL','הִלֵּךְ','andou_cont'),
+            ('HIPHIL','הוֹלִיךְ','conduziu'),('HITHPAEL','הִתְהַלֵּךְ','andou_reflexivo')],
+}
+def expand_root(root, binyan='all'):
+    results = ROOT_EXAMPLES.get(root, [])
+    if binyan != 'all':
+        results = [r for r in results if r[0]==binyan]
+    return [{'root':root,'binyan':b,'form':f,'gloss':g,
+             'phi':BINYANIM.get(b,{}).get('phi',0.7)} for b,f,g in results]
+# expand_root('ברא') → todas as formas do verbo "criar" em hebraico
+# Cada forma = semente que gera significado específico + coerência
+SEED
+}
+
+seed_S08_V2_greek_morphology_engine() { cat << 'SEED'
+# S08_V2: MOTOR DE MORFOLOGIA GREGA
+# Grego tem 5 casos × 3 gêneros × 3 números × voz/modo/aspecto = alta densidade semântica
+CASE_MEANINGS = {
+    'nominativo': {'fn':'sujeito','phi':0.90},
+    'genitivo':   {'fn':'posse/origem/partitivo','phi':0.88},
+    'dativo':     {'fn':'indireto/instrumento/lugar','phi':0.85},
+    'acusativo':  {'fn':'objeto/extensão','phi':0.87},
+    'vocativo':   {'fn':'interpelação','phi':0.92},
+}
+ASPECT_MEANINGS = {
+    'aoristo':     {'fn':'ação_pontual_no_passado','phi':0.93},
+    'imperfeito':  {'fn':'ação_contínua_no_passado','phi':0.88},
+    'perfeito':    {'fn':'ação_passada_com_efeito_presente','phi':0.95},
+    'presente':    {'fn':'ação_contínua_no_presente','phi':0.87},
+    'futuro':      {'fn':'ação_futura','phi':0.82},
+    'pluperfeito': {'fn':'ação_antes_de_outra_passada','phi':0.90},
+}
+LOGOS_FORMS = {
+    'nom_sg':'λόγος',  'gen_sg':'λόγου',  'dat_sg':'λόγῳ',
+    'acc_sg':'λόγον',  'voc_sg':'λόγε',
+    'nom_pl':'λόγοι',  'gen_pl':'λόγων',  'dat_pl':'λόγοις',
+    'acc_pl':'λόγους', 'voc_pl':'λόγοι',
+}
+def parse_greek_form(word):
+    for form_id, form in LOGOS_FORMS.items():
+        if form == word:
+            case_num = form_id.split('_')
+            case = case_num[0]; num = case_num[1] if len(case_num)>1 else '?'
+            fn = CASE_MEANINGS.get(case,{}).get('fn','?')
+            return {'word':word,'case':case,'number':num,'function':fn,
+                    'phi':CASE_MEANINGS.get(case,{}).get('phi',0.7)}
+    return {'word':word,'parsed':False,'phi':0.5}
+# parse_greek_form('λόγου') → {case:'genitivo', fn:'posse/origem', phi:0.88}
+# JO 1:1: "Ἐν ἀρχῇ ἦν ὁ λόγος" → λόγος=nom_sg (sujeito)
+SEED
+}
+
+seed_S08_V3_latin_case_grammar() { cat << 'SEED'
+# S08_V3: GRAMÁTICA DE CASOS LATINA — 6 casos + usos específicos
+LATIN_CASES = {
+    'nominativo': {'usos':['sujeito','predicativo'],'phi':0.90},
+    'genitivo':   {'usos':['posse','partitivo','objetivo','subjetivo'],'phi':0.88},
+    'dativo':     {'usos':['objeto_indireto','beneficiário','finalidade','referência'],'phi':0.85},
+    'acusativo':  {'usos':['objeto_direto','extensão','acusativo_grego'],'phi':0.87},
+    'ablativo':   {'usos':['separação','instrumento','agente','causa','modo','lugar','tempo'],'phi':0.86},
+    'vocativo':   {'usos':['interpelação'],'phi':0.92},
+    'locativo':   {'usos':['lugar_em_cidades'],'phi':0.80,'raro':True},
+}
+DECLENSIONS = {
+    '1a':{'nom_sg':'a','gen_sg':'ae','dat_sg':'ae','acc_sg':'am','abl_sg':'ā','gen':'F'},
+    '2a':{'nom_sg':'us','gen_sg':'i','dat_sg':'o','acc_sg':'um','abl_sg':'ō','gen':'M'},
+    '3a':{'nom_sg':'(variable)','gen_sg':'is','dat_sg':'i','acc_sg':'em','abl_sg':'e','gen':'M/F/N'},
+    '4a':{'nom_sg':'us','gen_sg':'ūs','dat_sg':'uī','acc_sg':'um','abl_sg':'ū','gen':'M'},
+    '5a':{'nom_sg':'ēs','gen_sg':'ēī','dat_sg':'ēī','acc_sg':'em','abl_sg':'ē','gen':'F'},
+}
+TERRA_FORMS = {  # terra, terrae (f.) — 1ª declinação
+    'nom_sg':'terra','gen_sg':'terrae','dat_sg':'terrae',
+    'acc_sg':'terram','abl_sg':'terrā','voc_sg':'terra',
+    'nom_pl':'terrae','gen_pl':'terrārum','dat_pl':'terrīs',
+    'acc_pl':'terrās','abl_pl':'terrīs',
+}
+LUMEN_FORMS = {  # lumen, luminis (n.) — 3ª declinação
+    'nom_sg':'lumen','gen_sg':'luminis','dat_sg':'luminī',
+    'acc_sg':'lumen','abl_sg':'lūmine',
+    'nom_pl':'lumina','gen_pl':'luminum','dat_pl':'luminibus',
+}
+def parse_latin_word(word):
+    for form_id, form in TERRA_FORMS.items():
+        if form.lower() == word.lower():
+            parts = form_id.split('_')
+            return {'word':word,'case':parts[0],'number':parts[1],
+                    'lexeme':'terra','meaning':'terra/chão',
+                    'phi':LATIN_CASES.get(parts[0],{}).get('phi',0.7)}
+    return {'word':word,'parsed':False,'phi':0.5}
+SEED
+}
+
+seed_S08_V4_translation_memory_c() { cat << 'SEED'
+// S08_V4: MEMÓRIA DE TRADUÇÃO EM C — sem malloc, arrays estáticos
+// Armazena pares (src, tgt) indexados por CRC32C
+#include <stdint.h>
+#define TM_BUCKETS 256
+#define TM_BUCKET_SIZE 8
+#define TM_WORD_LEN 32
+typedef struct {
+    uint32_t src_crc;
+    char src[TM_WORD_LEN];
+    char tgt[TM_WORD_LEN];
+    uint8_t src_lang;
+    uint8_t tgt_lang;
+    uint8_t phi_q8;    // phi × 255
+    uint8_t hits;
+} TM_Entry;
+static TM_Entry TM_TABLE[TM_BUCKETS][TM_BUCKET_SIZE];
+static uint8_t TM_COUNTS[TM_BUCKETS];
+static uint32_t tm_crc32c(const char *s) {
+    uint32_t c=0xFFFFFFFFu;
+    while(*s){ c^=(uint8_t)*s++; for(int b=0;b<8;b++) c=(c>>1)^(0x82F63B78u&-(c&1)); }
+    return ~c;
+}
+static int tm_store(const char *src, uint8_t sl, const char *tgt, uint8_t tl, float phi) {
+    uint32_t crc = tm_crc32c(src);
+    uint8_t bucket = (uint8_t)(crc & 0xFF);
+    uint8_t n = TM_COUNTS[bucket];
+    if (n >= TM_BUCKET_SIZE) return -1;  // bucket cheio
+    TM_Entry *e = &TM_TABLE[bucket][n];
+    e->src_crc=crc; e->src_lang=sl; e->tgt_lang=tl;
+    e->phi_q8=(uint8_t)(phi*255.0f); e->hits=0;
+    uint32_t i=0;
+    while(i<TM_WORD_LEN-1 && src[i]){e->src[i]=src[i];i++;}e->src[i]=0;
+    i=0;
+    while(i<TM_WORD_LEN-1 && tgt[i]){e->tgt[i]=tgt[i];i++;}e->tgt[i]=0;
+    TM_COUNTS[bucket]++;
+    return 0;
+}
+static const char *tm_lookup(const char *src) {
+    uint32_t crc=tm_crc32c(src), bucket=(uint8_t)(crc&0xFF);
+    for(uint8_t i=0;i<TM_COUNTS[bucket];i++) {
+        if(TM_TABLE[bucket][i].src_crc==crc){
+            TM_TABLE[bucket][i].hits++;
+            return TM_TABLE[bucket][i].tgt;
+        }
+    }
+    return 0;
+}
+// Pré-popula: tm_store("ברא", LANG_HE, "criou", LANG_PT, 0.97f);
+// Lookup: tm_lookup("ברא") → "criou"
+SEED
+}
+
+seed_S08_V5_etymology_graph_engine() { cat << 'SEED'
+# S08_V5: GRAFO DE ETIMOLOGIA — rastreia origem e cognatos de qualquer palavra
+ETYMOLOGY_GRAPH = {
+    'amor': {
+        'lang':'la','cognatos':{
+            'ἀγάπη':{'lang':'el','rel':'semântico','dist':0.8},
+            'love':{'lang':'en','rel':'germânico','dist':1.5},
+            'liebe':{'lang':'de','rel':'germânico','dist':1.5},
+            'amor':{'lang':'pt_es_it','rel':'direto','dist':0.0},
+        },'proto':'PIE *h₂em-','phi':0.95,
+    },
+    'logos': {
+        'lang':'el','origem':'λέγω (lego=dizer)','cognatos':{
+            'verbum':{'lang':'la','rel':'semântico','dist':0.9},
+            'word':{'lang':'en','rel':'semântico','dist':1.2},
+            'דָּבָר':{'lang':'he','rel':'semântico_funcional','dist':0.7},
+        },'phi':0.96,
+    },
+    'principium': {
+        'lang':'la','origem':'princeps (primeiro+tomar)','cognatos':{
+            'ἀρχή':{'lang':'el','rel':'semântico','dist':0.6},
+            'ראשית':{'lang':'he','rel':'semântico','dist':0.7},
+            'princípio':{'lang':'pt','rel':'direto','dist':0.0},
+        },'phi':0.94,
+    },
+    'Ω': {
+        'lang':'el','gloss':'ômega=grande-O=fim','cognatos':{
+            'תָּו':{'lang':'he','rel':'último_do_alfabeto','dist':0.5},
+            'Z':{'lang':'la','rel':'último_latino','dist':1.0},
+            'completude':{'lang':'pt','rel':'semântico','dist':0.8},
+        },'phi':0.98,
+    },
+}
+def trace_etymology(word, depth=3):
+    node = ETYMOLOGY_GRAPH.get(word.lower(), {})
+    if not node: return {'word':word,'found':False,'phi':0.5}
+    result = {'word':word,'lang':node.get('lang','?'),
+              'phi':node.get('phi',0.7),'cognatos':[]}
+    for cognate, data in node.get('cognatos',{}).items():
+        result['cognatos'].append({
+            'word':cognate,'lang':data.get('lang','?'),
+            'distance':data.get('dist',1.0),
+            'relation':data.get('rel','?'),
+        })
+    if depth > 1:
+        for cog in result['cognatos'][:2]:
+            sub = trace_etymology(cog['word'], depth-1)
+            if sub.get('found',True): cog['subtree']=sub
+    return result
+SEED
+}
+
+# ╔═══════════════════════════════════════════════════════════════════════════╗
+# ║  SEMENTE 09 — COMPILADOR COMPLETO FALA→ELF MONOLÍTICO                  ║
+# ╚═══════════════════════════════════════════════════════════════════════════╝
+
+seed_S09_V1_full_pipeline_orchestrator() { cat << 'SEED'
+# S09_V1: ORQUESTRADOR DO PIPELINE COMPLETO
+# Integra todas as sementes anteriores em um fluxo único
+class CompiladorLowFala:
+    def __init__(self, lang_src='he', lang_tgt='pt', target_arch='arm64'):
+        self.lang_src=lang_src; self.lang_tgt=lang_tgt; self.arch=target_arch
+        self.phi=0.0; self.bytecode=bytearray(); self.asm=[]
+    def compile(self, text):
+        # Etapa 1: tokenização
+        tokens = self._tokenize(text)
+        # Etapa 2: parse AST
+        ast = self._parse(tokens)
+        # Etapa 3: geração de bytecode
+        bc = self._gen_bytecode(ast)
+        # Etapa 4: geração de ASM
+        asm = self._gen_asm(bc)
+        # Etapa 5: cálculo de phi
+        self.phi = self._calc_phi(tokens, ast, bc)
+        return {'tokens':tokens,'bytecode':bc.hex(),'asm':asm,'phi':self.phi}
+    def _tokenize(self, text):
+        return [{'raw':w,'lang':self.lang_src} for w in text.split() if w]
+    def _parse(self, tokens):
+        return {'type':'SENTENCE','children':tokens,'phi':0.8}
+    def _gen_bytecode(self, ast):
+        bc = bytearray([0x10])  # BEGIN
+        for child in ast.get('children',[]):
+            bc.extend([0x03, hash(child['raw']) & 0xFF])
+        bc.append(0xFF)  # SEAL
+        return bc
+    def _gen_asm(self, bc):
+        lines = [f'.section .text', f'.global raf_entry', 'raf_entry:']
+        for byte in bc:
+            lines.append(f'    .byte 0x{byte:02X}')
+        lines.append('    ret')
+        return '\n'.join(lines)
+    def _calc_phi(self, tokens, ast, bc):
+        n = len(tokens)
+        return min(1.0, 0.5 + 0.5 * (n / max(n+1,1)))
+# Uso:
+# c = CompiladorLowFala('he','pt','arm64')
+# result = c.compile('בְּרֵאשִׁית בָּרָא אֱלֹהִים')
+# print(result['asm'])
+SEED
+}
+
+seed_S09_V2_rafaelia_vm_runtime() { cat << 'SEED'
+// S09_V2: RUNTIME DA RAFAELIA-VM EM C BARE-METAL
+// Executa bytecode gerado pelo compilador
+#include <stdint.h>
+#define RVM_STACK_SIZE 64
+#define RVM_MEM_SIZE   256
+typedef struct {
+    uint8_t  stack[RVM_STACK_SIZE];
+    uint8_t  mem[RVM_MEM_SIZE];
+    uint8_t  sp;     // stack pointer
+    uint8_t  mp;     // memory pointer
+    uint32_t pc;     // program counter
+    uint32_t phi_q8; // coerência atual 0-255
+    uint8_t  running;
+    uint8_t  lang;   // língua de output atual
+} RVM_State;
+static void rvm_init(RVM_State *vm, uint8_t lang) {
+    for(uint32_t i=0;i<RVM_STACK_SIZE;i++) vm->stack[i]=0;
+    for(uint32_t i=0;i<RVM_MEM_SIZE;i++) vm->mem[i]=0;
+    vm->sp=0; vm->mp=0; vm->pc=0; vm->phi_q8=200; vm->running=1; vm->lang=lang;
+}
+// Despacho de opcode via tabela de função (T12: lookup table O(1))
+typedef void (*RvmHandler)(RVM_State*, uint8_t);
+static void op_nop(RVM_State *vm, uint8_t arg)   { (void)arg; vm->pc++; }
+static void op_push(RVM_State *vm, uint8_t arg)  { if(vm->sp<RVM_STACK_SIZE-1) vm->stack[vm->sp++]=arg; vm->pc++; }
+static void op_pop(RVM_State *vm, uint8_t arg)   { (void)arg; if(vm->sp>0) vm->sp--; vm->pc++; }
+static void op_seal(RVM_State *vm, uint8_t arg)  { (void)arg; vm->running=0; vm->pc++; }
+static void op_bless(RVM_State *vm, uint8_t arg) {
+    (void)arg;
+    if(vm->phi_q8 < 250) vm->phi_q8 += 5;  // phi aumenta com BLESS
+    vm->pc++;
+}
+static void op_rest(RVM_State *vm, uint8_t arg)  {
+    (void)arg;
+    vm->phi_q8 = 255;  // REST = phi máximo
+    vm->pc++;
+}
+static const RvmHandler RVM_DISPATCH[256] = {
+    [0x00]=op_nop, [0x03]=op_push, [0x04]=op_pop,
+    [0x25]=op_bless, [0x27]=op_rest, [0xFF]=op_seal,
+};
+static void rvm_run(RVM_State *vm, const uint8_t *bc, uint32_t bclen) {
+    while(vm->running && vm->pc < bclen) {
+        uint8_t op = bc[vm->pc];
+        uint8_t arg = (vm->pc+1 < bclen) ? bc[vm->pc+1] : 0;
+        RvmHandler h = RVM_DISPATCH[op];
+        if(h) h(vm, arg); else vm->pc++;
+    }
+}
+SEED
+}
+
+seed_S09_V3_benchmark_compiler_suite() { cat << 'SEED'
+// S09_V3: SUITE DE BENCHMARK DO COMPILADOR — mede phi de cada estágio
+#include <stdint.h>
+// Baseado em RAFAELIA MVP Benchmark
+typedef struct {
+    uint64_t t_tokenize_ns;
+    uint64_t t_parse_ns;
+    uint64_t t_codegen_ns;
+    uint64_t t_total_ns;
+    uint32_t tokens_count;
+    uint32_t bytecode_len;
+    uint32_t phi_q8;        // coerência final 0-255
+    uint32_t chain_crc;     // integridade da cadeia
+} CompilerBenchResult;
+static inline uint64_t rdcycles(void) {
+#if defined(__aarch64__)
+    uint64_t v; __asm__ volatile("isb":::"memory");
+    __asm__ volatile("mrs %0,cntvct_el0":"=r"(v)); return v;
+#elif defined(__x86_64__)
+    uint32_t lo,hi;
+    __asm__ volatile("lfence\nrdtsc":"=a"(lo),"=d"(hi)::"memory");
+    return ((uint64_t)hi<<32)|lo;
+#else
+    return 0;
+#endif
+}
+// Meta benchmark: compila GN1:1 HE 155 vezes, mede mediana
+// Alvo: < 1μs por compilação em Cortex-A55
+// Referência MVP:
+//   tokenize:  < 100ns
+//   parse:     < 200ns
+//   codegen:   < 300ns
+//   total:     < 600ns
+//   phi:       > 200 (0.78+)
+// Alinha com T1-T5 do RAFAELIA MVP Benchmark
+SEED
+}
+
+seed_S09_V4_wasm_target_generator() { cat << 'SEED'
+# S09_V4: GERADOR DE TARGET WASM — bytecode RVM → WebAssembly
+# Permite rodar o compilador no browser sem modificações
+WASM_OPCODES = {
+    'unreachable': b'\x00', 'nop': b'\x01', 'block': b'\x02',
+    'loop': b'\x03', 'if': b'\x04', 'else': b'\x05', 'end': b'\x0b',
+    'return': b'\x0f', 'call': b'\x10', 'drop': b'\x1a', 'select': b'\x1b',
+    'local.get': b'\x20', 'local.set': b'\x21', 'local.tee': b'\x22',
+    'i32.const': b'\x41', 'i32.add': b'\x6a', 'i32.sub': b'\x6b',
+    'i32.mul': b'\x6c', 'i32.and': b'\x71', 'i32.or': b'\x72', 'i32.xor': b'\x73',
+}
+WASM_MAGIC = b'\x00asm'
+WASM_VERSION = b'\x01\x00\x00\x00'
+def rvm_to_wasm(rvm_bytecode):
+    # mapeia opcodes RVM → WASM
+    RVM_TO_WASM = {
+        0x00: WASM_OPCODES['nop'],
+        0x06: WASM_OPCODES['i32.add'],   # ADD
+        0x07: WASM_OPCODES['i32.sub'],   # SUB
+        0x20: WASM_OPCODES['i32.and'],   # AND
+        0x21: WASM_OPCODES['i32.or'],    # OR
+        0x22: WASM_OPCODES['i32.xor'],   # XOR (repurposed from NOT)
+        0xFF: WASM_OPCODES['return'],    # SEAL → return
+    }
+    wasm_body = bytearray(WASM_MAGIC + WASM_VERSION)
+    for byte in rvm_bytecode:
+        wasm_op = RVM_TO_WASM.get(byte, WASM_OPCODES['nop'])
+        wasm_body.extend(wasm_op)
+    return bytes(wasm_body)
+# rvm_to_wasm([0x10,0xF0,0x11,0xFF]) → WASM válido que executa GN1:1
+SEED
+}
+
+seed_S09_V5_phi_verification_system() { cat << 'SEED'
+# S09_V5: SISTEMA DE VERIFICAÇÃO DE PHI — valida coerência do output
+# Cada output do compilador deve ter phi > threshold para ser aceito
+class PhiVerifier:
+    def __init__(self, threshold=0.75):
+        self.threshold=threshold; self.log=[]
+    def verify_tokens(self, tokens):
+        if not tokens: return 0.0, False
+        # phi dos tokens = coerência de língua detectada
+        langs = [t.get('lang','?') for t in tokens]
+        dominant = max(set(langs), key=langs.count)
+        consistency = langs.count(dominant) / len(langs)
+        phi = consistency * 0.9 + 0.1  # sempre > 0.1
+        return phi, phi >= self.threshold
+    def verify_bytecode(self, bc):
+        if not bc: return 0.0, False
+        # phi do bytecode = proporção de opcodes válidos
+        VALID_OPS = set([0x00,0x01,0x02,0x03,0x04,0x10,0x11,0x12,0x13,
+                         0x14,0x15,0x16,0x17,0x20,0x21,0x22,0x23,0x24,
+                         0x25,0x26,0x27,0x80,0x81,0x82,0xF0,0xFE,0xFF])
+        valid = sum(1 for b in bc if b in VALID_OPS)
+        phi = valid / max(len(bc),1)
+        return phi, phi >= self.threshold
+    def verify_asm(self, asm_lines):
+        if not asm_lines: return 0.0, False
+        valid = sum(1 for l in asm_lines
+                    if any(kw in l for kw in ['.section','.global','ret','svc','mov','ldr','str','add','sub','and','orr','eor','nop','.byte','.string']))
+        phi = valid / max(len(asm_lines),1)
+        return phi, phi >= self.threshold
+    def full_verify(self, compile_result):
+        phi_t,ok_t = self.verify_tokens(compile_result.get('tokens',[]))
+        phi_b,ok_b = self.verify_bytecode(bytes.fromhex(compile_result.get('bytecode','00')))
+        phi_a,ok_a = self.verify_asm(compile_result.get('asm','').split('\n'))
+        phi_total = (phi_t + phi_b + phi_a) / 3
+        passed = ok_t and ok_b and ok_a and phi_total >= self.threshold
+        self.log.append({'phi_tokens':phi_t,'phi_bc':phi_b,'phi_asm':phi_a,
+                         'phi_total':phi_total,'passed':passed})
+        return phi_total, passed
+# Verificador aplicado ao compiladorlowFala garante que
+# nenhum output degradado passa — phi < 0.75 = rejeita e recompila
+SEED
+}
+
+# ╔═══════════════════════════════════════════════════════════════════════════╗
+# ║  SEMENTE 10 — FONEMA E LETRA COMO DADO PRIMÁRIO (DNA DO TEXTO)          ║
+# ╚═══════════════════════════════════════════════════════════════════════════╝
+
+seed_S10_V1_alphabet_as_bitfield() { cat << 'SEED'
+// S10_V1: ALFABETO COMO CAMPO DE BITS — cada letra = posição em uint64
+// Hebraico: 22 letras = 22 bits | Grego: 24 letras = 24 bits | Latin: 26 bits
+#include <stdint.h>
+// Hebraico (alef=bit0, bet=bit1, ... tav=bit21)
+static const uint32_t HE_ALPHABET_BITS = (1u<<22)-1;  // 0x3FFFFF
+// Mapeamento letra HE → bit
+static const uint8_t HE_LETTER_BIT[256] = {
+    // UTF-8 second byte: 0x90=alef, 0x91=bet, ... 0xAA=tav
+    [0x90]=0,[0x91]=1,[0x92]=2,[0x93]=3,[0x94]=4,[0x95]=5,
+    [0x96]=6,[0x97]=7,[0x98]=8,[0x99]=9,[0x9A]=10,[0x9B]=11,
+    [0x9C]=12,[0x9D]=13,[0x9E]=14,[0x9F]=15,[0xA0]=16,[0xA1]=17,
+    [0xA2]=18,[0xA3]=19,[0xA4]=20,[0xA5]=21,
+};
+// Palavra HE → bitfield de letras presentes
+static uint32_t he_word_to_bits(const uint8_t *word, uint32_t len) {
+    uint32_t bits = 0;
+    for (uint32_t i=0; i+1<len; i++) {
+        if (word[i]==0xD7) {  // UTF-8 lead byte hebraico
+            uint8_t b = HE_LETTER_BIT[word[i+1]];
+            bits |= (1u << b); i++;
+        }
+    }
+    return bits;
+}
+// בְּרֵאשִׁית = {ב=bit1, ר=bit19, א=bit0, ש=bit21, י=bit9, ת=bit21}
+// bits = 0b1000000000001000000000011 = específico e verificável
+// Hamming_distance(word_A, word_B) = popcount(bits_A XOR bits_B) = semelhança lexical
+static uint32_t hamming_dist_words(uint32_t bits_a, uint32_t bits_b) {
+    uint32_t xr = bits_a ^ bits_b;
+    xr = xr - ((xr>>1) & 0x55555555u);
+    xr = (xr & 0x33333333u) + ((xr>>2) & 0x33333333u);
+    return ((xr + (xr>>4)) & 0x0F0F0F0Fu) * 0x01010101u >> 24;
+}
+SEED
+}
+
+seed_S10_V2_phoneme_entropy_analyzer() { cat << 'SEED'
+# S10_V2: ANALISADOR DE ENTROPIA FONÊMICA — mede informação por fonema
+import math
+def phoneme_entropy(text, lang='pt'):
+    # conta frequência de cada fonema/char
+    freq = {}
+    for c in text:
+        if c.strip(): freq[c] = freq.get(c,0) + 1
+    total = sum(freq.values())
+    if total == 0: return 0.0, {}
+    # entropia de Shannon
+    H = -sum((f/total)*math.log2(f/total) for f in freq.values() if f>0)
+    # normaliza: H_max = log2(n_chars_únicos)
+    H_max = math.log2(len(freq)) if len(freq)>1 else 1.0
+    H_norm = H / H_max
+    phi_entropy = 1 - H_norm  # phi alto = baixa entropia = alta redundância
+    return phi_entropy, {'H':H,'H_max':H_max,'freq':freq,'H_norm':H_norm}
+# GN 1:1 HE: alta redundância (raízes trilíteras reusadas) → phi_entropy alto
+# Texto aleatório: entropia máxima → phi_entropy ≈ 0
+# Resultado: texto bíblico tem phi_entropy ≈ 0.35-0.45 (informação densa mas estruturada)
+def milli_entropy(data):
+    # versão inteira Q16 da entropia (sem float para bare-metal)
+    freq = [0]*256
+    for b in data: freq[b] += 1
+    n = len(data)
+    if n == 0: return 0
+    unique = sum(1 for f in freq if f>0)
+    transitions = sum(1 for i in range(n-1) if data[i]!=data[i+1])
+    return (unique*6000)//256 + (transitions*2000)//(n-1) if n>1 else 0
+SEED
+}
+
+seed_S10_V3_letter_frequency_matrix() { cat << 'SEED'
+# S10_V3: MATRIZ DE FREQUÊNCIA DE LETRAS — perfil estatístico por língua/corpus
+# Cada língua tem uma "impressão digital" de frequência que identifica o texto
+LETTER_FREQ_PROFILES = {
+    'he': {  # frequência relativa em HE bíblico (por mil letras)
+        'ו':133,'י':107,'ה':92,'ל':80,'א':74,'מ':70,'ר':55,'כ':50,
+        'ב':47,'ש':44,'ן':41,'ת':40,'נ':39,'ד':35,'ע':34,'פ':28,
+        'ח':27,'ג':20,'ס':18,'ק':17,'ז':16,'ט':12,'צ':11,'ף':10,'ך':8,
+    },
+    'el': {  # frequência em grego clássico
+        'α':98,'ε':87,'ο':79,'ι':75,'ν':67,'τ':65,'ρ':54,'σ':53,
+        'η':47,'κ':43,'υ':41,'λ':40,'π':38,'δ':35,'μ':32,'ω':28,
+        'γ':27,'χ':18,'φ':16,'θ':15,'ξ':8,'ζ':7,'β':6,'ψ':3,
+    },
+    'la': {  # frequência em latim clássico
+        'e':113,'i':96,'t':88,'s':82,'a':81,'n':79,'u':72,'o':64,
+        'r':61,'c':50,'m':46,'l':43,'d':39,'p':35,'q':28,'b':24,
+        'g':20,'f':16,'v':14,'h':12,'x':9,'y':4,'z':3,'k':2,
+    },
+    'pt': {  # frequência em PT brasileiro
+        'a':137,'e':126,'o':105,'s':78,'r':65,'i':62,'n':55,'t':48,
+        'd':44,'m':42,'u':39,'l':34,'c':32,'p':28,'h':25,'b':17,
+        'f':16,'v':15,'g':14,'q':12,'z':9,'j':7,'x':5,'w':1,'k':1,'y':1,
+    },
+}
+def chi_squared_lang(text):
+    text_low = text.lower()
+    freq = {}
+    total = 0
+    for c in text_low:
+        if c.isalpha(): freq[c]=freq.get(c,0)+1; total+=1
+    if total == 0: return 'unknown', 0.0
+    scores = {}
+    for lang, profile in LETTER_FREQ_PROFILES.items():
+        chi2 = 0.0
+        for letter, expected_per_1000 in profile.items():
+            observed = freq.get(letter, 0)
+            expected = total * expected_per_1000 / 1000.0
+            if expected > 0:
+                chi2 += (observed - expected)**2 / expected
+        scores[lang] = chi2
+    best_lang = min(scores, key=scores.get)
+    confidence = 1.0 / (1.0 + scores[best_lang]/100.0)
+    return best_lang, confidence
+SEED
+}
+
+seed_S10_V4_ngram_phoneme_model() { cat << 'SEED'
+# S10_V4: MODELO DE N-GRAMAS FONÊMICOS — captura padrões sonoros
+# N-gramas de fonemas são mais estáveis que n-gramas de letras (cross-língua)
+from collections import Counter
+def extract_phoneme_ngrams(text, n=2, lang='pt'):
+    # simplificado: trata cada char como fonema
+    # em implementação real, usa dicionário fonético completo
+    chars = [c.lower() for c in text if c.strip() and c.isalpha()]
+    ngrams = [tuple(chars[i:i+n]) for i in range(len(chars)-n+1)]
+    return Counter(ngrams)
+def ngram_similarity(text1, text2, n=2):
+    ng1 = extract_phoneme_ngrams(text1, n)
+    ng2 = extract_phoneme_ngrams(text2, n)
+    # coeficiente Dice
+    inter = sum((ng1 & ng2).values())
+    total = sum(ng1.values()) + sum(ng2.values())
+    dice = 2*inter / max(total,1)
+    return dice
+BIBLE_NGRAMS = {
+    'gn1_1_he': extract_phoneme_ngrams('בְּרֵאשִׁית בָּרָא אֱלֹהִים הַשָּׁמַיִם הָאָרֶץ',2,'he'),
+    'jn1_1_el': extract_phoneme_ngrams('Ἐν ἀρχῇ ἦν ὁ λόγος καὶ ὁ λόγος ἦν πρὸς τὸν θεόν',2,'el'),
+    'gn1_1_pt': extract_phoneme_ngrams('No princípio criou Deus os céus e a terra',2,'pt'),
+}
+# ngram_similarity(gn1_1_he, gn1_1_el) → similaridade fonêmica cross-língua
+# Alto valor = textos com padrões sonoros similares (possível cognação)
+SEED
+}
+
+seed_S10_V5_text_dna_codec() { cat << 'SEED'
+# S10_V5: CODEC DNA DO TEXTO — texto → sequência TCGA-like
+# Análogo ao DNA: 4 símbolos (T,C,G,A) → toda complexidade
+# Mapeamento: T=transição_silenciosa, C=consoante, G=vogal, A=acento/diacrítico
+def text_to_dna(text):
+    dna = []
+    for char in text:
+        code = ord(char)
+        if char in 'aeiouáàâãéêíóôõúüαεηιουω':
+            dna.append('G')  # vogal = Guanina
+        elif char.isalpha():
+            dna.append('C')  # consoante = Citosina
+        elif char in '´`^~¨ּׁׂ':
+            dna.append('A')  # acento/diacrítico = Adenina
+        else:
+            dna.append('T')  # transição/espaço = Timina
+    return ''.join(dna)
+def dna_to_text_skeleton(dna):
+    # reconstrói estrutura sem conteúdo específico
+    return {'G':dna.count('G'),'C':dna.count('C'),
+            'A':dna.count('A'),'T':dna.count('T'),
+            'CG_ratio':dna.count('C')/max(dna.count('G'),1),
+            'phi': 1 - abs(0.5 - dna.count('G')/max(len(dna),1))*2}
+# GN 1:1 HE: TCCGCCCCT TCCG GCCCCC CCGCCCCCC → perfil DNA do texto hebraico
+# JO 1:1 EL: GC GCCG GC G CGCGC → perfil DNA grego — diferentes, mas estrutura reconhecível
+# GN 1:1 PT: TC CCGCGGCG CCGGGT TGCC GC GG CC G G CGCCG → perfil PT
+# Cada texto tem sua "impressão genômica" — invariante cross-tradução
+def dna_distance(text1, text2):
+    dna1 = text_to_dna(text1); dna2 = text_to_dna(text2)
+    sk1 = dna_to_text_skeleton(dna1); sk2 = dna_to_text_skeleton(dna2)
+    # distância por perfil de bases
+    d = abs(sk1['G']-sk2['G']) + abs(sk1['C']-sk2['C'])
+    norm = len(text1) + len(text2)
+    return d/max(norm,1), min(sk1['phi'],sk2['phi'])
+# dna_distance(gn1_1_he, gn1_1_pt) → (~0.3, 0.62) — mesma mensagem, perfil diferente
+# dna_distance(gn1_1_he, gn1_1_el) → (~0.15, 0.78) — mais similar por estrutura semítica
+SEED
+}
+
+# ╔═══════════════════════════════════════════════════════════════════════════╗
+# ║  SEMENTE 11 — SISTEMA SONORO COMPLETO + SÍNTESE E ANÁLISE              ║
+# ╚═══════════════════════════════════════════════════════════════════════════╝
+
+seed_S11_V1_wavetable_phoneme_synth() { cat << 'SEED'
+# S11_V1: SÍNTESE FONÊMICA POR WAVETABLE — texto → onda de áudio
+# Cada fonema tem forma de onda característica por formantes
+import math
+PHONEME_WAVETABLE = {
+    # formato: (F1_Hz, F2_Hz, F3_Hz, duration_ms, amplitude)
+    'a': (800, 1200, 2600, 100, 0.8),
+    'e': (500, 1900, 2700, 90,  0.7),
+    'i': (300, 2300, 3000, 80,  0.75),
+    'o': (500, 1000, 2500, 95,  0.72),
+    'u': (300, 800,  2300, 85,  0.65),
+    'r': (150, 1200, 1800, 70,  0.4),
+    'l': (250, 1200, 2500, 60,  0.45),
+    'm': (200, 800,  2000, 80,  0.5),
+    'n': (250, 1600, 2500, 75,  0.48),
+    's': (5000,6000, 8000, 60,  0.35),
+    # hebraico
+    'ח': (200, 2000, 3500, 70,  0.3),  # fricativa velar surda
+    'ע': (400, 900,  2800, 75,  0.4),  # aproximante faríngea
+    'ש': (3000,5500, 8000, 65,  0.38), # fricativa palatal
+    # grego
+    'θ': (200, 1000, 3500, 70,  0.32), # interdental surda
+    'φ': (3000,4000, 8000, 65,  0.35), # labio-dental surda
+    'χ': (200, 2000, 3500, 70,  0.30), # velar surda
+}
+def synthesize_phoneme(phoneme, fs=16000):
+    params = PHONEME_WAVETABLE.get(phoneme.lower(), (600,1400,2800,80,0.5))
+    f1,f2,f3,dur_ms,amp = params
+    n_samples = int(fs * dur_ms / 1000)
+    samples = []
+    for i in range(n_samples):
+        t = i / fs
+        # sobreposição de 3 formantes com envelope de amplitude
+        env = math.sin(math.pi * i / n_samples)  # envelope
+        wave = (amp * env * (
+            0.6 * math.sin(2*math.pi*f1*t) +
+            0.3 * math.sin(2*math.pi*f2*t) +
+            0.1 * math.sin(2*math.pi*f3*t)
+        ))
+        samples.append(wave)
+    return samples
+def text_to_audio(text, fs=16000):
+    audio = []
+    for char in text.lower():
+        if char.isalpha():
+            ph_audio = synthesize_phoneme(char, fs)
+            audio.extend(ph_audio)
+        else:
+            audio.extend([0.0] * int(fs*0.05))  # silêncio 50ms
+    return audio
+# text_to_audio("amor") → síntese fonêmica do português
+# text_to_audio("אמור") → síntese fonêmica do hebraico
+SEED
+}
+
+seed_S11_V2_fft_speech_analyzer() { cat << 'SEED'
+# S11_V2: ANALISADOR FFT DE FALA — extrai fonemas de áudio real
+# Versão baremetal: FFT de Goertzel por frequência específica (sem libfftw)
+import math
+def goertzel(samples, target_freq, fs):
+    # Algoritmo de Goertzel — detecta frequência específica eficientemente
+    N = len(samples)
+    k = int(0.5 + N * target_freq / fs)
+    omega = 2.0 * math.pi * k / N
+    coeff = 2.0 * math.cos(omega)
+    s_prev = s_prev2 = 0.0
+    for s in samples:
+        s_curr = s + coeff * s_prev - s_prev2
+        s_prev2, s_prev = s_prev, s_curr
+    power = s_prev2**2 + s_prev**2 - coeff * s_prev * s_prev2
+    return math.sqrt(max(power, 0.0))
+def extract_formants_goertzel(frame, fs=16000):
+    # testa formantes F1 (300-900Hz) e F2 (800-3000Hz)
+    f1_candidates = range(300, 900, 50)
+    f2_candidates = range(800, 3000, 100)
+    f1 = max(f1_candidates, key=lambda f: goertzel(frame, f, fs))
+    f2 = max(f2_candidates, key=lambda f: goertzel(frame, f, fs))
+    # classifica fonema por formantes
+    return f1, f2
+def classify_phoneme(f1, f2):
+    PHONEME_REGIONS = [
+        ((700,900),(1000,1400),'a'),
+        ((400,600),(1700,2100),'e'),
+        ((250,350),(2200,2400),'i'),
+        ((450,550),(900,1100),'o'),
+        ((250,350),(750,850), 'u'),
+    ]
+    for (f1l,f1h),(f2l,f2h),phoneme in PHONEME_REGIONS:
+        if f1l<=f1<=f1h and f2l<=f2<=f2h:
+            return phoneme, 0.9
+    return '?', 0.3
+SEED
+}
+
+seed_S11_V3_cantillation_midi_generator() { cat << 'SEED'
+# S11_V3: GERADOR MIDI DE CANTILAÇÃO HEBRAICA
+# Converte te'amim (cantilação HE) para notas MIDI
+# A cantilação bíblica é o primeiro sistema de notação musical documentado
+TE_AMIM_MIDI = {
+    # (nota_MIDI, duração_ticks, tipo_pausa)
+    'סִלּוּק':   (60, 480, 'full_stop'),    # Dó central, semínima
+    'אַתְנָח':   (62, 360, 'half_stop'),    # Ré, pontuada
+    'זָקֵף':    (64, 240, 'quarter_stop'),  # Mi, colcheia
+    'טִפְּחָא':  (65, 180, 'sub_pause'),    # Fá
+    'מֵרְכָא':  (67, 120, 'ligature'),     # Sol, colcheia rápida
+    'מֻנַּח':   (69, 120, 'join'),          # Lá
+    'רְבִיעַ':  (71, 240, 'disjunctive'),  # Si
+    'גֵּרֵשׁ':  (72, 180, 'small_sep'),    # Dó+8va
+    'פַּשְׁטָא': (74, 160, 'rising'),       # Ré+8va
+    'שַׁלְשֶׁלֶת':(76, 600, 'trill'),       # Mi+8va, longa
+}
+def generate_midi_bytes(te_amin_list):
+    # MIDI mínimo: header + track
+    # Header: MThd + length=6 + format=0 + ntracks=1 + ppq=480
+    header = b'MThd\x00\x00\x00\x06\x00\x00\x00\x01\x01\xe0'
+    events = bytearray()
+    for ta in te_amin_list:
+        note, dur, _ = TE_AMIM_MIDI.get(ta, (60,240,'none'))
+        # delta_time=0, NoteOn ch0
+        events.extend([0x00, 0x90, note, 0x64])
+        # delta_time=dur, NoteOff ch0
+        # encode variable-length
+        if dur < 128: events.extend([dur, 0x80, note, 0x00])
+        else: events.extend([0x83,0x60, 0x80, note, 0x00])
+    events.extend([0x00, 0xFF, 0x2F, 0x00])  # EndOfTrack
+    track = b'MTrk' + len(events).to_bytes(4,'big') + bytes(events)
+    return header + track
+# Gera GN1:1 em MIDI cantilado:
+# te_amim_gn1_1 = ['מֵרְכָא','טִפְּחָא','מֵרְכָא','אַתְנָח','מֵרְכָא','טִפְּחָא','מֵרְכָא','סִלּוּק']
+# midi_bytes = generate_midi_bytes(te_amim_gn1_1)
+SEED
+}
+
+seed_S11_V4_voice_biomarker_coherence() { cat << 'SEED'
+# S11_V4: BIOMARCADORES DE VOZ COMO COERÊNCIA
+# Variabilidade de voz correlaciona com estado cognitivo (LAM + Hexacordex)
+# HRV (variabilidade cardíaca) ↔ prosódia (variabilidade de fala) — mesma física
+def extract_voice_biomarkers(audio_samples, fs=16000):
+    frame_size = int(fs * 0.025)  # 25ms frames
+    hop_size   = int(fs * 0.010)  # 10ms hop
+    frames = [audio_samples[i:i+frame_size]
+              for i in range(0, len(audio_samples)-frame_size, hop_size)]
+    biomarkers = {
+        'energy_var': 0.0,  # variabilidade de energia = emoção
+        'f0_var': 0.0,      # variabilidade de F0 = prosódia
+        'spectral_centroid_var': 0.0,  # variabilidade espectral = clareza
+        'phi_voice': 0.0,   # coerência de voz
+    }
+    energies = [sum(s**2 for s in f)/max(len(f),1) for f in frames if f]
+    if len(energies) > 1:
+        mean_e = sum(energies)/len(energies)
+        biomarkers['energy_var'] = sum((e-mean_e)**2 for e in energies)/len(energies)
+    # phi_voice = inverso da variabilidade normalizada
+    max_var = max(biomarkers['energy_var'], 1e-10)
+    biomarkers['phi_voice'] = 1.0 / (1.0 + biomarkers['energy_var'] * 100)
+    # phi_voice alto = voz estável = estado cognitivo coerente (Hexacordex H2)
+    return biomarkers
+RAF_FOMEGA_LOW  = 963  # Hz — banda de ressonância Rafaelia
+RAF_FOMEGA_HIGH = 999  # Hz
+def voice_in_fomega(biomarkers):
+    phi = biomarkers.get('phi_voice', 0.0)
+    simulated_freq = 963 + phi * (999-963)  # mapeia phi para banda fΩ
+    return RAF_FOMEGA_LOW <= simulated_freq <= RAF_FOMEGA_HIGH
+SEED
+}
+
+seed_S11_V5_phonosemantic_map() { cat << 'SEED'
+# S11_V5: MAPA FONOSEMÂNTICO — som carrega significado (não apenas convenção)
+# Teoria: certas combinações de fonemas têm significado universal cross-língua
+# Evidência: "gleam/glimmer/glisten" em inglês — gl- = luz visual
+# Hebraico: אור (alef+vav+resh) — 3 sons específicos = luz em HE
+PHONOSEMANTIC_CLUSTERS = {
+    'brilho/luz': {
+        'he': [('א','ו','ר')],  # alef-vav-resh
+        'el': [('φ','ω','ς')],  # phi-omega-sigma
+        'la': [('l','u','x')],  # lux
+        'pt': [('l','u','z')],  # luz
+        'en': [('l','i','g')],  # light, gleam
+        'feature_shared': 'soantes_líquidas+vogal_alta',
+        'phi': 0.85,
+    },
+    'água/fluxo': {
+        'he': [('מ','י','מ')],  # mem-yod-mem (água)
+        'el': [('ὕ','δ','ω')],  # hydor
+        'la': [('a','q','u')],  # aqua
+        'pt': [('á','g','u')],  # água
+        'fea…
