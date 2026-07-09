@@ -22,6 +22,7 @@
 - `reports/CANONICAL_BUILD_STATUS.md`
 
 ## 2) Ativo (estado operacional vigente)
+- `docs/active/VECTRA_MULTILINGUAL_INVARIANT_OPERATIONAL_CYCLES.md`
 - `docs/active/AI_SESSION_FACT_MAP_2026-06-05.md`
 - `docs/rafaelia_reference/RAFAELIA_SEED_BLOCK_CATALOG_2026-06-05.md`
 - `docs/active/RAFAELIA_ENTERPRISE_COMPLETION_PLAYBOOK_2026-06-05.md`
