@@ -29,7 +29,7 @@ A pipeline Android canônica do repositório é **`.github/workflows/android-ci.
 - `debug-local` → executa `run_workfile=upstream-debug-compat`, `build_variant=debug`, `signing_mode=unsigned`, `abi_profile=official_arm32_arm64`.
 - `debug-internal-arm32-arm64` → debug interno dual-ABI (`arm64-v8a` + `armeabi-v7a`) unsigned.
 - `release-unsigned-internal` → release interno dual-ABI unsigned (aceito somente na trilha interna com `ci_internal_validation=true`).
-- `release-signed-official` → release oficial dual-ABI com assinatura obrigatória.
+- `release-signed-official` → release oficial arm64-v8a com assinatura obrigatória.
 
 As trilhas de release mantêm validações rígidas de side-by-side ABI e assinatura; degradações são permitidas apenas em trilhas de debug/local.
 

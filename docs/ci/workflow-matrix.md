@@ -48,13 +48,13 @@
 ## Como os workflows são usados na prática
 
 1. **Entrada principal de validação contínua:** `pipeline-orchestrator.yml` para branches/PRs.
-2. **Entrada oficial de publicação:** `release-dual-track.yml`; ele chama `android-ci.yml` duas vezes, uma lane `release-unsigned-internal` e uma lane `release-signed-official-arm32-arm64`, valida ambas e publica somente a saída assinada oficial.
+2. **Entrada oficial de publicação:** `release-dual-track.yml`; ele chama `android-ci.yml` duas vezes, uma lane `release-unsigned-internal` e uma lane `release-signed-official`, valida ambas e publica somente a saída assinada oficial arm64-v8a.
 3. `android-ci.yml` aplica `prepare_android_env.sh`, `prepare_release_signing.sh`, `:app:verifyDeliveredCompiledArtifacts`, política `APP_ABI_POLICY`/`SUPPORTED_ABIS` resolvida por `abi_profiles_contract.json` e `materialize_android_ci_artifacts.sh`.
 4. Workflows wrapper (`android.yml`, `ci.yml`) são permitidos para compatibilidade, sem virar fonte de verdade de política.
 5. `sign-release.yml` não é caminho oficial: é manual, legado, exige confirmação `allow_compat_artifact=true` e não publica GitHub Release.
 
 ## Política ABI resumida
 
-- **Oficial de publicação neste fluxo dual-track:** `official_arm32_arm64` para pacote compatível arm32+arm64 assinado. `official_arm64` continua reservado para perfil store arm64-only quando acionado por lane específica.
-- **Validação interna controlada:** `official_arm32_arm64`, `internal_arm32_arm64` e matrizes expandidas conforme lane/profile.
+- **Oficial de publicação neste fluxo dual-track:** `official_arm64` para pacote assinado arm64-v8a. `official_arm32_arm64` permanece perfil de compatibilidade controlada fora da publicação oficial de loja.
+- **Validação interna/compatibilidade controlada:** `official_arm32_arm64`, `internal_arm32_arm64` e matrizes expandidas conforme lane/profile; ARM32 não é distribuição oficial sem decisão documentada em contrário.
 - **NEON:** existe sinalização de build e inclusão condicional de fontes por ABI ARM; classificação de implementação deve sempre ser comprovada por execução/teste, não só por flag.

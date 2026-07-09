@@ -157,10 +157,10 @@ jobs:
             signing_mode: unsigned
             abi_profile: internal_arm32_arm64
             label: internal-unsigned
-          - lane: release-signed-official-arm32-arm64
+          - lane: release-signed-official
             signing_mode: signed
-            abi_profile: official_arm32_arm64
-            label: official-signed-arm32-arm64
+            abi_profile: official_arm64
+            label: official-signed-arm64
     uses: ./.github/workflows/android-ci.yml
     with:
       run_workfile: release_gate
