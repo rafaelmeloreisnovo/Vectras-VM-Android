@@ -54,17 +54,17 @@ jobs:
     secrets: inherit
 
   release-signed-official:
-    name: Release signed official (arm32+arm64 compatibility)
+    name: Release signed official (arm64-v8a)
     if: ${{ github.event_name != 'workflow_dispatch' || inputs.official_release }}
     uses: ./.github/workflows/android-ci.yml
     permissions:
       contents: read
     with:
-      ci_lane: release-signed-official-arm32-arm64
+      ci_lane: release-signed-official
       run_workfile: release_gate
       build_variant: release
       signing_mode: signed
-      abi_profile: official_arm32_arm64
+      abi_profile: official_arm64
       native_matrix_profile: canonical
       run_lint: true
       run_native_checks: ${{ github.event_name != 'workflow_dispatch' || inputs.run_native_checks }}
@@ -117,7 +117,7 @@ jobs:
       - name: Download signed official Android artifacts
         uses: actions/download-artifact@v4
         with:
-          pattern: android-artifacts-release-signed-official-arm32-arm64
+          pattern: android-artifacts-release-signed-official
           path: release-assets/signed-official
           merge-multiple: true
 
