@@ -146,7 +146,7 @@ jobs:
     secrets: inherit
 
   android-release-binaries:
-    name: Android Release Binaries (internal unsigned + official signed)
+    name: Android Release Binaries (internal unsigned validation)
     needs: [matrix-build, abi-preflight, host-ci]
     if: ${{ always() && needs.matrix-build.outputs.should_run_android == 'true' && (needs.host-ci.result == 'success' || needs.host-ci.result == 'skipped') }}
     strategy:
@@ -157,10 +157,6 @@ jobs:
             signing_mode: unsigned
             abi_profile: internal_arm32_arm64
             label: internal-unsigned
-          - lane: release-signed-official
-            signing_mode: signed
-            abi_profile: official_arm64
-            label: official-signed-arm64
     uses: ./.github/workflows/android-ci.yml
     with:
       run_workfile: release_gate

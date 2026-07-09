@@ -17,7 +17,7 @@
 
 | Workflow | Quando roda | Papel |
 |---|---|---|
-| `.github/workflows/pipeline-orchestrator.yml` | `push`, `pull_request`, `workflow_dispatch` | Orquestra perfil (`host_only`/`android_only`/`full`) e chama trilhas canônicas. |
+| `.github/workflows/pipeline-orchestrator.yml` | `push`, `pull_request`, `workflow_dispatch` | Orquestra perfil (`host_only`/`android_only`/`full`) e chama trilhas canônicas de validação; não publica distribuição oficial. |
 | `.github/workflows/host-ci.yml` | direto por evento e/ou `workflow_call` | Pipeline host canônica (build, contratos e evidências host). |
 | `.github/workflows/android-ci.yml` | `workflow_call` | Pipeline Android canônica parametrizada (Gradle/NDK/CMake/JNI/testes/artefatos); é a fonte de verdade executável usada pelo release oficial. |
 | `.github/workflows/release-dual-track.yml` | `push` tag `v*.*.*`, `workflow_dispatch` com `release_tag` quando publicar | **Único workflow autorizado a publicar artefato oficial**; delega as lanes unsigned interna e signed oficial para `android-ci.yml` e só cria GitHub Release após gate signed verde. |
@@ -47,7 +47,7 @@
 
 ## Como os workflows são usados na prática
 
-1. **Entrada principal de validação contínua:** `pipeline-orchestrator.yml` para branches/PRs.
+1. **Entrada principal de validação contínua:** `pipeline-orchestrator.yml` para branches/PRs, com release binário apenas unsigned/internal para evitar dependência de segredos oficiais fora da trilha de publicação.
 2. **Entrada oficial de publicação:** `release-dual-track.yml`; ele chama `android-ci.yml` duas vezes, uma lane `release-unsigned-internal` e uma lane `release-signed-official`, valida ambas e publica somente a saída assinada oficial arm64-v8a.
 3. `android-ci.yml` aplica `prepare_android_env.sh`, `prepare_release_signing.sh`, `:app:verifyDeliveredCompiledArtifacts`, política `APP_ABI_POLICY`/`SUPPORTED_ABIS` resolvida por `abi_profiles_contract.json` e `materialize_android_ci_artifacts.sh`.
 4. Workflows wrapper (`android.yml`, `ci.yml`) são permitidos para compatibilidade, sem virar fonte de verdade de política.
