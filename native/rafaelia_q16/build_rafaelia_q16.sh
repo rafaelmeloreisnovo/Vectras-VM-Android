@@ -2,7 +2,7 @@
 set -eu
 export LC_ALL=C
 
-# RAFAELIA Q16 ARM32 loaderless runtime
+# RAFAELIA Q16 ARM32 loaderless runtime v2
 # Generates a libc-free, CRT-free, PT_INTERP-free ELF32 executable and
 # validates recurrence, fixed band, first fixed iteration and stripped parity.
 # Verified ARMv7 baseline: original=4740, stripped=3660, x96=1517719,
@@ -12,7 +12,7 @@ need(){ command -v "$1" >/dev/null 2>&1 || { echo "[FALHA] Ferramenta ausente: $
 for tool in clang ld.lld readelf sha256sum awk wc cmp diff cp chmod grep uname cat; do need "$tool"; done
 if command -v llvm-strip >/dev/null 2>&1; then STRIP_TOOL=llvm-strip; elif command -v strip >/dev/null 2>&1; then STRIP_TOOL=strip; else echo "[FALHA] llvm-strip ou strip necessario." >&2; exit 127; fi
 
-echo "[*] Gerando RAFAELIA Q16 freestanding (loaderless)..."
+echo "[*] Gerando RAFAELIA Q16 freestanding (loaderless, v2)..."
 cat <<'EOF_H' > rafaelia.h
 #ifndef RAFAELIA_H
 #define RAFAELIA_H
@@ -67,7 +67,9 @@ static const char ok[]="[STATUS] Convergencia dentro da tolerancia Q16.\n",gap[]
 s32 r48=fraf_iterate(TOKEN_VAZIO,48u),r96=fraf_iterate(TOKEN_VAZIO,FRAF_ITERATIONS),err=bare_abs_diff(r96,OMEGA_TARGET),fmin=0,fmax=0,fval=0; u32 fcnt=fraf_find_fixed_band(OMEGA_TARGET,FIXED_SCAN_RADIUS,&fmin,&fmax),first=fraf_first_fixed_iteration(TOKEN_VAZIO,256u,&fval);
 bare_write(msg_init,ARRAY_LEN_LITERAL(msg_init)); bare_write(msg_mode,ARRAY_LEN_LITERAL(msg_mode)); print_q16_line(l48,ARRAY_LEN_LITERAL(l48),r48); print_q16_line(l96,ARRAY_LEN_LITERAL(l96),r96); print_q16_line(lt,ARRAY_LEN_LITERAL(lt),OMEGA_TARGET); print_q16_line(le,ARRAY_LEN_LITERAL(le),err); print_q16_line(ltol,ARRAY_LEN_LITERAL(ltol),OMEGA_TOLERANCE_Q16); print_integer_line(lc,ARRAY_LEN_LITERAL(lc),(s32)fcnt); if(fcnt>0u){ print_q16_line(lmin,ARRAY_LEN_LITERAL(lmin),fmin); print_q16_line(lmax,ARRAY_LEN_LITERAL(lmax),fmax); }else bare_write(band,ARRAY_LEN_LITERAL(band)); print_integer_line(li,ARRAY_LEN_LITERAL(li),(s32)first); if(first>0u)print_q16_line(lv,ARRAY_LEN_LITERAL(lv),fval); if(err<=OMEGA_TOLERANCE_Q16&&fcnt==7u&&first>0u){ bare_write(ok,ARRAY_LEN_LITERAL(ok)); bare_exit(0); } bare_write(gap,ARRAY_LEN_LITERAL(gap)); bare_exit(1); }
 EOF_C
+SHA_SRC_H=$(sha256sum rafaelia.h|awk '{print $1}'); SHA_SRC_MATH=$(sha256sum fraf_math.c|awk '{print $1}'); SHA_SRC_MAIN=$(sha256sum main.c|awk '{print $1}'); SHA_BUILD_SCRIPT=$(sha256sum "$0"|awk '{print $1}')
 COMMON_CFLAGS="-O3 -marm -march=armv7-a -ffreestanding -fno-builtin -fno-stack-protector -fno-unwind-tables -fno-asynchronous-unwind-tables -ffunction-sections -fdata-sections -fno-pic -fno-pie"
+CLANG_VERSION=$(clang --version|awk 'NR==1{print;exit}'); LLD_VERSION=$(ld.lld --version|awk 'NR==1{print;exit}')
 echo "[*] Compilando objetos..."
 # shellcheck disable=SC2086
 clang $COMMON_CFLAGS -c main.c -o main.o
@@ -90,17 +92,17 @@ cp rafaelia_node rafaelia_node.stripped; "$STRIP_TOOL" --strip-all rafaelia_node
 set +e; ./rafaelia_node.stripped > stripped.output.txt 2>&1; STRIP_STATUS=$?; set -e; cat stripped.output.txt
 if cmp -s original.output.txt stripped.output.txt; then OUTPUT_STATUS=0; echo "[OK] Saidas identicas (byte a byte)."; else OUTPUT_STATUS=1; diff -u original.output.txt stripped.output.txt||true; fi
 [ "$RUN_STATUS" -eq 0 ]||exit "$RUN_STATUS"; [ "$STRIP_STATUS" -eq 0 ]||exit "$STRIP_STATUS"; [ "$OUTPUT_STATUS" -eq 0 ]||exit "$OUTPUT_STATUS"
-ORIG_SIZE=$(wc -c < rafaelia_node); STRIP_SIZE=$(wc -c < rafaelia_node.stripped); ORIG_SHA=$(sha256sum rafaelia_node|awk '{print $1}'); STRIP_SHA=$(sha256sum rafaelia_node.stripped|awk '{print $1}'); SCRIPT_SHA=$(sha256sum "$0"|awk '{print $1}'); HEADER_SHA=$(sha256sum rafaelia.h|awk '{print $1}'); MATH_SHA=$(sha256sum fraf_math.c|awk '{print $1}'); MAIN_SHA=$(sha256sum main.c|awk '{print $1}'); COMPILER_VERSION=$(clang --version|awk 'NR==1{print;exit}'); LINKER_VERSION=$(ld.lld --version|awk 'NR==1{print;exit}')
+ORIG_SIZE=$(wc -c < rafaelia_node); STRIP_SIZE=$(wc -c < rafaelia_node.stripped); ORIG_SHA=$(sha256sum rafaelia_node|awk '{print $1}'); STRIP_SHA=$(sha256sum rafaelia_node.stripped|awk '{print $1}')
 cat <<MANIFEST > rafaelia_q16_artifacts.manifest
 schema=rafaelia.q16.dual-artifact.v2
 architecture=$(uname -m)
-compiler=$COMPILER_VERSION
-linker=$LINKER_VERSION
+compiler.version=$CLANG_VERSION
+linker.version=$LLD_VERSION
 build.flags=$COMMON_CFLAGS
-script.sha256=$SCRIPT_SHA
-source.rafaelia_h.sha256=$HEADER_SHA
-source.fraf_math_c.sha256=$MATH_SHA
-source.main_c.sha256=$MAIN_SHA
+build.script.sha256=$SHA_BUILD_SCRIPT
+source.rafaelia_h.sha256=$SHA_SRC_H
+source.fraf_math_c.sha256=$SHA_SRC_MATH
+source.main_c.sha256=$SHA_SRC_MAIN
 original.name=rafaelia_node
 original.size_bytes=$ORIG_SIZE
 original.sha256=$ORIG_SHA
@@ -112,13 +114,12 @@ stripped.exit_status=$STRIP_STATUS
 reduction_bytes=$((ORIG_SIZE-STRIP_SIZE))
 outputs_identical=true
 contract_passed=true
-loaderless=true
 elf.type=EXEC
 elf.interp=false
 elf.dynamic=false
 elf.dt_needed_count=0
 elf.undefined_symbol_count=0
-elf.dynamic_relocation_count=0
+elf.relocation_count=0
 MANIFEST
 cat rafaelia_q16_artifacts.manifest
-echo "[OK] Contrato RAFAELIA Q16 loaderless satisfeito."
+echo "[OK] Contrato duplo satisfeito - RAFAELIA Q16 executavel, estatico, loaderless."
