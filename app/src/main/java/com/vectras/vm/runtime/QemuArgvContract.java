@@ -11,11 +11,18 @@ import java.util.List;
 import java.util.Locale;
 
 /**
- * Immutable, inspectable representation of the QEMU launch command.
+ * Immutable, inspectable representation of a QEMU launch command.
  *
- * <p>This does not replace the current shell string path yet; it provides the
- * missing proof layer: stable argv serialization + deterministic hash so each
- * VM launch can be audited without relying on lossy log text.</p>
+ * <p>The contract supports two distinct uses:</p>
+ * <ul>
+ *     <li>stable audit serialization and deterministic hashing;</li>
+ *     <li>direct argv dispatch without evaluating the command through a shell.</li>
+ * </ul>
+ *
+ * <p>{@link #fromShellCommand(String)} exists only as a compatibility boundary for
+ * legacy callers that still build a command string. Once parsed, callers must use
+ * {@link #toProcessArgv()} for execution. Shell operators then remain literal argv
+ * values and cannot be evaluated by {@code /bin/sh}.</p>
  */
 public final class QemuArgvContract {
     private final String qemuBinary;
@@ -45,18 +52,19 @@ public final class QemuArgvContract {
         }
         if (argv != null) {
             for (String arg : argv) {
-                if (arg == null || arg.trim().isEmpty()) continue;
+                if (arg == null || arg.isEmpty()) continue;
                 if (command.length() > 0) command.append(' ');
-                command.append(arg.trim());
+                command.append(arg);
             }
         }
-        return new QemuArgvContract(qemuBinary, argv, command.toString(), false, 0);
+        int qemuIndex = isQemuBinaryToken(qemuBinary) ? 0 : -1;
+        return new QemuArgvContract(qemuBinary, argv, command.toString(), false, qemuIndex);
     }
 
     /**
-     * Compatibility parser for the current Vectras launch path where QEMU is
-     * still written into a shell. It preserves quoted spans well enough for
-     * diagnostics; the goal is audit visibility, not command execution.
+     * Compatibility parser for the legacy Vectras launch path where QEMU may be
+     * embedded in a shell-like command string. Quoted spans and backslash escapes
+     * are decoded into tokens, but no token is executed by a shell.
      */
     public static QemuArgvContract fromShellCommand(String commandString) {
         List<String> tokens = splitShellLike(commandString);
@@ -95,6 +103,27 @@ public final class QemuArgvContract {
         return qemuTokenIndex;
     }
 
+    /** Returns true only for a basename beginning with qemu-system-. */
+    public boolean hasRecognizedQemuBinary() {
+        return qemuTokenIndex >= 0 && isQemuBinaryToken(qemuBinary);
+    }
+
+    /**
+     * Builds the exact process argv used for direct guest execution.
+     *
+     * @throws IllegalStateException if the parsed command does not contain a
+     *                               recognized qemu-system-* executable.
+     */
+    public List<String> toProcessArgv() {
+        if (!hasRecognizedQemuBinary()) {
+            throw new IllegalStateException("Direct argv dispatch requires qemu-system-* binary");
+        }
+        ArrayList<String> processArgv = new ArrayList<>(argv.size() + 1);
+        processArgv.add(qemuBinary);
+        processArgv.addAll(argv);
+        return Collections.unmodifiableList(processArgv);
+    }
+
     public JSONObject toJson() {
         JSONObject json = new JSONObject();
         JSONArray args = new JSONArray();
@@ -107,6 +136,7 @@ public final class QemuArgvContract {
             json.put("parsed_from_shell_string", parsedFromShellString);
             json.put("qemu_token_index", qemuTokenIndex);
             json.put("arg_count", argv.size());
+            json.put("direct_argv_allowed", hasRecognizedQemuBinary());
         } catch (Exception ignored) {
             // JSONObject.put should not fail for primitive/String payloads here.
         }
@@ -116,14 +146,18 @@ public final class QemuArgvContract {
     private static int findQemuTokenIndex(List<String> tokens) {
         if (tokens == null) return -1;
         for (int i = 0; i < tokens.size(); i++) {
-            String token = tokens.get(i);
-            if (token == null) continue;
-            String normalized = token.trim();
-            int slash = Math.max(normalized.lastIndexOf('/'), normalized.lastIndexOf('\\'));
-            String base = slash >= 0 ? normalized.substring(slash + 1) : normalized;
-            if (base.startsWith("qemu-system-")) return i;
+            if (isQemuBinaryToken(tokens.get(i))) return i;
         }
         return -1;
+    }
+
+    private static boolean isQemuBinaryToken(String token) {
+        if (token == null) return false;
+        String normalized = token.trim();
+        if (normalized.isEmpty()) return false;
+        int slash = Math.max(normalized.lastIndexOf('/'), normalized.lastIndexOf('\\'));
+        String base = slash >= 0 ? normalized.substring(slash + 1) : normalized;
+        return base.startsWith("qemu-system-");
     }
 
     private static List<String> splitShellLike(String value) {
@@ -161,6 +195,7 @@ public final class QemuArgvContract {
             }
             current.append(c);
         }
+        if (escaped) current.append('\\');
         if (current.length() > 0) out.add(current.toString());
         return out;
     }
