@@ -1,0 +1,65 @@
+{
+  "schema_version": "1.0.0",
+  "observed_at": "2026-07-19",
+  "repository": "rafaelmeloreisnovo/Vectras-VM-Android",
+  "branch": "claude/vectra-vm-gaps-audit-pvtiki",
+  "evidence_mode": "GITHUB_SOURCE_INSPECTION",
+  "runtime_execution": "TOKEN_VAZIO",
+  "real_apk_supplied": false,
+  "claim_allowed": false,
+  "findings": [
+    {
+      "id": "F-BROWSER-001",
+      "path": "Incluir/vectras_bbs.c",
+      "blob_sha": "567539703638ecedcb943902d1362cf266bc63a4",
+      "finding": "TBROWSER renders embedded rmr:// pages using hosted C stdio; it is not an ASM web browser",
+      "state": "SOURCE_PRESENT_LOCAL_RENDERER"
+    },
+    {
+      "id": "F-NET-001",
+      "path": "conjunto_de_conceitos/src/net.c",
+      "blob_sha": "abc977877aebd180a0480e0cc3929f7d5cf2e2cf",
+      "finding": "Raw TCP, DNS A and HTTP/1.0 code exists; source explicitly states HTTPS/TLS is unsupported",
+      "state": "IMPLEMENTED_CODEGEN_UNPROVEN_RUNTIME"
+    },
+    {
+      "id": "F-TLS-001",
+      "path": "conjunto_de_conceitos/src/tls.c",
+      "blob_sha": "TOKEN_VAZIO",
+      "finding": "No integrated clean-room TLS module or certification evidence was located",
+      "state": "TOKEN_VAZIO"
+    },
+    {
+      "id": "F-LOWFALA-001",
+      "path": "Incluir/compiladorlowFala.txt",
+      "blob_sha": "c05847c7b05f4657a156c131e2a43322aeec2ec0",
+      "finding": "The speech-to-VM pipeline is a shell/text seed monolith and is not referenced by canonical Gradle/CMake build files",
+      "state": "DOCUMENT_GENERATOR_UNINTEGRATED"
+    },
+    {
+      "id": "F-APK-001",
+      "path": "tools/ci/verify_apk_abi_contract.py",
+      "blob_sha": "57938c77f7a24be919db178cb3d5b77877305434",
+      "finding": "Existing APK gate checks container entries and ABI directories but does not parse DEX headers or ELF e_machine",
+      "state": "PARTIAL_AUDIT"
+    },
+    {
+      "id": "F-AUDIT-001",
+      "path": "tools/audit_vectra_capabilities.py",
+      "blob_sha": "CREATED_IN_THIS_BRANCH",
+      "finding": "New stdlib-only audit parses DEX and ELF headers, checks ABI coherence, hashes APKs and inventories loose artifacts",
+      "state": "AUDIT_IMPLEMENTED_AWAITS_REAL_APK"
+    }
+  ],
+  "local_synthetic_validation": {
+    "command": "python3 -m unittest -v tests/test_audit_vectra_capabilities.py",
+    "result": "PASS_5_OF_5",
+    "scope": "synthetic DEX/ELF fixtures and temporary loose-file trees",
+    "does_not_prove": [
+      "repository-wide scan on GitHub runner",
+      "current APK correctness",
+      "TLS interoperability",
+      "Android device runtime"
+    ]
+  }
+}
