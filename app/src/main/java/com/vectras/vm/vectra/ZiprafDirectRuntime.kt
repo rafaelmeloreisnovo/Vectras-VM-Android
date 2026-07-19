@@ -190,22 +190,27 @@ class ZiprafDirectRuntime(
     private val mapping: MappedByteBuffer
 
     init {
-        require(extent.compressionMethod == ZiprafStoredExtent.STORE_METHOD) {
-            "ZIPRAF direct runtime accepts only ZIP STORE"
-        }
-        require(extent.payloadOffset >= 0 && extent.payloadSize > 0)
-        require(extent.payloadSize <= Int.MAX_VALUE.toLong()) {
-            "Mapped STORE extent exceeds the ByteBuffer capacity limit"
-        }
-        require(extent.payloadOffset <= randomAccess.length())
-        require(extent.payloadSize <= randomAccess.length() - extent.payloadOffset)
+        try {
+            require(extent.compressionMethod == ZiprafStoredExtent.STORE_METHOD) {
+                "ZIPRAF direct runtime accepts only ZIP STORE"
+            }
+            require(extent.payloadOffset >= 0 && extent.payloadSize > 0)
+            require(extent.payloadSize <= Int.MAX_VALUE.toLong()) {
+                "Mapped STORE extent exceeds the ByteBuffer capacity limit"
+            }
+            require(extent.payloadOffset <= randomAccess.length())
+            require(extent.payloadSize <= randomAccess.length() - extent.payloadOffset)
 
-        mapping = randomAccess.channel.map(
-            FileChannel.MapMode.READ_ONLY,
-            extent.payloadOffset,
-            extent.payloadSize
-        )
-        mapping.order(ByteOrder.LITTLE_ENDIAN)
+            mapping = randomAccess.channel.map(
+                FileChannel.MapMode.READ_ONLY,
+                extent.payloadOffset,
+                extent.payloadSize
+            )
+            mapping.order(ByteOrder.LITTLE_ENDIAN)
+        } catch (failure: Throwable) {
+            randomAccess.close()
+            throw failure
+        }
     }
 
     fun window(
