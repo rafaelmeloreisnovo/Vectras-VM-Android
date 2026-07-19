@@ -42,6 +42,29 @@ fun main() {
             checks["crc"] = runtime.verifyCrc32()
         }
 
+        var scanChecksum = 0L
+        ZiprafDirectStoreSession.open(
+            archive,
+            "runtime/core.bin",
+            ZiprafRuntimePlan(512, 64, 1024, 8)
+        ).use { session ->
+            val scan = session.scan(
+                stage = ZiprafMemoryStage.L1_HOT,
+                routeSeed = 0,
+                startOffset = 17,
+                maxBytes = 1000
+            ) { window ->
+                while (window.bytes.hasRemaining()) {
+                    scanChecksum += window.bytes.get().toInt() and 0xff
+                }
+            }
+            checks["scan_bytes"] = scan.bytesVisited == 1000L
+            checks["scan_windows"] = scan.windowCount == 16
+            checks["scan_lanes"] = scan.laneMask == 0xff
+            checks["scan_checksum"] = scanChecksum == first.copyOfRange(17, 1017)
+                .sumOf { it.toInt() and 0xff }.toLong()
+        }
+
         checks["missing_entry_rejected"] = runCatching {
             ZiprafArchiveValidator.parseStoredEntry(archive, "missing.bin")
         }.isFailure
