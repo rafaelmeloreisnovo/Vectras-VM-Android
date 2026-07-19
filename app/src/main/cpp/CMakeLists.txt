@@ -397,6 +397,17 @@ if(NOT ANDROID)
     endif()
 endif()
 
+# Terminal JNI bridge (promoted from _incoming/termux.c — null-safety fixed in PR #1038)
+add_library(termux_terminal_jni SHARED
+    termux_jni.c)
+target_link_libraries(termux_terminal_jni PRIVATE ${log-lib})
+if(ANDROID)
+    target_link_options(termux_terminal_jni PRIVATE -Wl,-z,max-page-size=16384)
+endif()
+if(NOT ANDROID)
+    target_include_directories(termux_terminal_jni PRIVATE ${JNI_INCLUDE_DIRS})
+endif()
+
 if(CMAKE_ANDROID_NDK)
     target_include_directories(vectra_core_accel PRIVATE
         ${CMAKE_ANDROID_NDK}/sysroot/usr/include
