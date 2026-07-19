@@ -6,12 +6,13 @@ import org.junit.Assert.assertTrue
 import org.junit.Assert.fail
 import org.junit.Test
 import java.io.File
-import java.io.RandomAccessFile
-import java.nio.ByteBuffer
-import java.nio.ByteOrder
-import java.util.zip.CRC32
+import java.util.zip.ZipEntry
+import java.util.zip.ZipOutputStream
 
 class ZiprafDirectRuntimeTest {
+
+    // --- existing tests (preserved) ---
+
     @Test
     fun mappedStore_usesThreeStages_andEightLanes() {
         val file = File.createTempFile("zipraf-direct", ".bin")

@@ -1,15 +1,16 @@
-<!-- DOC_METADATA_SYNC: 2026-06-08 | role: project-state -->
+<!-- DOC_METADATA_SYNC: 2026-07-19 | role: project-state -->
 
 # PROJECT_STATE
 
 ## Metadados canônicos
 
-- Versão do documento: 2.1.
-- Última revisão: 2026-06-08.
+- Versão do documento: 2.2.
+- Última revisão: 2026-07-19.
 - Escopo: estado operacional validado, bloqueios, riscos, limitações e critérios para não inferir build/release sem evidência atual.
 - Status: canônico vigente; estado técnico declarado continua condicionado às validações registradas no próprio documento.
 - Commit de referência: `HEAD`.
 - Fonte de verdade relacionada: [`reports/CANONICAL_BUILD_STATUS.md`](reports/CANONICAL_BUILD_STATUS.md), [`BUILDING.md`](BUILDING.md), [`DOC_INDEX.md`](DOC_INDEX.md), [`.github/workflows/android-ci.yml`](.github/workflows/android-ci.yml) e [`.github/workflows/host-ci.yml`](.github/workflows/host-ci.yml).
+- Gaps de prova: ver [`docs/BLOCKING_GAPS.md`](docs/BLOCKING_GAPS.md).
 
 
 Estado atual do projeto: `BETA_BLOCKED`.
@@ -29,9 +30,17 @@ Veja `FIXES_SUMMARY.md` para tabela completa.
 ## Escopo atual (BETA_BLOCKED)
 - ✅ Consolidação de contratos CI host/android em andamento.
 - ✅ Fontes externas críticas (`qemu_rafaelia`, `androidx_RmR`) definidas por manifesto e script de verificação.
+- ✅ ABI de release oficial definida como `arm64-v8a` (PR #1041, 2026-07-09).
+- ✅ `ZiprafDirectRuntime.kt` — runtime ZIPRAF direto via mmap ativo (PR #1048, 2026-07-18).
+  - mmap por extent (não arquivo inteiro) — corrigido neste PR.
+  - `parseStoredExtent()` com validação de EOCD + CD + local header — adicionado neste PR.
+- ✅ `termux_jni.c` promovido de `_incoming/` ao path canônico `app/src/main/cpp/`.
+- ✅ SBOM inicial criado em `sbom/SBOM.spdx.json` (hashes dependem de CI build).
+- ✅ Mapeamento de escopo legal em `legal/LEGAL_SCOPE_MAP.yaml`.
+- ✅ Gaps bloqueados por hardware documentados em `docs/BLOCKING_GAPS.md`.
 - ⚠️ Status de build **não pode ser inferido como atual** sem execução CI no commit corrente.
 - ⚠️ Afirmações de aceleração/otimização (ex.: NEON) devem ser tratadas como capacidade de build declarada até validação executada no commit atual.
-- ✅ Política ABI oficialmente separada entre trilha oficial e validação interna controlada.
+- ⚠️ `NAOCOMERCIAL/` em quarentena — auditar por arquivo antes de qualquer release (ver `legal/LEGAL_SCOPE_MAP.yaml`).
 
 ## Documentos canônicos
 - `reports/CANONICAL_BUILD_STATUS.md` — **última validação conhecida** de build/release; não substitui execução CI do commit atual.
@@ -65,4 +74,4 @@ Veja `FIXES_SUMMARY.md` para tabela completa.
 - `external_sources.manifest` mantém `androidx_RmR` e `qemu_rafaelia` com `pinned_commit_sha`, além de validação remota e contenção do SHA no branch no CI.
 
 
-Última sincronização documental registrada: **2026-05-24**.
+Última sincronização documental registrada: **2026-07-19** (v2.2 — auditoria de gaps, ZIPRAF fix, SBOM, legal scope map).
