@@ -1,6 +1,7 @@
 package com.vectras.vm.vectra
 
 import java.io.File
+import java.security.MessageDigest
 import java.util.zip.CRC32
 import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
@@ -64,6 +65,35 @@ fun main() {
             checks["scan_checksum"] = scanChecksum == first.copyOfRange(17, 1017)
                 .sumOf { it.toInt() and 0xff }.toLong()
         }
+
+        val crc = CRC32().apply { update(first) }.value
+        val sha = MessageDigest.getInstance("SHA-256")
+            .digest(first)
+            .joinToString("") { "%02x".format(it.toInt() and 0xff) }
+        ZiprafDirectPolicyVerifier.open(
+            archive,
+            ZiprafDirectEntryPolicy(
+                entryName = "runtime/core.bin",
+                maxPayloadBytes = 8192,
+                expectedPayloadBytes = first.size.toLong(),
+                expectedCrc32 = crc,
+                expectedSha256Hex = sha
+            )
+        ).use { opened ->
+            checks["policy_size"] = opened.evidence.payloadBytes == first.size.toLong()
+            checks["policy_crc"] = opened.evidence.crc32 == crc
+            checks["policy_sha256"] = opened.evidence.sha256Hex == sha
+        }
+        checks["policy_wrong_sha_rejected"] = runCatching {
+            ZiprafDirectPolicyVerifier.open(
+                archive,
+                ZiprafDirectEntryPolicy(
+                    entryName = "runtime/core.bin",
+                    maxPayloadBytes = 8192,
+                    expectedSha256Hex = "00".repeat(32)
+                )
+            ).close()
+        }.isFailure
 
         checks["missing_entry_rejected"] = runCatching {
             ZiprafArchiveValidator.parseStoredEntry(archive, "missing.bin")
