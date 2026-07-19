@@ -1,73 +1,68 @@
 # Release Evidence Ledger
 
-> Ledger operacional para humanos e agentes de IA registrarem, compararem e auditarem evidências de release Android sem misturar validação interna com distribuição oficial.
+> Ledger operacional para registrar e auditar evidências de build/release Android sem misturar intenção, validação interna e distribuição oficial.
 
-## Finalidade
+## Regra canônica
 
-Este arquivo é o formato esperado para registrar cada APK/AAB gerado por lanes de CI, builds locais controlados ou publicação oficial. Ele complementa os manifests materializados por `tools/ci/materialize_android_ci_artifacts.sh` e o relatório Gradle `app/build/reports/artifacts/compiled-artifacts-report.json`.
+Uma execução só entra como artefato comprovado quando existem, em conjunto:
 
-Use este ledger para responder, sem inferência silenciosa:
+1. commit executado;
+2. workflow/lane concluído;
+3. APK/AAB materializado;
+4. SHA-256 calculado sobre o arquivo final;
+5. relatório ABI;
+6. modo de assinatura identificado;
+7. destino de upload verificável.
 
-- qual commit gerou o artefato;
-- qual workflow/lane executou a cadeia;
-- qual perfil ABI foi aplicado;
-- se a assinatura era de validação interna ou distribuição oficial;
-- qual APK/AAB foi gerado;
-- qual SHA-256 permite conferir integridade;
-- onde está o relatório ABI;
-- se houve upload e para qual destino;
-- quais bloqueios impedem promoção, publicação ou confiança operacional.
+Ausência de qualquer elo obrigatório é registrada como `BLOCKED:<motivo>`, nunca como sucesso implícito.
 
-## Vocabulário obrigatório de assinatura
+## Vocabulário de assinatura
 
-| Signing mode | Nome operacional obrigatório | Uso permitido | Proibição explícita |
+| Signing mode | Nome operacional | Uso permitido | Proibição |
 |---|---|---|---|
-| `unsigned` | **validação interna** | Testar gates de release, ABI, empacotamento e materialização sem segredo de produção. | Não chamar de release oficial, distribuição oficial, store-ready ou artefato publicável ao usuário final. |
-| `debug-signed` | **validação interna** | Iteração/debug instalável com chave debug padrão. | Não promover como release oficial. |
-| `signed-internal` | **validação interna** | Ensaios com keystore local/beta controlado, sem substituir a chave oficial. | Não confundir com assinatura oficial de loja. |
-| `signed` | **distribuição oficial** | Publicação oficial apenas via `.github/workflows/release-dual-track.yml` + `.github/workflows/android-ci.yml`, com segredos `VECTRAS_RELEASE_*`. | Não fazer fallback para unsigned; falha de segredo deve bloquear. |
+| `unsigned` | validação interna | gates de build/ABI sem segredo | não chamar de release oficial |
+| `debug-signed` | validação interna | instalação e debug | não promover para distribuição |
+| `signed-internal` | validação interna | beta controlado | não confundir com chave oficial |
+| `signed` | distribuição oficial | publicação via gate oficial | sem fallback para unsigned |
 
-Regra curta: **unsigned/debug/internal = validação interna**; **signed oficial = distribuição oficial**. Se a evidência não provar assinatura oficial, registre como validação interna.
+## Evidências observadas — 2026-07-19
 
-## Tabela padrão
-
-Preencha uma linha por artefato ou por pacote lógico de release quando o mesmo relatório cobrir APK e AAB. Use `n/a` somente quando o campo não se aplica; use `BLOCKED:<motivo>` quando a evidência deveria existir e não existe.
+Estas linhas registram execuções reais, inclusive quando falharam. Elas não afirmam que um artefato foi produzido.
 
 | data UTC | commit | workflow/lane | ABI profile | signing mode | APK/AAB gerado | SHA-256 | relatório ABI | status de upload | observações/bloqueios |
 |---|---|---|---|---|---|---|---|---|---|
-| 2026-06-08T00:00:00Z | `<sha>` | `android-ci.yml / release-unsigned-internal` | `internal_arm32_arm64` | `unsigned` — validação interna | `ci-artifacts/android-artifacts/...apk` | `<sha256>` | `app/build/reports/artifacts/compiled-artifacts-report.json` ou `ci-artifacts/android-cmake-matrix/...` | `uploaded:actions-artifact` ou `not-uploaded:<motivo>` | `validação interna; não publicar como distribuição oficial` |
-| 2026-06-08T00:00:00Z | `<sha>` | `release-dual-track.yml / release-signed-official` | `official_arm64` | `signed` — distribuição oficial | `ci-artifacts/android-artifacts/...aab` | `<sha256>` | `app/build/reports/artifacts/compiled-artifacts-report.json` ou release asset ABI report | `uploaded:github-release` | `distribuição oficial somente após gate signed verde` |
+| 2026-07-19 (data da execução) | `9f9e9cb44f4bf5df7359d9d5c1860470b1667f16` | PR #1051 — `android-ci`, `host-ci`, orchestrator e gates auxiliares | `BLOCKED:not-resolved` | `BLOCKED:not-reached` | `BLOCKED:workflow-failed` | `BLOCKED:no-artifact` | `BLOCKED:no-green-report` | `not-uploaded:workflow-failed` | fechamento G3/G4/G5/G7/G8/G10 presente em código; prova CI não concluída |
+| 2026-07-19 (data da execução) | `2e4f225586b86f5a805c9d64cf6754bf8fa53b9a` | PR #1050 — `android-ci`, `host-ci`, orchestrator e gates auxiliares | `BLOCKED:not-resolved` | `BLOCKED:not-reached` | `BLOCKED:workflow-failed` | `BLOCKED:no-artifact` | `BLOCKED:no-green-report` | `not-uploaded:workflow-failed` | ZIPRAF KAT/política/sessão incorporados; sem promoção de release |
+| 2026-07-19 (auditoria) | `54c70615c77772a3a7074fd297743f25936cb168` | master após merge #1050 | `BLOCKED:no-current-green-run` | `BLOCKED:not-evaluated` | `BLOCKED:no-canonical-artifact` | `BLOCKED:no-canonical-artifact` | `BLOCKED:no-current-green-run` | `not-uploaded:no-current-proof` | estado preservado como `BETA_BLOCKED` |
 
-## Campos e fonte de evidência
+## Última prova positiva preservada
 
-| Campo | Como preencher | Fonte preferencial |
-|---|---|---|
-| data UTC | Timestamp ISO-8601 UTC da geração/materialização. | `generated_at_utc` em `artifact-manifest.json` ou horário do job. |
-| commit | SHA do commit executado. | `GITHUB_SHA`, `git rev-parse HEAD` ou manifest de artefato. |
-| workflow/lane | Workflow e lane real, não intenção humana. | `GITHUB_WORKFLOW`, `ABI_PROFILE`, `ARTIFACT_LANE`, job summary. |
-| ABI profile | Perfil resolvido (`official_arm64`, `internal_arm32_arm64`, etc.). | Inputs do workflow, Gradle properties e manifest. |
-| signing mode | `unsigned`, `debug-signed`, `signed-internal` ou `signed`. | `signing_mode`, `ciRelease`, relatório de build/assinatura. |
-| APK/AAB gerado | Caminho relativo do binário entregue ou asset publicado. | `ci-artifacts/android-artifacts`, Gradle outputs ou release asset. |
-| SHA-256 | Hash do arquivo final entregue. | `sha256sum`, campo `files[].sha256` do manifest. |
-| relatório ABI | Caminho para relatório que prova ABI entregue. | `compiled-artifacts-report.json`, `android-cmake-matrix`, `verify_apk_abi_set` report. |
-| status de upload | Destino e resultado (`uploaded:actions-artifact`, `uploaded:github-release`, `not-uploaded`, `blocked`). | Logs do Actions, release page, materialização de staging. |
-| observações/bloqueios | Riscos, exceções, divergências, links internos e decisão operacional. | Logs, PR, release notes, issues ou auditoria manual. |
+| data UTC | commit | tarefa | classificação | observação |
+|---|---|---|---|---|
+| 2026-04-03T22:29:21Z | `0acd029fff6cb05d928249bace5d9d9a9d0c558f` | `:app:assembleDebug` | validação histórica | continua sendo a última prova positiva registrada; não representa o HEAD atual |
 
-## Boas práticas de preenchimento
+## Template para nova evidência
 
-1. Registre evidência no commit que realmente executou a cadeia; não copie status de commits anteriores.
-2. Não promova `release-unsigned-internal` para usuário final. Ela é validação interna mesmo quando passa em todos os gates.
-3. Não chame `signed-internal` de distribuição oficial; keystore beta/local não equivale aos segredos `VECTRAS_RELEASE_*`.
-4. Para distribuição oficial, exija `release-signed-official`, ABI `official_arm64`, signing mode `signed`, upload de GitHub Release e SHA-256 do asset publicado.
-5. Para validação dual ARM, exija `internal_arm32_arm64` e deixe claro se o APK/AAB é apenas evidência técnica.
-6. Se um relatório ABI estiver ausente, marque `BLOCKED:abi-report-missing` em vez de inferir pelo nome do arquivo.
-7. Se o upload falhar, mantenha o SHA-256 e marque `not-uploaded:<motivo>`; artefato local sem upload não é distribuição oficial.
-8. Sempre preserve links internos para manifests, relatórios e workflows quando disponíveis.
+Copie esta linha somente depois da execução; não deixe valores como se fossem evidência real.
 
-## Relação com CI e documentação
+| data UTC | commit | workflow/lane | ABI profile | signing mode | APK/AAB gerado | SHA-256 | relatório ABI | status de upload | observações/bloqueios |
+|---|---|---|---|---|---|---|---|---|---|
+| `<timestamp-real>` | `<sha-executado>` | `<workflow/job>` | `<perfil-resolvido>` | `<modo-comprovado>` | `<caminho-real-ou-BLOCKED>` | `<hash-real-ou-BLOCKED>` | `<relatório-real-ou-BLOCKED>` | `<destino-real-ou-BLOCKED>` | `<decisão e limites>` |
 
-- `tools/ci/materialize_android_ci_artifacts.sh` deve materializar manifests com referência a este arquivo como ledger esperado.
-- `BUILDING.md` descreve como gerar APK/AAB e como classificar assinatura sem fallback inseguro.
-- `README.md` aponta a cadeia oficial e a separação vocabular entre validação interna e distribuição oficial.
-- `PROJECT_STATE.md` mantém o estado real e lembra que status de build só é atual após CI do commit corrente.
-- `docs/OPERATIONS.md` usa este ledger como evidência operacional para auditoria, troubleshooting e upload.
+## Fontes preferenciais
+
+- timestamp: `generated_at_utc` do manifest ou horário do job;
+- commit: `GITHUB_SHA` ou manifest de artefato;
+- workflow/lane: job summary e inputs resolvidos;
+- ABI: `compiled-artifacts-report.json` e verificador do APK;
+- assinatura: relatório de signing, sem inferência pelo nome;
+- SHA-256: hash do arquivo entregue, após materialização;
+- upload: artifact/release realmente publicado.
+
+## Critérios de promoção
+
+- `release-unsigned-internal` permanece validação interna, mesmo verde;
+- distribuição oficial exige `official_arm64`, assinatura `signed`, SHA-256 e asset publicado;
+- relatório ABI ausente implica `BLOCKED:abi-report-missing`;
+- upload falho preserva o hash local, mas não constitui distribuição;
+- nenhuma linha de falha pode ser reinterpretada como artefato produzido.
