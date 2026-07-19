@@ -2,56 +2,144 @@
 
 ## Escopo
 
-Este registro acompanha o trabalho executado na branch `agent/vectra-gap-closure-zipraf-20260719` sem promover código adicionado a runtime comprovado.
+Este registro acompanha o trabalho da branch `agent/vectra-gap-closure-zipraf-20260719` e do PR draft `#1049`.
+
+Por decisão operacional, GitHub Actions/YAML ficam temporariamente fora do caminho crítico. O projeto continua avançando por código, compilação standalone, KAT local, testes unitários adicionados e harness instrumentado Android.
 
 ## Bloco fechado por implementação
 
 ### ZIPRAF direct runtime
 
 - parser de local-file header clássico;
-- exigência do método ZIP `STORE`;
+- parser de EOCD;
+- parser de central directory clássico;
+- validação single-disk;
+- seleção de entrada pelo nome;
+- rejeição de nome duplicado;
+- cross-check local header ↔ central directory;
+- exigência de ZIP `STORE`;
 - rejeição de criptografia;
 - rejeição de data descriptor;
-- rejeição explícita de ZIP64 até parser dedicado;
-- validação de tamanhos e limites do arquivo;
-- validação de nome contra NUL, caminho absoluto e `..`;
-- derivação do extent do payload;
-- CRC-32 esperado associado ao extent;
-- verificação CRC-32 do payload;
-- mmap somente do extent, em vez do arquivo inteiro;
-- fechamento do descritor quando a construção falha;
-- preservação dos estágios lógicos `BUFFER`, `L1_HOT`, `L2_SHARED`;
-- preservação das lanes determinísticas `0..7`;
-- preservação da invariante de bits fixos.
+- rejeição explícita de ZIP64;
+- validação de CRC, tamanhos, offsets e limites;
+- validação de nome contra NUL, caminho absoluto, drive e `..`;
+- derivação auditável do extent;
+- abertura segura por `openValidated`;
+- CRC-32 obrigatório por padrão na abertura validada;
+- mmap por janela, sem mapear arquivo ou payload inteiro;
+- offsets `Long`, eliminando o limite anterior do payload inteiro em um `ByteBuffer`;
+- fechamento do descritor em falha;
+- estágios `BUFFER`, `L1_HOT`, `L2_SHARED`;
+- lanes determinísticas `0..7`;
+- invariante de bits fixos.
+
+## Prova executada fora de Gradle
+
+Comando:
+
+```bash
+bash tools/zipraf/run_zipraf_host_kat.sh
+```
+
+Ambiente observado:
+
+```text
+host_arch = x86_64
+kotlinc   = 1.9.0
+java      = OpenJDK 21.0.10
+```
+
+Resultado:
+
+```json
+{
+  "schema": "zipraf.kat.v1",
+  "status": "PASS",
+  "checks": {
+    "central_directory": true,
+    "payload_size": true,
+    "window_length": true,
+    "lane": true,
+    "window_content": true,
+    "crc": true,
+    "missing_entry_rejected": true
+  }
+}
+```
+
+Portanto:
+
+```text
+host_kotlin_compilation = PASS
+standalone_kat          = PASS_7_OF_7
+android_runtime         = TOKEN_VAZIO
+```
 
 ## Testes adicionados
 
-1. janelas dos três estágios e lane de oito cores;
-2. parser e extent correto;
-3. leitura do payload sem cópia intermediária do arquivo completo;
-4. CRC-32 válido;
-5. CRC-32 inválido após mutação;
-6. rejeição de data descriptor;
-7. rejeição de path traversal;
-8. rejeição de payload truncado;
-9. rejeição de extent vazio;
-10. rejeição de método não-STORE;
-11. preservação dos bits fixos.
+### Unidade JVM/JUnit
+
+A suíte agora cobre 17 fronteiras:
+
+1. três estágios e oito lanes;
+2. cross-check do arquivo completo;
+3. abertura `openValidated`;
+4. parser local explicitamente baixo nível;
+5. mutação de payload;
+6. CRC central divergente;
+7. tamanho central divergente;
+8. nome duplicado;
+9. múltiplas entradas sem seleção;
+10. entrada ausente;
+11. arquivo multi-disk;
+12. data descriptor;
+13. path traversal;
+14. payload truncado;
+15. central directory ausente;
+16. extent vazio e método não-STORE;
+17. bits fixos.
+
+O código da suíte foi compilado sintaticamente no host com stubs mínimos de JUnit. Execução JUnit real permanece pendente.
+
+### Android instrumentado
+
+Foi adicionado:
+
+```text
+app/src/androidTest/java/com/vectras/vm/vectra/ZiprafDirectRuntimeInstrumentedTest.kt
+```
+
+O harness prepara:
+
+- arquivo ZIP real em `cacheDir`;
+- round-trip validado;
+- janelas no início, meio e fim;
+- oito lanes;
+- CRC-32 no dispositivo;
+- benchmark-harness de 256 janelas sobre 2 MiB;
+- relatório JSON com ABI, SDK e tempo;
+- ausência explícita de claim de ganho.
 
 ## Estado epistemológico
 
 ```text
-code_added                 = true
-tests_added                = true
-static_review              = performed
-gradle_test_executed       = TOKEN_VAZIO
-android_instrumented_test  = TOKEN_VAZIO
-arm32_device               = TOKEN_VAZIO
-arm64_device               = TOKEN_VAZIO
-central_directory_check    = TOKEN_VAZIO
-zip64                      = TOKEN_VAZIO
-performance_benchmark      = TOKEN_VAZIO
-claim_allowed              = false
+code_added                    = true
+central_directory_check       = IMPLEMENTED
+windowed_mmap                 = IMPLEMENTED
+standalone_host_compile       = PASS
+standalone_host_kat           = PASS_7_OF_7
+unit_tests_added              = true
+unit_test_source_compile      = PASS_WITH_LOCAL_JUNIT_STUBS
+real_junit_execution          = TOKEN_VAZIO
+android_instrumented_added    = true
+android_instrumented_executed = TOKEN_VAZIO
+arm32_device                  = TOKEN_VAZIO
+arm64_device                  = TOKEN_VAZIO
+zip64                         = BLOCKED_BY_DESIGN
+performance_harness           = ADDED_NOT_EXECUTED
+performance_claim             = PROHIBITED
+claim_allowed                 = false
+Actions/YAML                  = DEFERRED_BY_OWNER
 ```
 
 ## TAIL do fragmento
@@ -61,59 +149,72 @@ tail:
   traceability:
     repository: rafaelmeloreisnovo/Vectras-VM-Android
     branch: agent/vectra-gap-closure-zipraf-20260719
+    pull_request: 1049
     base: master
     date: 2026-07-19
   authorship:
     upstream_lineage: Vectras VM Android
     modification_author: Rafael Melo Reis project workflow
   intent:
-    purpose: close direct-memory ZIPRAF safety and integrity gaps
+    purpose: close direct-memory ZIPRAF integrity and runtime gaps
     distribution: draft review only
   license:
     inherited_scope: repository license map applies
     new_code_spdx: TOKEN_VAZIO pending directory-wide legal decision
   evidence:
     source_review: PRESENT
-    tests_present: PRESENT
-    tests_executed: TOKEN_VAZIO
+    host_compile: PASS
+    standalone_kat: PASS_7_OF_7
+    unit_tests_present: PRESENT
+    unit_junit_executed: TOKEN_VAZIO
+    android_harness_present: PRESENT
     device_runtime: TOKEN_VAZIO
 ```
 
 ## Gaps prioritários remanescentes
 
-### P0
+### Programação imediata — sem depender de CI
 
-- CI real no commit da branch;
-- APK/AAB com SHA-256 e ABI report;
-- ARM32 e ARM64 instrumentados;
+1. integrar `openValidated` ao ponto real que consome ZIPRAF;
+2. adicionar política de seleção por manifesto/entry name;
+3. registrar telemetria de janelas e bytes;
+4. acrescentar comparação `mmap × FileChannel.read × stream` no harness;
+5. preparar comando local de teste JUnit direcionado;
+6. executar no Termux/JVM local quando o checkout estiver disponível;
+7. executar o teste Android em ARM32;
+8. executar o teste Android em ARM64;
+9. ligar o resultado ao `RELEASE_EVIDENCE_LEDGER.md`.
+
+### P0 global do Vectra
+
+- APK/AAB com SHA-256 e relatório ABI;
 - boot mínimo de VM;
 - proveniência de `libXlorie.so`, rootfs, BIOS e OVMF;
 - decisão `NAOCOMERCIAL × GPLv2`;
 - SPDX final de `engine/rmr/**`.
 
-### P1
+### P1 global
 
-- cross-check entre local header e central directory;
-- suporte ZIP64 ou recusa documentada permanente;
-- benchmark mmap versus leitura convencional;
+- ZIP64, caso realmente necessário;
 - telemetria de page faults/RSS;
-- migração de comando QEMU string para `argv` estruturado;
-- prova de caminho JNI versus fallback Java.
+- migração QEMU string → `argv` estruturado;
+- prova JNI versus fallback Java.
 
 ## Regra de promoção
 
 ```text
-ADDED
-→ TEST_EXECUTED
-→ ANDROID_VERIFIED
-→ ARM32_ARM64_VERIFIED
+IMPLEMENTED
+→ HOST_KAT_PASS
+→ REAL_JUNIT_PASS
+→ ANDROID_DEVICE_PASS
+→ ARM32_ARM64_PASS
 → RELEASE_EVIDENCE_RECORDED
 ```
 
-Nenhuma etapa pode ser pulada por documentação.
+Nenhuma etapa posterior é inferida pela anterior.
 
 ## Retroalimentação
 
-- `F_ok`: o leitor direto deixa de confiar em offsets totalmente externos e reduz o mapeamento ao payload validado.
-- `F_gap`: central directory, CI, dispositivo e desempenho continuam sem prova.
-- `F_next`: executar a suíte no commit do PR e acrescentar cross-check do central directory antes de aceitar ZIP não confiável.
+- `F_ok`: central directory, cross-check, janela mmap, abertura segura e KAT standalone foram concluídos.
+- `F_gap`: JUnit real, Android ARM32/ARM64 e benchmark comparativo continuam abertos.
+- `F_next`: integrar `openValidated` ao consumidor real e adicionar telemetria/benchmark comparativo, mantendo Actions fora do caminho crítico.
