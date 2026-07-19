@@ -94,7 +94,16 @@ public class ProotCommandBuilder {
         putIfNotEmpty(environment, "SDL_VIDEODRIVER", firstNotBlank(resolved.sdlVideoDriver, sdlVideoDriver));
     }
 
+    /** Builds the legacy interactive shell command. */
     public List<String> buildCommand() {
+        return buildCommand(null);
+    }
+
+    /**
+     * Builds a PRoot command that executes guest argv directly.
+     * When guestArgv is null or empty, the historical login shell is preserved.
+     */
+    public List<String> buildCommand(List<String> guestArgv) {
         String filesDir = resolveFilesDirPath();
         List<String> binds = resolveFinalBinds(filesDir);
         List<String> command = new ArrayList<>();
@@ -110,8 +119,23 @@ public class ProotCommandBuilder {
         }
         command.add("-w");
         command.add(workDir);
-        command.add(firstNotBlank(shell, "/bin/sh"));
-        command.add("--login");
+
+        if (guestArgv == null || guestArgv.isEmpty()) {
+            command.add(firstNotBlank(shell, "/bin/sh"));
+            command.add("--login");
+            return command;
+        }
+
+        for (int i = 0; i < guestArgv.size(); i++) {
+            String arg = guestArgv.get(i);
+            if (arg == null) {
+                throw new IllegalArgumentException("guestArgv[" + i + "] must not be null");
+            }
+            if (i == 0 && arg.trim().isEmpty()) {
+                throw new IllegalArgumentException("guest executable must not be blank");
+            }
+            command.add(arg);
+        }
         return command;
     }
 
