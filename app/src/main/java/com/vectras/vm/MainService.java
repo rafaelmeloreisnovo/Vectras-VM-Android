@@ -16,6 +16,7 @@ import androidx.core.app.NotificationCompat;
 import com.vectras.vm.main.core.MainStartVM;
 import com.vectras.vm.runtime.ExpandedRuntimePreflight;
 import com.vectras.vm.runtime.QemuArgvContract;
+import com.vectras.vm.runtime.QemuDirectLauncher;
 import com.vectras.vm.runtime.QemuRuntimeProbe;
 import com.vectras.vm.runtime.RuntimeSessionReport;
 import com.vectras.vterm.Terminal;
@@ -66,8 +67,7 @@ public class MainService extends Service {
             Context targetContext = ctx != null ? ctx : getApplicationContext();
             MainStartVM.ensureLastVmIdInitialized(MainStartVM.lastVMID);
             persistLaunchProof(targetContext, command, "foreground_service_on_create");
-            Terminal vterm = new Terminal(targetContext);
-            vterm.executeShellCommand2(command, true, targetContext);
+            dispatchCommand(targetContext, command);
         } else {
             Log.e(TAG, "env is null");
         }
@@ -132,8 +132,7 @@ public class MainService extends Service {
     public static void startCommand(String _env, Context _context) {
         MainStartVM.ensureLastVmIdInitialized(MainStartVM.lastVMID);
         persistLaunchProof(_context, _env, "existing_service_start_command");
-        Terminal vterm = new Terminal(_context);
-        vterm.executeShellCommand2(_env, true, _context);
+        dispatchCommand(_context, _env);
     }
 
     public static void setActivityContext(Context context) {
@@ -148,6 +147,21 @@ public class MainService extends Service {
         }
     }
 
+    /**
+     * QEMU commands use direct argv inside PRoot. Non-QEMU commands keep the
+     * historical terminal shell path for compatibility.
+     */
+    private static void dispatchCommand(Context context, String command) {
+        if (context == null || command == null) return;
+        QemuArgvContract contract = QemuArgvContract.fromShellCommand(command);
+        if (QemuDirectLauncher.launch(context, contract)) {
+            Log.i("MainService", "QEMU routed through direct argv: " + contract.getArgvSha256());
+            return;
+        }
+        Terminal vterm = new Terminal(context);
+        vterm.executeShellCommand2(command, true, context);
+    }
+
     private static void persistLaunchProof(Context context, String command, String phase) {
         if (context == null) return;
         try {
@@ -157,6 +171,7 @@ public class MainService extends Service {
             File out = RuntimeSessionReport.begin(vmId, MainStartVM.lastVMName)
                     .phase("main_service", "dispatch", phase)
                     .putString("channel_id", CHANNEL_ID)
+                    .putString("dispatch_mode", contract.hasRecognizedQemuBinary() ? "direct_argv" : "shell_compatibility")
                     .putCommand(contract)
                     .putExpandedPreflight(preflight)
                     .putRuntimeProbe(QemuRuntimeProbe.captureNoProcessReference())

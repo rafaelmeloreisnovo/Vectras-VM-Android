@@ -1,0 +1,112 @@
+{
+  "schema_version": "1.0.0",
+  "generated_at": "2026-07-19",
+  "repository": "rafaelmeloreisnovo/Vectras-VM-Android",
+  "source_ref": "claude/vectra-vm-gaps-audit-pvtiki",
+  "principle": "source_present != integrated != executed != certified",
+  "capabilities": [
+    {
+      "id": "CAP_BROWSER_LOCAL_RMR",
+      "title": "Renderer local rmr:// chamado TBROWSER",
+      "required_paths": ["Incluir/vectras_bbs.c"],
+      "required_markers": {
+        "Incluir/vectras_bbs.c": ["static const Page pages[]", "rmr://home", "static void browser_run"]
+      },
+      "declared_state": "SOURCE_PRESENT_LOCAL_RENDERER",
+      "claim_allowed": false,
+      "boundary": "C hosted com stdio e paginas estaticas; nao e navegador ASM nem cliente web de rede"
+    },
+    {
+      "id": "CAP_NET_RAW_HTTP",
+      "title": "TCP/DNS/HTTP cru por syscall",
+      "required_paths": ["conjunto_de_conceitos/src/net.c"],
+      "required_markers": {
+        "conjunto_de_conceitos/src/net.c": ["HTTP/1.0", "cdc_http_get_ip", "cdc_dns_a", "https:// (TLS) NAO e suportado"]
+      },
+      "declared_state": "IMPLEMENTED_CODEGEN_UNPROVEN_RUNTIME",
+      "claim_allowed": false,
+      "boundary": "HTTP sem TLS; runtime ARM e egress ainda nao comprovados"
+    },
+    {
+      "id": "CAP_TLS_12_13_CLEANROOM",
+      "title": "TLS 1.2/1.3 low-level autoral",
+      "required_paths": ["conjunto_de_conceitos/src/tls.c"],
+      "required_markers": {},
+      "declared_state": "TOKEN_VAZIO",
+      "claim_allowed": false,
+      "boundary": "nenhum modulo TLS integrado; certificacao e interoperabilidade inexistentes"
+    },
+    {
+      "id": "CAP_LOWFALA_FRONTEND",
+      "title": "Fala/fonema/token/AST/bytecode/ASM/VM",
+      "required_paths": ["Incluir/compiladorlowFala.txt"],
+      "required_markers": {
+        "Incluir/compiladorlowFala.txt": ["FALA→FONEMA→TOKEN→AST→BYTECODE→ASM→VM→OUTPUT", "seed_S01_V1_phoneme_manifold"]
+      },
+      "integration_needles": ["compiladorlowFala.txt"],
+      "integration_files": ["CMakeLists.txt", "app/build.gradle", "settings.gradle"],
+      "declared_state": "DOCUMENT_GENERATOR_UNINTEGRATED",
+      "claim_allowed": false,
+      "boundary": "monolito shell/texto com sementes; nao ha referencia no build canônico nem emissao APK provada"
+    },
+    {
+      "id": "CAP_APK_BUILD_PIPELINE",
+      "title": "Build e assinatura de APK Android",
+      "required_paths": ["tools/apk/build_release_signed_local.sh", "app/build.gradle"],
+      "required_markers": {},
+      "declared_state": "BUILD_PIPELINE_PRESENT_UNPROVEN_ARTIFACT",
+      "claim_allowed": false,
+      "boundary": "pipeline existe; APK corrente, assinatura, DEX e ELF exigem artefato real"
+    },
+    {
+      "id": "CAP_ELF_CONTRACT_AUDIT",
+      "title": "Auditoria de simbolos/secoes ELF",
+      "required_paths": ["tools/verify_vectra_os_contract.sh", "reports/vectra_os_contract_report.md"],
+      "required_markers": {},
+      "declared_state": "AUDIT_PRESENT_HISTORICAL",
+      "claim_allowed": false,
+      "boundary": "nao substitui leitura dos ELF contidos no APK atual"
+    },
+    {
+      "id": "CAP_APK_DEX_ELF_COHERENCE",
+      "title": "Coerencia DEX/ELF/ABI do APK",
+      "required_paths": ["tools/audit_vectra_capabilities.py"],
+      "required_markers": {},
+      "declared_state": "AUDIT_IMPLEMENTED_AWAITS_APK",
+      "claim_allowed": false,
+      "boundary": "somente um APK real pode promover o resultado do gate"
+    },
+    {
+      "id": "CAP_LOOSE_ARTIFACT_INTAKE",
+      "title": "Inventario e roteamento de arquivos soltos",
+      "required_paths": ["tools/audit_vectra_capabilities.py"],
+      "required_markers": {},
+      "declared_state": "INVENTORY_IMPLEMENTED",
+      "claim_allowed": false,
+      "boundary": "o auditor sugere rota; nunca move nem promove automaticamente"
+    }
+  ],
+  "loose_artifact_policy": {
+    "scan_roots": ["Incluir", "_incoming", "addthis", "bug"],
+    "ignore_names": [".gitkeep"],
+    "route_by_suffix": {
+      ".c": "source/c",
+      ".h": "source/include",
+      ".s": "source/asm",
+      ".S": "source/asm",
+      ".java": "source/android-java",
+      ".kt": "source/android-kotlin",
+      ".py": "tools/python",
+      ".sh": "tools/shell",
+      ".md": "docs/intake",
+      ".txt": "docs/intake",
+      ".json": "data-or-config/review",
+      ".yaml": "data-or-config/review",
+      ".yml": "data-or-config/review",
+      ".xml": "android-or-data/review",
+      ".zip": "quarantine/archive",
+      ".apk": "quarantine/artifact"
+    },
+    "default_route": "quarantine/unclassified"
+  }
+}
