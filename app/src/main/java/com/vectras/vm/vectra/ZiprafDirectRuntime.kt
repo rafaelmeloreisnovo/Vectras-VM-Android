@@ -5,7 +5,6 @@ import java.io.File
 import java.io.RandomAccessFile
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
-import java.nio.MappedByteBuffer
 import java.nio.channels.FileChannel
 import java.util.zip.CRC32
 
@@ -23,119 +22,48 @@ data class ZiprafStoredExtent(
 
     companion object {
         const val STORE_METHOD = 0
-        private const val UINT32_MAX = 0xffff_ffffL
+        internal const val UINT32_MAX = 0xffff_ffffL
     }
+}
+
+enum class ZiprafValidationLevel {
+    LOCAL_HEADER,
+    CENTRAL_DIRECTORY
 }
 
 data class ZiprafStoredEntry(
     val name: String,
     val flags: Int,
-    val extent: ZiprafStoredExtent
+    val extent: ZiprafStoredExtent,
+    val localHeaderOffset: Long = 0,
+    val validationLevel: ZiprafValidationLevel = ZiprafValidationLevel.LOCAL_HEADER
 )
 
-/**
- * Parses a classic ZIP local-file header and emits a validated STORE extent.
- *
- * This intentionally rejects encrypted entries, data-descriptor entries and ZIP64 sentinels.
- * The direct runtime needs sizes and CRC to be present before mapping the payload. A future
- * central-directory validator can cross-check the local header before release promotion.
- */
-object ZiprafStoredEntryParser {
-    private const val LOCAL_FILE_HEADER_SIGNATURE = 0x04034b50
-    private const val LOCAL_FILE_HEADER_SIZE = 30
-    private const val FLAG_ENCRYPTED = 1
-    private const val FLAG_DATA_DESCRIPTOR = 1 shl 3
-    private const val FLAG_UTF8 = 1 shl 11
-    private const val ZIP64_SENTINEL = 0xffff_ffffL
+private object ZiprafZipFormat {
+    const val LOCAL_FILE_HEADER_SIGNATURE = 0x04034b50
+    const val CENTRAL_DIRECTORY_SIGNATURE = 0x02014b50
+    const val END_OF_CENTRAL_DIRECTORY_SIGNATURE = 0x06054b50
+    const val LOCAL_FILE_HEADER_SIZE = 30
+    const val CENTRAL_DIRECTORY_HEADER_SIZE = 46
+    const val END_OF_CENTRAL_DIRECTORY_SIZE = 22
+    const val MAX_COMMENT_SIZE = 0xffff
+    const val FLAG_ENCRYPTED = 1
+    const val FLAG_DATA_DESCRIPTOR = 1 shl 3
+    const val FLAG_UTF8 = 1 shl 11
+    const val ZIP64_UINT16_SENTINEL = 0xffff
+    const val ZIP64_UINT32_SENTINEL = 0xffff_ffffL
+}
 
-    fun parse(
-        file: File,
-        localHeaderOffset: Long = 0,
-        expectedName: String? = null
-    ): ZiprafStoredEntry {
-        require(localHeaderOffset >= 0) { "ZIP local-header offset must be non-negative" }
-
-        RandomAccessFile(file, "r").use { randomAccess ->
-            val fileSize = randomAccess.length()
-            require(localHeaderOffset <= fileSize) { "ZIP local-header offset is outside the file" }
-            require(fileSize - localHeaderOffset >= LOCAL_FILE_HEADER_SIZE) {
-                "Truncated ZIP local-file header"
-            }
-
-            randomAccess.seek(localHeaderOffset)
-            val headerBytes = ByteArray(LOCAL_FILE_HEADER_SIZE)
-            randomAccess.readFully(headerBytes)
-            val header = ByteBuffer.wrap(headerBytes).order(ByteOrder.LITTLE_ENDIAN)
-
-            val signature = header.int
-            require(signature == LOCAL_FILE_HEADER_SIGNATURE) { "Invalid ZIP local-file signature" }
-
-            header.short // version needed
-            val flags = header.short.toInt() and 0xffff
-            val method = header.short.toInt() and 0xffff
-            header.short // modification time
-            header.short // modification date
-            val crc32 = header.int.toLong() and ZIP64_SENTINEL
-            val compressedSize = header.int.toLong() and ZIP64_SENTINEL
-            val uncompressedSize = header.int.toLong() and ZIP64_SENTINEL
-            val nameLength = header.short.toInt() and 0xffff
-            val extraLength = header.short.toInt() and 0xffff
-
-            require(flags and FLAG_ENCRYPTED == 0) { "Encrypted ZIP entries are not supported" }
-            require(flags and FLAG_DATA_DESCRIPTOR == 0) {
-                "ZIP data-descriptor entries are not supported by the direct runtime"
-            }
-            require(method == ZiprafStoredExtent.STORE_METHOD) {
-                "ZIPRAF direct runtime accepts only ZIP STORE"
-            }
-            require(compressedSize != ZIP64_SENTINEL && uncompressedSize != ZIP64_SENTINEL) {
-                "ZIP64 entries require a dedicated parser"
-            }
-            require(compressedSize == uncompressedSize) {
-                "STORE entry compressed and uncompressed sizes must match"
-            }
-            require(compressedSize > 0) { "Empty STORE entries cannot be memory mapped" }
-            require(compressedSize <= Int.MAX_VALUE.toLong()) {
-                "Mapped STORE extent exceeds the ByteBuffer capacity limit"
-            }
-
-            val metadataSize = LOCAL_FILE_HEADER_SIZE.toLong() + nameLength + extraLength
-            require(metadataSize <= fileSize - localHeaderOffset) {
-                "ZIP entry metadata exceeds file bounds"
-            }
-
-            val nameBytes = ByteArray(nameLength)
-            randomAccess.readFully(nameBytes)
-            val nameIsAscii = nameBytes.all { (it.toInt() and 0xff) < 0x80 }
-            require(flags and FLAG_UTF8 != 0 || nameIsAscii) {
-                "Non-UTF-8 ZIP entry names are not accepted by this parser"
-            }
-
-            val name = nameBytes.toString(Charsets.UTF_8)
-            validateEntryName(name)
-            expectedName?.let {
-                require(name == it) { "Unexpected ZIP entry name: $name" }
-            }
-
-            val payloadOffset = localHeaderOffset + metadataSize
-            require(compressedSize <= fileSize - payloadOffset) {
-                "ZIP STORE payload exceeds file bounds"
-            }
-
-            return ZiprafStoredEntry(
-                name = name,
-                flags = flags,
-                extent = ZiprafStoredExtent(
-                    payloadOffset = payloadOffset,
-                    payloadSize = compressedSize,
-                    compressionMethod = method,
-                    expectedCrc32 = crc32
-                )
-            )
+private object ZiprafEntryNamePolicy {
+    fun decode(nameBytes: ByteArray, flags: Int): String {
+        val nameIsAscii = nameBytes.all { (it.toInt() and 0xff) < 0x80 }
+        require(flags and ZiprafZipFormat.FLAG_UTF8 != 0 || nameIsAscii) {
+            "Non-UTF-8 ZIP entry names are not accepted by this parser"
         }
+        return nameBytes.toString(Charsets.UTF_8).also(::validate)
     }
 
-    private fun validateEntryName(name: String) {
+    fun validate(name: String) {
         require(name.isNotEmpty()) { "ZIP entry name must not be empty" }
         require('\u0000' !in name) { "ZIP entry name contains NUL" }
 
@@ -147,6 +75,343 @@ object ZiprafStoredEntryParser {
         require(normalized.split('/').none { it == ".." }) {
             "ZIP entry path traversal is not accepted"
         }
+    }
+}
+
+/**
+ * Parses one classic ZIP local-file header and emits a bounded STORE extent.
+ *
+ * This low-level parser validates the local record only. Distribution or trusted execution should
+ * use [ZiprafArchiveValidator.parseStoredEntry], which cross-checks the central directory and EOCD.
+ */
+object ZiprafStoredEntryParser {
+    fun parse(
+        file: File,
+        localHeaderOffset: Long = 0,
+        expectedName: String? = null
+    ): ZiprafStoredEntry = RandomAccessFile(file, "r").use { randomAccess ->
+        parse(randomAccess, localHeaderOffset, expectedName)
+    }
+
+    internal fun parse(
+        randomAccess: RandomAccessFile,
+        localHeaderOffset: Long,
+        expectedName: String?
+    ): ZiprafStoredEntry {
+        require(localHeaderOffset >= 0) { "ZIP local-header offset must be non-negative" }
+        val fileSize = randomAccess.length()
+        require(localHeaderOffset <= fileSize) { "ZIP local-header offset is outside the file" }
+        require(fileSize - localHeaderOffset >= ZiprafZipFormat.LOCAL_FILE_HEADER_SIZE) {
+            "Truncated ZIP local-file header"
+        }
+
+        randomAccess.seek(localHeaderOffset)
+        val headerBytes = ByteArray(ZiprafZipFormat.LOCAL_FILE_HEADER_SIZE)
+        randomAccess.readFully(headerBytes)
+        val header = ByteBuffer.wrap(headerBytes).order(ByteOrder.LITTLE_ENDIAN)
+
+        require(header.int == ZiprafZipFormat.LOCAL_FILE_HEADER_SIGNATURE) {
+            "Invalid ZIP local-file signature"
+        }
+
+        header.short
+        val flags = header.short.toInt() and 0xffff
+        val method = header.short.toInt() and 0xffff
+        header.short
+        header.short
+        val crc32 = header.int.toLong() and ZiprafStoredExtent.UINT32_MAX
+        val compressedSize = header.int.toLong() and ZiprafStoredExtent.UINT32_MAX
+        val uncompressedSize = header.int.toLong() and ZiprafStoredExtent.UINT32_MAX
+        val nameLength = header.short.toInt() and 0xffff
+        val extraLength = header.short.toInt() and 0xffff
+
+        validateStoreMetadata(flags, method, compressedSize, uncompressedSize)
+
+        val metadataSize = ZiprafZipFormat.LOCAL_FILE_HEADER_SIZE.toLong() + nameLength + extraLength
+        require(metadataSize <= fileSize - localHeaderOffset) {
+            "ZIP entry metadata exceeds file bounds"
+        }
+
+        val nameBytes = ByteArray(nameLength)
+        randomAccess.readFully(nameBytes)
+        val name = ZiprafEntryNamePolicy.decode(nameBytes, flags)
+        expectedName?.let { require(name == it) { "Unexpected ZIP entry name: $name" } }
+
+        val payloadOffset = Math.addExact(localHeaderOffset, metadataSize)
+        require(compressedSize <= fileSize - payloadOffset) {
+            "ZIP STORE payload exceeds file bounds"
+        }
+
+        return ZiprafStoredEntry(
+            name = name,
+            flags = flags,
+            extent = ZiprafStoredExtent(
+                payloadOffset = payloadOffset,
+                payloadSize = compressedSize,
+                compressionMethod = method,
+                expectedCrc32 = crc32
+            ),
+            localHeaderOffset = localHeaderOffset
+        )
+    }
+
+    internal fun validateStoreMetadata(
+        flags: Int,
+        method: Int,
+        compressedSize: Long,
+        uncompressedSize: Long
+    ) {
+        require(flags and ZiprafZipFormat.FLAG_ENCRYPTED == 0) {
+            "Encrypted ZIP entries are not supported"
+        }
+        require(flags and ZiprafZipFormat.FLAG_DATA_DESCRIPTOR == 0) {
+            "ZIP data-descriptor entries are not supported by the direct runtime"
+        }
+        require(method == ZiprafStoredExtent.STORE_METHOD) {
+            "ZIPRAF direct runtime accepts only ZIP STORE"
+        }
+        require(
+            compressedSize != ZiprafZipFormat.ZIP64_UINT32_SENTINEL &&
+                uncompressedSize != ZiprafZipFormat.ZIP64_UINT32_SENTINEL
+        ) { "ZIP64 entries require a dedicated parser" }
+        require(compressedSize == uncompressedSize) {
+            "STORE entry compressed and uncompressed sizes must match"
+        }
+        require(compressedSize > 0) { "Empty STORE entries cannot be memory mapped" }
+    }
+}
+
+private data class ZiprafCentralDirectoryEntry(
+    val name: String,
+    val flags: Int,
+    val method: Int,
+    val crc32: Long,
+    val compressedSize: Long,
+    val uncompressedSize: Long,
+    val localHeaderOffset: Long
+)
+
+private data class ZiprafCentralDirectory(
+    val offset: Long,
+    val size: Long,
+    val entries: List<ZiprafCentralDirectoryEntry>
+)
+
+/**
+ * Strict classic-ZIP validator for the direct STORE runtime.
+ *
+ * It validates EOCD, single-disk layout, central-directory bounds, entry uniqueness and equality
+ * between central and local metadata. ZIP64, encrypted entries and data descriptors remain blocked.
+ */
+object ZiprafArchiveValidator {
+    fun parseStoredEntry(file: File, expectedName: String? = null): ZiprafStoredEntry {
+        RandomAccessFile(file, "r").use { randomAccess ->
+            val centralDirectory = readCentralDirectory(randomAccess)
+            val matches = if (expectedName == null) {
+                require(centralDirectory.entries.size == 1) {
+                    "Archive contains multiple entries; expectedName is required"
+                }
+                centralDirectory.entries
+            } else {
+                centralDirectory.entries.filter { it.name == expectedName }
+            }
+
+            require(matches.isNotEmpty()) {
+                "ZIP central directory does not contain the requested entry: $expectedName"
+            }
+            require(matches.size == 1) {
+                "Duplicate ZIP central-directory entry name is not accepted: ${matches.first().name}"
+            }
+
+            val central = matches.single()
+            require(central.localHeaderOffset < centralDirectory.offset) {
+                "ZIP local header overlaps the central directory"
+            }
+
+            val local = ZiprafStoredEntryParser.parse(
+                randomAccess = randomAccess,
+                localHeaderOffset = central.localHeaderOffset,
+                expectedName = central.name
+            )
+            crossCheck(local, central, centralDirectory.offset)
+            return local.copy(validationLevel = ZiprafValidationLevel.CENTRAL_DIRECTORY)
+        }
+    }
+
+    private fun readCentralDirectory(randomAccess: RandomAccessFile): ZiprafCentralDirectory {
+        val fileSize = randomAccess.length()
+        require(fileSize >= ZiprafZipFormat.END_OF_CENTRAL_DIRECTORY_SIZE) {
+            "ZIP file is too small to contain EOCD"
+        }
+
+        val tailSize = minOf(
+            fileSize,
+            (ZiprafZipFormat.END_OF_CENTRAL_DIRECTORY_SIZE + ZiprafZipFormat.MAX_COMMENT_SIZE).toLong()
+        ).toInt()
+        val tailOffset = fileSize - tailSize
+        val tail = ByteArray(tailSize)
+        randomAccess.seek(tailOffset)
+        randomAccess.readFully(tail)
+
+        val eocdIndex = findSignatureBackwards(
+            bytes = tail,
+            signature = ZiprafZipFormat.END_OF_CENTRAL_DIRECTORY_SIGNATURE,
+            latestStart = tail.size - ZiprafZipFormat.END_OF_CENTRAL_DIRECTORY_SIZE
+        )
+        require(eocdIndex >= 0) { "ZIP end-of-central-directory record was not found" }
+
+        val eocd = ByteBuffer.wrap(tail, eocdIndex, tail.size - eocdIndex)
+            .slice()
+            .order(ByteOrder.LITTLE_ENDIAN)
+        require(eocd.int == ZiprafZipFormat.END_OF_CENTRAL_DIRECTORY_SIGNATURE)
+        val diskNumber = eocd.short.toInt() and 0xffff
+        val centralDirectoryDisk = eocd.short.toInt() and 0xffff
+        val entriesOnDisk = eocd.short.toInt() and 0xffff
+        val totalEntries = eocd.short.toInt() and 0xffff
+        val centralDirectorySize = eocd.int.toLong() and ZiprafStoredExtent.UINT32_MAX
+        val centralDirectoryOffset = eocd.int.toLong() and ZiprafStoredExtent.UINT32_MAX
+        val commentLength = eocd.short.toInt() and 0xffff
+
+        require(eocdIndex + ZiprafZipFormat.END_OF_CENTRAL_DIRECTORY_SIZE + commentLength == tail.size) {
+            "ZIP EOCD comment length or trailing bytes are inconsistent"
+        }
+        require(diskNumber == 0 && centralDirectoryDisk == 0) {
+            "Multi-disk ZIP archives are not supported"
+        }
+        require(entriesOnDisk == totalEntries) {
+            "Split ZIP central-directory entry counts are inconsistent"
+        }
+        require(totalEntries != ZiprafZipFormat.ZIP64_UINT16_SENTINEL) {
+            "ZIP64 entry count requires a dedicated parser"
+        }
+        require(
+            centralDirectorySize != ZiprafZipFormat.ZIP64_UINT32_SENTINEL &&
+                centralDirectoryOffset != ZiprafZipFormat.ZIP64_UINT32_SENTINEL
+        ) { "ZIP64 central-directory metadata requires a dedicated parser" }
+        require(totalEntries > 0) { "ZIP archive contains no entries" }
+
+        val eocdAbsoluteOffset = tailOffset + eocdIndex
+        require(centralDirectoryOffset <= eocdAbsoluteOffset) {
+            "ZIP central-directory offset is outside the archive"
+        }
+        require(centralDirectorySize <= eocdAbsoluteOffset - centralDirectoryOffset) {
+            "ZIP central-directory size exceeds archive bounds"
+        }
+        require(centralDirectoryOffset + centralDirectorySize == eocdAbsoluteOffset) {
+            "Unexpected records exist between central directory and EOCD"
+        }
+
+        val entries = ArrayList<ZiprafCentralDirectoryEntry>(totalEntries)
+        randomAccess.seek(centralDirectoryOffset)
+        val centralDirectoryEnd = centralDirectoryOffset + centralDirectorySize
+        repeat(totalEntries) {
+            require(centralDirectoryEnd - randomAccess.filePointer >= ZiprafZipFormat.CENTRAL_DIRECTORY_HEADER_SIZE) {
+                "Truncated ZIP central-directory header"
+            }
+            val fixed = ByteArray(ZiprafZipFormat.CENTRAL_DIRECTORY_HEADER_SIZE)
+            randomAccess.readFully(fixed)
+            val header = ByteBuffer.wrap(fixed).order(ByteOrder.LITTLE_ENDIAN)
+            require(header.int == ZiprafZipFormat.CENTRAL_DIRECTORY_SIGNATURE) {
+                "Invalid ZIP central-directory signature"
+            }
+
+            header.short
+            header.short
+            val flags = header.short.toInt() and 0xffff
+            val method = header.short.toInt() and 0xffff
+            header.short
+            header.short
+            val crc32 = header.int.toLong() and ZiprafStoredExtent.UINT32_MAX
+            val compressedSize = header.int.toLong() and ZiprafStoredExtent.UINT32_MAX
+            val uncompressedSize = header.int.toLong() and ZiprafStoredExtent.UINT32_MAX
+            val nameLength = header.short.toInt() and 0xffff
+            val extraLength = header.short.toInt() and 0xffff
+            val entryCommentLength = header.short.toInt() and 0xffff
+            val diskStart = header.short.toInt() and 0xffff
+            header.short
+            header.int
+            val localHeaderOffset = header.int.toLong() and ZiprafStoredExtent.UINT32_MAX
+
+            require(diskStart == 0) { "Multi-disk ZIP entry is not supported" }
+            require(localHeaderOffset != ZiprafZipFormat.ZIP64_UINT32_SENTINEL) {
+                "ZIP64 local-header offsets require a dedicated parser"
+            }
+            ZiprafStoredEntryParser.validateStoreMetadata(
+                flags,
+                method,
+                compressedSize,
+                uncompressedSize
+            )
+
+            val variableSize = nameLength.toLong() + extraLength + entryCommentLength
+            require(variableSize <= centralDirectoryEnd - randomAccess.filePointer) {
+                "ZIP central-directory variable fields exceed bounds"
+            }
+            val nameBytes = ByteArray(nameLength)
+            randomAccess.readFully(nameBytes)
+            val name = ZiprafEntryNamePolicy.decode(nameBytes, flags)
+            randomAccess.seek(randomAccess.filePointer + extraLength + entryCommentLength)
+
+            entries += ZiprafCentralDirectoryEntry(
+                name = name,
+                flags = flags,
+                method = method,
+                crc32 = crc32,
+                compressedSize = compressedSize,
+                uncompressedSize = uncompressedSize,
+                localHeaderOffset = localHeaderOffset
+            )
+        }
+
+        require(randomAccess.filePointer == centralDirectoryEnd) {
+            "ZIP central-directory size does not match parsed entries"
+        }
+        return ZiprafCentralDirectory(
+            offset = centralDirectoryOffset,
+            size = centralDirectorySize,
+            entries = entries
+        )
+    }
+
+    private fun crossCheck(
+        local: ZiprafStoredEntry,
+        central: ZiprafCentralDirectoryEntry,
+        centralDirectoryOffset: Long
+    ) {
+        require(local.flags == central.flags) { "ZIP flags differ between local and central records" }
+        require(local.extent.compressionMethod == central.method) {
+            "ZIP compression method differs between local and central records"
+        }
+        require(local.extent.expectedCrc32 == central.crc32) {
+            "ZIP CRC-32 differs between local and central records"
+        }
+        require(local.extent.payloadSize == central.compressedSize) {
+            "ZIP compressed size differs between local and central records"
+        }
+        require(central.compressedSize == central.uncompressedSize) {
+            "ZIP STORE central-directory sizes must match"
+        }
+        require(local.extent.payloadOffset + local.extent.payloadSize <= centralDirectoryOffset) {
+            "ZIP payload overlaps the central directory"
+        }
+    }
+
+    private fun findSignatureBackwards(bytes: ByteArray, signature: Int, latestStart: Int): Int {
+        val b0 = signature and 0xff
+        val b1 = signature ushr 8 and 0xff
+        val b2 = signature ushr 16 and 0xff
+        val b3 = signature ushr 24 and 0xff
+        for (index in latestStart downTo 0) {
+            if (
+                bytes[index].toInt() and 0xff == b0 &&
+                bytes[index + 1].toInt() and 0xff == b1 &&
+                bytes[index + 2].toInt() and 0xff == b2 &&
+                bytes[index + 3].toInt() and 0xff == b3
+            ) {
+                return index
+            }
+        }
+        return -1
     }
 }
 
@@ -181,13 +446,20 @@ data class ZiprafMappedWindow(
     val bytes: ByteBuffer
 )
 
+/**
+ * Read-only direct runtime for a validated STORE payload.
+ *
+ * Each request maps only the requested logical window. The whole payload is never forced into one
+ * Int-sized ByteBuffer, so large extents remain addressable while every individual window stays
+ * bounded by [ZiprafRuntimePlan].
+ */
 class ZiprafDirectRuntime(
     file: File,
     private val extent: ZiprafStoredExtent,
     private val plan: ZiprafRuntimePlan = ZiprafRuntimePlan()
 ) : Closeable {
     private val randomAccess = RandomAccessFile(file, "r")
-    private val mapping: MappedByteBuffer
+    private val channel: FileChannel = randomAccess.channel
 
     init {
         try {
@@ -195,18 +467,8 @@ class ZiprafDirectRuntime(
                 "ZIPRAF direct runtime accepts only ZIP STORE"
             }
             require(extent.payloadOffset >= 0 && extent.payloadSize > 0)
-            require(extent.payloadSize <= Int.MAX_VALUE.toLong()) {
-                "Mapped STORE extent exceeds the ByteBuffer capacity limit"
-            }
             require(extent.payloadOffset <= randomAccess.length())
             require(extent.payloadSize <= randomAccess.length() - extent.payloadOffset)
-
-            mapping = randomAccess.channel.map(
-                FileChannel.MapMode.READ_ONLY,
-                extent.payloadOffset,
-                extent.payloadSize
-            )
-            mapping.order(ByteOrder.LITTLE_ENDIAN)
         } catch (failure: Throwable) {
             randomAccess.close()
             throw failure
@@ -230,12 +492,21 @@ class ZiprafDirectRuntime(
         routeId: Long = 0
     ): ZiprafMappedWindow {
         require(logicalOffset >= 0 && logicalOffset < extent.payloadSize)
-        val length = minOf(plan.sizeFor(stage).toLong(), extent.payloadSize - logicalOffset).toInt()
-        require(logicalOffset + length <= Int.MAX_VALUE)
-        val view = mapping.asReadOnlyBuffer()
-        view.position(logicalOffset.toInt())
-        view.limit((logicalOffset + length).toInt())
-        return ZiprafMappedWindow(stage, logicalOffset, length, plan.lane(routeId), view.slice().asReadOnlyBuffer())
+        val length = minOf(
+            plan.sizeFor(stage).toLong(),
+            extent.payloadSize - logicalOffset
+        ).toInt()
+        val absoluteOffset = Math.addExact(extent.payloadOffset, logicalOffset)
+        val mapping = channel.map(FileChannel.MapMode.READ_ONLY, absoluteOffset, length.toLong())
+        mapping.order(ByteOrder.LITTLE_ENDIAN)
+
+        return ZiprafMappedWindow(
+            stage = stage,
+            logicalOffset = logicalOffset,
+            length = length,
+            coreLane = plan.lane(routeId),
+            bytes = mapping.asReadOnlyBuffer().order(ByteOrder.LITTLE_ENDIAN)
+        )
     }
 
     fun verifyCrc32(
@@ -243,16 +514,20 @@ class ZiprafDirectRuntime(
             ?: throw IllegalStateException("No expected CRC-32 is attached to this extent"),
         chunkBytes: Int = 64 * 1024
     ): Boolean {
-        require(expectedCrc32 in 0..0xffff_ffffL)
+        require(expectedCrc32 in 0..ZiprafStoredExtent.UINT32_MAX)
         require(chunkBytes > 0)
 
         val crc = CRC32()
-        val view = mapping.asReadOnlyBuffer()
-        val chunk = ByteArray(minOf(chunkBytes, view.remaining()))
-        while (view.hasRemaining()) {
-            val count = minOf(chunk.size, view.remaining())
-            view.get(chunk, 0, count)
-            crc.update(chunk, 0, count)
+        val chunk = ByteBuffer.allocate(chunkBytes)
+        var logicalOffset = 0L
+        while (logicalOffset < extent.payloadSize) {
+            chunk.clear()
+            chunk.limit(minOf(chunk.capacity().toLong(), extent.payloadSize - logicalOffset).toInt())
+            val absoluteOffset = Math.addExact(extent.payloadOffset, logicalOffset)
+            readFullyAt(channel, chunk, absoluteOffset)
+            val count = chunk.position()
+            crc.update(chunk.array(), 0, count)
+            logicalOffset += count
         }
         return crc.value == expectedCrc32
     }
@@ -262,108 +537,32 @@ class ZiprafDirectRuntime(
     }
 
     companion object {
-        private const val SIG_EOCD = 0x06054b50.toInt()
-        private const val SIG_CD_ENTRY = 0x02014b50.toInt()
-        private const val SIG_LOCAL_HEADER = 0x04034b50.toInt()
-
-        fun parseStoredExtent(file: File, entryName: String): ZiprafStoredExtent {
-            require(!entryName.contains("..")) { "Path traversal rejected: $entryName" }
-            require(!entryName.startsWith("/")) { "Absolute path rejected: $entryName" }
-
-            RandomAccessFile(file, "r").use { raf ->
-                val fileLen = raf.length()
-
-                // Find EOCD (search backward, accounting for up to 65535-byte comment)
-                val searchStart = maxOf(0L, fileLen - 22 - 65535)
-                var eocdPos = fileLen - 22
-                var eocdFound = false
-                while (eocdPos >= searchStart) {
-                    raf.seek(eocdPos)
-                    if (readIntLE(raf) == SIG_EOCD) { eocdFound = true; break }
-                    eocdPos--
-                }
-                require(eocdFound) { "EOCD not found — not a valid ZIP file" }
-
-                // Guard against ZIP64 (total entries == 0xFFFF signals ZIP64 EOCD)
-                raf.seek(eocdPos + 10)
-                val totalEntries = readShortLE(raf)
-                require(totalEntries != 0xFFFF) { "ZIP64 format is not supported" }
-
-                // Read CD offset from EOCD
-                raf.seek(eocdPos + 16)
-                val cdOffset = readIntLE(raf).toLong() and 0xFFFFFFFFL
-
-                // Scan Central Directory for the named entry
-                var cdPos = cdOffset
-                var localHeaderOffset = -1L
-                var payloadSize = -1L
-                var compressionMethod = -1
-
-                while (cdPos < fileLen) {
-                    raf.seek(cdPos)
-                    val sig = readIntLE(raf)
-                    if (sig != SIG_CD_ENTRY) break
-
-                    raf.seek(cdPos + 10)
-                    val method = readShortLE(raf)
-                    raf.seek(cdPos + 20)
-                    val compressedSize = readIntLE(raf).toLong() and 0xFFFFFFFFL
-                    val uncompressedSize = readIntLE(raf).toLong() and 0xFFFFFFFFL
-                    val fnLen = readShortLE(raf)
-                    val extraLen = readShortLE(raf)
-                    val commentLen = readShortLE(raf)
-                    raf.seek(cdPos + 42)
-                    val localOff = readIntLE(raf).toLong() and 0xFFFFFFFFL
-
-                    raf.seek(cdPos + 46)
-                    val nameBytes = ByteArray(fnLen)
-                    raf.readFully(nameBytes)
-                    val name = String(nameBytes, Charsets.UTF_8)
-
-                    if (name == entryName) {
-                        compressionMethod = method
-                        payloadSize = if (method == 0) uncompressedSize else compressedSize
-                        localHeaderOffset = localOff
-                        break
-                    }
-                    cdPos += 46 + fnLen + extraLen + commentLen
-                }
-
-                require(localHeaderOffset >= 0) { "Entry '$entryName' not found in ZIP" }
-                require(compressionMethod == 0) {
-                    "Entry '$entryName' uses compression method $compressionMethod, expected STORED (0)"
-                }
-                require(payloadSize > 0) { "Entry '$entryName' has empty payload" }
-                require(payloadSize <= Int.MAX_VALUE.toLong()) {
-                    "ZIP64 entry size $payloadSize exceeds 2GiB addressable limit"
-                }
-
-                // Read Local File Header to compute exact data start offset
-                raf.seek(localHeaderOffset)
-                val localSig = readIntLE(raf)
-                require(localSig == SIG_LOCAL_HEADER) {
-                    "Invalid local file header signature at offset $localHeaderOffset"
-                }
-                raf.seek(localHeaderOffset + 26)
-                val localFnLen = readShortLE(raf)
-                val localExtraLen = readShortLE(raf)
-                val dataOffset = localHeaderOffset + 30 + localFnLen + localExtraLen
-
-                return ZiprafStoredExtent(dataOffset, payloadSize, ZiprafStoredExtent.STORE_METHOD)
+        fun openValidated(
+            file: File,
+            entryName: String? = null,
+            plan: ZiprafRuntimePlan = ZiprafRuntimePlan(),
+            verifyCrc32: Boolean = true
+        ): ZiprafDirectRuntime {
+            val entry = ZiprafArchiveValidator.parseStoredEntry(file, entryName)
+            val runtime = ZiprafDirectRuntime(file, entry.extent, plan)
+            if (verifyCrc32 && !runtime.verifyCrc32()) {
+                runtime.close()
+                throw IllegalArgumentException("ZIP STORE payload CRC-32 verification failed")
             }
-        }
-
-        private fun readIntLE(raf: RandomAccessFile): Int {
-            val b0 = raf.read(); val b1 = raf.read(); val b2 = raf.read(); val b3 = raf.read()
-            return b0 or (b1 shl 8) or (b2 shl 16) or (b3 shl 24)
-        }
-
-        private fun readShortLE(raf: RandomAccessFile): Int {
-            val b0 = raf.read(); val b1 = raf.read()
-            return b0 or (b1 shl 8)
+            return runtime
         }
 
         fun preserveFixedBits(candidate: Long, fixedMask: Long, fixedValue: Long): Long =
             (candidate and fixedMask.inv()) or (fixedValue and fixedMask)
+
+        private fun readFullyAt(channel: FileChannel, target: ByteBuffer, absoluteOffset: Long) {
+            var position = absoluteOffset
+            while (target.hasRemaining()) {
+                val read = channel.read(target, position)
+                require(read >= 0) { "ZIP STORE payload was truncated during CRC verification" }
+                require(read > 0) { "ZIP STORE payload read made no progress" }
+                position += read
+            }
+        }
     }
 }

@@ -1,0 +1,51 @@
+{
+  "schema": "zipraf.host-kat.evidence.v1",
+  "executed_at_utc": "2026-07-19T12:48:38Z",
+  "repository": "rafaelmeloreisnovo/Vectras-VM-Android",
+  "branch": "agent/vectra-gap-closure-zipraf-20260719",
+  "pull_request": 1050,
+  "environment": {
+    "host_arch": "x86_64",
+    "kotlinc": "1.9.0",
+    "java": "OpenJDK 21.0.10"
+  },
+  "command_model": "kotlinc production sources + KAT; java -jar",
+  "source_snapshot_sha256": {
+    "ZiprafDirectRuntime.kt": "2947a5917443d98c8d1692fa080f76fcf72485b79945aa1aa3c347bd4632f3f6",
+    "ZiprafDirectStoreSession.kt": "da0d95980d814dd0d03f68a8590f521984330480529170a344fb574b2bf0cb92",
+    "ZiprafDirectEntryPolicy.kt": "d6c861bf161aee52c6b18557eec46d250ad160451cf8df16b8966141cfadc36e",
+    "ZiprafDirectRuntimeKat.kt": "41e5586ddd1cf6790953f3dfb6819a92875d43342ff6e8a827c8cb828ab747e2"
+  },
+  "status": "PASS",
+  "checks_total": 15,
+  "checks_passed": 15,
+  "checks_failed": 0,
+  "checks": {
+    "central_directory": true,
+    "payload_size": true,
+    "window_length": true,
+    "lane": true,
+    "window_content": true,
+    "crc": true,
+    "scan_bytes": true,
+    "scan_windows": true,
+    "scan_lanes": true,
+    "scan_checksum": true,
+    "policy_size": true,
+    "policy_crc": true,
+    "policy_sha256": true,
+    "policy_wrong_sha_rejected": true,
+    "missing_entry_rejected": true
+  },
+  "epistemic_state": {
+    "host_compile": "PASS",
+    "standalone_kat": "PASS_15_OF_15",
+    "real_junit": "TOKEN_VAZIO",
+    "android_device": "TOKEN_VAZIO",
+    "arm32": "TOKEN_VAZIO",
+    "arm64": "TOKEN_VAZIO",
+    "performance_claim": "PROHIBITED",
+    "actions_yaml": "DEFERRED_BY_OWNER",
+    "claim_allowed": false
+  }
+}

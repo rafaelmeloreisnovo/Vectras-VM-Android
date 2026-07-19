@@ -1,84 +1,184 @@
-# ZIPRAF no Vectras — acesso direto validado por extent
+# ZIPRAF no Vectras — acesso direto com validação do arquivo
 
-O runtime aceita somente entradas ZIP clássicas com método `STORE` e mapeia em modo somente leitura **apenas o extent do payload**, sem materialização intermediária e sem rotina de descompressão.
+O runtime aceita somente entradas ZIP clássicas `STORE`, valida o arquivo ZIP e cria mapeamentos somente leitura por janela. Não há descompressão nem materialização integral do payload.
 
 ## Fluxo endurecido
 
 ```text
-arquivo ZIP
-→ parser do local-file header
-→ validação de assinatura, flags, método, tamanhos, nome e bounds
-→ extent STORE com CRC-32 esperado
-→ mmap somente do payload
+arquivo ZIP clássico
+→ localização e validação do EOCD
+→ validação de arquivo single-disk
+→ leitura do central directory
+→ seleção nominal e rejeição de duplicata
+→ cross-check central directory ↔ local-file header
+→ validação de assinatura, flags, método, CRC, tamanhos, nome e bounds
+→ extent STORE validado
+→ CRC-32 integral
+→ mmap somente da janela solicitada
 → BUFFER / L1_HOT / L2_SHARED
 → lane determinística 0..7
-→ verificação CRC-32 opcional/obrigatória pelo chamador
 → operação Vectra
 ```
 
-`BUFFER`, `L1_HOT` e `L2_SHARED` são níveis lógicos de trabalho. O processo Android não reivindica controle físico de cache L1/L2 do processador.
+`BUFFER`, `L1_HOT` e `L2_SHARED` são níveis lógicos de trabalho. Não representam controle físico da cache L1/L2 do processador.
+
+## APIs
+
+### Fronteira de baixo nível
+
+```kotlin
+ZiprafStoredEntryParser.parse(file, localHeaderOffset, expectedName)
+```
+
+Valida somente o `local-file header`. É útil para arquivos controlados e diagnóstico, mas não promove a entrada para confiança de arquivo completo.
+
+### Fronteira validada
+
+```kotlin
+ZiprafArchiveValidator.parseStoredEntry(file, expectedName)
+```
+
+Valida EOCD, central directory e concordância com o local header.
+
+### Abertura recomendada
+
+```kotlin
+ZiprafDirectRuntime.openValidated(
+    file = archive,
+    entryName = "runtime/core.bin",
+    plan = ZiprafRuntimePlan(coreCount = 8),
+    verifyCrc32 = true
+)
+```
+
+Essa chamada bloqueia a abertura quando a estrutura ou o CRC não correspondem.
 
 ## Invariantes implementadas
 
-- assinatura do local-file header deve ser `0x04034b50`;
-- entrada criptografada é recusada;
-- entrada com data descriptor é recusada, pois tamanhos e CRC precisam existir antes do mapeamento;
-- método diferente de ZIP `STORE` é recusado;
-- sentinela ZIP64 é recusada até existir parser próprio;
-- tamanhos comprimido e descomprimido precisam ser iguais;
-- extent vazio é recusado;
-- metadados e payload precisam caber integralmente no arquivo;
-- nomes absolutos, com NUL ou `..` são recusados;
-- nomes não UTF-8 só são aceitos quando integralmente ASCII;
-- o mapeamento cobre somente `payloadOffset..payloadOffset+payloadSize`;
-- o extent mapeado precisa caber na capacidade de `ByteBuffer`;
+- assinatura local `0x04034b50`;
+- assinatura central `0x02014b50`;
+- assinatura EOCD `0x06054b50`;
+- arquivo single-disk;
+- quantidade de entradas consistente;
+- central directory integralmente limitado pelo EOCD;
+- ausência de registros inesperados entre central directory e EOCD;
+- nome solicitado deve existir uma única vez;
+- entrada criptografada recusada;
+- data descriptor recusado;
+- método diferente de `STORE` recusado;
+- ZIP64 recusado até parser dedicado;
+- tamanhos comprimido e descomprimido iguais e maiores que zero;
+- CRC, flags, método e tamanho iguais entre registro local e central;
+- payload não pode sobrepor o central directory;
+- nome vazio, absoluto, com NUL, drive ou `..` recusado;
+- nome sem flag UTF-8 só é aceito quando ASCII;
+- arquivo e extent precisam conter integralmente o payload;
+- cada chamada mapeia somente sua janela lógica;
+- offsets usam `Long`; o payload completo não precisa caber em um único `ByteBuffer`;
 - `coreCount` fica entre 1 e 8;
-- bits marcados por `fixedMask` mantêm `fixedValue`;
-- o mapeamento e todas as janelas são somente leitura;
-- nenhuma imagem de VM é modificada por esse leitor;
-- CRC-32 do payload pode ser conferido contra o valor do header.
+- bits marcados por `fixedMask` preservam `fixedValue`;
+- janelas são somente leitura;
+- nenhuma imagem de VM é modificada pelo leitor;
+- CRC-32 integral pode ser obrigatório antes da abertura.
 
-## Cobertura de regressão adicionada
+## Prova standalone sem Gradle
 
-`ZiprafDirectRuntimeTest` cobre agora:
+Comando local:
 
-1. três estágios lógicos e oito lanes;
-2. derivação de extent pelo local header;
-3. leitura direta do payload;
-4. CRC-32 válido;
-5. mutação de payload detectada por CRC;
-6. rejeição de data descriptor;
-7. rejeição de path traversal;
-8. rejeição de payload truncado;
-9. rejeição de extent vazio;
-10. rejeição de método não-STORE;
-11. preservação de bits fixos.
-
-## Limites preservados como `TOKEN_VAZIO`
-
-- cruzamento com central directory;
-- ZIP64;
-- múltiplos local headers encadeados;
-- benchmark mmap versus `FileChannel.read`/stream;
-- execução instrumentada em Android ARM32;
-- execução instrumentada em Android ARM64;
-- medição de page faults/RSS;
-- residência física em cache;
-- ganho de desempenho;
-- política de unmap explícito, que não faz parte da API pública Java padrão.
-
-## Estado desta mudança
-
-```text
-implementação parser STORE        = ADDED
-mapeamento somente do extent      = ADDED
-verificação CRC-32                = ADDED
-testes de regressão               = ADDED_NOT_EXECUTED_IN_THIS_BRANCH
-CI do commit                      = TOKEN_VAZIO
-Android device execution          = TOKEN_VAZIO
-physical cache residency          = TOKEN_VAZIO
-performance benefit               = TOKEN_VAZIO
-claim_allowed                     = false
+```bash
+bash tools/zipraf/run_zipraf_host_kat.sh
 ```
 
-A promoção para `VERIFIED` exige Gradle/JUnit real no commit da branch e teste instrumentado em dispositivo. O local header, isoladamente, não prova concordância com o central directory; portanto, distribuição hostil ou não confiável continua bloqueada até o cross-check correspondente.
+O script compila diretamente:
+
+```text
+ZiprafDirectRuntime.kt
++
+ZiprafDirectRuntimeKat.kt
+→ kotlinc
+→ JAR standalone
+→ execução Java
+→ result.json
+```
+
+Execução observada em 19 de julho de 2026:
+
+```text
+host_arch       = x86_64
+kotlinc         = 1.9.0
+java            = OpenJDK 21.0.10
+checks          = 7/7
+status          = PASS
+```
+
+Checks executados:
+
+1. central directory validado;
+2. tamanho do payload;
+3. comprimento da janela;
+4. lane determinística;
+5. conteúdo da janela;
+6. CRC-32;
+7. entrada ausente recusada.
+
+Essa prova confirma compilação JVM e comportamento standalone. Ela não substitui Gradle, APK ou dispositivo Android.
+
+## Cobertura unitária adicionada
+
+`ZiprafDirectRuntimeTest` contém cenários para:
+
+1. três estágios e oito lanes;
+2. arquivo validado e abertura segura;
+3. fronteira local mantida explicitamente como baixo nível;
+4. mutação detectada por CRC;
+5. divergência de CRC central/local;
+6. divergência de tamanho central/local;
+7. nomes duplicados;
+8. seleção obrigatória em arquivo com múltiplas entradas;
+9. entrada ausente;
+10. arquivo multi-disk;
+11. data descriptor;
+12. path traversal;
+13. payload truncado;
+14. ausência de central directory;
+15. extent vazio;
+16. método não-STORE;
+17. preservação de bits fixos.
+
+## Teste Android e benchmark-harness
+
+O arquivo:
+
+```text
+app/src/androidTest/java/com/vectras/vm/vectra/ZiprafDirectRuntimeInstrumentedTest.kt
+```
+
+prepara:
+
+- round-trip em armazenamento temporário Android;
+- janelas no início, meio e fim;
+- oito lanes;
+- CRC no dispositivo;
+- registro de ABI e SDK;
+- harness de 256 janelas sobre payload de 2 MiB;
+- relatório JSON local;
+- `claim_allowed=false` para o tempo medido.
+
+O teste foi adicionado, mas sua execução ARM32/ARM64 continua pendente.
+
+## Limites preservados
+
+```text
+ZIP64                         = BLOCKED_BY_DESIGN
+Android ARM32                 = TOKEN_VAZIO
+Android ARM64                 = TOKEN_VAZIO
+page faults / RSS             = TOKEN_VAZIO
+cache física L1/L2            = TOKEN_VAZIO
+ganho de desempenho           = TOKEN_VAZIO
+comparação mmap/read/stream    = HARNESS_ADDED_NOT_EXECUTED
+Gradle/JUnit real              = TOKEN_VAZIO
+Actions/YAML                   = DEFERRED_BY_OWNER
+claim_allowed                  = false
+```
+
+A programação pode continuar pelo gate local, sem depender do GitHub Actions. Promoção para runtime Android exige execução instrumentada em aparelho e registro da evidência correspondente.
