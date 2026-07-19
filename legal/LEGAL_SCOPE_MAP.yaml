@@ -1,0 +1,129 @@
+# LEGAL_SCOPE_MAP.yaml
+# Mapa de autoria, origem e licença por diretório/componente.
+# Atualizado: 2026-07-19
+# Mantido sincronizado com sbom/SBOM.spdx.json e LICENSES_REGISTER.md.
+
+app/:
+  origin: fork_autoral
+  license: GPL-2.0-only
+  upstream: xoureldeen/Vectras-VM-Android
+  authors:
+    - rafaelmeloreisnovo
+    - xoureldeen (upstream, modificações próprias sobre base GPLv2)
+  notes: >
+    Arquivos originados do upstream preservam copyright do upstream.
+    Modificações e arquivos novos são de autoria de rafaelmeloreisnovo,
+    igualmente sob GPL-2.0-only.
+
+engine/rmr/:
+  origin: autoral
+  license: GPL-2.0-only
+  authors:
+    - rafaelmeloreisnovo
+  notes: >
+    Implementação C/ASM original (rmr_unified_kernel, rmr_zipraf_core, etc.).
+    Sem código de terceiros incorporado neste diretório.
+
+engine/platform/:
+  origin: autoral
+  license: GPL-2.0-only
+  authors:
+    - rafaelmeloreisnovo
+
+app/src/main/cpp/termux_jni.c:
+  origin: fork_autoral
+  license: GPL-2.0-only
+  upstream: termux/termux-app
+  authors:
+    - Termux contributors (base JNI)
+    - rafaelmeloreisnovo (null-safety fix PR#1038)
+  notes: >
+    Promovido de _incoming/termux.c. Correção de segurança null-safety
+    em loops strdup() de argv e envp aplicada em PR #1038.
+
+bug/:
+  origin: experimental_evidencia
+  license: GPL-2.0-only
+  status: EVIDENCIA_NAO_CANONICO
+  notes: >
+    Cópias de evidência e espelhos. Não compila como parte do APK oficial.
+    zipraf_jni.c e zipraf_core_bridge.c aqui são "Evidência" — o runtime
+    canônico é ZiprafDirectRuntime.kt (mmap direto, sem JNI intermediário).
+
+_incoming/:
+  origin: staging
+  license: NOASSERTION
+  status: STAGING_NAO_CANONICO
+  notes: >
+    Área de staging. Código aqui não é parte do APK até ser promovido
+    explicitamente. termux.c foi promovido a app/src/main/cpp/termux_jni.c.
+
+NAOCOMERCIAL/:
+  origin: unknown
+  license: NOASSERTION
+  status: QUARANTENA
+  decision_needed: true
+  risk: >
+    Potencial incompatibilidade com GPL-2.0-only se arquivos desta pasta
+    forem incluídos no APK. Uma licença não-comercial não é compatível com
+    as condições da GPL versão 2.
+  action_required: >
+    Auditar cada arquivo individualmente antes de qualquer release.
+    Determinar: (a) autor e licença exata; (b) se o arquivo é incluído
+    no APK compilado; (c) se a licença é compatível com GPL-2.0-only.
+    Enquanto não resolvido, bloquear inclusão no release oficial.
+
+docs/:
+  origin: autoral
+  license: GPL-2.0-only
+  authors:
+    - rafaelmeloreisnovo
+  notes: Documentação normativa do projeto.
+
+sbom/:
+  origin: autoral
+  license: CC0-1.0
+  notes: SBOM do projeto em formato SPDX 2.3.
+
+legal/:
+  origin: autoral
+  license: CC0-1.0
+  notes: Mapeamento de autoria e escopo legal.
+
+addthis/:
+  origin: unknown
+  license: NOASSERTION
+  status: PENDENTE_CLASSIFICACAO
+  notes: >
+    Origem e finalidade não definidas. Auditar antes de qualquer release
+    para confirmar que nenhum arquivo deste diretório entra no APK.
+
+screenshots/:
+  origin: autoral_ou_upstream
+  license: NOASSERTION
+  status: PENDENTE_CLASSIFICACAO
+  notes: >
+    Proveniência de assets visuais não normalizada. Confirmar origem
+    de cada imagem antes de distribuição pública.
+
+# Componentes externos (gerenciados via external_sources.manifest)
+external_qemu_rafaelia:
+  origin: fork_qemu
+  license: GPL-2.0-only
+  upstream: qemu.org/QEMU
+  authors:
+    - QEMU contributors (upstream)
+    - rafaelmeloreisnovo (camada RAFAELIA em hw/core/)
+  notes: >
+    Fork de QEMU. Todos os arquivos RAFAELIA adicionados em hw/core/
+    são de autoria de rafaelmeloreisnovo sob GPL-2.0-only.
+    Blobs BIOS/OVMF em pc-bios/ são upstream QEMU, licença BSD-2-Clause-Patent.
+
+external_ovmf_bios:
+  origin: upstream_qemu_prebuilt
+  license: BSD-2-Clause-Patent
+  upstream: tianocore/edk2
+  notes: >
+    Blobs pré-compilados distribuídos com QEMU. Licença BSD-2-Clause-Patent
+    é compatível com GPL-2.0-only para distribuição.
+    SHA256 deve ser registrado em sbom/SBOM.spdx.json após build concluído.

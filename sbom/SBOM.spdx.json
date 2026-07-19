@@ -1,0 +1,171 @@
+{
+  "SPDXID": "SPDXRef-DOCUMENT",
+  "spdxVersion": "SPDX-2.3",
+  "creationInfo": {
+    "created": "2026-07-19T00:00:00Z",
+    "creators": [
+      "Tool: vectra-vm-audit-2026-07-19",
+      "Organization: rafaelmeloreisnovo"
+    ],
+    "licenseListVersion": "3.22",
+    "comment": "Skeleton SBOM — sha256 fields marked NOASSERTION require a completed CI build to be filled with real artifact hashes. See docs/BLOCKING_GAPS.md."
+  },
+  "name": "Vectras-VM-Android",
+  "dataLicense": "CC0-1.0",
+  "documentNamespace": "https://github.com/rafaelmeloreisnovo/Vectras-VM-Android/sbom/2026-07-19",
+  "packages": [
+    {
+      "SPDXID": "SPDXRef-app",
+      "name": "com.vectras.vm",
+      "versionInfo": "NOASSERTION",
+      "downloadLocation": "https://github.com/rafaelmeloreisnovo/Vectras-VM-Android",
+      "filesAnalyzed": false,
+      "licenseConcluded": "GPL-2.0-only",
+      "licenseDeclared": "GPL-2.0-only",
+      "copyrightText": "Copyright (C) rafaelmeloreisnovo",
+      "comment": "Main Android application — Kotlin/Java sources in app/src/main/java/",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceType": "purl",
+          "referenceLocator": "pkg:github/rafaelmeloreisnovo/Vectras-VM-Android"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-engine-rmr",
+      "name": "engine/rmr",
+      "versionInfo": "NOASSERTION",
+      "downloadLocation": "https://github.com/rafaelmeloreisnovo/Vectras-VM-Android",
+      "filesAnalyzed": false,
+      "licenseConcluded": "GPL-2.0-only",
+      "licenseDeclared": "GPL-2.0-only",
+      "copyrightText": "Copyright (C) rafaelmeloreisnovo",
+      "comment": "Native C/ASM engine — original authorship. Sources in engine/rmr/src/ and engine/rmr/include/."
+    },
+    {
+      "SPDXID": "SPDXRef-upstream-vectras",
+      "name": "Vectras-VM-Android-upstream",
+      "versionInfo": "NOASSERTION",
+      "downloadLocation": "https://github.com/xoureldeen/Vectras-VM-Android",
+      "filesAnalyzed": false,
+      "licenseConcluded": "GPL-2.0-only",
+      "licenseDeclared": "GPL-2.0-only",
+      "copyrightText": "Copyright (C) xoureldeen",
+      "comment": "Upstream fork origin. Modified files carry additional copyright by rafaelmeloreisnovo per GPL-2.0-only.",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceType": "purl",
+          "referenceLocator": "pkg:github/xoureldeen/Vectras-VM-Android"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-qemu-rafaelia",
+      "name": "qemu_rafaelia",
+      "versionInfo": "NOASSERTION",
+      "downloadLocation": "https://github.com/rafaelmeloreisnovo/qemu_rafaelia",
+      "filesAnalyzed": false,
+      "licenseConcluded": "GPL-2.0-only",
+      "licenseDeclared": "GPL-2.0-only",
+      "copyrightText": "Copyright (C) QEMU contributors, rafaelmeloreisnovo",
+      "comment": "Fork of QEMU with RAFAELIA additions. Pinned commit SHA defined in external_sources.manifest. NOASSERTION until binary artifact produced by CI.",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "NOASSERTION"
+        }
+      ],
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceType": "purl",
+          "referenceLocator": "pkg:github/rafaelmeloreisnovo/qemu_rafaelia"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-androidx-rmr",
+      "name": "androidx_RmR",
+      "versionInfo": "NOASSERTION",
+      "downloadLocation": "https://github.com/rafaelmeloreisnovo/androidx_RmR",
+      "filesAnalyzed": false,
+      "licenseConcluded": "GPL-2.0-only",
+      "licenseDeclared": "GPL-2.0-only",
+      "copyrightText": "Copyright (C) rafaelmeloreisnovo",
+      "comment": "Custom AndroidX module. Pinned commit SHA defined in external_sources.manifest."
+    },
+    {
+      "SPDXID": "SPDXRef-termux-jni",
+      "name": "termux-app-rafacodephi",
+      "versionInfo": "NOASSERTION",
+      "downloadLocation": "https://github.com/rafaelmeloreisnovo/termux-app-rafacodephi",
+      "filesAnalyzed": false,
+      "licenseConcluded": "GPL-2.0-only",
+      "licenseDeclared": "GPL-2.0-only",
+      "copyrightText": "Copyright (C) Termux contributors, rafaelmeloreisnovo",
+      "comment": "Fork of Termux terminal app. JNI bridge promoted from _incoming/termux.c to app/src/main/cpp/termux_jni.c."
+    },
+    {
+      "SPDXID": "SPDXRef-naocomercial",
+      "name": "NAOCOMERCIAL",
+      "versionInfo": "NOASSERTION",
+      "downloadLocation": "NOASSERTION",
+      "filesAnalyzed": false,
+      "licenseConcluded": "NOASSERTION",
+      "licenseDeclared": "NOASSERTION",
+      "copyrightText": "NOASSERTION",
+      "comment": "QUARANTENA: directory may carry a non-commercial restriction incompatible with GPL-2.0-only. Contents must be audited file-by-file before inclusion in any APK/AAB. See legal/LEGAL_SCOPE_MAP.yaml."
+    },
+    {
+      "SPDXID": "SPDXRef-ovmf-bios",
+      "name": "OVMF/EDK2-BIOS",
+      "versionInfo": "NOASSERTION",
+      "downloadLocation": "https://www.tianocore.org/",
+      "filesAnalyzed": false,
+      "licenseConcluded": "BSD-2-Clause-Patent",
+      "licenseDeclared": "BSD-2-Clause-Patent",
+      "copyrightText": "Copyright (C) Intel Corporation and EDK2 contributors",
+      "comment": "Pre-compiled BIOS/OVMF blobs sourced from QEMU upstream pc-bios/ directory. SHA256 values require CI build to be filled. Upstream license: BSD-2-Clause-Patent.",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "NOASSERTION"
+        }
+      ]
+    }
+  ],
+  "relationships": [
+    {
+      "spdxElementId": "SPDXRef-DOCUMENT",
+      "relationshipType": "DESCRIBES",
+      "relatedSpdxElement": "SPDXRef-app"
+    },
+    {
+      "spdxElementId": "SPDXRef-app",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-engine-rmr"
+    },
+    {
+      "spdxElementId": "SPDXRef-app",
+      "relationshipType": "DYNAMIC_LINK",
+      "relatedSpdxElement": "SPDXRef-qemu-rafaelia"
+    },
+    {
+      "spdxElementId": "SPDXRef-app",
+      "relationshipType": "DYNAMIC_LINK",
+      "relatedSpdxElement": "SPDXRef-termux-jni"
+    },
+    {
+      "spdxElementId": "SPDXRef-app",
+      "relationshipType": "VARIANT_OF",
+      "relatedSpdxElement": "SPDXRef-upstream-vectras"
+    },
+    {
+      "spdxElementId": "SPDXRef-app",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-ovmf-bios"
+    }
+  ]
+}

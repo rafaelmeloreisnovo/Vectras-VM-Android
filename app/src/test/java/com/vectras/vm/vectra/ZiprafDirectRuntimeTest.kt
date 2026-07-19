@@ -5,12 +5,13 @@ import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import java.io.File
-import java.io.RandomAccessFile
-import java.nio.ByteBuffer
-import java.nio.ByteOrder
-import java.util.zip.CRC32
+import java.util.zip.ZipEntry
+import java.util.zip.ZipOutputStream
 
 class ZiprafDirectRuntimeTest {
+
+    // --- existing tests (preserved) ---
+
     @Test
     fun mappedStore_usesThreeStages_andEightLanes() {
         val file = File.createTempFile("zipraf-direct", ".bin")
@@ -149,36 +150,166 @@ class ZiprafDirectRuntimeTest {
         assertTrue((result and mask) == (fixed and mask))
     }
 
-    private fun writeStoredEntry(
-        file: File,
-        name: String,
-        payload: ByteArray,
-        flags: Int = FLAG_UTF8
-    ) {
-        val nameBytes = name.toByteArray(Charsets.UTF_8)
-        val crc = CRC32().apply { update(payload) }.value
-        val output = ByteBuffer.allocate(30 + nameBytes.size + payload.size)
-            .order(ByteOrder.LITTLE_ENDIAN)
+    // --- new tests: extent-based mmap ---
 
-        output.putInt(LOCAL_FILE_HEADER_SIGNATURE)
-        output.putShort(20.toShort())
-        output.putShort(flags.toShort())
-        output.putShort(ZiprafStoredExtent.STORE_METHOD.toShort())
-        output.putShort(0.toShort())
-        output.putShort(0.toShort())
-        output.putInt(crc.toInt())
-        output.putInt(payload.size)
-        output.putInt(payload.size)
-        output.putShort(nameBytes.size.toShort())
-        output.putShort(0.toShort())
-        output.put(nameBytes)
-        output.put(payload)
-        file.writeBytes(output.array())
+    @Test
+    fun extentMmap_mapsOnlyPayload_notWholeFile() {
+        val file = File.createTempFile("zipraf-extent", ".bin")
+        try {
+            // File: 1024 bytes; extent covers bytes [256, 256+128)
+            val content = ByteArray(1024) { (it % 256).toByte() }
+            file.writeBytes(content)
+            val extent = ZiprafStoredExtent(256L, 128L)
+            ZiprafDirectRuntime(file, extent).use { rt ->
+                val w = rt.window(0, ZiprafMemoryStage.BUFFER)
+                // First byte in mapping corresponds to file[256] = 0 (256 % 256 == 0)
+                assertEquals(0, w.bytes.get(0).toInt() and 0xff)
+                val wEnd = rt.window(127, ZiprafMemoryStage.BUFFER)
+                // byte at logicalOffset=127 → file[256+127=383] = 383 % 256 = 127
+                assertEquals(127, wEnd.bytes.get(0).toInt() and 0xff)
+            }
+        } finally { file.delete() }
     }
 
-    companion object {
-        private const val LOCAL_FILE_HEADER_SIGNATURE = 0x04034b50
-        private const val FLAG_DATA_DESCRIPTOR = 1 shl 3
-        private const val FLAG_UTF8 = 1 shl 11
+    @Test(expected = IllegalArgumentException::class)
+    fun extentExceeding2GiB_isRejected() {
+        val file = File.createTempFile("zipraf-overflow", ".bin")
+        try {
+            file.writeBytes(ByteArray(64))
+            // payloadOffset + payloadSize > Int.MAX_VALUE
+            ZiprafDirectRuntime(file, ZiprafStoredExtent(Int.MAX_VALUE.toLong(), 1L)).close()
+        } finally { file.delete() }
+    }
+
+    @Test(expected = IllegalArgumentException::class)
+    fun windowBeyondExtent_isRejected() {
+        val file = File.createTempFile("zipraf-oob", ".bin")
+        try {
+            file.writeBytes(ByteArray(256))
+            ZiprafDirectRuntime(file, ZiprafStoredExtent(0, 128)).use { rt ->
+                rt.window(128, ZiprafMemoryStage.BUFFER) // logicalOffset == payloadSize, out of bounds
+            }
+        } finally { file.delete() }
+    }
+
+    // --- new tests: parseStoredExtent ---
+
+    private fun createStoredZip(entryName: String, payload: ByteArray): File {
+        val file = File.createTempFile("zipraf-parse", ".zip")
+        ZipOutputStream(file.outputStream()).use { zos ->
+            val entry = ZipEntry(entryName)
+            entry.method = ZipEntry.STORED
+            entry.size = payload.size.toLong()
+            entry.compressedSize = payload.size.toLong()
+            val crc = java.util.zip.CRC32()
+            crc.update(payload)
+            entry.crc = crc.value
+            zos.putNextEntry(entry)
+            zos.write(payload)
+            zos.closeEntry()
+        }
+        return file
+    }
+
+    @Test
+    fun parseStoredExtent_returnsCorrectPayload() {
+        val payload = ByteArray(200) { it.toByte() }
+        val file = createStoredZip("data.bin", payload)
+        try {
+            val extent = ZiprafDirectRuntime.parseStoredExtent(file, "data.bin")
+            ZiprafDirectRuntime(file, extent).use { rt ->
+                val w = rt.window(0, ZiprafMemoryStage.BUFFER)
+                // Verify payload is accessible through the extent
+                assertEquals(0, w.bytes.get(0).toInt() and 0xff)
+                assertEquals(1, w.bytes.get(1).toInt() and 0xff)
+            }
+        } finally { file.delete() }
+    }
+
+    @Test(expected = IllegalArgumentException::class)
+    fun parseStoredExtent_deflate_isRejected() {
+        val file = File.createTempFile("zipraf-deflate", ".zip")
+        try {
+            ZipOutputStream(file.outputStream()).use { zos ->
+                zos.setMethod(ZipOutputStream.DEFLATED)
+                val entry = ZipEntry("data.bin")
+                zos.putNextEntry(entry)
+                zos.write(ByteArray(100) { 0 })
+                zos.closeEntry()
+            }
+            ZiprafDirectRuntime.parseStoredExtent(file, "data.bin")
+        } finally { file.delete() }
+    }
+
+    @Test(expected = IllegalArgumentException::class)
+    fun parseStoredExtent_missingEntry_throws() {
+        val payload = ByteArray(50) { 1 }
+        val file = createStoredZip("actual.bin", payload)
+        try {
+            ZiprafDirectRuntime.parseStoredExtent(file, "nonexistent.bin")
+        } finally { file.delete() }
+    }
+
+    @Test(expected = IllegalArgumentException::class)
+    fun parseStoredExtent_pathTraversal_isRejected() {
+        val payload = ByteArray(50) { 1 }
+        val file = createStoredZip("safe.bin", payload)
+        try {
+            ZiprafDirectRuntime.parseStoredExtent(file, "../etc/passwd")
+        } finally { file.delete() }
+    }
+
+    @Test(expected = IllegalArgumentException::class)
+    fun parseStoredExtent_absolutePath_isRejected() {
+        val payload = ByteArray(50) { 1 }
+        val file = createStoredZip("safe.bin", payload)
+        try {
+            ZiprafDirectRuntime.parseStoredExtent(file, "/etc/passwd")
+        } finally { file.delete() }
+    }
+
+    @Test(expected = IllegalArgumentException::class)
+    fun parseStoredExtent_notAZip_throws() {
+        val file = File.createTempFile("zipraf-notzip", ".bin")
+        try {
+            file.writeBytes(ByteArray(128) { 0xFF.toByte() })
+            ZiprafDirectRuntime.parseStoredExtent(file, "data.bin")
+        } finally { file.delete() }
+    }
+
+    // --- new tests: multi-window and close ---
+
+    @Test
+    fun multipleWindows_sameExtent_independentPositions() {
+        val file = File.createTempFile("zipraf-multi", ".bin")
+        try {
+            file.writeBytes(ByteArray(512) { (it % 256).toByte() })
+            ZiprafDirectRuntime(file, ZiprafStoredExtent(0, 512)).use { rt ->
+                val w0 = rt.window(0, ZiprafMemoryStage.BUFFER)
+                val w100 = rt.window(100, ZiprafMemoryStage.L1_HOT)
+                // Windows are independent slices
+                assertEquals(0, w0.bytes.get(0).toInt() and 0xff)
+                assertEquals(100, w100.bytes.get(0).toInt() and 0xff)
+            }
+        } finally { file.delete() }
+    }
+
+    @Test
+    fun reopenAfterClose_succeedsWithNewInstance() {
+        val file = File.createTempFile("zipraf-reopen", ".bin")
+        try {
+            file.writeBytes(ByteArray(128) { 42 })
+            val extent = ZiprafStoredExtent(0, 128)
+            ZiprafDirectRuntime(file, extent).close()
+            ZiprafDirectRuntime(file, extent).use { rt ->
+                assertEquals(42, rt.window(0, ZiprafMemoryStage.BUFFER).bytes.get(0).toInt() and 0xff)
+            }
+        } finally { file.delete() }
+    }
+
+    @Test
+    fun preserveFixedBits_allPatterns() {
+        assertEquals(0x05L, ZiprafDirectRuntime.preserveFixedBits(0L, 0x0FL, 0x05L))
+        assertEquals(-1L and 0x0FL.inv() or 0x05L, ZiprafDirectRuntime.preserveFixedBits(-1L, 0x0FL, 0x05L))
     }
 }
