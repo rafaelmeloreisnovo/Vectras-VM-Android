@@ -1,181 +1,228 @@
 # BLOCKING_GAPS.md
-<!-- Atualizado: 2026-07-19 -->
+<!-- Atualizado: 2026-07-19 | segunda onda de fechamento -->
 
-Documento de registro explícito dos gaps que impedem o fechamento completo
-da cadeia de prova sem recursos externos (hardware, segredos CI, dispositivos físicos).
+Registro canônico dos gaps que impedem a promoção do Vectras VM.
 
-Substitui o estado `TOKEN_VAZIO` por `BLOCKED_BY[motivo]` — mais informativo
-e rastreável como tarefa de infraestrutura, não como falha de código.
+Este documento substitui `TOKEN_VAZIO` por estados verificáveis:
+
+```text
+IMPLEMENTED_UNPROVEN
+BLOCKED_BY[motivo]
+PROVEN
+```
+
+Uma alteração de código não é automaticamente build, artefato, instalação, boot ou release.
 
 ---
 
 ## Estado atual: BETA_BLOCKED
 
-O projeto possui código substancial, arquitetura documentada e pipeline CI sofisticado.
-O bloqueio remanescente é a **cadeia de prova** — não o código em si:
-
-```
+```text
 código → build → artefato → instalação → boot VM → teste → prova assinada
 ```
 
----
-
-## Gaps Bloqueados por Hardware/Infraestrutura
-
-### BG-01: SHA-256 reais no RELEASE_EVIDENCE_LEDGER
-
-**Status:** `BLOCKED_BY[CI_BUILD_REQUIRED]`
-
-O arquivo `docs/RELEASE_EVIDENCE_LEDGER.md` está estruturado corretamente mas
-contém apenas linhas de exemplo. SHA-256 do APK/AAB, perfil ABI e data de build
-só podem ser preenchidos após um CI run completo que produza artefatos reais.
-
-**Desbloqueio:** Executar `android-ci.yml` com lane `full_debug` ou `release_gate`
-em um runner com segredos configurados. O CI job de `build` já produz e publica
-artefatos; basta executar e copiar os valores para o ledger.
+A cadeia ainda está aberta. Há componentes substanciais e correções implementadas, mas não existe prova completa do HEAD em dispositivo.
 
 ---
 
-### BG-02: Testes em dispositivo físico ARM32/ARM64
+## BG-00: workflows Vectras não chegam ao runner
+
+**Status:** `BLOCKED_BY[GITHUB_ACTIONS_RUNNER_STARTUP]`
+
+Nos heads do PR #1052, os workflows `android-ci`, `host-ci`, `Shell-Loader Smoke`, `APK Wizard`, `audit-benchmark-contract`, `Validate Formula` e o orquestrador encerraram em falha antes de executar steps de compilação. Em `android-ci`, os jobs de resolução/gate falharam sem lista de steps e o job canônico foi pulado.
+
+Consequências:
+
+- não há log Java/Kotlin/C que atribua falha ao diff;
+- não há APK/AAB recente;
+- não há hash de artefato;
+- o estado não pode ser promovido nem rebaixado por inferência.
+
+**Desbloqueio:** restaurar a capacidade de início dos runners/Actions e repetir o HEAD do PR.
+
+---
+
+## BG-01: hashes reais no RELEASE_EVIDENCE_LEDGER
+
+**Status:** `BLOCKED_BY[CURRENT_GREEN_BUILD_REQUIRED]`
+
+`docs/RELEASE_EVIDENCE_LEDGER.md` agora contém evidências negativas reais das execuções falhas e mantém o template separado. SHA-256 de APK/AAB, perfil ABI e assinatura continuam bloqueados até um build atual materializar os arquivos.
+
+**Desbloqueio:** executar `android-ci.yml` no commit corrente, publicar o artefato e registrar os hashes do arquivo final.
+
+---
+
+## BG-02: testes em dispositivo físico ARM32/ARM64
 
 **Status:** `BLOCKED_BY[ADB_RUNNER_REQUIRED]`
 
-O arquivo `.github/workflows/device-runtime-smoke.yml` existe mas retorna:
-- ADB: missing
-- Install: pending
-- Launch: pending
-- Estado: `DEVICE_PENDING`
+Necessário:
 
-**Desbloqueio:** Provisionar um runner auto-hospedado com:
-1. ADB instalado e autorizado
-2. Dispositivo ARM32 (ex.: Moto E7 Power) conectado via USB
-3. Dispositivo ARM64 (ex.: Realme ou equivalente) conectado via USB
-4. Android 10 e Android 14+
+1. ADB instalado e autorizado;
+2. dispositivo ARM32, por exemplo Moto E7 Power;
+3. dispositivo ARM64;
+4. Android 10 e Android 14+;
+5. captura de logcat, instalação, launch e encerramento.
 
-Referência de workflow: `.github/workflows/moto-e7-arm32-beta.yml` já define
-a estrutura esperada para ARM32.
+O workflow `device-runtime-smoke.yml` continua com ADB ausente e instalação/launch pendentes.
 
 ---
 
-### BG-03: Assinatura oficial de release
+## BG-03: assinatura oficial de release
 
 **Status:** `BLOCKED_BY[KEYSTORE_SECRETS_REQUIRED]`
 
-O pipeline `.github/workflows/release-dual-track.yml` e `sign-release.yml`
-estão implementados e funcionais, mas requerem:
-- `VECTRAS_RELEASE_KEYSTORE_BASE64`
-- `VECTRAS_RELEASE_KEY_ALIAS`
-- `VECTRAS_RELEASE_KEY_PASSWORD`
-- `VECTRAS_RELEASE_STORE_PASSWORD`
+Segredos necessários:
 
-Esses segredos devem ser configurados em Settings → Secrets → Actions
-no repositório ou na organização.
+- `VECTRAS_RELEASE_KEYSTORE_BASE64`;
+- `VECTRAS_RELEASE_KEY_ALIAS`;
+- `VECTRAS_RELEASE_KEY_PASSWORD`;
+- `VECTRAS_RELEASE_STORE_PASSWORD`.
 
-**Nota de segurança:** Segredos de keystore NUNCA devem ser commitados
-no repositório. O pipeline já usa `${{ secrets.* }}` corretamente.
+Segredos nunca devem ser commitados. Release unsigned/debug não é release oficial.
 
 ---
 
-### BG-04: Smoke test de boot de VM em dispositivo
+## BG-04: smoke de boot de VM
 
-**Status:** `BLOCKED_BY[QEMU_BINARY_AND_DEVICE_REQUIRED]`
+**Status:** `BLOCKED_BY[QEMU_ARTIFACT_AND_DEVICE_REQUIRED]`
 
-Para verificar que o QEMU realmente inicializa uma VM guest em um dispositivo
-Android físico, é necessário:
-1. APK compilado com QEMU binary embarcado (via qemu_rafaelia artifact)
-2. Dispositivo com ADB
-3. Imagem de VM mínima (Alpine ou similar)
-4. Runner que execute logcat e parse a saída de boot
+A prova exige:
 
-Sequência de verificação documentada:
+```text
+QEMU artifact validado
+→ APK integrado
+→ instalação ADB
+→ VM criada
+→ firmware carregado
+→ guest iniciado
+→ display/rede observados
+→ shutdown limpo
+→ logs e hashes registrados
 ```
-APK instalado → app iniciado → VM criada → QEMU executado → firmware carregado
-→ guest iniciado → display funcional → shutdown limpo → logs + hashes registrados
-```
+
+O `qemu_rafaelia` já possui job multi-target e diagnóstico persistente. A produção dos três binários ainda precisa terminar verde antes da integração Android.
 
 ---
 
-### BG-05: Benchmarks de performance ZIPRAF
+## BG-05: benchmarks ZIPRAF
 
 **Status:** `BLOCKED_BY[DEVICE_EXECUTION_REQUIRED]`
 
-Os claims de performance do `ZiprafDirectRuntime.kt` (mmap direto, cache windows
-L1/L2, lane routing por core) requerem medição em hardware real para:
-- Comparação mmap extent vs FileChannel.read convencional
-- Page faults cold/warm
-- RSS e GC durante operações de janela
-- Throughput por lane em ARM32 vs ARM64
+Claims de mmap por extent, janelas L1/L2 e lanes exigem medição em aparelho:
 
-Workflow de referência: `.github/workflows/audit-benchmark-contract.yml`
-
----
-
-### BG-06: Bootstrap ZIPs e loader.apk verificáveis
-
-**Status:** `BLOCKED_BY[BUILD_ARTIFACTS_REQUIRED]` (ver termux-app-rafacodephi)
-
-Os arquivos:
-- `bootstrap-aarch64.zip`
-- `bootstrap-arm.zip`
-- `bootstrap-i686.zip`
-- `bootstrap-x86_64.zip`
-- `loader.apk`
-
-São build artifacts que devem ser gerados ou baixados de uma fonte pinada
-com SHA-256 verificado. Não estão versionados no Git por design (correto),
-mas a fonte de geração e os hashes esperados devem estar documentados.
-
-Ver: `termux-app-rafacodephi/docs/BOOTSTRAP_SOURCE_CONTRACT.md`
+- page faults cold/warm;
+- RSS/GC;
+- throughput por lane;
+- ARM32 versus ARM64;
+- mmap extent versus leitura convencional.
 
 ---
 
-### BG-07: SBOM com hashes reais de binários
+## BG-06: bootstrap ZIPs e loader.apk verificáveis
 
-**Status:** `BLOCKED_BY[CI_BUILD_REQUIRED]`
+**Status:** `IMPLEMENTED_UNPROVEN + BLOCKED_BY[FUNCTIONAL_CONTRACT]`
 
-O arquivo `sbom/SBOM.spdx.json` foi criado com campos `"checksumValue": "NOASSERTION"`
-para os binários (APK, OVMF blobs, libXlorie.so se presente).
+No `termux-app-rafacodephi`:
 
-Os hashes reais só podem ser calculados após:
-1. Build CI completo que produza os artefatos
-2. `sha256sum` dos artefatos gerados
-3. Atualização dos campos `checksums` no SBOM
+- o contrato de origem foi corrigido para a task real `:app:generateRafcodephiBootstraps`;
+- o gerador padrão é classificado como `BOOTSTRAP_BRIDGE_ONLY`;
+- existe módulo `:loader` que produz um APK stub sem código;
+- o build de debug do head do PR #282 passou antes do gate ARM32.
+
+Ainda faltam:
+
+- payload pinado;
+- SHA-256/BLAKE3;
+- comportamento funcional de instalação;
+- consentimento, rollback e atualização;
+- assinatura e testes instrumentados.
 
 ---
 
-### BG-08: Proveniência de libXlorie.so
+## BG-07: SBOM com hashes reais
+
+**Status:** `BLOCKED_BY[CURRENT_GREEN_BUILD_REQUIRED]`
+
+A estrutura SPDX 2.3 existe. Hashes de APK, blobs e bibliotecas só podem ser preenchidos após materialização do build canônico.
+
+---
+
+## BG-08: proveniência de libXlorie.so
 
 **Status:** `BLOCKED_BY[AUDIT_REQUIRED]`
 
-Se `libXlorie.so` for incluída no APK, requer:
-- Origem (repositório upstream ou build própria)
-- Licença SPDX
-- Recipe de build (como compilar a partir de fontes)
-- SHA-256 do binário
+Se incluída no APK, requer:
 
-Sem isso, a biblioteca está em quarentena para fins de distribuição pública.
+- origem/upstream;
+- licença SPDX;
+- recipe de build;
+- commit de origem;
+- SHA-256 do binário.
 
----
-
-## Itens Resolvidos por Este PR (2026-07-19)
-
-| Gap | Resolução |
-|-----|-----------|
-| G5: ZiprafDirectRuntime mapeava arquivo inteiro | FIXED: mmap agora usa `extent.payloadOffset, extent.payloadSize` |
-| G5: Sem parser ZIP estrutural | FIXED: `parseStoredExtent()` lê EOCD + CD + local header |
-| G5: Testes insuficientes | FIXED: 12 novos casos de teste adicionados |
-| G4: termux.c em _incoming/ | FIXED: promovido a `app/src/main/cpp/termux_jni.c` + CMakeLists |
-| G3: Sem SBOM | PARTIAL: `sbom/SBOM.spdx.json` criado com estrutura SPDX 2.3 (hashes requerem BG-07) |
-| G10: NAOCOMERCIAL sem decisão | PARTIAL: quarentena formalizada em `legal/LEGAL_SCOPE_MAP.yaml` |
-| G7: PROJECT_STATE desatualizado | FIXED: sincronizado para 2026-07-19 |
-| Q1/Q2: qemu_rafaelia CI sem binários | FIXED: scripts de packaging + job adicionados |
-| T1: Bootstrap ZIPs sem contrato | FIXED: `BOOTSTRAP_SOURCE_CONTRACT.md` criado |
+Sem isso, permanece em quarentena para distribuição pública.
 
 ---
 
-## Próxima Ação Prioritária
+## BG-09: migração integral do comando QEMU para argv
 
-1. Provisionar runner com ADB → desbloqueia BG-02 e BG-04
-2. Configurar keystore secrets → desbloqueia BG-03
-3. Executar `android-ci.yml` no HEAD atual → desbloqueia BG-01 e BG-07
-4. Auditar NAOCOMERCIAL/ arquivo por arquivo → desbloqueia BG-08 parcialmente
+**Status:** `IMPLEMENTED_UNPROVEN[CANONICAL_STANDALONE_PATH]`
+
+O PR #1052 implementa:
+
+- `QemuArgvContract.toProcessArgv()`;
+- `ProotCommandBuilder.buildCommand(List<String>)`;
+- `QemuDirectLauncher`;
+- despacho direto no `MainService` para executável `qemu-system-*` standalone;
+- preparação fixa de PulseAudio sem texto externo;
+- testes para espaços e metacaracteres.
+
+Limite preservado:
+
+- wrappers opcionais `xterm -e bash -c`/`bash -c` ainda seguem o caminho de compatibilidade;
+- esses wrappers não são falsamente interpretados como executável direto;
+- a migração deles requer contrato próprio de argv/terminal.
+
+**Gate:** build unitário + assembleDebug + smoke de boot antes de marcar `PROVEN`.
+
+---
+
+## BG-10: escopo NAOCOMERCIAL versus GPLv2
+
+**Status:** `BLOCKED_BY[FILE_LEVEL_LICENSE_AUDIT]`
+
+`legal/LEGAL_SCOPE_MAP.yaml` formaliza a quarentena, mas não resolve por si só eventual incompatibilidade de distribuição. É necessário separar, arquivo por arquivo:
+
+- código derivado GPLv2;
+- código autoral independente;
+- documentação/licença comercial separada;
+- artefatos que não podem ser combinados/distribuídos no mesmo produto.
+
+---
+
+## Matriz de fechamento
+
+| Gap | Código | Prova atual | Estado |
+|---|---:|---:|---|
+| G3 SBOM | sim | estrutura somente | `IMPLEMENTED_UNPROVEN` |
+| G4 JNI Termux | sim | sem build Vectras atual | `IMPLEMENTED_UNPROVEN` |
+| G5 ZIPRAF | sim | testes adicionados; sem dispositivo | `IMPLEMENTED_UNPROVEN` |
+| G7 PROJECT_STATE | sim | documental | `PROVEN_DOCUMENTAL` |
+| G8 mover fórmulas | sim | path corrigido | `PROVEN_DOCUMENTAL` |
+| G9 argv QEMU | caminho standalone | sem CI/ADB | `IMPLEMENTED_UNPROVEN` |
+| G10 licenças | mapa/quarentena | auditoria incompleta | `PARTIAL` |
+| Q1–Q3 QEMU | job/scripts/fix-em-série | smoke verde; binários em nova rodada | `IMPLEMENTED_UNPROVEN` |
+| T1 bootstrap | contrato corrigido | build bridge observado | `PARTIAL` |
+| T2 loader | stub compilável | build debug passou; funcionalidade ausente | `STUB_PROVEN_BUILD_ONLY` |
+
+---
+
+## Próxima ordem operacional
+
+1. obter CI verde do `qemu_rafaelia` com três `qemu-system-*` e manifests;
+2. restaurar o início dos runners do Vectras e executar testes/build no PR #1052;
+3. ler o artifact nomeado dos gates ARM32 do Termux e corrigir a assertiva real;
+4. integrar o artifact QEMU ao APK Vectras;
+5. executar ADB ARM32/ARM64;
+6. preencher ledger e SBOM com hashes reais;
+7. auditar licenças por arquivo antes de distribuição.
