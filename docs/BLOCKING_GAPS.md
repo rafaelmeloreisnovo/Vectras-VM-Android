@@ -21,7 +21,7 @@ Uma alteração de código não é automaticamente build, artefato, instalação
 código → build → artefato móvel → instalação → boot VM → teste → prova assinada
 ```
 
-A cadeia ainda está aberta. O QEMU já possui prova de host CI, mas o HEAD do Vectras não chega ao runner e ainda não existe prova completa em dispositivo.
+A cadeia ainda está aberta. O QEMU já possui prova de host CI, o Termux possui APKs ARM32/ARM64 e loader stub comprovados, mas o HEAD do Vectras não chega ao runner e ainda não existe prova completa em dispositivo.
 
 ---
 
@@ -128,18 +128,20 @@ Claims de mmap por extent, janelas L1/L2 e lanes exigem medição em aparelho:
 
 ## BG-06: bootstrap ZIPs e loader.apk verificáveis
 
-**Status:** `IMPLEMENTED_UNPROVEN + BLOCKED_BY[FUNCTIONAL_CONTRACT]`
+**Status:** `STUB_PROVEN_CI + BLOCKED_BY[FUNCTIONAL_CONTRACT]`
 
 No `termux-app-rafacodephi`:
 
 - contrato corrigido para `:app:generateRafcodephiBootstraps`;
 - gerador padrão classificado como `BOOTSTRAP_BRIDGE_ONLY`;
-- módulo `:loader` produz APK stub sem código;
-- builds debug ARM32/ARM64/universal passam;
-- relatório ARM32 prova package, SDKs, ELF e presença `armeabi-v7a`;
-- a assinatura/gate final continua em correção operacional.
+- as lanes ARM32 padrão e NDK 29 estão verdes;
+- APKs `armeabi-v7a`, `arm64-v8a` e universal foram produzidos, assinados e publicados;
+- package `com.termux.rafacodephi`, minSdk 21, targetSdk 28 e bibliotecas ARM32 foram comprovados;
+- módulo `:loader` produz `loader.apk` de 7.965 bytes;
+- loader package `com.termux.rafacodephi.loader`, `hasCode=false`, assinatura v1/v2 e DEX limitado à classe `R` foram comprovados;
+- SHA-256 do loader: `e5bc3ca105a6b0b04afeaaa0d575ada2dafc4777549e5df92c3dd217c07fe24f`.
 
-Ainda faltam payload pinado, hashes de bootstrap, comportamento funcional, consentimento, rollback e testes instrumentados.
+Ainda faltam payload pinado, hashes de bootstrap real, comportamento de instalação, consentimento, rollback, atualização e testes instrumentados.
 
 ---
 
@@ -171,14 +173,15 @@ O PR #1052 implementa:
 - testes para espaços e metacaracteres;
 - validação de `qemu-exec.json` no consumidor;
 - exigência de `runtime.os=linux`, `execution_mode=proot`, libc permitida e ABI do aparelho;
+- detecção de musl/glibc na rootfs e exigência de igualdade com o artifact;
 - resolução de path relativa ao artifact root;
 - bloqueio de path traversal/absoluto;
-- verificação SHA-256 antes da execução.
+- verificação SHA-256 antes da execução;
+- rejeição fail-closed quando o manifesto existe e falha.
 
 Limite preservado:
 
 - wrappers opcionais `xterm -e bash -c`/`bash -c` seguem o caminho de compatibilidade;
-- compatibilidade da libc com a rootfs precisa de preflight adicional;
 - build unitário, assembleDebug e boot ainda não foram provados no HEAD.
 
 ---
@@ -206,8 +209,8 @@ Limite preservado:
 | Q2 packaging/contrato | sim | hashes, manifests e checker verdes | `PROVEN_CI_HOST` |
 | Q3 PRoot ARM64 | lane criada | compilação ARM64/musl em curso | `IN_PROGRESS` |
 | Q3 Android NDK | contrato definido | dependências/launcher ausentes | `BLOCKED` |
-| T1 bootstrap | contrato corrigido | build bridge observado | `PARTIAL` |
-| T2 loader | stub compilável | build debug passou; funcionalidade ausente | `STUB_PROVEN_BUILD_ONLY` |
+| T1 bootstrap | contrato corrigido | bridge e APK pipeline comprovados | `PROVEN_DOCUMENTAL_PARTIAL_RUNTIME` |
+| T2 loader | stub dedicado | workflow, artifact, hash e contrato verdes | `STUB_PROVEN_CI` |
 
 ---
 
@@ -215,9 +218,9 @@ Limite preservado:
 
 1. concluir artifact PRoot `linux-aarch64 + musl`;
 2. restaurar runners do Vectras e executar testes/build no PR #1052;
-3. fechar assinatura/gates ARM32 do Termux e publicar APKs/relatórios;
-4. importar artifact QEMU pinado no Vectras;
-5. validar libc da rootfs;
-6. executar ADB ARM64 e ARM32;
-7. preencher ledger/SBOM com hashes reais;
+3. importar artifact QEMU pinado no Vectras;
+4. validar rootfs/libc e instalação atômica;
+5. executar ADB ARM64 e ARM32;
+6. preencher ledger/SBOM com hashes reais;
+7. implementar contrato funcional do loader;
 8. auditar licenças por arquivo antes de distribuição.
