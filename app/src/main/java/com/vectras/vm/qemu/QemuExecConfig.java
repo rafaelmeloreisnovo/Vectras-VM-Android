@@ -1,18 +1,26 @@
 package com.vectras.vm.qemu;
 
 import android.app.Activity;
+import android.os.Build;
 import android.util.Log;
 
 import com.vectras.vm.AppConfig;
-import com.vectras.vm.utils.FileUtils;
 
 import org.json.JSONObject;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.util.Collections;
+import java.util.Locale;
 
 public final class QemuExecConfig {
     private static final String TAG = "QemuExecConfig";
     private static final String CONFIG_FILE_NAME = "qemu-exec.json";
+    private static final String REQUIRED_SOURCE_REPO = "rafaelmeloreisnovo/qemu_rafaelia";
+    private static final String REQUIRED_EXECUTION_MODE = "proot";
     public static final boolean ALLOW_QEMU_NAME_FALLBACK = false;
 
     private QemuExecConfig() {
@@ -37,7 +45,11 @@ public final class QemuExecConfig {
     public static QemuBinaryResolver.Resolution resolveBinaryStrict(Activity activity, String arch) {
         String fromConfig = resolveConfiguredBinary(activity, arch);
         if (fromConfig != null) {
-            return QemuBinaryResolver.Resolution.found(new File(fromConfig).getName(), fromConfig, java.util.Collections.singletonList(fromConfig));
+            return QemuBinaryResolver.Resolution.found(
+                    new File(fromConfig).getName(),
+                    fromConfig,
+                    Collections.singletonList(fromConfig)
+            );
         }
         return QemuBinaryResolver.resolveForArch(activity, arch, TAG);
     }
@@ -46,48 +58,162 @@ public final class QemuExecConfig {
         try {
             AppConfig.ensureStoragePaths(activity);
             File configFile = new File(AppConfig.maindirpath, CONFIG_FILE_NAME);
-            if (!configFile.exists()) {
+            if (!configFile.isFile()) {
                 return null;
             }
-
-            String content = FileUtils.readAFile(configFile.getAbsolutePath());
-            if (content == null || content.trim().isEmpty()) {
+            String hostAbi = primaryHostAbi();
+            if (hostAbi.isEmpty()) {
+                Log.w(TAG, "Cannot validate QEMU artifact: host ABI unavailable");
                 return null;
             }
-
-            JSONObject root = new JSONObject(content);
-            JSONObject binary = root.optJSONObject("binary");
-            if (binary == null) {
-                return null;
-            }
-
-            String normalizedArch = QemuBinaryResolver.normalizeArch(arch);
-            String key = normalizedArch.toLowerCase();
-            String path = binary.optString(key, "").trim();
-            if (path.isEmpty()) {
-                path = binary.optString("default", "").trim();
-            }
-            if (path.isEmpty()) {
-                return null;
-            }
-
-            File executable = new File(path);
-            if (!executable.exists()) {
-                Log.w(TAG, "Configured QEMU binary missing: " + path);
-                return null;
-            }
-            if (!executable.canExecute()) {
-                boolean chmodOk = executable.setExecutable(true, true);
-                if (!chmodOk) {
-                    Log.w(TAG, "Configured QEMU binary not executable and chmod failed: " + path);
-                    return null;
-                }
-            }
-            return executable.getAbsolutePath();
+            return resolveArtifactBinary(configFile, arch, hostAbi);
         } catch (Exception e) {
-            Log.w(TAG, "Invalid qemu-exec config. Falling back to runtime resolver.", e);
+            Log.w(TAG, "Rejected qemu-exec artifact contract; using strict runtime resolver.", e);
             return null;
         }
+    }
+
+    /**
+     * Resolves a binary from a producer artifact without trusting a free-form path.
+     * Package-private for deterministic contract tests.
+     */
+    static String resolveArtifactBinary(File configFile, String guestArch, String hostAbi) throws Exception {
+        if (configFile == null || !configFile.isFile()) {
+            throw new IllegalArgumentException("qemu-exec.json is missing");
+        }
+
+        JSONObject root = new JSONObject(readUtf8(configFile));
+        if (!REQUIRED_SOURCE_REPO.equals(root.optString("source_repo", "").trim())) {
+            throw new SecurityException("unexpected source_repo");
+        }
+        if (root.optString("source_commit", "").trim().isEmpty()) {
+            throw new SecurityException("source_commit is required");
+        }
+
+        JSONObject runtime = root.optJSONObject("runtime");
+        if (runtime == null) {
+            throw new SecurityException("runtime contract is required");
+        }
+        String runtimeOs = lower(runtime.optString("os", ""));
+        String runtimeArch = lower(runtime.optString("arch", ""));
+        String runtimeAbi = lower(runtime.optString("abi", ""));
+        String runtimeLibc = lower(runtime.optString("libc", ""));
+        String executionMode = lower(runtime.optString("execution_mode", ""));
+
+        if (!"linux".equals(runtimeOs)) {
+            throw new SecurityException("PRoot launcher requires runtime.os=linux");
+        }
+        if (!REQUIRED_EXECUTION_MODE.equals(executionMode)) {
+            throw new SecurityException("PRoot launcher rejects execution_mode=" + executionMode);
+        }
+        if (!("musl".equals(runtimeLibc) || "glibc".equals(runtimeLibc))) {
+            throw new SecurityException("PRoot launcher requires musl or glibc");
+        }
+        if (!runtimeAbi.equals(runtimeOs + "-" + runtimeArch)) {
+            throw new SecurityException("runtime.abi mismatch");
+        }
+
+        String expectedRuntimeArch = normalizeHostAbi(hostAbi);
+        if (expectedRuntimeArch.isEmpty() || !expectedRuntimeArch.equals(runtimeArch)) {
+            throw new SecurityException(
+                    "artifact runtime arch " + runtimeArch + " incompatible with host ABI " + hostAbi
+            );
+        }
+
+        JSONObject binaries = root.optJSONObject("binary");
+        JSONObject hashes = root.optJSONObject("sha256");
+        if (binaries == null || hashes == null) {
+            throw new SecurityException("binary and sha256 maps are required");
+        }
+
+        String guestKey = QemuBinaryResolver.normalizeArch(guestArch).toLowerCase(Locale.ROOT);
+        String relativePath = binaries.optString(guestKey, "").trim();
+        if (relativePath.isEmpty()) {
+            relativePath = binaries.optString("default", "").trim();
+        }
+        if (relativePath.isEmpty()) {
+            throw new IllegalArgumentException("guest binary is absent: " + guestKey);
+        }
+        if (new File(relativePath).isAbsolute()
+                || relativePath.contains("..")
+                || relativePath.indexOf('\\') >= 0) {
+            throw new SecurityException("binary path must be relative and traversal-free");
+        }
+
+        File artifactRoot = configFile.getParentFile().getCanonicalFile();
+        File executable = new File(artifactRoot, relativePath).getCanonicalFile();
+        String allowedPrefix = artifactRoot.getPath() + File.separator;
+        if (!executable.getPath().startsWith(allowedPrefix)) {
+            throw new SecurityException("binary escapes artifact root");
+        }
+        if (!executable.isFile()) {
+            throw new IllegalArgumentException("configured QEMU binary missing: " + relativePath);
+        }
+
+        String expectedSha256 = lower(hashes.optString(relativePath, ""));
+        if (!expectedSha256.matches("[0-9a-f]{64}")) {
+            throw new SecurityException("valid SHA-256 is required for " + relativePath);
+        }
+        String actualSha256 = sha256(executable);
+        if (!MessageDigest.isEqual(
+                expectedSha256.getBytes(StandardCharsets.US_ASCII),
+                actualSha256.getBytes(StandardCharsets.US_ASCII))) {
+            throw new SecurityException("SHA-256 mismatch for " + relativePath);
+        }
+
+        if (!executable.canExecute() && !executable.setExecutable(true, true)) {
+            throw new SecurityException("QEMU binary is not executable: " + relativePath);
+        }
+        return executable.getAbsolutePath();
+    }
+
+    static String normalizeHostAbi(String abi) {
+        String value = lower(abi);
+        if ("arm64-v8a".equals(value) || "aarch64".equals(value)) return "aarch64";
+        if ("armeabi-v7a".equals(value) || "armeabi".equals(value)
+                || "armv7".equals(value) || "arm".equals(value)) return "arm";
+        if ("x86_64".equals(value)) return "x86_64";
+        if ("x86".equals(value) || "i386".equals(value) || "i686".equals(value)) return "i386";
+        return "";
+    }
+
+    private static String primaryHostAbi() {
+        if (Build.SUPPORTED_ABIS == null || Build.SUPPORTED_ABIS.length == 0) {
+            return "";
+        }
+        return Build.SUPPORTED_ABIS[0] == null ? "" : Build.SUPPORTED_ABIS[0];
+    }
+
+    private static String readUtf8(File file) throws Exception {
+        try (FileInputStream input = new FileInputStream(file);
+             ByteArrayOutputStream output = new ByteArrayOutputStream()) {
+            byte[] buffer = new byte[8192];
+            int read;
+            while ((read = input.read(buffer)) != -1) {
+                output.write(buffer, 0, read);
+            }
+            return output.toString(StandardCharsets.UTF_8.name());
+        }
+    }
+
+    private static String sha256(File file) throws Exception {
+        MessageDigest digest = MessageDigest.getInstance("SHA-256");
+        try (FileInputStream input = new FileInputStream(file)) {
+            byte[] buffer = new byte[64 * 1024];
+            int read;
+            while ((read = input.read(buffer)) != -1) {
+                digest.update(buffer, 0, read);
+            }
+        }
+        StringBuilder hex = new StringBuilder(64);
+        for (byte value : digest.digest()) {
+            hex.append(String.format(Locale.US, "%02x", value & 0xff));
+        }
+        return hex.toString();
+    }
+
+    private static String lower(String value) {
+        return value == null ? "" : value.trim().toLowerCase(Locale.ROOT);
     }
 
     private static String fromConfigPath(String path) {
