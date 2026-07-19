@@ -31,44 +31,51 @@ public final class QemuExecConfig {
         if (strict.found) {
             return strict.fullPath;
         }
-        if (!ALLOW_QEMU_NAME_FALLBACK) {
-            return "";
-        }
-        String fromConfig = resolveConfiguredBinary(activity, arch);
-        if (fromConfig != null) {
-            return fromConfig;
-        }
-        QemuBinaryResolver.Resolution resolution = QemuBinaryResolver.resolveForArch(activity, arch, TAG);
-        return resolution.found ? fromConfigPath(resolution.fullPath) : QemuBinaryResolver.primaryBinaryForArch(arch);
+        return ALLOW_QEMU_NAME_FALLBACK
+                ? QemuBinaryResolver.primaryBinaryForArch(arch)
+                : "";
     }
 
     public static QemuBinaryResolver.Resolution resolveBinaryStrict(Activity activity, String arch) {
-        String fromConfig = resolveConfiguredBinary(activity, arch);
-        if (fromConfig != null) {
-            return QemuBinaryResolver.Resolution.found(
-                    new File(fromConfig).getName(),
-                    fromConfig,
-                    Collections.singletonList(fromConfig)
-            );
+        File configFile = configuredArtifactFile(activity);
+        if (configFile != null && configFile.isFile()) {
+            try {
+                String hostAbi = primaryHostAbi();
+                if (hostAbi.isEmpty()) {
+                    throw new SecurityException("host ABI unavailable");
+                }
+                File rootfs = new File(activity.getFilesDir(), "distro");
+                String rootfsLibc = detectRootfsLibc(rootfs);
+                String configured = resolveArtifactBinary(configFile, arch, hostAbi, rootfsLibc);
+                return QemuBinaryResolver.Resolution.found(
+                        new File(configured).getName(),
+                        configured,
+                        Collections.singletonList(configured)
+                );
+            } catch (Exception rejected) {
+                Log.e(TAG, "event=qemu_artifact_contract_rejected config="
+                        + configFile.getAbsolutePath(), rejected);
+                return QemuBinaryResolver.Resolution.notFound(
+                        "artifact-contract-rejected",
+                        Collections.singletonList(configFile.getAbsolutePath())
+                );
+            }
         }
+
+        // Legacy discovery is allowed only when no producer manifest exists.
+        // Once qemu-exec.json is present, any invalid field fails closed.
         return QemuBinaryResolver.resolveForArch(activity, arch, TAG);
     }
 
-    private static String resolveConfiguredBinary(Activity activity, String arch) {
+    private static File configuredArtifactFile(Activity activity) {
+        if (activity == null) {
+            return null;
+        }
         try {
             AppConfig.ensureStoragePaths(activity);
-            File configFile = new File(AppConfig.maindirpath, CONFIG_FILE_NAME);
-            if (!configFile.isFile()) {
-                return null;
-            }
-            String hostAbi = primaryHostAbi();
-            if (hostAbi.isEmpty()) {
-                Log.w(TAG, "Cannot validate QEMU artifact: host ABI unavailable");
-                return null;
-            }
-            return resolveArtifactBinary(configFile, arch, hostAbi);
+            return new File(AppConfig.maindirpath, CONFIG_FILE_NAME);
         } catch (Exception e) {
-            Log.w(TAG, "Rejected qemu-exec artifact contract; using strict runtime resolver.", e);
+            Log.w(TAG, "Unable to resolve qemu-exec.json path", e);
             return null;
         }
     }
@@ -77,7 +84,10 @@ public final class QemuExecConfig {
      * Resolves a binary from a producer artifact without trusting a free-form path.
      * Package-private for deterministic contract tests.
      */
-    static String resolveArtifactBinary(File configFile, String guestArch, String hostAbi) throws Exception {
+    static String resolveArtifactBinary(File configFile,
+                                        String guestArch,
+                                        String hostAbi,
+                                        String rootfsLibc) throws Exception {
         if (configFile == null || !configFile.isFile()) {
             throw new IllegalArgumentException("qemu-exec.json is missing");
         }
@@ -117,6 +127,16 @@ public final class QemuExecConfig {
         if (expectedRuntimeArch.isEmpty() || !expectedRuntimeArch.equals(runtimeArch)) {
             throw new SecurityException(
                     "artifact runtime arch " + runtimeArch + " incompatible with host ABI " + hostAbi
+            );
+        }
+
+        String detectedRootfsLibc = lower(rootfsLibc);
+        if (detectedRootfsLibc.isEmpty()) {
+            throw new SecurityException("rootfs libc could not be detected");
+        }
+        if (!runtimeLibc.equals(detectedRootfsLibc)) {
+            throw new SecurityException(
+                    "artifact libc " + runtimeLibc + " incompatible with rootfs libc " + detectedRootfsLibc
             );
         }
 
@@ -177,6 +197,47 @@ public final class QemuExecConfig {
         return "";
     }
 
+    static String detectRootfsLibc(File rootfs) {
+        if (rootfs == null || !rootfs.isDirectory()) {
+            return "";
+        }
+
+        if (new File(rootfs, "etc/alpine-release").isFile()
+                || hasAnyFile(rootfs,
+                "lib/ld-musl-aarch64.so.1",
+                "lib/ld-musl-armhf.so.1",
+                "lib/ld-musl-arm.so.1",
+                "lib/ld-musl-x86_64.so.1",
+                "lib/ld-musl-i386.so.1",
+                "usr/lib/libc.musl-aarch64.so.1",
+                "usr/lib/libc.musl-armhf.so.1",
+                "usr/lib/libc.musl-x86_64.so.1")) {
+            return "musl";
+        }
+
+        if (hasAnyFile(rootfs,
+                "lib64/ld-linux-x86-64.so.2",
+                "lib/x86_64-linux-gnu/ld-linux-x86-64.so.2",
+                "lib/ld-linux-aarch64.so.1",
+                "lib/aarch64-linux-gnu/ld-linux-aarch64.so.1",
+                "lib/ld-linux-armhf.so.3",
+                "lib/arm-linux-gnueabihf/ld-linux-armhf.so.3",
+                "usr/glibc-compat/lib/ld-linux-aarch64.so.1")) {
+            return "glibc";
+        }
+        return "";
+    }
+
+    private static boolean hasAnyFile(File rootfs, String... relativePaths) {
+        if (relativePaths == null) return false;
+        for (String relativePath : relativePaths) {
+            if (new File(rootfs, relativePath).isFile()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     private static String primaryHostAbi() {
         if (Build.SUPPORTED_ABIS == null || Build.SUPPORTED_ABIS.length == 0) {
             return "";
@@ -214,9 +275,5 @@ public final class QemuExecConfig {
 
     private static String lower(String value) {
         return value == null ? "" : value.trim().toLowerCase(Locale.ROOT);
-    }
-
-    private static String fromConfigPath(String path) {
-        return path == null ? "" : path;
     }
 }
