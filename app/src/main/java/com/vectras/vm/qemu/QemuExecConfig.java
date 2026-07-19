@@ -46,7 +46,8 @@ public final class QemuExecConfig {
                 }
                 File rootfs = new File(activity.getFilesDir(), "distro");
                 String rootfsLibc = detectRootfsLibc(rootfs);
-                String configured = resolveArtifactBinary(configFile, arch, hostAbi, rootfsLibc);
+                String rootfsArch = detectRootfsArch(rootfs);
+                String configured = resolveArtifactBinary(configFile, arch, hostAbi, rootfsLibc, rootfsArch);
                 return QemuBinaryResolver.Resolution.found(
                         new File(configured).getName(),
                         configured,
@@ -87,7 +88,8 @@ public final class QemuExecConfig {
     static String resolveArtifactBinary(File configFile,
                                         String guestArch,
                                         String hostAbi,
-                                        String rootfsLibc) throws Exception {
+                                        String rootfsLibc,
+                                        String rootfsArch) throws Exception {
         if (configFile == null || !configFile.isFile()) {
             throw new IllegalArgumentException("qemu-exec.json is missing");
         }
@@ -140,13 +142,27 @@ public final class QemuExecConfig {
             );
         }
 
+        // Validate rootfs loader arch against artifact arch so a musl-aarch64 rootfs
+        // cannot silently accept an artifact built for musl-arm (armhf) and vice-versa.
+        String detectedRootfsArch = lower(rootfsArch);
+        if (!detectedRootfsArch.isEmpty() && !runtimeArch.equals(detectedRootfsArch)) {
+            throw new SecurityException(
+                    "artifact arch " + runtimeArch + " incompatible with rootfs arch " + detectedRootfsArch
+            );
+        }
+
         JSONObject binaries = root.optJSONObject("binary");
         JSONObject hashes = root.optJSONObject("sha256");
         if (binaries == null || hashes == null) {
             throw new SecurityException("binary and sha256 maps are required");
         }
 
-        String guestKey = QemuBinaryResolver.normalizeArch(guestArch).toLowerCase(Locale.ROOT);
+        // Use normalizeHostAbi so the guest arch key matches qemu_rafaelia artifact naming
+        // ("aarch64" not "arm64", "arm" not "armeabi-v7a", "i386" not "x86").
+        String guestKey = normalizeHostAbi(guestArch);
+        if (guestKey.isEmpty()) {
+            guestKey = lower(guestArch);
+        }
         String relativePath = binaries.optString(guestKey, "").trim();
         if (relativePath.isEmpty()) {
             relativePath = binaries.optString("default", "").trim();
@@ -224,6 +240,47 @@ public final class QemuExecConfig {
                 "lib/arm-linux-gnueabihf/ld-linux-armhf.so.3",
                 "usr/glibc-compat/lib/ld-linux-aarch64.so.1")) {
             return "glibc";
+        }
+        return "";
+    }
+
+    /**
+     * Detects the CPU architecture of the rootfs by inspecting its dynamic loader paths.
+     * Returns the same arch tokens used in artifact manifests: "aarch64", "arm", "x86_64", "i386".
+     * Returns empty string when the rootfs directory is absent or the arch is indeterminate.
+     */
+    static String detectRootfsArch(File rootfs) {
+        if (rootfs == null || !rootfs.isDirectory()) {
+            return "";
+        }
+        if (hasAnyFile(rootfs,
+                "lib/ld-musl-aarch64.so.1",
+                "lib/ld-linux-aarch64.so.1",
+                "lib/aarch64-linux-gnu/ld-linux-aarch64.so.1",
+                "usr/glibc-compat/lib/ld-linux-aarch64.so.1",
+                "usr/lib/libc.musl-aarch64.so.1")) {
+            return "aarch64";
+        }
+        if (hasAnyFile(rootfs,
+                "lib/ld-musl-armhf.so.1",
+                "lib/ld-musl-arm.so.1",
+                "lib/ld-linux-armhf.so.3",
+                "lib/arm-linux-gnueabihf/ld-linux-armhf.so.3",
+                "usr/lib/libc.musl-armhf.so.1")) {
+            return "arm";
+        }
+        if (hasAnyFile(rootfs,
+                "lib/ld-musl-x86_64.so.1",
+                "lib64/ld-linux-x86-64.so.2",
+                "lib/x86_64-linux-gnu/ld-linux-x86-64.so.2",
+                "usr/lib/libc.musl-x86_64.so.1")) {
+            return "x86_64";
+        }
+        if (hasAnyFile(rootfs,
+                "lib/ld-musl-i386.so.1",
+                "lib/ld-linux.so.2",
+                "lib/i386-linux-gnu/ld-linux.so.2")) {
+            return "i386";
         }
         return "";
     }
