@@ -3,8 +3,6 @@
 
 Registro canônico dos gaps que impedem a promoção do Vectras VM.
 
-Este documento substitui `TOKEN_VAZIO` por estados verificáveis:
-
 ```text
 IMPLEMENTED_UNPROVEN
 BLOCKED_BY[motivo]
@@ -18,10 +16,17 @@ Uma alteração de código não é automaticamente build, artefato, instalação
 ## Estado atual: BETA_BLOCKED
 
 ```text
-código → build → artefato móvel → instalação → boot VM → teste → prova assinada
+código → build → artefato móvel → integração → instalação → boot VM → teste → prova assinada
 ```
 
-A cadeia ainda está aberta. O QEMU já possui prova de host CI, o Termux possui APKs ARM32/ARM64 e loader stub comprovados, mas o HEAD do Vectras não chega ao runner e ainda não existe prova completa em dispositivo.
+A cadeia avançou substancialmente:
+
+- QEMU host CI: comprovado;
+- QEMU PRoot ARM64/musl: artifact comprovado;
+- Termux ARM32/ARM64/universal: comprovado;
+- loader stub: comprovado;
+- Vectras HEAD: ainda sem runner/build atual;
+- dispositivo/ADB: ainda não comprovado.
 
 ---
 
@@ -29,12 +34,12 @@ A cadeia ainda está aberta. O QEMU já possui prova de host CI, o Termux possui
 
 **Status:** `BLOCKED_BY[GITHUB_ACTIONS_RUNNER_STARTUP]`
 
-Nos heads do PR #1052, os workflows `android-ci`, `host-ci`, `Shell-Loader Smoke`, `APK Wizard`, `audit-benchmark-contract`, `Validate Formula` e o orquestrador encerraram em falha antes de executar steps de compilação. Em `android-ci`, os jobs de resolução/gate falharam sem lista de steps e o job canônico foi pulado.
+Nos heads do PR #1052, os workflows encerraram antes de executar steps de compilação. Em `android-ci`, os jobs de resolução/gate falharam sem lista de steps e o job canônico foi pulado.
 
 Consequências:
 
 - não há log Java/Kotlin/C que atribua falha ao diff;
-- não há APK/AAB recente;
+- não há APK/AAB Vectras recente;
 - não há hash de artefato Vectras;
 - o estado não pode ser promovido nem rebaixado por inferência.
 
@@ -44,9 +49,9 @@ Consequências:
 
 ## BG-01: hashes reais no RELEASE_EVIDENCE_LEDGER
 
-**Status:** `BLOCKED_BY[CURRENT_GREEN_BUILD_REQUIRED]`
+**Status:** `BLOCKED_BY[CURRENT_VECTRAS_GREEN_BUILD_REQUIRED]`
 
-`docs/RELEASE_EVIDENCE_LEDGER.md` contém evidências negativas reais das execuções falhas e mantém o template separado. SHA-256 de APK/AAB, perfil ABI e assinatura continuam bloqueados até um build atual materializar os arquivos.
+O ledger já contém hashes reais dos componentes QEMU e Termux. Permanecem bloqueados apenas os hashes de APK/AAB do HEAD Vectras, assinatura e relatório ABI do app integrado.
 
 ---
 
@@ -60,9 +65,7 @@ Necessário:
 2. dispositivo ARM32, por exemplo Moto E7 Power;
 3. dispositivo ARM64;
 4. Android 10 e Android 14+;
-5. captura de logcat, instalação, launch e encerramento.
-
-O workflow `device-runtime-smoke.yml` continua com instalação/launch pendentes.
+5. instalação, launch, boot da VM, I/O, logcat e encerramento.
 
 ---
 
@@ -77,38 +80,55 @@ Segredos necessários:
 - `VECTRAS_RELEASE_KEY_PASSWORD`;
 - `VECTRAS_RELEASE_STORE_PASSWORD`.
 
-Segredos nunca devem ser commitados. Release unsigned/debug não é release oficial.
+Release unsigned/debug não é release oficial.
 
 ---
 
-## BG-04: artifact móvel e smoke de boot de VM
+## BG-04: integração e smoke do artifact QEMU móvel
 
-**Status:** `BLOCKED_BY[PROOT_ARM64_ARTIFACT_AND_DEVICE_REQUIRED]`
+**Status:** `BLOCKED_BY[ARTIFACT_IMPORT_AND_DEVICE_REQUIRED]`
 
-A prova exige:
+O produtor `qemu_rafaelia` comprovou no run `29696118677`:
 
 ```text
-QEMU artifact móvel validado
-→ importação pinada
-→ APK integrado
-→ instalação ADB
-→ VM criada
-→ firmware carregado
-→ guest iniciado
-→ display/rede observados
-→ shutdown limpo
-→ logs e hashes registrados
+runtime.os = linux
+runtime.arch = aarch64
+runtime.abi = linux-aarch64
+runtime.libc = musl
+runtime.execution_mode = proot
 ```
 
-Estado do produtor `qemu_rafaelia`:
+Provas:
 
-- três guest targets compilados e empacotados em host Linux x86_64;
-- artifact host CI e manifestos publicados com sucesso;
-- checker de runtime/ABI/libc/modo verde;
-- lane PRoot `linux-aarch64 + musl` criada e em compilação;
-- lane Android/Bionic separada por contrato, pois exige launcher nativo sem PRoot.
+- runner ARM64 nativo;
+- Alpine 3.22 ARM64/musl;
+- três guest targets compilados;
+- ELF AArch64 com `/lib/ld-musl-aarch64.so.1`;
+- SHA256SUMS e checker verdes;
+- artifact e manifestos publicados.
 
-O artifact `host_ci` prova Q1/Q2, mas não pode ser instalado no aparelho.
+Hashes:
+
+```text
+artifact ZIP = e66998db55f77befcf61d1734b06391fcc26e5dd04a8d7bc14764de6a2d840b6
+inner tar.gz = e7af6e44304d6ad26463f3d040dc8c5f6a063d8ba247a7af7d8c47415a290fe3
+qemu-system-aarch64 = 237e9674562320a9be4a345d6366bd4b12d37f55448ea66abb1ea4e75662786c
+qemu-system-i386 = 70a11470fe5a1791261725db47a887ce54159700eb56f2e39e8f89bac550c859
+qemu-system-x86_64 = f5632cc9b1264b4ce42ad9675ed83546c2fc41642293145b617162f247c9c654
+```
+
+A rootfs canônica instalada pelo caminho interno do app usa o asset `alpine19` em `files/distro`. Portanto, `musl + proot` é a classe coerente com esse fluxo. O wizard externo ainda aponta para tarballs históricos sem SHA pinado e permanece fonte alternativa não canônica.
+
+Faltam:
+
+```text
+importação atômica
+→ qemu-exec.json no path controlado
+→ validação consumer SHA/runtime/libc
+→ build Vectras
+→ ADB
+→ boot/shutdown
+```
 
 ---
 
@@ -116,40 +136,31 @@ O artifact `host_ci` prova Q1/Q2, mas não pode ser instalado no aparelho.
 
 **Status:** `BLOCKED_BY[DEVICE_EXECUTION_REQUIRED]`
 
-Claims de mmap por extent, janelas L1/L2 e lanes exigem medição em aparelho:
-
-- page faults cold/warm;
-- RSS/GC;
-- throughput por lane;
-- ARM32 versus ARM64;
-- mmap extent versus leitura convencional.
+Exigem aparelho real: page faults, RSS, throughput por lane, ARM32/ARM64 e mmap por extent.
 
 ---
 
-## BG-06: bootstrap ZIPs e loader.apk verificáveis
+## BG-06: bootstrap ZIPs e loader.apk
 
 **Status:** `STUB_PROVEN_CI + BLOCKED_BY[FUNCTIONAL_CONTRACT]`
 
 No `termux-app-rafacodephi`:
 
-- contrato corrigido para `:app:generateRafcodephiBootstraps`;
-- gerador padrão classificado como `BOOTSTRAP_BRIDGE_ONLY`;
-- as lanes ARM32 padrão e NDK 29 estão verdes;
-- APKs `armeabi-v7a`, `arm64-v8a` e universal foram produzidos, assinados e publicados;
-- package `com.termux.rafacodephi`, minSdk 21, targetSdk 28 e bibliotecas ARM32 foram comprovados;
-- módulo `:loader` produz `loader.apk` de 7.965 bytes;
-- loader package `com.termux.rafacodephi.loader`, `hasCode=false`, assinatura v1/v2 e DEX limitado à classe `R` foram comprovados;
+- ARM32 padrão e NDK 29 verdes;
+- APKs ARM32, ARM64 e universal publicados;
+- loader stub de 7.965 bytes comprovado;
+- package, SDK, `hasCode=false`, assinatura e DEX limitado à classe gerada `R` comprovados;
 - SHA-256 do loader: `e5bc3ca105a6b0b04afeaaa0d575ada2dafc4777549e5df92c3dd217c07fe24f`.
 
-Ainda faltam payload pinado, hashes de bootstrap real, comportamento de instalação, consentimento, rollback, atualização e testes instrumentados.
+Ainda faltam payload funcional, hashes de bootstrap real, consentimento, rollback, atualização e testes instrumentados.
 
 ---
 
 ## BG-07: SBOM com hashes reais
 
-**Status:** `BLOCKED_BY[CURRENT_GREEN_BUILD_REQUIRED]`
+**Status:** `PARTIAL + BLOCKED_BY[CURRENT_VECTRAS_BUILD]`
 
-A estrutura SPDX 2.3 existe. Hashes de APK, blobs e bibliotecas só podem ser preenchidos após materialização do build canônico.
+A estrutura SPDX 2.3 existe. Os hashes dos componentes externos já são conhecidos; os hashes do APK e blobs efetivamente integrados ao Vectras dependem do build atual.
 
 ---
 
@@ -157,7 +168,7 @@ A estrutura SPDX 2.3 existe. Hashes de APK, blobs e bibliotecas só podem ser pr
 
 **Status:** `BLOCKED_BY[AUDIT_REQUIRED]`
 
-Se incluída no APK, requer origem/upstream, licença SPDX, recipe, commit e SHA-256. Sem isso, permanece em quarentena para distribuição pública.
+Se incluída, requer origem, licença SPDX, recipe, commit e SHA-256.
 
 ---
 
@@ -167,22 +178,16 @@ Se incluída no APK, requer origem/upstream, licença SPDX, recipe, commit e SHA
 
 O PR #1052 implementa:
 
-- argv direto para `qemu-system-*` standalone;
+- argv direto para QEMU standalone;
 - PRoot sem concatenação de argumentos;
-- preparação fixa de PulseAudio sem texto externo;
-- testes para espaços e metacaracteres;
-- validação de `qemu-exec.json` no consumidor;
-- exigência de `runtime.os=linux`, `execution_mode=proot`, libc permitida e ABI do aparelho;
-- detecção de musl/glibc na rootfs e exigência de igualdade com o artifact;
-- resolução de path relativa ao artifact root;
-- bloqueio de path traversal/absoluto;
-- verificação SHA-256 antes da execução;
+- `qemu-exec.json` runtime-aware;
+- ABI do aparelho;
+- detecção da libc da rootfs;
+- path confinado ao artifact root;
+- SHA-256 antes da execução;
 - rejeição fail-closed quando o manifesto existe e falha.
 
-Limite preservado:
-
-- wrappers opcionais `xterm -e bash -c`/`bash -c` seguem o caminho de compatibilidade;
-- build unitário, assembleDebug e boot ainda não foram provados no HEAD.
+O produtor e a classe de rootfs agora são coerentes; falta build do consumidor e prova ADB.
 
 ---
 
@@ -190,7 +195,7 @@ Limite preservado:
 
 **Status:** `BLOCKED_BY[FILE_LEVEL_LICENSE_AUDIT]`
 
-`legal/LEGAL_SCOPE_MAP.yaml` formaliza a quarentena, mas não resolve eventual incompatibilidade. É necessário separar por arquivo código derivado GPLv2, código autoral independente, documentação comercial e artefatos que não podem ser combinados.
+O mapa de quarentena existe, mas a compatibilidade de distribuição deve ser resolvida por arquivo e artifact.
 
 ---
 
@@ -198,17 +203,17 @@ Limite preservado:
 
 | Gap | Código | Prova atual | Estado |
 |---|---:|---:|---|
-| G3 SBOM | sim | estrutura somente | `IMPLEMENTED_UNPROVEN` |
+| G3 SBOM | sim | estrutura + hashes externos | `PARTIAL` |
 | G4 JNI Termux | sim | sem build Vectras atual | `IMPLEMENTED_UNPROVEN` |
 | G5 ZIPRAF | sim | testes adicionados; sem dispositivo | `IMPLEMENTED_UNPROVEN` |
 | G7 PROJECT_STATE | sim | documental | `PROVEN_DOCUMENTAL` |
 | G8 mover fórmulas | sim | path corrigido | `PROVEN_DOCUMENTAL` |
-| G9 argv + artifact gate | sim, caminho PRoot standalone | sem CI Vectras/ADB | `IMPLEMENTED_UNPROVEN` |
+| G9 argv + artifact gate | sim | produtor móvel verde; consumidor sem CI/ADB | `IMPLEMENTED_UNPROVEN` |
 | G10 licenças | mapa/quarentena | auditoria incompleta | `PARTIAL` |
 | Q1 binários QEMU | sim | três targets verdes no host | `PROVEN_CI_HOST` |
 | Q2 packaging/contrato | sim | hashes, manifests e checker verdes | `PROVEN_CI_HOST` |
-| Q3 PRoot ARM64 | lane criada | compilação ARM64/musl em curso | `IN_PROGRESS` |
-| Q3 Android NDK | contrato definido | dependências/launcher ausentes | `BLOCKED` |
+| Q3 PRoot ARM64 | sim | artifact AArch64/musl/proot verde | `PROVEN_CI_ARTIFACT` |
+| Q3 Android NDK | contrato definido | dependências/launcher ausentes | `BLOCKED_OPTIONAL_PATH` |
 | T1 bootstrap | contrato corrigido | bridge e APK pipeline comprovados | `PROVEN_DOCUMENTAL_PARTIAL_RUNTIME` |
 | T2 loader | stub dedicado | workflow, artifact, hash e contrato verdes | `STUB_PROVEN_CI` |
 
@@ -216,11 +221,10 @@ Limite preservado:
 
 ## Próxima ordem operacional
 
-1. concluir artifact PRoot `linux-aarch64 + musl`;
+1. importar atomicamente o artifact QEMU PRoot ARM64 no Vectras;
 2. restaurar runners do Vectras e executar testes/build no PR #1052;
-3. importar artifact QEMU pinado no Vectras;
-4. validar rootfs/libc e instalação atômica;
-5. executar ADB ARM64 e ARM32;
-6. preencher ledger/SBOM com hashes reais;
-7. implementar contrato funcional do loader;
-8. auditar licenças por arquivo antes de distribuição.
+3. executar ADB ARM64 com boot/shutdown de VM;
+4. executar ADB ARM32 para o app/Termux e definir artifact QEMU ARM32 se necessário;
+5. preencher ledger/SBOM do APK integrado;
+6. implementar contrato funcional do loader;
+7. auditar licenças por arquivo antes de distribuição.
