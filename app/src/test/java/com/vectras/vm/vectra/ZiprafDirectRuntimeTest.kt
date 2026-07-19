@@ -3,6 +3,7 @@ package com.vectras.vm.vectra
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
+import org.junit.Assert.fail
 import org.junit.Test
 import java.io.File
 import java.io.RandomAccessFile
@@ -32,27 +33,37 @@ class ZiprafDirectRuntimeTest {
     }
 
     @Test
-    fun localHeaderParser_derivesExtent_andVerifiesCrc32() {
-        val file = File.createTempFile("zipraf-entry", ".zip")
+    fun archiveValidator_crossChecksCentralDirectory_andOpensRuntime() {
+        val file = File.createTempFile("zipraf-archive", ".zip")
         try {
             val payload = "RAFAELIA-ZIPRAF".toByteArray()
-            writeStoredEntry(file, "runtime/core.bin", payload)
+            writeArchive(file, listOf(TestEntry("runtime/core.bin", payload)))
 
-            val entry = ZiprafStoredEntryParser.parse(file, expectedName = "runtime/core.bin")
-            assertEquals("runtime/core.bin", entry.name)
+            val entry = ZiprafArchiveValidator.parseStoredEntry(file, "runtime/core.bin")
+            assertEquals(ZiprafValidationLevel.CENTRAL_DIRECTORY, entry.validationLevel)
             assertEquals(payload.size.toLong(), entry.extent.payloadSize)
-            assertEquals(
-                30L + "runtime/core.bin".toByteArray().size,
-                entry.extent.payloadOffset
-            )
 
-            ZiprafDirectRuntime(file, entry.extent).use { runtime ->
-                assertTrue(runtime.verifyCrc32())
+            ZiprafDirectRuntime.openValidated(file, "runtime/core.bin").use { runtime ->
                 val window = runtime.window(0, ZiprafMemoryStage.BUFFER)
                 val actual = ByteArray(window.length)
                 window.bytes.get(actual)
                 assertTrue(payload.contentEquals(actual))
+                assertTrue(runtime.verifyCrc32())
             }
+        } finally {
+            file.delete()
+        }
+    }
+
+    @Test
+    fun localHeaderParser_remainsAvailable_asLowLevelBoundary() {
+        val file = File.createTempFile("zipraf-local", ".bin")
+        try {
+            val payload = byteArrayOf(7, 8, 9)
+            writeLocalRecordOnly(file, TestEntry("payload.bin", payload))
+            val entry = ZiprafStoredEntryParser.parse(file, expectedName = "payload.bin")
+            assertEquals(ZiprafValidationLevel.LOCAL_HEADER, entry.validationLevel)
+            assertEquals(payload.size.toLong(), entry.extent.payloadSize)
         } finally {
             file.delete()
         }
@@ -62,8 +73,8 @@ class ZiprafDirectRuntimeTest {
     fun crcMismatch_isDetected_afterPayloadMutation() {
         val file = File.createTempFile("zipraf-crc", ".zip")
         try {
-            writeStoredEntry(file, "payload.bin", byteArrayOf(1, 2, 3, 4))
-            val entry = ZiprafStoredEntryParser.parse(file)
+            writeArchive(file, listOf(TestEntry("payload.bin", byteArrayOf(1, 2, 3, 4))))
+            val entry = ZiprafArchiveValidator.parseStoredEntry(file, "payload.bin")
 
             RandomAccessFile(file, "rw").use { randomAccess ->
                 randomAccess.seek(entry.extent.payloadOffset)
@@ -73,69 +84,201 @@ class ZiprafDirectRuntimeTest {
             ZiprafDirectRuntime(file, entry.extent).use { runtime ->
                 assertFalse(runtime.verifyCrc32())
             }
+            expectFailure<IllegalArgumentException> {
+                ZiprafDirectRuntime.openValidated(file, "payload.bin").close()
+            }
         } finally {
             file.delete()
         }
     }
 
-    @Test(expected = IllegalArgumentException::class)
+    @Test
+    fun centralDirectoryCrcMismatch_isRejected() {
+        val file = File.createTempFile("zipraf-central-crc", ".zip")
+        try {
+            val payload = byteArrayOf(1, 2, 3)
+            val actualCrc = crc32(payload)
+            writeArchive(
+                file,
+                listOf(TestEntry("payload.bin", payload, centralCrc = actualCrc xor 1L))
+            )
+            expectFailure<IllegalArgumentException> {
+                ZiprafArchiveValidator.parseStoredEntry(file, "payload.bin")
+            }
+        } finally {
+            file.delete()
+        }
+    }
+
+    @Test
+    fun centralDirectorySizeMismatch_isRejected() {
+        val file = File.createTempFile("zipraf-central-size", ".zip")
+        try {
+            writeArchive(
+                file,
+                listOf(TestEntry("payload.bin", byteArrayOf(1, 2, 3), centralSize = 2))
+            )
+            expectFailure<IllegalArgumentException> {
+                ZiprafArchiveValidator.parseStoredEntry(file, "payload.bin")
+            }
+        } finally {
+            file.delete()
+        }
+    }
+
+    @Test
+    fun duplicateCentralDirectoryName_isRejected() {
+        val file = File.createTempFile("zipraf-duplicate", ".zip")
+        try {
+            writeArchive(
+                file,
+                listOf(
+                    TestEntry("same.bin", byteArrayOf(1)),
+                    TestEntry("same.bin", byteArrayOf(2))
+                )
+            )
+            expectFailure<IllegalArgumentException> {
+                ZiprafArchiveValidator.parseStoredEntry(file, "same.bin")
+            }
+        } finally {
+            file.delete()
+        }
+    }
+
+    @Test
+    fun expectedName_isRequired_whenArchiveHasMultipleEntries() {
+        val file = File.createTempFile("zipraf-multiple", ".zip")
+        try {
+            writeArchive(
+                file,
+                listOf(
+                    TestEntry("a.bin", byteArrayOf(1)),
+                    TestEntry("b.bin", byteArrayOf(2))
+                )
+            )
+            expectFailure<IllegalArgumentException> {
+                ZiprafArchiveValidator.parseStoredEntry(file)
+            }
+        } finally {
+            file.delete()
+        }
+    }
+
+    @Test
+    fun missingEntry_isRejected() {
+        val file = File.createTempFile("zipraf-missing", ".zip")
+        try {
+            writeArchive(file, listOf(TestEntry("present.bin", byteArrayOf(1))))
+            expectFailure<IllegalArgumentException> {
+                ZiprafArchiveValidator.parseStoredEntry(file, "missing.bin")
+            }
+        } finally {
+            file.delete()
+        }
+    }
+
+    @Test
+    fun multiDiskArchive_isRejected() {
+        val file = File.createTempFile("zipraf-multidisk", ".zip")
+        try {
+            writeArchive(
+                file,
+                listOf(TestEntry("payload.bin", byteArrayOf(1))),
+                eocdDiskNumber = 1
+            )
+            expectFailure<IllegalArgumentException> {
+                ZiprafArchiveValidator.parseStoredEntry(file, "payload.bin")
+            }
+        } finally {
+            file.delete()
+        }
+    }
+
+    @Test
     fun dataDescriptorEntry_isRejected() {
         val file = File.createTempFile("zipraf-descriptor", ".zip")
         try {
-            writeStoredEntry(
-                file = file,
-                name = "payload.bin",
-                payload = byteArrayOf(1),
-                flags = FLAG_UTF8 or FLAG_DATA_DESCRIPTOR
+            writeArchive(
+                file,
+                listOf(
+                    TestEntry(
+                        name = "payload.bin",
+                        payload = byteArrayOf(1),
+                        flags = FLAG_UTF8 or FLAG_DATA_DESCRIPTOR
+                    )
+                )
             )
-            ZiprafStoredEntryParser.parse(file)
+            expectFailure<IllegalArgumentException> {
+                ZiprafArchiveValidator.parseStoredEntry(file, "payload.bin")
+            }
         } finally {
             file.delete()
         }
     }
 
-    @Test(expected = IllegalArgumentException::class)
+    @Test
     fun traversalEntryName_isRejected() {
         val file = File.createTempFile("zipraf-traversal", ".zip")
         try {
-            writeStoredEntry(file, "../payload.bin", byteArrayOf(1))
-            ZiprafStoredEntryParser.parse(file)
+            writeArchive(file, listOf(TestEntry("../payload.bin", byteArrayOf(1))))
+            expectFailure<IllegalArgumentException> {
+                ZiprafArchiveValidator.parseStoredEntry(file, "../payload.bin")
+            }
         } finally {
             file.delete()
         }
     }
 
-    @Test(expected = IllegalArgumentException::class)
-    fun truncatedPayload_isRejected() {
-        val file = File.createTempFile("zipraf-truncated", ".zip")
+    @Test
+    fun truncatedLocalPayload_isRejected() {
+        val file = File.createTempFile("zipraf-truncated", ".bin")
         try {
-            writeStoredEntry(file, "payload.bin", byteArrayOf(1, 2, 3, 4))
+            writeLocalRecordOnly(file, TestEntry("payload.bin", byteArrayOf(1, 2, 3, 4)))
             RandomAccessFile(file, "rw").use { randomAccess ->
                 randomAccess.setLength(randomAccess.length() - 1)
             }
-            ZiprafStoredEntryParser.parse(file)
+            expectFailure<IllegalArgumentException> {
+                ZiprafStoredEntryParser.parse(file)
+            }
         } finally {
             file.delete()
         }
     }
 
-    @Test(expected = IllegalArgumentException::class)
+    @Test
+    fun missingCentralDirectory_isRejected() {
+        val file = File.createTempFile("zipraf-no-central", ".bin")
+        try {
+            writeLocalRecordOnly(file, TestEntry("payload.bin", byteArrayOf(1)))
+            expectFailure<IllegalArgumentException> {
+                ZiprafArchiveValidator.parseStoredEntry(file, "payload.bin")
+            }
+        } finally {
+            file.delete()
+        }
+    }
+
+    @Test
     fun zeroLengthExtent_isRejected() {
         val file = File.createTempFile("zipraf-empty", ".bin")
         try {
             file.writeBytes(byteArrayOf(1))
-            ZiprafDirectRuntime(file, ZiprafStoredExtent(0, 0)).close()
+            expectFailure<IllegalArgumentException> {
+                ZiprafDirectRuntime(file, ZiprafStoredExtent(0, 0)).close()
+            }
         } finally {
             file.delete()
         }
     }
 
-    @Test(expected = IllegalArgumentException::class)
+    @Test
     fun nonStoreMethod_isRejected() {
         val file = File.createTempFile("zipraf-deflate", ".bin")
         try {
             file.writeBytes(ByteArray(64))
-            ZiprafDirectRuntime(file, ZiprafStoredExtent(0, 64, 8)).close()
+            expectFailure<IllegalArgumentException> {
+                ZiprafDirectRuntime(file, ZiprafStoredExtent(0, 64, 8)).close()
+            }
         } finally {
             file.delete()
         }
@@ -149,36 +292,115 @@ class ZiprafDirectRuntimeTest {
         assertTrue((result and mask) == (fixed and mask))
     }
 
-    private fun writeStoredEntry(
-        file: File,
-        name: String,
-        payload: ByteArray,
-        flags: Int = FLAG_UTF8
-    ) {
-        val nameBytes = name.toByteArray(Charsets.UTF_8)
-        val crc = CRC32().apply { update(payload) }.value
-        val output = ByteBuffer.allocate(30 + nameBytes.size + payload.size)
-            .order(ByteOrder.LITTLE_ENDIAN)
+    private data class TestEntry(
+        val name: String,
+        val payload: ByteArray,
+        val flags: Int = FLAG_UTF8,
+        val localCrc: Long = crc32(payload),
+        val centralCrc: Long = localCrc,
+        val centralSize: Int = payload.size
+    )
 
-        output.putInt(LOCAL_FILE_HEADER_SIGNATURE)
-        output.putShort(20.toShort())
-        output.putShort(flags.toShort())
-        output.putShort(ZiprafStoredExtent.STORE_METHOD.toShort())
-        output.putShort(0.toShort())
-        output.putShort(0.toShort())
-        output.putInt(crc.toInt())
-        output.putInt(payload.size)
-        output.putInt(payload.size)
-        output.putShort(nameBytes.size.toShort())
-        output.putShort(0.toShort())
-        output.put(nameBytes)
-        output.put(payload)
+    private fun writeLocalRecordOnly(file: File, entry: TestEntry) {
+        val nameBytes = entry.name.toByteArray(Charsets.UTF_8)
+        val output = ByteBuffer.allocate(LOCAL_HEADER_SIZE + nameBytes.size + entry.payload.size)
+            .order(ByteOrder.LITTLE_ENDIAN)
+        writeLocalHeader(output, entry, nameBytes)
+        output.put(entry.payload)
         file.writeBytes(output.array())
     }
 
+    private fun writeArchive(
+        file: File,
+        entries: List<TestEntry>,
+        eocdDiskNumber: Int = 0
+    ) {
+        val totalSize = entries.sumOf {
+            LOCAL_HEADER_SIZE + it.name.toByteArray(Charsets.UTF_8).size + it.payload.size +
+                CENTRAL_HEADER_SIZE + it.name.toByteArray(Charsets.UTF_8).size
+        } + EOCD_SIZE
+        val output = ByteBuffer.allocate(totalSize).order(ByteOrder.LITTLE_ENDIAN)
+        val localOffsets = ArrayList<Int>(entries.size)
+
+        entries.forEach { entry ->
+            val nameBytes = entry.name.toByteArray(Charsets.UTF_8)
+            localOffsets += output.position()
+            writeLocalHeader(output, entry, nameBytes)
+            output.put(entry.payload)
+        }
+
+        val centralOffset = output.position()
+        entries.forEachIndexed { index, entry ->
+            val nameBytes = entry.name.toByteArray(Charsets.UTF_8)
+            output.putInt(CENTRAL_SIGNATURE)
+            output.putShort(20)
+            output.putShort(20)
+            output.putShort(entry.flags.toShort())
+            output.putShort(ZiprafStoredExtent.STORE_METHOD.toShort())
+            output.putShort(0)
+            output.putShort(0)
+            output.putInt(entry.centralCrc.toInt())
+            output.putInt(entry.centralSize)
+            output.putInt(entry.centralSize)
+            output.putShort(nameBytes.size.toShort())
+            output.putShort(0)
+            output.putShort(0)
+            output.putShort(0)
+            output.putShort(0)
+            output.putInt(0)
+            output.putInt(localOffsets[index])
+            output.put(nameBytes)
+        }
+        val centralSize = output.position() - centralOffset
+
+        output.putInt(EOCD_SIGNATURE)
+        output.putShort(eocdDiskNumber.toShort())
+        output.putShort(0)
+        output.putShort(entries.size.toShort())
+        output.putShort(entries.size.toShort())
+        output.putInt(centralSize)
+        output.putInt(centralOffset)
+        output.putShort(0)
+        file.writeBytes(output.array())
+    }
+
+    private fun writeLocalHeader(output: ByteBuffer, entry: TestEntry, nameBytes: ByteArray) {
+        output.putInt(LOCAL_SIGNATURE)
+        output.putShort(20)
+        output.putShort(entry.flags.toShort())
+        output.putShort(ZiprafStoredExtent.STORE_METHOD.toShort())
+        output.putShort(0)
+        output.putShort(0)
+        output.putInt(entry.localCrc.toInt())
+        output.putInt(entry.payload.size)
+        output.putInt(entry.payload.size)
+        output.putShort(nameBytes.size.toShort())
+        output.putShort(0)
+        output.put(nameBytes)
+    }
+
+    private inline fun <reified T : Throwable> expectFailure(block: () -> Unit) {
+        try {
+            block()
+            fail("Expected ${T::class.java.simpleName}")
+        } catch (failure: Throwable) {
+            assertTrue(
+                "Expected ${T::class.java.name}, got ${failure::class.java.name}",
+                failure is T
+            )
+        }
+    }
+
     companion object {
-        private const val LOCAL_FILE_HEADER_SIGNATURE = 0x04034b50
+        private const val LOCAL_SIGNATURE = 0x04034b50
+        private const val CENTRAL_SIGNATURE = 0x02014b50
+        private const val EOCD_SIGNATURE = 0x06054b50
+        private const val LOCAL_HEADER_SIZE = 30
+        private const val CENTRAL_HEADER_SIZE = 46
+        private const val EOCD_SIZE = 22
         private const val FLAG_DATA_DESCRIPTOR = 1 shl 3
         private const val FLAG_UTF8 = 1 shl 11
+
+        private fun crc32(payload: ByteArray): Long = CRC32().apply { update(payload) }.value
     }
 }
