@@ -1,0 +1,80 @@
+{
+  "schema_version": "1.0.0",
+  "batch_id": "VECTRA_ARTIFACT_PROMOTION_BATCH_001",
+  "generated_at": "2026-07-20",
+  "repository": "rafaelmeloreisnovo/Vectras-VM-Android",
+  "source_ref": "agent/vectra-artifact-promotion-batch1-20260720",
+  "principle": "identity and adapter proof do not imply runtime proof",
+  "claim_allowed": false,
+  "artifacts": [
+    {
+      "id": "ART_LOWFALA_MONOLITH",
+      "source_path": "Incluir/compiladorlowFala.txt",
+      "expected_git_blob_sha": "c05847c7b05f4657a156c131e2a43322aeec2ec0",
+      "required_markers": [
+        "FALA→FONEMA→TOKEN→AST→BYTECODE→ASM→VM→OUTPUT",
+        "seed_S01_V1_phoneme_manifold"
+      ],
+      "adapter_paths": [
+        "tools/compilerlowfala/extract_seeds.py",
+        "tools/compilerlowfala/README.md"
+      ],
+      "promotion_state": "ADAPTER_INTEGRATED_UNEXECUTED",
+      "automatic_move_allowed": false,
+      "claim_allowed": false,
+      "boundary": "The monolith becomes deterministically indexable and extractable; it is not yet an APK compiler runtime."
+    },
+    {
+      "id": "ART_TBROWSER_LOCAL",
+      "source_path": "Incluir/vectras_bbs.c",
+      "expected_git_blob_sha": "567539703638ecedcb943902d1362cf266bc63a4",
+      "required_markers": [
+        "static const Page pages[]",
+        "rmr://home",
+        "static void browser_run"
+      ],
+      "adapter_paths": [
+        "docs/maps/VECTRA_ARTIFACT_PROMOTION_BATCH_001.md"
+      ],
+      "promotion_state": "REGISTERED_LOCAL_RENDERER",
+      "automatic_move_allowed": false,
+      "claim_allowed": false,
+      "boundary": "Hosted C renderer over static rmr:// pages; not an ASM browser, HTML engine, or network client."
+    },
+    {
+      "id": "ART_NET_RAW_HTTP",
+      "source_path": "conjunto_de_conceitos/src/net.c",
+      "expected_git_blob_sha": "abc977877aebd180a0480e0cc3929f7d5cf2e2cf",
+      "required_markers": [
+        "HTTP/1.0 GET cru",
+        "cdc_http_get_ip",
+        "https:// (TLS) NAO e suportado"
+      ],
+      "adapter_paths": [
+        "docs/maps/VECTRA_ARTIFACT_PROMOTION_BATCH_001.md"
+      ],
+      "promotion_state": "REGISTERED_CODEGEN_UNPROVEN_RUNTIME",
+      "automatic_move_allowed": false,
+      "claim_allowed": false,
+      "boundary": "Raw HTTP/DNS source is present; ARM runtime, egress, TLS 1.2 and TLS 1.3 remain unproven or absent."
+    },
+    {
+      "id": "ART_DEX_ELF_AUDITOR",
+      "source_path": "tools/audit_vectra_capabilities.py",
+      "expected_git_blob_sha": "74c1b2720d9b849df723df0dc0bce6f9950a0bcb",
+      "required_markers": [
+        "def parse_dex_header",
+        "def parse_elf_header",
+        "def inspect_apk"
+      ],
+      "adapter_paths": [
+        "configs/vectra_capability_contract.json",
+        "tools/run_vectra_capability_gate.sh"
+      ],
+      "promotion_state": "GATE_IMPLEMENTED_AWAITS_ARTIFACT",
+      "automatic_move_allowed": false,
+      "claim_allowed": false,
+      "boundary": "Header and ABI gate exists; promotion requires a real APK and generated receipt."
+    }
+  ]
+}
