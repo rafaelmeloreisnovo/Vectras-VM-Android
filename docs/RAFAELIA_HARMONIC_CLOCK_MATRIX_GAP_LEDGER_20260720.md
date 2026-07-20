@@ -8,7 +8,7 @@
 
 ```text
 P0 = 8
-P1 = 8
+P1 = 13
 P2 = 5
 closed = 0
 claim_allowed = false
@@ -241,6 +241,36 @@ Hash, snapshot, barreira e BitGhost têm custo não medido.
 ### HC-P1-08 — Falta ligação com sensores/Conversation Chunks
 
 A máquina ainda não recebe de modo canônico áudio, toque, acelerômetro, texto e tempo sincronizados.
+
+### HC-P1-09 — Claim de integridade CRC divergente do bloco real
+
+O relatório diz `CRC32 + SHA256`, mas o formato implementado do `BlockStore` contém SHA-256 do payload e não mostra campo CRC32 no cabeçalho.
+
+**Critério de saída:** documentação corrigida ou campo CRC versionado e testado; nenhum claim duplo sem bytes correspondentes.
+
+### HC-P1-10 — L4 chamado persistente, mas é temporário
+
+O tier L4 cria arquivo em `java.io.tmpdir` com UUID e o apaga no `close()`. Isso não comprova persistência entre reinicializações.
+
+**Critério de saída:** separar `L4_TEMP_MAPPED` de `PERSISTENT_BLOCK_STORE`, testar reopen e recuperação por índice.
+
+### HC-P1-11 — Ciclo de estados documentado não corresponde ao engine
+
+A documentação descreve transições `NEW→HOT→COLD→EXPIRED`, mas o fluxo observado marca `DONE`, `RETRYING`, `DROPPED` ou `EXPIRED` sem materializar todas as transições declaradas.
+
+**Critério de saída:** tabela derivada da máquina real ou implementação explícita das transições, com testes de cada aresta.
+
+### HC-P1-12 — Claims `non-blocking` e `branchless` não comprovados
+
+O append usa `ReentrantLock`, aloca buffers e chama `channel.force(true)`. Os tiers usam mapas, filas e condicionais. Isso pode ser correto, mas não é hot path branchless/non-blocking demonstrado.
+
+**Critério de saída:** renomear claim ou fornecer perfil separado, benchmark e prova do caminho sem bloqueio.
+
+### HC-P1-13 — Tabela `HARMONICS` não governa o schedule como parece
+
+O construtor clona e ordena `harmonics`, mas `nextCycleLayers()` agenda a partir de `layerFreqs`; a tabela interna não participa diretamente da seleção posterior. Além disso, `{144,288,144000,...}` mistura escalas sem unidade.
+
+**Critério de saída:** perfil tipado com unidade; remover configuração morta ou fazê-la participar explicitamente do algoritmo; testes que detectem mudança do perfil.
 
 ---
 
