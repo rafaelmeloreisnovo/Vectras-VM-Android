@@ -167,3 +167,65 @@ BitGhost muda a visibilidade.
 O cálculo acontece por camada.
 O container permanece inteiro.
 ```
+
+---
+
+## Visibilidade temporal e observação inversa
+
+BitGhost também pode variar com o ciclo e com a direção da caminhada.
+
+O mesmo item pode permanecer Ghost durante a subida e tornar-se visível na descida:
+
+\[
+G_{up}(x)=0,
+\qquad
+G_{down}(x)=1.
+\]
+
+Isso não reconstrói nem move o item. A segunda view apenas possui outra combinação de:
+
+```text
+layer
+color
+viewpoint
+cycle_index
+direction
+transform_id
+```
+
+### Regra de inversão
+
+A caminhada inversa deve inverter a ordem das transformações:
+
+\[
+(M_7M_6\cdots M_0)^{-1}
+=
+M_0^{-1}\cdots M_6^{-1}M_7^{-1}.
+\]
+
+Quando uma transformação não tiver inversa, o runtime precisa preservar resíduo ou marcar `TOKEN_VAZIO`; não pode chamar uma estimativa de recuperação integral.
+
+### Ghost não é temperatura
+
+```text
+temperature ∈ {HOT, WARM, COLD}
+visibility  ∈ {VISIBLE, GHOST}
+```
+
+Assim, são válidos estados como `HOT+GHOST` e `COLD+VISIBLE`. O cache decide residência; BitGhost decide participação na view.
+
+### Relação com a janela de oito ciclos
+
+No contrato harmônico v1, uma decisão Ghost pode fazer parte do recibo de cada posição `C0..C7`. A primeira posição somente se torna elegível para promoção depois do fechamento da oitava e da verificação da subida/descida.
+
+Autoridades relacionadas:
+
+- `docs/RAFAELIA_HARMONIC_CLOCK_MATRIX_CONTRACT_V1.md`;
+- `docs/RAFAELIA_HARMONIC_CLOCK_MATRIX_IMPLEMENTATION_INDEX_20260720.md`;
+- `docs/RAFAELIA_HARMONIC_CLOCK_MATRIX_GAP_LEDGER_20260720.md`.
+
+```text
+F_ok   = semântica Ghost preservada
+F_gap  = integração temporal ainda não implementada
+F_next = conectar decisão BitGhost ao scheduler em modo sombra
+```
