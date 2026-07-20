@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-2.0-only
+// Copyright (C) Rafael M. R. — rafaelmeloreisnovo
 #include "rmr_lowlevel.h"
 
 uint32_t rmr_lowlevel_reduce_xor(const uint8_t* data, size_t len) {

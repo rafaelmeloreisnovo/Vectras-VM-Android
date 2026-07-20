@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-2.0-only
+// Copyright (C) Rafael M. R. — rafaelmeloreisnovo
 #include "rmr_casm_bridge.h"
 
 #ifndef RMR_ASM_CORE_EXPERIMENTAL

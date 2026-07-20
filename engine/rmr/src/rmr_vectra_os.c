@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-2.0-only
+// Copyright (C) Rafael M. R. — rafaelmeloreisnovo
 /* ═══════════════════════════════════════════════════════════════════════════
    rmr_vectra_os.c — VECTRA_OS Implementation
    Freestanding · NoMalloc · NoFriction · Capability-Dispatched

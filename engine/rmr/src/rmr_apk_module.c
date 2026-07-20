@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-2.0-only
+// Copyright (C) Rafael M. R. — rafaelmeloreisnovo
 #include "rmr_apk_module.h"
 #include "rmr_hw_detect.h"
 

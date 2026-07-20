@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-2.0-only
+// Copyright (C) Rafael M. R. — rafaelmeloreisnovo
 #ifndef RMR_VECTOR_FIELD_H
 #define RMR_VECTOR_FIELD_H
 

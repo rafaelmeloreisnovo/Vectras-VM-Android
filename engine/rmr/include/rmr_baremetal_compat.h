@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-2.0-only
+// Copyright (C) Rafael M. R. — rafaelmeloreisnovo
 /* ═══════════════════════════════════════════════════════════════════
    rmr_baremetal_compat.h — Substituição stdlib para baremetal
    Zero deps externas. Implementação inline + bump allocator.

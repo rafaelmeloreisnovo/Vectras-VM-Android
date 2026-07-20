@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-2.0-only
+// Copyright (C) Rafael M. R. — rafaelmeloreisnovo
 /* rmr_bench.h - microbenchmarks determinísticos low-level */
 #ifndef RMR_BENCH_H
 #define RMR_BENCH_H

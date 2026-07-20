@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-2.0-only
+// Copyright (C) Rafael M. R. — rafaelmeloreisnovo
 #include "rmr_policy_kernel.h"
 #include "zero.h"
 #include "zero_compat.h"

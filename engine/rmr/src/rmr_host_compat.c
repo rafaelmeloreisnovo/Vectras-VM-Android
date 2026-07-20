@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-2.0-only
+// Copyright (C) Rafael M. R. — rafaelmeloreisnovo
 #define _POSIX_C_SOURCE 200809L
 
 #include "rmr_host_compat.h"

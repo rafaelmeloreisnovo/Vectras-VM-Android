@@ -1,0 +1,71 @@
+name: Legal Compliance Gate
+
+on:
+  push:
+    paths:
+      - 'engine/rmr/**'
+      - 'app/src/main/jniLibs/**'
+      - 'resources/compliance/**'
+      - 'LICENSES_REGISTER.md'
+      - 'sbom/**'
+      - '.github/workflows/legal-compliance-gate.yml'
+  pull_request:
+    paths:
+      - 'engine/rmr/**'
+      - 'app/src/main/jniLibs/**'
+      - 'resources/compliance/**'
+      - 'LICENSES_REGISTER.md'
+      - 'sbom/**'
+      - '.github/workflows/legal-compliance-gate.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  legal-gate:
+    name: Legal / Provenance Gate
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run legal compliance check
+        run: python3 tools/ci/check_legal_gate.py
+
+      - name: Verify engine/rmr SPDX coverage
+        run: |
+          missing=$(grep -rL "SPDX-License-Identifier" engine/rmr/src/ --include="*.c" --include="*.h" 2>/dev/null || true)
+          if [ -n "$missing" ]; then
+            echo "FAIL: Missing SPDX headers in engine/rmr/src/:"
+            echo "$missing"
+            exit 1
+          fi
+          echo "OK: All engine/rmr/src files have SPDX-License-Identifier headers"
+
+      - name: Verify LICENSES_REGISTER is not empty
+        run: |
+          lines=$(grep -c "TOKEN_VAZIO\|QUARANTINE\|blocked" LICENSES_REGISTER.md || true)
+          echo "INFO: $lines line(s) with TOKEN_VAZIO/QUARANTINE/blocked status in LICENSES_REGISTER.md"
+          echo "These require resolution before public distribution."
+
+      - name: Validate ASSET_PROVENANCE_REGISTER structure
+        run: |
+          python3 - <<'EOF'
+          import csv, sys
+          path = "resources/compliance/ASSET_PROVENANCE_REGISTER.csv"
+          required = {"asset_path", "asset_type", "license_spdx", "status"}
+          try:
+              with open(path, newline="") as f:
+                  reader = csv.DictReader(f)
+                  fields = set(reader.fieldnames or [])
+                  missing = required - fields
+                  if missing:
+                      print(f"FAIL: {path} missing required columns: {missing}", file=sys.stderr)
+                      sys.exit(1)
+                  count = sum(1 for _ in reader)
+              print(f"OK: {path} valid ({count} data rows)")
+          except FileNotFoundError:
+              print(f"FAIL: {path} not found", file=sys.stderr)
+              sys.exit(1)
+          EOF

@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-2.0-only
+// Copyright (C) Rafael M. R. — rafaelmeloreisnovo
 /* ═══════════════════════════════════════════════════════════════
    rmr_neon_simd.c — RAFAELIA NEON/SIMD Baremetal Acceleration
    ψ→χ→ρ→Δ→Σ→Ω  |  R(t+1) = R(t) × Φ_ethica × (√3/2)^(πφ)

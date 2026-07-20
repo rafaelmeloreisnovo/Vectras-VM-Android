@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-2.0-only
+// Copyright (C) Rafael M. R. — rafaelmeloreisnovo
 /* rmr_baremetal_compat.c — Instância do arena de memória baremetal */
 #define RMR_BAREMETAL_COMPAT_IMPL
 #include "rmr_baremetal_compat.h"

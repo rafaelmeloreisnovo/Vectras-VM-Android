@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-2.0-only
+// Copyright (C) Rafael M. R. — rafaelmeloreisnovo
 #ifndef RMR_NEON_SIMD_H
 #define RMR_NEON_SIMD_H
 /* ────────────────────────────────────────────────────────────

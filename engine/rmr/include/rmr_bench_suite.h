@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-2.0-only
+// Copyright (C) Rafael M. R. — rafaelmeloreisnovo
 /* rmr_bench_suite.h - suite industrial (50 testes) */
 #ifndef RMR_BENCH_SUITE_H
 #define RMR_BENCH_SUITE_H

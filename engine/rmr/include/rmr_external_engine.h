@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-2.0-only
+// Copyright (C) Rafael M. R. — rafaelmeloreisnovo
 #ifndef RMR_EXTERNAL_ENGINE_H
 #define RMR_EXTERNAL_ENGINE_H
 
