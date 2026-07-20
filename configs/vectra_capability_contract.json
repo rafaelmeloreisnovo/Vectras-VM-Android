@@ -1,8 +1,8 @@
 {
-  "schema_version": "1.0.0",
-  "generated_at": "2026-07-19",
+  "schema_version": "1.1.0",
+  "generated_at": "2026-07-20",
   "repository": "rafaelmeloreisnovo/Vectras-VM-Android",
-  "source_ref": "claude/vectra-vm-gaps-audit-pvtiki",
+  "source_ref": "agent/vectra-artifact-promotion-batch1-20260720",
   "principle": "source_present != integrated != executed != certified",
   "capabilities": [
     {
@@ -39,15 +39,24 @@
     {
       "id": "CAP_LOWFALA_FRONTEND",
       "title": "Fala/fonema/token/AST/bytecode/ASM/VM",
-      "required_paths": ["Incluir/compiladorlowFala.txt"],
+      "required_paths": [
+        "Incluir/compiladorlowFala.txt",
+        "tools/compilerlowfala/extract_seeds.py",
+        "tools/compilerlowfala/README.md"
+      ],
       "required_markers": {
-        "Incluir/compiladorlowFala.txt": ["FALA→FONEMA→TOKEN→AST→BYTECODE→ASM→VM→OUTPUT", "seed_S01_V1_phoneme_manifold"]
+        "Incluir/compiladorlowFala.txt": ["FALA→FONEMA→TOKEN→AST→BYTECODE→ASM→VM→OUTPUT", "seed_S01_V1_phoneme_manifold"],
+        "tools/compilerlowfala/extract_seeds.py": ["def parse_seed_blocks", "def build_index", "claim_allowed"]
       },
       "integration_needles": ["compiladorlowFala.txt"],
-      "integration_files": ["CMakeLists.txt", "app/build.gradle", "settings.gradle"],
-      "declared_state": "DOCUMENT_GENERATOR_UNINTEGRATED",
+      "integration_files": [
+        ".github/workflows/host-ci.yml",
+        "tools/compilerlowfala/README.md",
+        "tools/compilerlowfala/extract_seeds.py"
+      ],
+      "declared_state": "ADAPTER_INTEGRATED_AWAITS_EXECUTION",
       "claim_allowed": false,
-      "boundary": "monolito shell/texto com sementes; nao ha referencia no build canônico nem emissao APK provada"
+      "boundary": "monolito indexavel e extraivel por adaptador deterministico; ainda sem compilacao por semente, emissao APK ou runtime Android provado"
     },
     {
       "id": "CAP_APK_BUILD_PIPELINE",
@@ -84,6 +93,23 @@
       "declared_state": "INVENTORY_IMPLEMENTED",
       "claim_allowed": false,
       "boundary": "o auditor sugere rota; nunca move nem promove automaticamente"
+    },
+    {
+      "id": "CAP_ARTIFACT_PROMOTION_BATCH_001",
+      "title": "Promocao reversivel e selada do primeiro lote de artefatos",
+      "required_paths": [
+        "configs/vectra_artifact_promotion_batch_001.json",
+        "tools/promotion/verify_promotion_batch.py",
+        "tests/test_vectra_artifact_promotion.py",
+        "docs/maps/VECTRA_ARTIFACT_PROMOTION_BATCH_001.md"
+      ],
+      "required_markers": {
+        "tools/promotion/verify_promotion_batch.py": ["def git_blob_sha1", "def validate_batch", "automatic_move_allowed must remain false"],
+        "configs/vectra_artifact_promotion_batch_001.json": ["ART_LOWFALA_MONOLITH", "ART_TBROWSER_LOCAL", "ART_NET_RAW_HTTP", "ART_DEX_ELF_AUDITOR"]
+      },
+      "declared_state": "PROMOTION_GATE_IMPLEMENTED_AWAITS_CI",
+      "claim_allowed": false,
+      "boundary": "identidade, marcadores e adaptadores podem passar; runtime, certificacao e APK continuam em gates separados"
     }
   ],
   "loose_artifact_policy": {
