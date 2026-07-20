@@ -1,11 +1,11 @@
-<!-- DOC_TAXONOMY_SYNC: 2026-06-13 | role: technical-hub -->
+<!-- DOC_TAXONOMY_SYNC: 2026-07-20 | role: technical-hub -->
 
 # Hub técnico — Vectras VM Android
 
 ## Metadados canônicos
 
-- Versão do documento: 3.2.
-- Última revisão: 2026-06-13.
+- Versão do documento: 3.3.
+- Última revisão: 2026-07-20.
 - Escopo: hub técnico de arquitetura, build/release, CI, segurança, documentação, operação e pesquisa.
 - Status: canônico vigente.
 - Commit de referência: `HEAD`.
@@ -69,6 +69,21 @@ Este diretório é o hub técnico canônico. Ele aprofunda a entrada curta do [`
 - Contrato de warning como intenção: [`active/LOWLEVEL_WARNING_INTENT_CONTRACT.md`](active/LOWLEVEL_WARNING_INTENT_CONTRACT.md).
 - Contrato freestanding `void`: [`active/VECTRA_FREESTANDING_VOID_CONTRACT.md`](active/VECTRA_FREESTANDING_VOID_CONTRACT.md).
 - Ponte RAFCODEphi C→ASM→hex: [`active/VECTRA_RAFCODE_PHI_BRIDGE.md`](active/VECTRA_RAFCODE_PHI_BRIDGE.md).
+
+#### 3.1 Relógio harmônico, matriz temporal e BitGhost
+- Contrato canônico v1: [`RAFAELIA_HARMONIC_CLOCK_MATRIX_CONTRACT_V1.md`](RAFAELIA_HARMONIC_CLOCK_MATRIX_CONTRACT_V1.md).
+- Índice código ↔ especificação: [`RAFAELIA_HARMONIC_CLOCK_MATRIX_IMPLEMENTATION_INDEX_20260720.md`](RAFAELIA_HARMONIC_CLOCK_MATRIX_IMPLEMENTATION_INDEX_20260720.md).
+- Gap ledger: [`RAFAELIA_HARMONIC_CLOCK_MATRIX_GAP_LEDGER_20260720.md`](RAFAELIA_HARMONIC_CLOCK_MATRIX_GAP_LEDGER_20260720.md).
+- Errata `936/939/963` e perfis: [`RAFAELIA_FREQUENCY_AUTHORITY_ERRATA_20260720.md`](RAFAELIA_FREQUENCY_AUTHORITY_ERRATA_20260720.md).
+- BitGhost sem extração e view temporal: [`RAFAELIA_BITGHOST_LAYERED_COMPUTE.md`](RAFAELIA_BITGHOST_LAYERED_COMPUTE.md).
+
+Estado desta trilha:
+
+```text
+SPECIFICATION / PARTIAL / TOKEN_VAZIO
+```
+
+Ela não autoriza claim de performance nem substitui benchmark em dispositivo.
 
 ### 4. Canonização anti-óbvio e documentação atrasada
 - Mapa holístico global e fluxograma: [`active/VECTRA_GLOBAL_HOLISTIC_FLOWMAP.md`](active/VECTRA_GLOBAL_HOLISTIC_FLOWMAP.md).
