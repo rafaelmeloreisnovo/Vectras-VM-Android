@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-2.0-only
+// Copyright (C) Rafael M. R. — rafaelmeloreisnovo
 #define _XOPEN_SOURCE 700
 #include "rmr_virtio_blk.h"
 

@@ -27,7 +27,7 @@ Legenda de status:
 | G6 | `device-runtime-smoke.yml` -- ADB missing, Install/Launch pending | P0 | BLOQUEADO_HW | -- |
 | G7 | `PROJECT_STATE.md` -- sincronizado para 2026-07-19 | P1 | FECHADO | -- |
 | G8 | `formulasdoRafaelmr.md` -- movido para `docs/formulas/` | P2 | FECHADO | -- |
-| G9 | Comando QEMU construido por concatenacao de strings -- risco de shell injection | P1 | ABERTO | -- |
+| G9 | Comando QEMU construido por concatenacao de strings -- risco de shell injection | P1 | PARCIAL | -- |
 | G10 | `NAOCOMERCIAL/` -- incompatibilidade com GPLv2 formalizada em quarentena; decisao juridica pendente | P0 | PARCIAL | -- |
 | G11 | `app/src/main/jniLibs/*/libXlorie.so` -- TOKEN_VAZIO: origem, build script, licenca e hash ausentes | P0 | ABERTO | **SIM** |
 | G12 | Alpine/rootfs tarballs distribuidos sem proveniencia -- `resources/compliance/ASSET_PROVENANCE_REGISTER.csv` nao preenchido | P0 | ABERTO | **SIM** |
@@ -44,6 +44,8 @@ Legenda de status:
 | G23 | `ASSET_PROVENANCE_REGISTER.csv` -- estrutura existe, conteudo vazio (zero binarios registrados) | P0 | ABERTO | **SIM** |
 | G24 | `Incluir/` e `_incoming/` -- 181 arquivos aguardando classificacao e promocao desde 2026-06-05 | P1 | ABERTO | **SIM** |
 | G25 | `examples/guest_boot_evidence.token-vazio.json` -- todos os gates em TOKEN_VAZIO; nenhum boot de VM registrado | P0 | ABERTO | **SIM** |
+| G26 | `detectRootfsLibc()` nao detectava glibc em rootfs i386 (`lib/ld-linux.so.2`, `lib/i386-linux-gnu/ld-linux.so.2` ausentes do bloco glibc) | P2 | FECHADO | **SIM** |
+| G27 | `tools/audit_vectra_capabilities.py` -- 4 falhas de seguranca: ABI desconhecida passava silencioso, e_type nao validado, versao DEX desconhecida aceita, DEX em subdiretorio incluido | P2 | FECHADO | **SIM** |
 
 ### Proximas acoes -- Vectras-VM-Android
 
@@ -67,7 +69,7 @@ Legenda de status:
 | Q3 | Nenhum workflow compila QEMU para Android/NDK (target arm/aarch64-linux-android) | P0 | ABERTO | -- |
 | Q4 | `android/vectras-vm-android/` -- scaffold Gradle sem nenhum codigo que carregue o binario QEMU | P1 | ABERTO | -- |
 | Q5 | Connectors `magisk`, `llama`, `userland`, `private` existem como `.c` mas nao estao no `meson.build` | P1 | ABERTO | **SIM** |
-| Q6 | `system/process-monitor.c` -- `qemu_process_monitor_get_stats()` le campos sem mutex (race condition leve) | P2 | ABERTO | **SIM** |
+| Q6 | `system/process-monitor.c` -- `qemu_process_monitor_get_stats()` le campos sem mutex (race condition leve) | P2 | FECHADO | **SIM** |
 | Q7 | `check_bql_contention()` em `process-health.c` -- retorna sempre `true`; implementacao real e TODO | P2 | ABERTO | **SIM** |
 
 ### Proximas acoes -- qemu_rafaelia
@@ -89,7 +91,7 @@ Legenda de status:
 | T2 | `loader.apk` -- nao existe em nenhum repositorio; contrato de bootstrap o requer | P0 | ABERTO | -- |
 | T3 | Integracao com Vectras-VM-Android -- documentada como futura; nenhum consumidor implementado | P1 | ABERTO | -- |
 | T4 | `raf_numbase` -- sistema sem equivalente em `qemu_rafaelia`; sem ponte entre os dois | P2 | ABERTO | -- |
-| T5 | `compatibility-arm32` e `compatibility-arm32-ndk29` -- falhas pre-existentes em master desde 2026-07-03 (`apksigner: command not found`) | P1 | ABERTO | **SIM** |
+| T5 | `compatibility-arm32` e `compatibility-arm32-ndk29` -- falhas pre-existentes em master desde 2026-07-03 (`apksigner: command not found`) | P1 | FECHADO | **SIM** |
 
 ### Proximas acoes -- termux-app-rafacodephi
 
@@ -110,9 +112,9 @@ Legenda de status:
 | RG4 | Sem APK produzido em nenhuma atividade CI -- `ECOSYSTEM_RUNTIME_STATE.json` = `OUT_OF_SCOPE_NO_CREDIT` | P0 | ABERTO | **SIM** |
 | RG5 | `rafpolimata.segment-runtime` -- NativeActivity runtime proof ausente | P1 | ABERTO | **SIM** |
 | RG6 | P33-12/13/15/16/20/21 -- syntax highlight, line numbers inline, breadcrumb UI, file icons, branch/tag selectors -- todos parciais | P2 | ABERTO | **SIM** |
-| RG7 | `TokenRefreshManager` -- OAuth token refresh e stub (correto para PATs; incorreto para OAuth Apps) | P1 | ABERTO | **SIM** |
+| RG7 | `TokenRefreshManager` -- OAuth token refresh e stub (correto para PATs; incorreto para OAuth Apps) | P1 | FECHADO | **SIM** |
 | RG8 | Fine-grained PAT -- scopes nao inspecionados; apenas `/user` validado | P2 | ABERTO | **SIM** |
-| RG9 | `GPGVerifier` retorna sempre `valido` -- verificacao de assinatura GPG e bypass total | P0 | ABERTO | **SIM** |
+| RG9 | `GPGVerifier` retorna sempre `valido` -- verificacao de assinatura GPG e bypass total | P0 | FECHADO | **SIM** |
 | RG10 | `ActivitySingletonManager` guarda `Activity` sem `WeakReference` -- memory leak em rotation/back | P1 | ABERTO | **SIM** |
 | RG11 | CI desativado por ausencia de credito Actions -- nenhum workflow executou no estado atual | P0 | ABERTO | **SIM** |
 
@@ -165,14 +167,16 @@ Legenda de status:
 
 | Status | Quantidade |
 |--------|-----------|
-| FECHADO | 8 |
-| PARCIAL | 3 |
-| ABERTO | 44 |
+| FECHADO | 14 |
+| PARCIAL | 4 |
+| ABERTO | 39 |
 | BLOQUEADO_HW | 2 |
 | BLOQUEADO_SEGREDO | 1 |
-| **Total** | **58** |
+| **Total** | **60** |
 
-### Gaps OMITIDOS em auditorias anteriores: 31 de 58
+### Gaps OMITIDOS em auditorias anteriores: 33 de 60
+
+<!-- Atualizacao 2026-07-20: +6 fechados (Q6, T5, RG7, RG9 confirmados em main; G26 detectRootfsLibc i386; G27 audit_vectra_capabilities P2x4) -->
 
 ---
 

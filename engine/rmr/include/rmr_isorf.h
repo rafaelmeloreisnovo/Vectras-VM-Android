@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-2.0-only
+// Copyright (C) Rafael M. R. — rafaelmeloreisnovo
 /* rmr_isorf.h - ISOraf: armazenamento lógico denso com físico esparso (sem compressão) */
 #ifndef RMR_ISORF_H
 #define RMR_ISORF_H

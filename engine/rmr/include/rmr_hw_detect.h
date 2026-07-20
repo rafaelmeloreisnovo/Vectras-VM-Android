@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-2.0-only
+// Copyright (C) Rafael M. R. — rafaelmeloreisnovo
 /* rmr_hw_detect.h - autodetecção avançada low-level */
 #ifndef RMR_HW_DETECT_H
 #define RMR_HW_DETECT_H

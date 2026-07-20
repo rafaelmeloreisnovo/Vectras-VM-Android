@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-2.0-only
+// Copyright (C) Rafael M. R. — rafaelmeloreisnovo
 #include "rmr_attractor.h"
 
 RmR_AttractorClass RmR_Attractor_Classify(RmR_AttractorState *st, double entropy, u32 miss_score) {

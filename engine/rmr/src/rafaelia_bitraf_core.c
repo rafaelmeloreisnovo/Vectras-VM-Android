@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-2.0-only
+// Copyright (C) Rafael M. R. — rafaelmeloreisnovo
 /* rafaelia_bitraf_core.c
    Núcleo C: BITRAF (D/I/P/R) + slot10 + base20 + dual parity + atrator 42
    - Sem libc (freestanding-friendly)

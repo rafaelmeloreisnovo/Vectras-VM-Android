@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-2.0-only
+// Copyright (C) Rafael M. R. — rafaelmeloreisnovo
 #ifndef RMR_UNIFIED_KERNEL_H
 #define RMR_UNIFIED_KERNEL_H
 
