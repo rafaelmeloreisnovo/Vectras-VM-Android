@@ -21,12 +21,13 @@ def dex_bytes(version=b"035", size=0x70):
     return bytes(data)
 
 
-def elf_bytes(machine, elf_class):
+def elf_bytes(machine, elf_class, e_type=3):
     data = bytearray(64)
     data[:4] = b"\x7fELF"
     data[4] = elf_class
     data[5] = 1
     data[6] = 1
+    struct.pack_into("<H", data, 16, e_type)
     struct.pack_into("<H", data, 18, machine)
     return bytes(data)
 
@@ -86,6 +87,57 @@ class AuditTests(unittest.TestCase):
             self.assertEqual(2, report["records_count"])
             self.assertEqual(1, len(report["duplicates"]))
             self.assertEqual({"source/c": 2}, report["route_counts"])
+
+    def test_unknown_abi_directory_fails_closed(self):
+        with tempfile.TemporaryDirectory() as td:
+            apk = Path(td) / "abi.apk"
+            with zipfile.ZipFile(apk, "w") as archive:
+                archive.writestr("AndroidManifest.xml", b"xml")
+                archive.writestr("classes.dex", dex_bytes())
+                # mips64 is not in ABI_MACHINE — should fail closed
+                archive.writestr("lib/mips64/libbad.so", elf_bytes(8, 2))
+            report = mod.inspect_apk(apk)
+            self.assertEqual("FAIL", report["state"])
+            elf_failures = [f for e in report["elf"] for f in e.get("failures", [])]
+            self.assertTrue(any("unknown ABI directory" in f for f in elf_failures))
+
+    def test_elf_exec_type_rejected(self):
+        with tempfile.TemporaryDirectory() as td:
+            apk = Path(td) / "exec.apk"
+            with zipfile.ZipFile(apk, "w") as archive:
+                archive.writestr("AndroidManifest.xml", b"xml")
+                archive.writestr("classes.dex", dex_bytes())
+                # ET_EXEC = 2, not ET_DYN = 3
+                archive.writestr("lib/armeabi-v7a/libexec.so", elf_bytes(40, 1, e_type=2))
+            report = mod.inspect_apk(apk)
+            self.assertEqual("FAIL", report["state"])
+            elf_failures = [f for e in report["elf"] for f in e.get("failures", [])]
+            self.assertTrue(any("ET_DYN" in f for f in elf_failures))
+
+    def test_unknown_dex_version_rejected(self):
+        with tempfile.TemporaryDirectory() as td:
+            apk = Path(td) / "dex.apk"
+            with zipfile.ZipFile(apk, "w") as archive:
+                archive.writestr("AndroidManifest.xml", b"xml")
+                # version 099 is not a known Android DEX version
+                archive.writestr("classes.dex", dex_bytes(version=b"099"))
+            report = mod.inspect_apk(apk)
+            self.assertEqual("FAIL", report["state"])
+            dex_failures = [f for d in report["dex"] for f in d.get("failures", [])]
+            self.assertTrue(any("not a known Android" in f for f in dex_failures))
+
+    def test_dex_in_subdirectory_ignored(self):
+        with tempfile.TemporaryDirectory() as td:
+            apk = Path(td) / "subdir.apk"
+            with zipfile.ZipFile(apk, "w") as archive:
+                archive.writestr("AndroidManifest.xml", b"xml")
+                # DEX in a subdirectory should NOT be treated as valid APK DEX
+                archive.writestr("assets/classes.dex", dex_bytes())
+                # No root-level DEX → missing DEX failure
+            report = mod.inspect_apk(apk)
+            self.assertIn("no classes*.dex entries", report["failures"])
+            # Subdirectory DEX is not parsed
+            self.assertEqual([], report["dex"])
 
     def test_lowfala_integration_absence_is_explicit(self):
         with tempfile.TemporaryDirectory() as td:

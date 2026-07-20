@@ -85,6 +85,14 @@ public class MainStartVM {
     public static String pendingVMID = "";
     public static String pendingThumbnailFile = "";
     public static boolean isLaunchFromPending = false;
+    /**
+     * @deprecated Shell-format insertion is unsafe for arbitrary input.
+     * Use {@link com.vectras.vm.runtime.QemuDirectLauncher} via
+     * {@link com.vectras.vm.runtime.QemuArgvContract#fromShellCommand} instead.
+     * The %s slot must only ever receive a pre-validated command string;
+     * see {@link com.vectras.vm.core.VmCommandSafetyValidator#validateQemuCommand}.
+     */
+    @Deprecated
     public static final String BASE_RUN_COMMAND_FORMAT = "export TMPDIR=/tmp && mkdir -p $TMPDIR/pulse && export XDG_RUNTIME_DIR=/tmp && chmod -R 775 $TMPDIR/pulse && pulseaudio --start --exit-idle-time=-1 > /dev/null 2>&1 && %s";
 
     private static final AtomicLong TRANSIENT_VM_ID_COUNTER = new AtomicLong(0L);

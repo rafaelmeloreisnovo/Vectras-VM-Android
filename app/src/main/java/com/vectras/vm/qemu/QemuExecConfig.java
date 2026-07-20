@@ -238,7 +238,9 @@ public final class QemuExecConfig {
                 "lib/aarch64-linux-gnu/ld-linux-aarch64.so.1",
                 "lib/ld-linux-armhf.so.3",
                 "lib/arm-linux-gnueabihf/ld-linux-armhf.so.3",
-                "usr/glibc-compat/lib/ld-linux-aarch64.so.1")) {
+                "usr/glibc-compat/lib/ld-linux-aarch64.so.1",
+                "lib/ld-linux.so.2",
+                "lib/i386-linux-gnu/ld-linux.so.2")) {
             return "glibc";
         }
         return "";

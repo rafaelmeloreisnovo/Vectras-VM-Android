@@ -105,6 +105,54 @@ public class QemuExecConfigTest {
         assertEquals("", QemuExecConfig.detectRootfsArch(null));
     }
 
+    // detectRootfsLibc: libc variant detection
+
+    @Test
+    public void detectRootfsLibc_musl_aarch64_returns_musl() throws Exception {
+        File rootfs = tmp.newFolder("rootfs-libc-musl");
+        makeFile(rootfs, "lib/ld-musl-aarch64.so.1");
+        assertEquals("musl", QemuExecConfig.detectRootfsLibc(rootfs));
+    }
+
+    @Test
+    public void detectRootfsLibc_glibc_aarch64_returns_glibc() throws Exception {
+        File rootfs = tmp.newFolder("rootfs-libc-glibc-aa64");
+        makeFile(rootfs, "lib/ld-linux-aarch64.so.1");
+        assertEquals("glibc", QemuExecConfig.detectRootfsLibc(rootfs));
+    }
+
+    @Test
+    public void detectRootfsLibc_glibc_i386_ld_linux_so2_returns_glibc() throws Exception {
+        File rootfs = tmp.newFolder("rootfs-libc-glibc-i386");
+        makeFile(rootfs, "lib/ld-linux.so.2");
+        assertEquals("glibc", QemuExecConfig.detectRootfsLibc(rootfs));
+    }
+
+    @Test
+    public void detectRootfsLibc_glibc_i386_debian_style_returns_glibc() throws Exception {
+        File rootfs = tmp.newFolder("rootfs-libc-glibc-i386-deb");
+        makeFile(rootfs, "lib/i386-linux-gnu/ld-linux.so.2");
+        assertEquals("glibc", QemuExecConfig.detectRootfsLibc(rootfs));
+    }
+
+    @Test
+    public void detectRootfsLibc_alpine_release_returns_musl() throws Exception {
+        File rootfs = tmp.newFolder("rootfs-libc-alpine");
+        makeFile(rootfs, "etc/alpine-release");
+        assertEquals("musl", QemuExecConfig.detectRootfsLibc(rootfs));
+    }
+
+    @Test
+    public void detectRootfsLibc_empty_rootfs_returns_empty() throws Exception {
+        File rootfs = tmp.newFolder("rootfs-libc-empty");
+        assertEquals("", QemuExecConfig.detectRootfsLibc(rootfs));
+    }
+
+    @Test
+    public void detectRootfsLibc_null_returns_empty() {
+        assertEquals("", QemuExecConfig.detectRootfsLibc(null));
+    }
+
     private static void makeFile(File rootfs, String relativePath) throws Exception {
         File f = new File(rootfs, relativePath);
         f.getParentFile().mkdirs();

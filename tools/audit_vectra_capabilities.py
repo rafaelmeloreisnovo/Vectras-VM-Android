@@ -19,7 +19,9 @@ from typing import Any
 TOKEN_VAZIO = "TOKEN_VAZIO"
 DEX_HEADER_SIZE = 0x70
 DEX_ENDIAN = {0x12345678, 0x78563412}
+KNOWN_DEX_VERSIONS = {b"035", b"037", b"038", b"039", b"040", b"041"}
 ELF_MACHINE = {3: "x86", 40: "ARM", 62: "x86_64", 183: "AArch64", 243: "RISC-V"}
+ET_DYN = 3
 ABI_MACHINE = {
     "armeabi-v7a": {40},
     "arm64-v8a": {183},
@@ -105,6 +107,10 @@ def parse_dex_header(data: bytes, name: str) -> dict[str, Any]:
     report["version"] = version_raw.decode("ascii", errors="replace")
     if not version_raw.isdigit():
         report["failures"].append("DEX version is not numeric")
+    elif version_raw not in KNOWN_DEX_VERSIONS:
+        report["failures"].append(
+            f"DEX version {version_raw.decode('ascii', errors='replace')!r} is not a known Android version"
+        )
     checksum = struct.unpack_from("<I", data, 8)[0]
     file_size, header_size, endian_tag = struct.unpack_from("<III", data, 32)
     report.update(
@@ -142,12 +148,19 @@ def parse_elf_header(data: bytes, name: str, abi: str | None) -> dict[str, Any]:
         report["failures"].append("invalid ELF data encoding")
         return report
     fmt = "<H" if endian == 1 else ">H"
+    e_type = struct.unpack_from(fmt, data, 16)[0]
+    report["e_type"] = e_type
+    if e_type != ET_DYN:
+        report["failures"].append(f"ELF e_type={e_type} is not ET_DYN (shared library expected)")
     machine = struct.unpack_from(fmt, data, 18)[0]
     report["machine"] = machine
     report["machine_name"] = ELF_MACHINE.get(machine, "UNKNOWN")
-    allowed = ABI_MACHINE.get(abi or "", set())
-    if abi and allowed and machine not in allowed:
-        report["failures"].append(f"ELF e_machine={machine} conflicts with lib/{abi}/")
+    if abi is not None and abi not in ABI_MACHINE:
+        report["failures"].append(f"unknown ABI directory: {abi!r}")
+    else:
+        allowed = ABI_MACHINE.get(abi or "", set())
+        if abi and allowed and machine not in allowed:
+            report["failures"].append(f"ELF e_machine={machine} conflicts with lib/{abi}/")
     if abi == "armeabi-v7a" and elf_class != 1:
         report["failures"].append("armeabi-v7a requires ELF32")
     if abi in {"arm64-v8a", "x86_64", "riscv64"} and elf_class != 2:
@@ -176,7 +189,10 @@ def inspect_apk(apk_path: Path | None) -> dict[str, Any]:
     try:
         with zipfile.ZipFile(apk_path) as archive:
             names = archive.namelist()
-            dex_names = sorted(n for n in names if Path(n).name.startswith("classes") and n.endswith(".dex"))
+            dex_names = sorted(
+                n for n in names
+                if n.endswith(".dex") and "/" not in n and n.startswith("classes")
+            )
             so_names = sorted(n for n in names if n.startswith("lib/") and n.endswith(".so"))
             if "AndroidManifest.xml" not in names:
                 report["failures"].append("missing AndroidManifest.xml")
