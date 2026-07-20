@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import importlib.util
-import json
 import tempfile
 import unittest
 from pathlib import Path
@@ -115,14 +114,33 @@ class LowFalaExtractorTests(unittest.TestCase):
         self.assertEqual("V3", records[1]["variant"])
         self.assertEqual(64, len(records[0]["body_sha256"]))
 
-    def test_required_count_is_fail_closed(self):
+    def test_count_gap_is_partial_without_false_pass(self):
         with tempfile.TemporaryDirectory() as temp:
             source = Path(temp) / "lowfala.txt"
             source.write_text(self.SAMPLE, encoding="utf-8")
             report, status = LOWFALA.build_index(source, required_count=60)
+            self.assertEqual(0, status)
+            self.assertEqual("PARTIAL", report["state"])
+            self.assertFalse(report["claim_allowed"])
+            self.assertIn("differs from required 60", " ".join(report["gaps"]))
+
+    def test_strict_count_turns_gap_into_failure_exit(self):
+        with tempfile.TemporaryDirectory() as temp:
+            source = Path(temp) / "lowfala.txt"
+            source.write_text(self.SAMPLE, encoding="utf-8")
+            report, status = LOWFALA.build_index(source, required_count=60, strict_count=True)
             self.assertEqual(1, status)
-            self.assertEqual("FAIL", report["state"])
-            self.assertIn("differs from required 60", " ".join(report["failures"]))
+            self.assertEqual("PARTIAL", report["state"])
+
+    def test_unterminated_seed_is_preserved_as_gap(self):
+        text = self.SAMPLE + "seed_S03_V1_cut() { cat << 'SEED'\ntruncated\n"
+        with tempfile.TemporaryDirectory() as temp:
+            source = Path(temp) / "lowfala.txt"
+            source.write_text(text, encoding="utf-8")
+            report, status = LOWFALA.build_index(source)
+            self.assertEqual(0, status)
+            self.assertEqual("PARTIAL", report["state"])
+            self.assertEqual(["seed_S03_V1_cut"], report["unterminated_seed_names"])
 
     def test_reversible_extraction_writes_seed_bodies_only(self):
         records = LOWFALA.parse_seed_blocks(self.SAMPLE)
