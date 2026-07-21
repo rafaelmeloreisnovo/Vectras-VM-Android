@@ -97,6 +97,11 @@ credentials.*
 .android-sdk/
 .build-spill/
 
+# Python bytecode cache
+__pycache__/
+*.py[cod]
+*.pyo
+
 
 # Local fork sync cache (downloaded via termux orchestrator)
 .third_party_forks/
