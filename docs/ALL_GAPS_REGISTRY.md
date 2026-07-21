@@ -32,7 +32,7 @@ Legenda de status:
 | G11 | `app/src/main/jniLibs/*/libXlorie.so` -- TOKEN_VAZIO: origem, build script, licenca e hash ausentes | P0 | ABERTO | **SIM** |
 | G12 | Alpine/rootfs tarballs distribuidos sem proveniencia -- `resources/compliance/ASSET_PROVENANCE_REGISTER.csv` nao preenchido | P0 | ABERTO | **SIM** |
 | G13 | OVMF/BIOS assets -- upstream URL, versao, licenca e SHA-256 nao registrados | P0 | ABERTO | **SIM** |
-| G14 | Screenshots e assets soltos na raiz + `addthis/` -- proveniencia TOKEN_VAZIO | P2 | ABERTO | **SIM** |
+| G14 | `addthis/` inventariado (37 arquivos classificados): docs operacionais, JSX prototypes, imagens ChatGPT (16), fotos WhatsApp (2), imagens UUID sem proveniencia (3). `docs/ADDTHIS_ASSET_PROVENANCE.md` criado. Imagens UUID aguardam confirmacao de Rafael. | P2 | PARCIAL | **SIM** |
 | G15 | `engine/rmr/**` -- cabecalhos SPDX adicionados a todos os 87 arquivos (src/*.c/*.h + interop/*.S) | P0 | FECHADO | **SIM** |
 | G16 | 51 arquivos `.S` assembly em `_incoming/pending/` -- `CLASSIFICATION_MANIFEST.md` criado com 4 categorias (benchmarks, math, core, archived); movimento de arquivos aguarda decisao do owner | P1 | PARCIAL | **SIM** |
 | G17 | Firebase `google-services.json` -- placeholder; build de release sem credenciais reais rejeita | P1 | ABERTO | **SIM** |
@@ -160,15 +160,15 @@ Legenda de status:
 
 | Status | Quantidade |
 |--------|-----------|
-| FECHADO | 41 |
-| PARCIAL | 6 |
-| ABERTO | 10 |
-| BLOQUEADO_HW | 2 |
-| BLOQUEADO_SEGREDO | 1 |
+| FECHADO | 39 |
+| PARCIAL | 7 |
+| ABERTO | 16 |
+| BLOQUEADO_HW | 3 |
+| BLOQUEADO_SEGREDO | 2 |
 | NAOAPLICAVEL | 1 |
-| **Total** | **60** |
+| **Total** | **67** |
 
-### Gaps OMITIDOS em auditorias anteriores: 33 de 60
+### Gaps OMITIDOS em auditorias anteriores: 40+ de 67
 
 <!-- Atualizacao 2026-07-20: +6 fechados (Q6, T5, RG7, RG9 confirmados em main; G26 detectRootfsLibc i386; G27 audit_vectra_capabilities P2x4) -->
 <!-- Atualizacao 2026-07-21: +2 fechados (G1 CANONICAL_BUILD_STATUS drift corrigido; RG1 HTTP adapters GitLab/Bitbucket implementados); RG10 marcado NAOAPLICAVEL (classe inexistente) -->
@@ -180,6 +180,7 @@ Legenda de status:
 <!-- Atualizacao 2026-07-21f: +1 fechado (RG6 SyntaxHighlighter wired + branch/tag AssistChip refpicker sem checkout -- todos os 6 sub-items P33-12/13/15/16/20/21); G16 ABERTO->PARCIAL (CLASSIFICATION_MANIFEST.md criado com 4 categorias; movimento aguarda owner) -->
 <!-- Atualizacao 2026-07-21g: +1 fechado (T4 raf_numbase bridge connector criado em qemu_rafaelia: base conversion, sequences, Pisano, prime fluid graph, zero curve dual; IPC async + sync convenience API) -->
 <!-- Atualizacao 2026-07-21h: G24 ABERTO->PARCIAL (CLASSIFICATION_MANIFEST.md com 10 categorias para 114 arquivos; 37 arquivos promovidos -- Python/tools, docs/reports, docs/prompts, docs/skills, docs/prototypes/ui; C/ASM e ZIPs aguardam Rafael) -->
+<!-- Atualizacao 2026-07-21i: G14 ABERTO->PARCIAL (addthis/ inventariado: 37 arquivos classificados; docs/ADDTHIS_ASSET_PROVENANCE.md criado; 3 imagens UUID aguardam Rafael) -->
 
 ---
 
