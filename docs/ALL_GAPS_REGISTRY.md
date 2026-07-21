@@ -11,6 +11,8 @@ Legenda de status:
 - `ABERTO` -- identificado, pendente de implementacao
 - `BLOQUEADO_HW` -- requer hardware fisico (ADB/dispositivo/runner dedicado)
 - `BLOQUEADO_SEGREDO` -- requer segredos CI nao commitaveis (keystore, tokens)
+- `BLOQUEADO_INFRA` -- workflows corretos mas CI sem runners (credito Actions esgotado)
+- `NAOAPLICAVEL` -- gap identificado nao se aplica ao codigo real deste projeto
 - `OMITIDO` -- nao constava em nenhuma auditoria anterior
 
 ---
@@ -43,7 +45,7 @@ Legenda de status:
 | G22 | Gate legal de CI -- `legal-compliance-gate.yml` implementado; verifica SPDX em src/ + interop/ + CSV de proveniencia | P0 | FECHADO | **SIM** |
 | G23 | `ASSET_PROVENANCE_REGISTER.csv` -- 12 entradas registradas (libXlorie x4, rootfs, OVMF, BIOS, NAOCOMERCIAL/, addthis/); todas TOKEN_VAZIO ou bloqueadas aguardando Rafael fornecer SHA-256+source-url | P0 | PARCIAL | **SIM** |
 | G24 | `Incluir/` -- `CLASSIFICATION_MANIFEST.md` criado (10 categorias, 114 arquivos); 37 arquivos promovidos (Python->tools/, docs->docs/, JSX->docs/prototypes/ui/); C/ASM, ZIPs e patches aguardam confirmacao de Rafael | P1 | PARCIAL | **SIM** |
-| G25 | `examples/guest_boot_evidence.token-vazio.json` -- todos os gates em TOKEN_VAZIO; nenhum boot de VM registrado | P0 | ABERTO | **SIM** |
+| G25 | `examples/guest_boot_evidence.token-vazio.json` -- todos os gates em TOKEN_VAZIO; nenhum boot de VM registrado -- requer QEMU executando em dispositivo real | P0 | BLOQUEADO_HW | **SIM** |
 | G26 | `detectRootfsLibc()` nao detectava glibc em rootfs i386 (`lib/ld-linux.so.2`, `lib/i386-linux-gnu/ld-linux.so.2` ausentes do bloco glibc) | P2 | FECHADO | **SIM** |
 | G27 | `tools/audit_vectra_capabilities.py` -- 4 falhas de seguranca: ABI desconhecida passava silencioso, e_type nao validado, versao DEX desconhecida aceita, DEX em subdiretorio incluido | P2 | FECHADO | **SIM** |
 
@@ -103,14 +105,14 @@ Legenda de status:
 | RG1 | HTTP adapters para multiplos providers -- GitLabApiService (v4) e BitbucketApiService (v2) implementados via Retrofit; wiring em MultiPlatformManager com tratamento de 401/403/IOException | P1 | FECHADO | **SIM** |
 | RG2 | Offline queue -- `SyncOperation` (Gson codec) + `SyncWorker` (CoroutineWorker) + `PeriodicWorkRequest` 15min registrados em Application.onCreate | P1 | FECHADO | **SIM** |
 | RG3 | `terminal-bounded-executor` -- `AnsiOutputProcessor` adicionado: strip() remove ESC bytes, parse() retorna spans coloridos por cor ANSI (git diff vermelho/verde, log amarelo) | P2 | FECHADO | **SIM** |
-| RG4 | Sem APK produzido em nenhuma atividade CI -- `debug-apk.yml` e `android-ci.yml` existem; bloqueado por credito Actions esgotado (`ECOSYSTEM_RUNTIME_STATE.json` = `OUT_OF_SCOPE_NO_CREDIT`) | P0 | BLOQUEADO_INFRA | **SIM** |
+| RG4 | Sem APK produzido em nenhuma atividade CI -- `debug-apk.yml` e `android-ci.yml` existem; bloqueado por credito Actions esgotado (runner_id=0 em todos os jobs do PR#289; `ECOSYSTEM_RUNTIME_STATE.json` = `OUT_OF_SCOPE_NO_CREDIT`) | P0 | BLOQUEADO_INFRA | **SIM** |
 | RG5 | `rafpolimata.segment-runtime` -- NativeActivity runtime proof ausente | P1 | ABERTO | **SIM** |
 | RG6 | P33-12/13/15/16/20/21 -- `SyntaxHighlighter` wired no `FileViewer` (Kotlin/Java/Python/JS/TS/XML/JSON/YAML/Shell); branch/tag `AssistChip` + `DropdownMenu` no TopAppBar; browsing por ref sem checkout via `listFiles(ref)` | P2 | FECHADO | **SIM** |
 | RG7 | `TokenRefreshManager` -- OAuth token refresh e stub (correto para PATs; incorreto para OAuth Apps) | P1 | FECHADO | **SIM** |
 | RG8 | Fine-grained PAT -- scopes inspecionados via `PATScopeInspector` (X-OAuth-Scopes + endpoint probing para fine-grained) | P2 | FECHADO | **SIM** |
 | RG9 | `GPGVerifier` retorna sempre `valido` -- verificacao de assinatura GPG e bypass total | P0 | FECHADO | **SIM** |
 | RG10 | `ActivitySingletonManager` -- classe nao existe no codigo-fonte; gap nao se aplica a este projeto | P1 | NAOAPLICAVEL | **SIM** |
-| RG11 | CI desativado por ausencia de credito Actions -- nenhum workflow executou no estado atual; workflows de CI existem (ci.yml, android-ci.yml, debug-apk.yml, etc.) | P0 | BLOQUEADO_INFRA | **SIM** |
+| RG11 | CI desativado por ausencia de credito Actions -- todos os checks de PR#289 com runner_id=0 em <3s; workflows de CI existem (ci.yml, android-ci.yml, debug-apk.yml, etc.) e estao corretos | P0 | BLOQUEADO_INFRA | **SIM** |
 
 ### Proximas acoes -- RafGitTools
 
@@ -147,7 +149,7 @@ Legenda de status:
 
 | ID | Gap | Prioridade | Status | Omitido anteriormente |
 |----|-----|-----------|--------|-----------------------|
-| X1 | `examples/guest_boot_evidence.token-vazio.json` -- todos os 9 gates em TOKEN_VAZIO; prova de boot zero | P0 | ABERTO | **SIM** |
+| X1 | `examples/guest_boot_evidence.token-vazio.json` -- todos os 9 gates em TOKEN_VAZIO; prova de boot zero -- requer QEMU executando em dispositivo real | P0 | BLOQUEADO_HW | **SIM** |
 | X2 | Cadeia de prova `codigo->build->artefato->instalacao->boot VM->teste->prova assinada` -- aberta em todos os repos | P0 | ABERTO | -- |
 | X3 | Nenhum runner CI com hardware ARM32/ARM64 + ADB ativo | P0 | BLOQUEADO_HW | -- |
 | X4 | Segredos `VECTRAS_RELEASE_*` ausentes em CI -- assinatura oficial impossivel | P0 | BLOQUEADO_SEGREDO | -- |
@@ -160,16 +162,16 @@ Legenda de status:
 
 | Status | Quantidade |
 |--------|-----------|
-| FECHADO | 39 |
-| PARCIAL | 9 |
-| ABERTO | 11 |
-| BLOQUEADO_HW | 3 |
-| BLOQUEADO_SEGREDO | 2 |
+| FECHADO | 38 |
+| PARCIAL | 8 |
+| ABERTO | 9 |
+| BLOQUEADO_HW | 4 |
+| BLOQUEADO_SEGREDO | 1 |
 | BLOQUEADO_INFRA | 2 |
 | NAOAPLICAVEL | 1 |
-| **Total** | **67** |
+| **Total** | **63** |
 
-### Gaps OMITIDOS em auditorias anteriores: 40+ de 67
+### Gaps OMITIDOS em auditorias anteriores: 41 de 63
 
 <!-- Atualizacao 2026-07-20: +6 fechados (Q6, T5, RG7, RG9 confirmados em main; G26 detectRootfsLibc i386; G27 audit_vectra_capabilities P2x4) -->
 <!-- Atualizacao 2026-07-21: +2 fechados (G1 CANONICAL_BUILD_STATUS drift corrigido; RG1 HTTP adapters GitLab/Bitbucket implementados); RG10 marcado NAOAPLICAVEL (classe inexistente) -->
@@ -183,6 +185,7 @@ Legenda de status:
 <!-- Atualizacao 2026-07-21h: G24 ABERTO->PARCIAL (CLASSIFICATION_MANIFEST.md com 10 categorias para 114 arquivos; 37 arquivos promovidos -- Python/tools, docs/reports, docs/prompts, docs/skills, docs/prototypes/ui; C/ASM e ZIPs aguardam Rafael) -->
 <!-- Atualizacao 2026-07-21i: G14 ABERTO->PARCIAL (addthis/ inventariado: 37 arquivos classificados; docs/ADDTHIS_ASSET_PROVENANCE.md criado; 3 imagens UUID aguardam Rafael); G23 ABERTO->PARCIAL (ASSET_PROVENANCE_REGISTER.csv actualizado com addthis/ provenance doc); RG4+RG11 ABERTO->BLOQUEADO_INFRA (CI workflows existem mas credito Actions esgotado) -->
 <!-- Atualizacao 2026-07-21j: M1 ABERTO->PARCIAL (Mapa/docs/ACTIVE_SCOPE.md criado: lista 6 ativos vs 22 fora do escopo CI; aguarda confirmacao Rafael); G20 corrigido: 20/25 placeholders (nao 16) -->
+<!-- Atualizacao 2026-07-21k: BLOCKING_GAPS.md atualizado -- BG-10/11/12 marcados RESOLVED (G15+RG9+G22 FECHADOS); BG-14 adicionado (CI runners esgotados -- BLOQUEADO_INFRA); G16->PARCIAL; G25/X1->BLOQUEADO_HW; contagem corrigida Total=63 (38+8+9+4+1+2+1), OMITIDOS=41 -->
 
 ---
 

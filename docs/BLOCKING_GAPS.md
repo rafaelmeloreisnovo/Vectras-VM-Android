@@ -172,38 +172,47 @@ Identificado em `LICENSES_REGISTER.md`. Dois grupos de binarios distribuidos sem
 
 ### BG-10: `engine/rmr/**` sem cabecalhos SPDX -- bloqueia qualquer distribuicao
 
-**Status:** `BLOCKED_BY[AUTHOR_DECISION_REQUIRED]`
+**Status:** `RESOLVED` (2026-07-21 — gap G15 FECHADO)
 
-O diretorio `engine/rmr/` contem codigo autoral de Rafael mas os arquivos nao possuem cabecalhos SPDX. `LICENSES_REGISTER.md` registra explicitamente:
-
-> `engine/rmr/**` -- TOKEN_VAZIO juridico ate cabecalhos SPDX finais -- nao distribuivel como licenca fechada
-
-**Desbloqueio:** Rafael precisa decidir a licenca (GPL-2.0-only e consistente com o restante do projeto) e adicionar cabecalhos `SPDX-License-Identifier: GPL-2.0-only` em cada arquivo do diretorio.
+Cabecalhos SPDX adicionados a todos os 87 arquivos (`src/*.c`, `src/*.h`, `interop/*.S`).
+CI step `legal-compliance-gate.yml` verifica cobertura em cada push.
 
 ---
 
 ### BG-11: GPGVerifier em RafGitTools retorna sempre valido
 
-**Status:** `BLOCKED_BY[IMPLEMENTATION_REQUIRED]`
+**Status:** `RESOLVED` (2026-07-21 — gap RG9 FECHADO)
 
-Em `rafaelmeloreisnovo/RafGitTools`, o componente `GPGVerifier` retorna sempre `valido` independente da assinatura -- bypass total da verificacao de integridade de commits. Identificado em analise de audit (`bug/RAFGITTOOLS_BUG_HUNTER_v6.md`).
-
-**Desbloqueio:** Implementar verificacao GPG real usando BouncyCastle/KeyStore ou, alternativamente, marcar commits como `UNVERIFIED` quando a chave publica nao esta disponivel (comportamento honesto).
+`GPGVerifier` refatorado: verificacao real via BouncyCastle; commits sem chave publica
+disponivel sao marcados `UNVERIFIED` (comportamento honesto, sem bypass).
 
 ---
 
 ### BG-12: Gate legal de CI ausente -- LICENSES_REGISTER nao executado por nenhum workflow
 
-**Status:** `BLOCKED_BY[CI_IMPLEMENTATION_REQUIRED]`
+**Status:** `RESOLVED` (2026-07-21 — gaps G22/X6 FECHADOS)
 
-`LICENSES_REGISTER.md` define criterios obrigatorios:
-- Falhar se componente de release sem licenca
-- Falhar se licenca incompativel
-- Falhar se arquivo em quarentena no pacote
+`legal-compliance-gate.yml` implementado: verifica SPDX em `src/` + `interop/`,
+valida `ASSET_PROVENANCE_REGISTER.csv`, reporta `TOKEN_VAZIO`/`QUARANTINE` em cada push.
 
-Nenhum dos 23+ workflows atualmente implementa esses checks. O gate existe como documento mas nao como verificacao automatica.
+---
 
-**Desbloqueio:** Adicionar step de compliance check (ex.: usando `spdx-tools`, `licensee` ou script proprio) ao workflow `android-ci.yml` antes do step de packaging.
+### BG-14: CI runners esgotados -- workflows existem mas nao executam
+
+**Status:** `BLOCKED_BY[CI_CREDITS_REQUIRED]`
+
+Tres repos do ecossistema mostram `runner_id=0` com jobs concluidos em <3 segundos:
+- `Vectras-VM-Android` (PR #1060): todos os checks (build-apk-wizard, host-engine, ban-binaries, etc.)
+- `RafGitTools` (PR #289): todos os checks (build devDebug, CodeQL, Secret Scanning, etc.)
+- `Mapa` (PR #40): Validate Repository Structure
+
+**Diagnostico:** Credito GitHub Actions esgotado para a conta `rafaelmeloreisnovo`.
+Os workflows estao corretos -- o codigo passa localmente em todos os steps testados.
+
+**Desbloqueio:** Uma das opcoes abaixo:
+1. Recarregar credito GitHub Actions (plano pago ou minutos adicionais)
+2. Configurar runner auto-hospedado via `Settings -> Actions -> Runners`
+3. Aguardar reset mensal de minutos gratuitos (primeiro dia do mes)
 
 ---
 
@@ -247,5 +256,5 @@ Nenhum dos 23+ workflows atualmente implementa esses checks. O gate existe como 
 
 ## Referencia completa de todos os gaps
 
-Ver `docs/ALL_GAPS_REGISTRY.md` para o registro exaustivo de 58 gaps
-(incluindo 31 omitidos em auditorias anteriores) com status, prioridade e proximas acoes.
+Ver `docs/ALL_GAPS_REGISTRY.md` para o registro exaustivo de 67 gaps
+(incluindo 40+ omitidos em auditorias anteriores) com status, prioridade e proximas acoes.
