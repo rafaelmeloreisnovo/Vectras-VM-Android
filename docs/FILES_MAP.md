@@ -1,4 +1,4 @@
-<!-- DOC_ORG_SCAN: 2026-04-07 | source-scan: pending-manual-by-domain -->
+<!-- DOC_ORG_SCAN: 2026-07-20 | source-scan: harmonic-clock-matrix-v1 -->
 
 # docs/FILES_MAP.md
 
@@ -109,6 +109,36 @@ Mapa arquivo-a-arquivo em três linhas por item: papel, ligação e comando de i
 - **Liga com**: ver [`docs/README.md`](README.md) e [`docs/THREE_LAYER_ANALYSIS.md`](../docs/THREE_LAYER_ANALYSIS.md) para contexto de camadas.
 - **Inspeção**: `file "docs/QUALITY_ISO8000_ISO9001_PLAN.md"` e, quando texto, `sed -n "1,80p" "docs/QUALITY_ISO8000_ISO9001_PLAN.md"`.
 
+## `docs/RAFAELIA_BITGHOST_LAYERED_COMPUTE.md`
+- **Papel**: contrato de visibilidade por layer/view no mesmo contêiner, incluindo semântica temporal e observação inversa sem extração.
+- **Liga com**: [`../Rafaelia/rafaelia_bitwalk.h`](../Rafaelia/rafaelia_bitwalk.h), [`RAFAELIA_HARMONIC_CLOCK_MATRIX_CONTRACT_V1.md`](RAFAELIA_HARMONIC_CLOCK_MATRIX_CONTRACT_V1.md) e [`RAFAELIA_HARMONIC_CLOCK_MATRIX_GAP_LEDGER_20260720.md`](RAFAELIA_HARMONIC_CLOCK_MATRIX_GAP_LEDGER_20260720.md).
+- **Inspeção**: `sed -n "1,260p" "docs/RAFAELIA_BITGHOST_LAYERED_COMPUTE.md"`.
+
+## `docs/RAFAELIA_COHESION_ENTERPRISE_STACK.md`
+- **Papel**: documentação textual e/ou especificação técnica.
+- **Liga com**: ver [`docs/README.md`](README.md) e [`docs/THREE_LAYER_ANALYSIS.md`](../docs/THREE_LAYER_ANALYSIS.md) para contexto de camadas.
+- **Inspeção**: `file "docs/RAFAELIA_COHESION_ENTERPRISE_STACK.md"` e, quando texto, `sed -n "1,80p" "docs/RAFAELIA_COHESION_ENTERPRISE_STACK.md"`.
+
+## `docs/RAFAELIA_FREQUENCY_AUTHORITY_ERRATA_20260720.md`
+- **Papel**: errata canônica que separa `936`, `939`, `963`, perfis legados, âncoras v1 e unidades.
+- **Liga com**: [`RAFAELIA_HARMONIC_CLOCK_MATRIX_CONTRACT_V1.md`](RAFAELIA_HARMONIC_CLOCK_MATRIX_CONTRACT_V1.md), [`../app/src/main/java/com/vectras/vm/rafaelia/FrequencyResonanceGrid.java`](../app/src/main/java/com/vectras/vm/rafaelia/FrequencyResonanceGrid.java) e [`../engine/rmr/include/rafaelia_formulas_core.h`](../engine/rmr/include/rafaelia_formulas_core.h).
+- **Inspeção**: `sed -n "1,220p" "docs/RAFAELIA_FREQUENCY_AUTHORITY_ERRATA_20260720.md"`.
+
+## `docs/RAFAELIA_HARMONIC_CLOCK_MATRIX_CONTRACT_V1.md`
+- **Papel**: autoridade de especificação para 10 Hz/100 ms, janela de oito ciclos, subida/descida, âncoras `555/633/777/939`, BitGhost temporal e critérios de prova.
+- **Liga com**: [`RAFAELIA_HARMONIC_CLOCK_MATRIX_IMPLEMENTATION_INDEX_20260720.md`](RAFAELIA_HARMONIC_CLOCK_MATRIX_IMPLEMENTATION_INDEX_20260720.md), [`RAFAELIA_HARMONIC_CLOCK_MATRIX_GAP_LEDGER_20260720.md`](RAFAELIA_HARMONIC_CLOCK_MATRIX_GAP_LEDGER_20260720.md) e [`RAFAELIA_BITGHOST_LAYERED_COMPUTE.md`](RAFAELIA_BITGHOST_LAYERED_COMPUTE.md).
+- **Inspeção**: `sed -n "1,460p" "docs/RAFAELIA_HARMONIC_CLOCK_MATRIX_CONTRACT_V1.md"`.
+
+## `docs/RAFAELIA_HARMONIC_CLOCK_MATRIX_GAP_LEDGER_20260720.md`
+- **Papel**: ledger conservador dos bloqueadores, divergências documentais, gaps de integração, testes e benchmark.
+- **Liga com**: [`RAFAELIA_HARMONIC_CLOCK_MATRIX_CONTRACT_V1.md`](RAFAELIA_HARMONIC_CLOCK_MATRIX_CONTRACT_V1.md), [`RAFAELIA_HARMONIC_CLOCK_MATRIX_IMPLEMENTATION_INDEX_20260720.md`](RAFAELIA_HARMONIC_CLOCK_MATRIX_IMPLEMENTATION_INDEX_20260720.md) e [`../bug/VECTRAS_CODIGO_ALEM_DOCUMENTACAO.md`](../bug/VECTRAS_CODIGO_ALEM_DOCUMENTACAO.md).
+- **Inspeção**: `sed -n "1,440p" "docs/RAFAELIA_HARMONIC_CLOCK_MATRIX_GAP_LEDGER_20260720.md"`.
+
+## `docs/RAFAELIA_HARMONIC_CLOCK_MATRIX_IMPLEMENTATION_INDEX_20260720.md`
+- **Papel**: índice de autoridade que cruza contrato, classes Java, kernel C, scheduler, cache, testes, BitWalk e BitGhost.
+- **Liga com**: [`RAFAELIA_HARMONIC_CLOCK_MATRIX_CONTRACT_V1.md`](RAFAELIA_HARMONIC_CLOCK_MATRIX_CONTRACT_V1.md), [`../app/src/main/java/com/vectras/vm/rafaelia/HdCacheMvp.java`](../app/src/main/java/com/vectras/vm/rafaelia/HdCacheMvp.java) e [`../Rafaelia/rafaelia_bitwalk.h`](../Rafaelia/rafaelia_bitwalk.h).
+- **Inspeção**: `sed -n "1,420p" "docs/RAFAELIA_HARMONIC_CLOCK_MATRIX_IMPLEMENTATION_INDEX_20260720.md"`.
+
 ## `docs/RAFAELIA_PERF_OPS.md`
 - **Papel**: documentação textual e/ou especificação técnica.
 - **Liga com**: ver [`docs/README.md`](README.md) e [`docs/THREE_LAYER_ANALYSIS.md`](../docs/THREE_LAYER_ANALYSIS.md) para contexto de camadas.
@@ -117,12 +147,7 @@ Mapa arquivo-a-arquivo em três linhas por item: papel, ligação e comando de i
 ## `docs/README.md`
 - **Papel**: documentação local do diretório.
 - **Liga com**: ver [`docs/README.md`](README.md) e [`docs/THREE_LAYER_ANALYSIS.md`](../docs/THREE_LAYER_ANALYSIS.md) para contexto de camadas.
-- **Inspeção**: `file "docs/README.md"` e, quando texto, `sed -n "1,80p" "docs/README.md"`.
-
-## `docs/RAFAELIA_COHESION_ENTERPRISE_STACK.md`
-- **Papel**: documentação textual e/ou especificação técnica.
-- **Liga com**: ver [`docs/README.md`](README.md) e [`docs/THREE_LAYER_ANALYSIS.md`](../docs/THREE_LAYER_ANALYSIS.md) para contexto de camadas.
-- **Inspeção**: `file "docs/RAFAELIA_COHESION_ENTERPRISE_STACK.md"` e, quando texto, `sed -n "1,80p" "docs/RAFAELIA_COHESION_ENTERPRISE_STACK.md"`.
+- **Inspeção**: `file "docs/README.md"` e, quando texto, `sed -n "1,180p" "docs/README.md"`.
 
 ## `docs/REPO_XRAY.md`
 - **Papel**: documentação textual e/ou especificação técnica.
