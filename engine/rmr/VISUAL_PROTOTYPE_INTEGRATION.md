@@ -38,7 +38,7 @@ A weak result is `NO_MATCH`; a close tie is `AMBIGUOUS`. Both preserve `TOKEN_VA
 
 ## Capsule format
 
-The canonical little-endian `RVC1` payload contains magic, version, total length, class id, label, view mask, all view descriptors, prototype CRC32C and a final capsule CRC32C. A two-view `cachorro` fixture serializes to 232 bytes.
+The canonical little-endian `RVC1` payload contains magic, version, total length, class id, label, view mask, all view descriptors, prototype CRC32C and a final capsule CRC32C. Structural validation also rejects label/class mismatches, inconsistent masks, duplicate views and view ids outside `0..15`.
 
 The low-level core does not construct a ZIP archive. The capsule becomes an entry such as `cachorro-0001.rvp` inside a method-0 ZIP archive. This preserves separation:
 
@@ -57,6 +57,12 @@ Standalone compilation passed with:
 -O2 -std=c11 -Wall -Wextra -Werror -pedantic
 ```
 
-The fixture verified three classes, two dog views, a brightness variation, correct winner/margin, duplicate-view rejection, serialization round-trip and one-byte tamper rejection.
+The fixture verified three classes, two dog views, a brightness variation, correct winner/margin, duplicate-view rejection, serialization round-trip and one-byte tamper rejection:
+
+```text
+rmr_visual_prototype_selftest: OK dog=63395 car=47011 margin=16384 capsule=232
+```
+
+A one-view `cachorro` capsule was materialized as 140 RVC1 bytes and packaged in a 272-byte classic ZIP using method `STORE`. Reopening produced identical payload bytes. ZIP CRC-32: `2d8bd598`; payload SHA-256: `3438ca62d78667862f86fe809463ce328fc025e763fdd7a8ec1693344726dfed`.
 
 The current descriptor is intentionally small. Real dog/car/tree accuracy remains `TOKEN_VAZIO` until real labeled images are evaluated outside the enrolled prototype set. A multimodal embedding can later be added as a higher descriptor channel without changing the capsule/store contract.
