@@ -14,6 +14,7 @@ RMR_SOURCE_GROUP_CORE := \
 	engine/rmr/src/rmr_qemu_bridge.c \
 	engine/rmr/src/rmr_math_fabric.c \
 	engine/rmr/src/rmr_torus_flow.c \
+	engine/rmr/src/rmr_stability.c \
 	engine/rmr/src/rafaelia_formulas_core.c \
 	engine/rmr/src/rmr_corelib.c \
 	engine/rmr/src/rmr_ll_ops.c \
@@ -59,3 +60,7 @@ RMR_SOURCE_GROUP_ASM_ARM64_NEON := \
 RMR_SOURCE_GROUP_ASM_RISCV64 := \
 	engine/rmr/interop/rmr_casm_riscv64.S \
 	engine/rmr/interop/rmr_vectra_os_riscv64.S
+
+RMR_SOURCE_GROUP_ASM_ARM32 := \
+	engine/rmr/interop/rmr_stability_armv7.S \
+	engine/rmr/interop/rmr_vectra_os_armv7.S
