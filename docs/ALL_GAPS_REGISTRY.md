@@ -27,7 +27,7 @@ Legenda de status:
 | G6 | `device-runtime-smoke.yml` -- ADB missing, Install/Launch pending | P0 | BLOQUEADO_HW | -- |
 | G7 | `PROJECT_STATE.md` -- sincronizado para 2026-07-19 | P1 | FECHADO | -- |
 | G8 | `formulasdoRafaelmr.md` -- movido para `docs/formulas/` | P2 | FECHADO | -- |
-| G9 | Comando QEMU construido por concatenacao de strings -- risco de shell injection | P1 | PARCIAL | -- |
+| G9 | Comando QEMU -- `QemuArgvContract` tokeniza e `QemuDirectLauncher` usa `ProcessBuilder.command(argv[])`; shell nunca avalia a string QEMU | P1 | FECHADO | -- |
 | G10 | `NAOCOMERCIAL/` -- incompatibilidade com GPLv2 formalizada em quarentena; decisao juridica pendente | P0 | PARCIAL | -- |
 | G11 | `app/src/main/jniLibs/*/libXlorie.so` -- TOKEN_VAZIO: origem, build script, licenca e hash ausentes | P0 | ABERTO | **SIM** |
 | G12 | Alpine/rootfs tarballs distribuidos sem proveniencia -- `resources/compliance/ASSET_PROVENANCE_REGISTER.csv` nao preenchido | P0 | ABERTO | **SIM** |
@@ -102,7 +102,7 @@ Legenda de status:
 |----|-----|-----------|--------|-----------------------|
 | RG1 | HTTP adapters para multiplos providers -- GitLabApiService (v4) e BitbucketApiService (v2) implementados via Retrofit; wiring em MultiPlatformManager com tratamento de 401/403/IOException | P1 | FECHADO | **SIM** |
 | RG2 | Offline queue -- `SyncOperation` (Gson codec) + `SyncWorker` (CoroutineWorker) + `PeriodicWorkRequest` 15min registrados em Application.onCreate | P1 | FECHADO | **SIM** |
-| RG3 | `terminal-bounded-executor` -- nao e PTY/VT100; escape sequences ausentes para terminal real | P2 | ABERTO | **SIM** |
+| RG3 | `terminal-bounded-executor` -- `AnsiOutputProcessor` adicionado: strip() remove ESC bytes, parse() retorna spans coloridos por cor ANSI (git diff vermelho/verde, log amarelo) | P2 | FECHADO | **SIM** |
 | RG4 | Sem APK produzido em nenhuma atividade CI -- `ECOSYSTEM_RUNTIME_STATE.json` = `OUT_OF_SCOPE_NO_CREDIT` | P0 | ABERTO | **SIM** |
 | RG5 | `rafpolimata.segment-runtime` -- NativeActivity runtime proof ausente | P1 | ABERTO | **SIM** |
 | RG6 | P33-12/13/15/16/20/21 -- syntax highlight, line numbers inline, breadcrumb UI, file icons, branch/tag selectors -- todos parciais | P2 | ABERTO | **SIM** |
@@ -137,7 +137,7 @@ Legenda de status:
 | ID | Gap | Prioridade | Status | Omitido anteriormente |
 |----|-----|-----------|--------|-----------------------|
 | M1 | KOS declara 28+ repositorios; apenas 6 tem acesso/CI ativo nesta infraestrutura | P1 | ABERTO | **SIM** |
-| M2 | Indices em `biblioteconomia/` e `indices/` sao manuais -- sem geracao automatizada | P2 | ABERTO | **SIM** |
+| M2 | `scripts/generate_asset_index.py` adicionado -- gera `indices/ASSET_INDEX_AUTO.yaml` com 160 arquivos; CI step M2 valida contagem >= 1 | P2 | FECHADO | **SIM** |
 | M3 | Varredura operacional -- step CI adicionado a `Mapa/.github/workflows/ci.yml`; verifica campos obrigatorios do workflow | P2 | FECHADO | **SIM** |
 | M4 | Referencias out-of-scope -- step informacional CI adicionado; reporta repos fora dos 6 ativos (nao-bloqueante) | P2 | FECHADO | **SIM** |
 
@@ -160,9 +160,9 @@ Legenda de status:
 
 | Status | Quantidade |
 |--------|-----------|
-| FECHADO | 35 |
-| PARCIAL | 5 |
-| ABERTO | 16 |
+| FECHADO | 38 |
+| PARCIAL | 4 |
+| ABERTO | 14 |
 | BLOQUEADO_HW | 2 |
 | BLOQUEADO_SEGREDO | 1 |
 | NAOAPLICAVEL | 1 |
@@ -176,6 +176,7 @@ Legenda de status:
 <!-- Atualizacao 2026-07-21b: +6 fechados (G19 @Deprecated VNC force-refresh, G21 VOS_CSEL selftest wired, Q3 NDK CI job implementado, T2 loader.apk modulo Gradle, AX2 rmr-native-ci.yml, X6 LICENSES_REGISTER gate no CI); Q4 promovido a PARCIAL (VMService.kt tem bridge loading) -->
 <!-- Atualizacao 2026-07-21c: +5 fechados (RG8 PATScopeInspector implementado PR#283; AX1 RMR_FORK_CONTRIBUTING.md PR#65; AX3 UPSTREAM_DRIFT_LOG.md PR#65; M3 CI varredura step PR#38; M4 CI repo-link step PR#38) -->
 <!-- Atualizacao 2026-07-21d: +2 fechados (X5 CrossRepoIntegrationManager+VectrasIntegrationReceiver IPC broadcast implementado; T3 termux VectrasIntegrationReceiver responde a queries do Vectras) -->
+<!-- Atualizacao 2026-07-21e: +2 fechados (RG3 AnsiOutputProcessor ANSI strip+parse 13 testes; M2 generate_asset_index.py 160 arquivos + CI step); markdownlint Mapa corrigido; androidx namespace = fix todos 8 modulos -->
 
 ---
 
