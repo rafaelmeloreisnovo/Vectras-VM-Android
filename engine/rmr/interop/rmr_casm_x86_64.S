@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-2.0-only
 .text
 .global rmr_casm_xor_fold32_x86_64
 .type rmr_casm_xor_fold32_x86_64, @function

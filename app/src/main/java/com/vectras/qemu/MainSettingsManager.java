@@ -1174,6 +1174,8 @@ public class MainSettingsManager extends AppCompatActivity
         return prefs.getInt("vncScaleMode", 0);
     }
 
+    /** @deprecated VNC force-refresh is controlled per-session; use VncDisplayConfig instead. */
+    @Deprecated
     public static void setForceRefreshVNCDisplay(Context context, Boolean enabled) {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         SharedPreferences.Editor edit = prefs.edit();
@@ -1181,6 +1183,8 @@ public class MainSettingsManager extends AppCompatActivity
         edit.apply();
     }
 
+    /** @deprecated VNC force-refresh is controlled per-session; use VncDisplayConfig instead. */
+    @Deprecated
     public static Boolean getForceRefreshVNCDisplay(Context context) {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         return prefs.getBoolean("forceRefeshVNCDisplay", true);

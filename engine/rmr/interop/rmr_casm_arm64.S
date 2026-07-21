@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-2.0-only
 /* ═══════════════════════════════════════════════════════
    rmr_casm_arm64.S — RMR CASM BRIDGE ARM64 (BAREMETAL)
    Ficheiro FALTANDO no zip original — adicionado aqui.

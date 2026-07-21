@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-2.0-only
 /* ═══════════════════════════════════════════════════════
    rmr_casm_riscv64.S — RMR CASM BRIDGE RISCV64
    Ficheiro FALTANDO no zip original — adicionado aqui.

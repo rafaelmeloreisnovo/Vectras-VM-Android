@@ -36,12 +36,13 @@ jobs:
       - name: Verify engine/rmr SPDX coverage
         run: |
           missing=$(grep -rL "SPDX-License-Identifier" engine/rmr/src/ --include="*.c" --include="*.h" 2>/dev/null || true)
-          if [ -n "$missing" ]; then
-            echo "FAIL: Missing SPDX headers in engine/rmr/src/:"
-            echo "$missing"
+          missing_asm=$(grep -rL "SPDX-License-Identifier" engine/rmr/interop/ --include="*.S" 2>/dev/null || true)
+          if [ -n "$missing" ] || [ -n "$missing_asm" ]; then
+            [ -n "$missing" ]     && echo "FAIL: Missing SPDX in engine/rmr/src/:" && echo "$missing"
+            [ -n "$missing_asm" ] && echo "FAIL: Missing SPDX in engine/rmr/interop/:" && echo "$missing_asm"
             exit 1
           fi
-          echo "OK: All engine/rmr/src files have SPDX-License-Identifier headers"
+          echo "OK: All engine/rmr/src and engine/rmr/interop files have SPDX-License-Identifier headers"
 
       - name: Verify LICENSES_REGISTER is not empty
         run: |
