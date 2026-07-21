@@ -1,4 +1,4 @@
-<!-- DOC_ORG_SCAN: 2026-07-19 | source-scan: current-audit -->
+<!-- DOC_ORG_SCAN: 2026-07-21 | source-scan: current-audit -->
 
 # CANONICAL_BUILD_STATUS
 
@@ -7,26 +7,39 @@
 ## Estado canônico atual
 
 - **Estado:** `BETA_BLOCKED`
-- **Auditoria corrente:** 2026-07-19
-- **Baseline master auditado:** `54c70615c77772a3a7074fd297743f25936cb168`
+- **Auditoria corrente:** 2026-07-21
 - **Branch de fechamento:** `claude/vectra-vm-gaps-audit-pvtiki`
-- **Prova no HEAD corrente:** `BLOCKED_BY_CI[RECENT_WORKFLOWS_FAILED]`
+- **Prova no HEAD corrente:** `BLOCKED_BY_CI[PENDING_DEVICE_RUN]`
 - **Regra:** mudança de código não equivale a build, artefato, instalação ou release comprovados.
+
+## Progresso de fechamento de gaps (2026-07-21)
+
+Fechamentos confirmados em código nesta auditoria (em relação ao estado de 2026-07-19):
+- **G15 FECHADO:** SPDX GPL-2.0-only adicionado a todos os 87 arquivos em `engine/rmr/` (src/*.c/*.h + interop/*.S)
+- **G22 FECHADO:** `legal-compliance-gate.yml` implementado e expandido para cobrir interop/
+- **G26/G27 FECHADOS:** `detectRootfsLibc` i386 + `audit_vectra_capabilities` segurança
+- **G4/G5/G7/G8 FECHADOS:** em sessões anteriores (termux_jni, ZiprafDirectRuntime, PROJECT_STATE, formulas)
+
+Gaps ainda abertos — bloqueados por hardware ou segredos:
+- G2/G3: SHA-256 reais de APK (requer build CI com runner real)
+- G6: smoke de dispositivo ADB (requer runner ARM + dispositivo)
+- G11/G12/G13: proveniência de binários (requer decisão do proprietário)
+- G17/G18: Firebase credentials e cert pinning hash (requer segredos)
 
 ## Última validação oficial bem-sucedida (UTC)
 
 - **Data/hora:** 2026-04-03T22:29:21Z
 - **Commit SHA validado:** `0acd029fff6cb05d928249bace5d9d9a9d0c558f`
-- **Drift documental encerrado:** o registro antigo continua preservado como última prova positiva, mas não representa o HEAD de 2026-07-19.
+- **Nota:** este registro permanece como última prova positiva; o HEAD 2026-07-21 aguarda prova de CI bem-sucedida.
 
 ## Evidência recente sem promoção
 
-Os heads dos PRs de fechamento #1051 (`9f9e9cb44f4bf5df7359d9d5c1860470b1667f16`) e #1050 (`2e4f225586b86f5a805c9d64cf6754bf8fa53b9a`) acionaram workflows, porém as execuções observadas terminaram em falha. Portanto:
+O branch `claude/vectra-vm-gaps-audit-pvtiki` (HEAD: `f11b557a`) inclui múltiplos fechamentos de gap,
+porém ainda não produziu APK de release validado. Portanto:
 
-- nenhum APK/AAB recente foi promovido a evidência canônica;
-- nenhum SHA-256 de release foi inferido;
-- o ledger deve registrar `BLOCKED:workflow-failed`;
-- as correções de ZIPRAF, SBOM, JNI e argv QEMU permanecem como código pendente de prova CI/dispositivo.
+- nenhum APK/AAB foi promovido a evidência canônica;
+- nenhum SHA-256 de release foi calculado;
+- o ledger registra `BLOCKED_BY_HARDWARE[no-device-runner]`;
 
 ## Comandos oficiais
 
