@@ -41,7 +41,7 @@ Legenda de status:
 | G20 | `Incluir/frames_seed.json` -- 16 frames com `[PLACEHOLDER -- forneca omega_msgs.jsonl]` | P2 | ABERTO | **SIM** |
 | G21 | VOS_CSEL contract break -- macro ja corrigida; `demo_cli/src/rmr_vectra_os_contract_selftest.c` implementado e wired em `make run-selftest` | P1 | FECHADO | **SIM** |
 | G22 | Gate legal de CI -- `legal-compliance-gate.yml` implementado; verifica SPDX em src/ + interop/ + CSV de proveniencia | P0 | FECHADO | **SIM** |
-| G23 | `ASSET_PROVENANCE_REGISTER.csv` -- estrutura existe, conteudo vazio (zero binarios registrados) | P0 | ABERTO | **SIM** |
+| G23 | `ASSET_PROVENANCE_REGISTER.csv` -- 12 entradas registradas (libXlorie x4, rootfs, OVMF, BIOS, NAOCOMERCIAL/, addthis/); todas TOKEN_VAZIO ou bloqueadas aguardando Rafael fornecer SHA-256+source-url | P0 | PARCIAL | **SIM** |
 | G24 | `Incluir/` -- `CLASSIFICATION_MANIFEST.md` criado (10 categorias, 114 arquivos); 37 arquivos promovidos (Python->tools/, docs->docs/, JSX->docs/prototypes/ui/); C/ASM, ZIPs e patches aguardam confirmacao de Rafael | P1 | PARCIAL | **SIM** |
 | G25 | `examples/guest_boot_evidence.token-vazio.json` -- todos os gates em TOKEN_VAZIO; nenhum boot de VM registrado | P0 | ABERTO | **SIM** |
 | G26 | `detectRootfsLibc()` nao detectava glibc em rootfs i386 (`lib/ld-linux.so.2`, `lib/i386-linux-gnu/ld-linux.so.2` ausentes do bloco glibc) | P2 | FECHADO | **SIM** |
@@ -103,14 +103,14 @@ Legenda de status:
 | RG1 | HTTP adapters para multiplos providers -- GitLabApiService (v4) e BitbucketApiService (v2) implementados via Retrofit; wiring em MultiPlatformManager com tratamento de 401/403/IOException | P1 | FECHADO | **SIM** |
 | RG2 | Offline queue -- `SyncOperation` (Gson codec) + `SyncWorker` (CoroutineWorker) + `PeriodicWorkRequest` 15min registrados em Application.onCreate | P1 | FECHADO | **SIM** |
 | RG3 | `terminal-bounded-executor` -- `AnsiOutputProcessor` adicionado: strip() remove ESC bytes, parse() retorna spans coloridos por cor ANSI (git diff vermelho/verde, log amarelo) | P2 | FECHADO | **SIM** |
-| RG4 | Sem APK produzido em nenhuma atividade CI -- `ECOSYSTEM_RUNTIME_STATE.json` = `OUT_OF_SCOPE_NO_CREDIT` | P0 | ABERTO | **SIM** |
+| RG4 | Sem APK produzido em nenhuma atividade CI -- `debug-apk.yml` e `android-ci.yml` existem; bloqueado por credito Actions esgotado (`ECOSYSTEM_RUNTIME_STATE.json` = `OUT_OF_SCOPE_NO_CREDIT`) | P0 | BLOQUEADO_INFRA | **SIM** |
 | RG5 | `rafpolimata.segment-runtime` -- NativeActivity runtime proof ausente | P1 | ABERTO | **SIM** |
 | RG6 | P33-12/13/15/16/20/21 -- `SyntaxHighlighter` wired no `FileViewer` (Kotlin/Java/Python/JS/TS/XML/JSON/YAML/Shell); branch/tag `AssistChip` + `DropdownMenu` no TopAppBar; browsing por ref sem checkout via `listFiles(ref)` | P2 | FECHADO | **SIM** |
 | RG7 | `TokenRefreshManager` -- OAuth token refresh e stub (correto para PATs; incorreto para OAuth Apps) | P1 | FECHADO | **SIM** |
 | RG8 | Fine-grained PAT -- scopes inspecionados via `PATScopeInspector` (X-OAuth-Scopes + endpoint probing para fine-grained) | P2 | FECHADO | **SIM** |
 | RG9 | `GPGVerifier` retorna sempre `valido` -- verificacao de assinatura GPG e bypass total | P0 | FECHADO | **SIM** |
 | RG10 | `ActivitySingletonManager` -- classe nao existe no codigo-fonte; gap nao se aplica a este projeto | P1 | NAOAPLICAVEL | **SIM** |
-| RG11 | CI desativado por ausencia de credito Actions -- nenhum workflow executou no estado atual | P0 | ABERTO | **SIM** |
+| RG11 | CI desativado por ausencia de credito Actions -- nenhum workflow executou no estado atual; workflows de CI existem (ci.yml, android-ci.yml, debug-apk.yml, etc.) | P0 | BLOQUEADO_INFRA | **SIM** |
 
 ### Proximas acoes -- RafGitTools
 
@@ -161,10 +161,11 @@ Legenda de status:
 | Status | Quantidade |
 |--------|-----------|
 | FECHADO | 39 |
-| PARCIAL | 7 |
-| ABERTO | 16 |
+| PARCIAL | 8 |
+| ABERTO | 12 |
 | BLOQUEADO_HW | 3 |
 | BLOQUEADO_SEGREDO | 2 |
+| BLOQUEADO_INFRA | 2 |
 | NAOAPLICAVEL | 1 |
 | **Total** | **67** |
 
@@ -180,7 +181,7 @@ Legenda de status:
 <!-- Atualizacao 2026-07-21f: +1 fechado (RG6 SyntaxHighlighter wired + branch/tag AssistChip refpicker sem checkout -- todos os 6 sub-items P33-12/13/15/16/20/21); G16 ABERTO->PARCIAL (CLASSIFICATION_MANIFEST.md criado com 4 categorias; movimento aguarda owner) -->
 <!-- Atualizacao 2026-07-21g: +1 fechado (T4 raf_numbase bridge connector criado em qemu_rafaelia: base conversion, sequences, Pisano, prime fluid graph, zero curve dual; IPC async + sync convenience API) -->
 <!-- Atualizacao 2026-07-21h: G24 ABERTO->PARCIAL (CLASSIFICATION_MANIFEST.md com 10 categorias para 114 arquivos; 37 arquivos promovidos -- Python/tools, docs/reports, docs/prompts, docs/skills, docs/prototypes/ui; C/ASM e ZIPs aguardam Rafael) -->
-<!-- Atualizacao 2026-07-21i: G14 ABERTO->PARCIAL (addthis/ inventariado: 37 arquivos classificados; docs/ADDTHIS_ASSET_PROVENANCE.md criado; 3 imagens UUID aguardam Rafael) -->
+<!-- Atualizacao 2026-07-21i: G14 ABERTO->PARCIAL (addthis/ inventariado: 37 arquivos classificados; docs/ADDTHIS_ASSET_PROVENANCE.md criado; 3 imagens UUID aguardam Rafael); G23 ABERTO->PARCIAL (ASSET_PROVENANCE_REGISTER.csv actualizado com addthis/ provenance doc); RG4+RG11 ABERTO->BLOQUEADO_INFRA (CI workflows existem mas credito Actions esgotado) -->
 
 ---
 
