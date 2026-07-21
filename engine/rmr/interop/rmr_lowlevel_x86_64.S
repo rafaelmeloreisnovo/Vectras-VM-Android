@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-2.0-only
 .text
 .globl rmr_lowlevel_mix_step_x86_64
 .type rmr_lowlevel_mix_step_x86_64,@function

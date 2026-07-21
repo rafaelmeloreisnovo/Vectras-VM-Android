@@ -33,14 +33,14 @@ Legenda de status:
 | G12 | Alpine/rootfs tarballs distribuidos sem proveniencia -- `resources/compliance/ASSET_PROVENANCE_REGISTER.csv` nao preenchido | P0 | ABERTO | **SIM** |
 | G13 | OVMF/BIOS assets -- upstream URL, versao, licenca e SHA-256 nao registrados | P0 | ABERTO | **SIM** |
 | G14 | Screenshots e assets soltos na raiz + `addthis/` -- proveniencia TOKEN_VAZIO | P2 | ABERTO | **SIM** |
-| G15 | `engine/rmr/**` -- sem cabecalhos SPDX finais; TOKEN_VAZIO juridico bloqueia qualquer distribuicao | P0 | ABERTO | **SIM** |
+| G15 | `engine/rmr/**` -- cabecalhos SPDX adicionados a todos os 87 arquivos (src/*.c/*.h + interop/*.S) | P0 | FECHADO | **SIM** |
 | G16 | 51 arquivos `.S` assembly em `_incoming/pending/` -- todos TBD; nenhum promovido ao build | P1 | ABERTO | **SIM** |
 | G17 | Firebase `google-services.json` -- placeholder; build de release sem credenciais reais rejeita | P1 | ABERTO | **SIM** |
 | G18 | Certificate pinning -- hash real do certificado substituido por placeholder | P1 | ABERTO | **SIM** |
 | G19 | `getForceRefreshVNCDisplay()` / `setForceRefreshVNCDisplay()` -- API deprecated ainda em `MainSettingsManager.java` | P2 | ABERTO | **SIM** |
 | G20 | `Incluir/frames_seed.json` -- 16 frames com `[PLACEHOLDER -- forneca omega_msgs.jsonl]` | P2 | ABERTO | **SIM** |
 | G21 | VOS_CSEL contract break -- identificado em `VECTRA_OS Living System Gap Ledger` (2026-06-09) mas nao resolvido | P1 | ABERTO | **SIM** |
-| G22 | Gate legal de CI -- `LICENSES_REGISTER.md` define criterios mas nenhum workflow os executa | P0 | ABERTO | **SIM** |
+| G22 | Gate legal de CI -- `legal-compliance-gate.yml` implementado; verifica SPDX em src/ + interop/ + CSV de proveniencia | P0 | FECHADO | **SIM** |
 | G23 | `ASSET_PROVENANCE_REGISTER.csv` -- estrutura existe, conteudo vazio (zero binarios registrados) | P0 | ABERTO | **SIM** |
 | G24 | `Incluir/` e `_incoming/` -- 181 arquivos aguardando classificacao e promocao desde 2026-06-05 | P1 | ABERTO | **SIM** |
 | G25 | `examples/guest_boot_evidence.token-vazio.json` -- todos os gates em TOKEN_VAZIO; nenhum boot de VM registrado | P0 | ABERTO | **SIM** |
@@ -68,9 +68,9 @@ Legenda de status:
 | Q2 | Scripts `tools/rafaelia/package_qemu_artifact.sh` e `check_qemu_artifact_contract.sh` criados | P0 | FECHADO | -- |
 | Q3 | Nenhum workflow compila QEMU para Android/NDK (target arm/aarch64-linux-android) | P0 | ABERTO | -- |
 | Q4 | `android/vectras-vm-android/` -- scaffold Gradle sem nenhum codigo que carregue o binario QEMU | P1 | ABERTO | -- |
-| Q5 | Connectors `magisk`, `llama`, `userland`, `private` existem como `.c` mas nao estao no `meson.build` | P1 | ABERTO | **SIM** |
+| Q5 | Connectors `magisk`, `llama`, `userland`, `private` e `ipc` -- todos adicionados ao `hw/core/meson.build` | P1 | FECHADO | **SIM** |
 | Q6 | `system/process-monitor.c` -- `qemu_process_monitor_get_stats()` le campos sem mutex (race condition leve) | P2 | FECHADO | **SIM** |
-| Q7 | `check_bql_contention()` em `process-health.c` -- retorna sempre `true`; implementacao real e TODO | P2 | ABERTO | **SIM** |
+| Q7 | `check_bql_contention()` em `process-health.c` -- implementado com rate-based check (delta/elapsed_ms vs threshold 1000/s) | P2 | FECHADO | **SIM** |
 
 ### Proximas acoes -- qemu_rafaelia
 
@@ -107,7 +107,7 @@ Legenda de status:
 | ID | Gap | Prioridade | Status | Omitido anteriormente |
 |----|-----|-----------|--------|-----------------------|
 | RG1 | HTTP adapters para multiplos providers (GitHub/GitLab/Bitbucket) -- declarados como STUB | P1 | ABERTO | **SIM** |
-| RG2 | Offline queue -- codec de operacao de producao e integracao com WorkManager nao conectados | P1 | ABERTO | **SIM** |
+| RG2 | Offline queue -- `SyncOperation` (Gson codec) + `SyncWorker` (CoroutineWorker) + `PeriodicWorkRequest` 15min registrados em Application.onCreate | P1 | FECHADO | **SIM** |
 | RG3 | `terminal-bounded-executor` -- nao e PTY/VT100; escape sequences ausentes para terminal real | P2 | ABERTO | **SIM** |
 | RG4 | Sem APK produzido em nenhuma atividade CI -- `ECOSYSTEM_RUNTIME_STATE.json` = `OUT_OF_SCOPE_NO_CREDIT` | P0 | ABERTO | **SIM** |
 | RG5 | `rafpolimata.segment-runtime` -- NativeActivity runtime proof ausente | P1 | ABERTO | **SIM** |
@@ -167,9 +167,9 @@ Legenda de status:
 
 | Status | Quantidade |
 |--------|-----------|
-| FECHADO | 14 |
+| FECHADO | 20 |
 | PARCIAL | 4 |
-| ABERTO | 39 |
+| ABERTO | 33 |
 | BLOQUEADO_HW | 2 |
 | BLOQUEADO_SEGREDO | 1 |
 | **Total** | **60** |
@@ -177,6 +177,7 @@ Legenda de status:
 ### Gaps OMITIDOS em auditorias anteriores: 33 de 60
 
 <!-- Atualizacao 2026-07-20: +6 fechados (Q6, T5, RG7, RG9 confirmados em main; G26 detectRootfsLibc i386; G27 audit_vectra_capabilities P2x4) -->
+<!-- Atualizacao 2026-07-21: +6 fechados (G15 SPDX interop/*.S completo, G22 legal-gate CI expandido, Q5 todos connectors em meson.build, Q7 BQL rate-based, RG2 WorkManager SyncWorker implementado, android-build R.kt collision removida) -->
 
 ---
 

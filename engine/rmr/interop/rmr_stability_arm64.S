@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-2.0-only
 .text
 .align 6
 .global rmr_stability_step_arm64
