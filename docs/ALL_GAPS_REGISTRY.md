@@ -85,7 +85,7 @@ Legenda de status:
 | T1 | `docs/BOOTSTRAP_SOURCE_CONTRACT.md` criado -- fonte dos bootstrap ZIPs documentada | P0 | FECHADO | -- |
 | T2 | `loader.apk` -- modulo Gradle `app/loader/` implementado; produz `loader.apk` stub via `materializeLoaderApk` | P0 | FECHADO | -- |
 | T3 | Integracao com Vectras-VM-Android -- `VectrasIntegrationReceiver` implementado em termux; `CrossRepoIntegrationManager` consume no Vectras | P1 | FECHADO | -- |
-| T4 | `raf_numbase` -- sistema sem equivalente em `qemu_rafaelia`; sem ponte entre os dois | P2 | ABERTO | -- |
+| T4 | `raf_numbase` -- bridge `hw/core/connectors/rafaelia-connector-numbase.c` criado em qemu_rafaelia: base 2-36, Fibonacci/Tribonacci/Primonacci, Pisano, radix economy, prime fluid graph, zero curve dual; IPC async + API sincrona de conveniencia | P2 | FECHADO | -- |
 | T5 | `compatibility-arm32` e `compatibility-arm32-ndk29` -- falhas pre-existentes em master desde 2026-07-03 (`apksigner: command not found`) | P1 | FECHADO | **SIM** |
 
 ### Proximas acoes -- termux-app-rafacodephi
@@ -160,9 +160,9 @@ Legenda de status:
 
 | Status | Quantidade |
 |--------|-----------|
-| FECHADO | 40 |
+| FECHADO | 41 |
 | PARCIAL | 5 |
-| ABERTO | 12 |
+| ABERTO | 11 |
 | BLOQUEADO_HW | 2 |
 | BLOQUEADO_SEGREDO | 1 |
 | NAOAPLICAVEL | 1 |
@@ -178,6 +178,7 @@ Legenda de status:
 <!-- Atualizacao 2026-07-21d: +2 fechados (X5 CrossRepoIntegrationManager+VectrasIntegrationReceiver IPC broadcast implementado; T3 termux VectrasIntegrationReceiver responde a queries do Vectras) -->
 <!-- Atualizacao 2026-07-21e: +2 fechados (RG3 AnsiOutputProcessor ANSI strip+parse 13 testes; M2 generate_asset_index.py 160 arquivos + CI step); markdownlint Mapa corrigido; androidx namespace = fix todos 8 modulos -->
 <!-- Atualizacao 2026-07-21f: +1 fechado (RG6 SyntaxHighlighter wired + branch/tag AssistChip refpicker sem checkout -- todos os 6 sub-items P33-12/13/15/16/20/21); G16 ABERTO->PARCIAL (CLASSIFICATION_MANIFEST.md criado com 4 categorias; movimento aguarda owner) -->
+<!-- Atualizacao 2026-07-21g: +1 fechado (T4 raf_numbase bridge connector criado em qemu_rafaelia: base conversion, sequences, Pisano, prime fluid graph, zero curve dual; IPC async + sync convenience API) -->
 
 ---
 
