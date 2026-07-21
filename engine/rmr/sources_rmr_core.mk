@@ -15,6 +15,7 @@ RMR_SOURCE_GROUP_CORE := \
 	engine/rmr/src/rmr_math_fabric.c \
 	engine/rmr/src/rmr_torus_flow.c \
 	engine/rmr/src/rmr_stability.c \
+	engine/rmr/src/rmr_visual_prototype.c \
 	engine/rmr/src/rafaelia_formulas_core.c \
 	engine/rmr/src/rmr_corelib.c \
 	engine/rmr/src/rmr_ll_ops.c \
@@ -24,6 +25,7 @@ RMR_SOURCE_GROUP_CORE := \
 	engine/rmr/src/rmr_unified_jni_bridge.c \
 	engine/rmr/src/rmr_host_compat.c \
 	engine/rmr/src/rmr_zipraf_core.c \
+	engine/rmr/src/rmr_visual_zipraf.c \
 	engine/rmr/src/topological_guard.c \
 	engine/rmr/src/rmr_lowlevel_portable.c \
 	engine/rmr/src/rmr_lowlevel_mix.c \
