@@ -119,6 +119,74 @@
       "comment": "QUARANTENA: directory may carry a non-commercial restriction incompatible with GPL-2.0-only. Contents must be audited file-by-file before inclusion in any APK/AAB. See legal/LEGAL_SCOPE_MAP.yaml."
     },
     {
+      "SPDXID": "SPDXRef-libXlorie-arm64",
+      "name": "libXlorie.so (arm64-v8a)",
+      "versionInfo": "NOASSERTION",
+      "downloadLocation": "NOASSERTION",
+      "filesAnalyzed": false,
+      "licenseConcluded": "NOASSERTION",
+      "licenseDeclared": "NOASSERTION",
+      "copyrightText": "NOASSERTION",
+      "comment": "QUARANTENA-PARCIAL: pre-compiled X11/EGL-pixman Android display library; ELF64 ARM aarch64; BuildID-sha1=fa8b07c20a74960492bbf454821fa0a0e7f08c5e; stripped. SHA-256 computed 2026-07-21. Source origin and license TOKEN_VAZIO pending Rafael confirmation. See resources/compliance/ASSET_PROVENANCE_REGISTER.csv.",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "70aed270f25d08510f068dd00260911e7076d6884230c5f2d4baca758430922c"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-libXlorie-armv7",
+      "name": "libXlorie.so (armeabi-v7a)",
+      "versionInfo": "NOASSERTION",
+      "downloadLocation": "NOASSERTION",
+      "filesAnalyzed": false,
+      "licenseConcluded": "NOASSERTION",
+      "licenseDeclared": "NOASSERTION",
+      "copyrightText": "NOASSERTION",
+      "comment": "QUARANTENA-PARCIAL: pre-compiled X11/EGL-pixman Android display library; ELF32 ARM; stripped. SHA-256 computed 2026-07-21. Source origin and license TOKEN_VAZIO pending Rafael confirmation.",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "91fd5f2ec45712e4c317598381dee21c236dbc92d6f1657597d587ce1a137954"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-libXlorie-x86",
+      "name": "libXlorie.so (x86)",
+      "versionInfo": "NOASSERTION",
+      "downloadLocation": "NOASSERTION",
+      "filesAnalyzed": false,
+      "licenseConcluded": "NOASSERTION",
+      "licenseDeclared": "NOASSERTION",
+      "copyrightText": "NOASSERTION",
+      "comment": "QUARANTENA-PARCIAL: pre-compiled X11/EGL-pixman Android display library; ELF32 x86; stripped. SHA-256 computed 2026-07-21. Source origin and license TOKEN_VAZIO pending Rafael confirmation.",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "bc2bf69dfda4aa606344a66c32c6e97dee88de956de6f754c57415048b45a6a0"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-libXlorie-x86-64",
+      "name": "libXlorie.so (x86_64)",
+      "versionInfo": "NOASSERTION",
+      "downloadLocation": "NOASSERTION",
+      "filesAnalyzed": false,
+      "licenseConcluded": "NOASSERTION",
+      "licenseDeclared": "NOASSERTION",
+      "copyrightText": "NOASSERTION",
+      "comment": "QUARANTENA-PARCIAL: pre-compiled X11/EGL-pixman Android display library; ELF64 x86_64; stripped. SHA-256 computed 2026-07-21. Source origin and license TOKEN_VAZIO pending Rafael confirmation.",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "c2a051f3e1ba7d0d4b982ee6fbef98e4c476756a208cabec47de31a73d0381ac"
+        }
+      ]
+    },
+    {
       "SPDXID": "SPDXRef-ovmf-bios",
       "name": "OVMF/EDK2-BIOS",
       "versionInfo": "NOASSERTION",
@@ -166,6 +234,26 @@
       "spdxElementId": "SPDXRef-app",
       "relationshipType": "DEPENDS_ON",
       "relatedSpdxElement": "SPDXRef-ovmf-bios"
+    },
+    {
+      "spdxElementId": "SPDXRef-app",
+      "relationshipType": "DYNAMIC_LINK",
+      "relatedSpdxElement": "SPDXRef-libXlorie-arm64"
+    },
+    {
+      "spdxElementId": "SPDXRef-app",
+      "relationshipType": "DYNAMIC_LINK",
+      "relatedSpdxElement": "SPDXRef-libXlorie-armv7"
+    },
+    {
+      "spdxElementId": "SPDXRef-app",
+      "relationshipType": "DYNAMIC_LINK",
+      "relatedSpdxElement": "SPDXRef-libXlorie-x86"
+    },
+    {
+      "spdxElementId": "SPDXRef-app",
+      "relationshipType": "DYNAMIC_LINK",
+      "relatedSpdxElement": "SPDXRef-libXlorie-x86-64"
     }
   ]
 }

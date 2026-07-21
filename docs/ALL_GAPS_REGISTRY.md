@@ -23,7 +23,7 @@ Legenda de status:
 |----|-----|-----------|--------|-----------------------|
 | G1 | `CANONICAL_BUILD_STATUS.md` -- drift de data corrigido; auditoria 2026-07-21 registrada | P0 | FECHADO | -- |
 | G2 | `docs/RELEASE_EVIDENCE_LEDGER.md` -- estrutura correta com BLOCKED entries; SHA-256 reais bloqueados por ausencia de build CI verde | P0 | BLOQUEADO_INFRA | -- |
-| G3 | SBOM criado (`sbom/SBOM.spdx.json`) mas todos os checksums em `NOASSERTION` ate build real | P0 | PARCIAL | -- |
+| G3 | SBOM: 4 entradas `libXlorie.so` adicionadas com SHA-256 reais (arm64/armv7/x86/x86_64); restante NOASSERTION ate build CI produzir APK/AAB | P0 | PARCIAL | -- |
 | G4 | `_incoming/termux.c` -> promovido para `app/src/main/cpp/termux_jni.c` | P1 | FECHADO | -- |
 | G5 | `ZiprafDirectRuntime.kt` -- mmap extent corrigido + parser ZIP + testes | P1 | FECHADO | -- |
 | G6 | `device-runtime-smoke.yml` -- ADB missing, Install/Launch pending | P0 | BLOQUEADO_HW | -- |
