@@ -19,7 +19,7 @@ Legenda de status:
 
 | ID | Gap | Prioridade | Status | Omitido anteriormente |
 |----|-----|-----------|--------|-----------------------|
-| G1 | `CANONICAL_BUILD_STATUS.md` -- drift de data (ultima entrada: 2026-04-03, >107 dias) | P0 | ABERTO | -- |
+| G1 | `CANONICAL_BUILD_STATUS.md` -- drift de data corrigido; auditoria 2026-07-21 registrada | P0 | FECHADO | -- |
 | G2 | `docs/RELEASE_EVIDENCE_LEDGER.md` -- zero entradas reais; apenas templates de exemplo | P0 | ABERTO | -- |
 | G3 | SBOM criado (`sbom/SBOM.spdx.json`) mas todos os checksums em `NOASSERTION` ate build real | P0 | PARCIAL | -- |
 | G4 | `_incoming/termux.c` -> promovido para `app/src/main/cpp/termux_jni.c` | P1 | FECHADO | -- |
@@ -106,7 +106,7 @@ Legenda de status:
 
 | ID | Gap | Prioridade | Status | Omitido anteriormente |
 |----|-----|-----------|--------|-----------------------|
-| RG1 | HTTP adapters para multiplos providers (GitHub/GitLab/Bitbucket) -- declarados como STUB | P1 | ABERTO | **SIM** |
+| RG1 | HTTP adapters para multiplos providers -- GitLabApiService (v4) e BitbucketApiService (v2) implementados via Retrofit; wiring em MultiPlatformManager com tratamento de 401/403/IOException | P1 | FECHADO | **SIM** |
 | RG2 | Offline queue -- `SyncOperation` (Gson codec) + `SyncWorker` (CoroutineWorker) + `PeriodicWorkRequest` 15min registrados em Application.onCreate | P1 | FECHADO | **SIM** |
 | RG3 | `terminal-bounded-executor` -- nao e PTY/VT100; escape sequences ausentes para terminal real | P2 | ABERTO | **SIM** |
 | RG4 | Sem APK produzido em nenhuma atividade CI -- `ECOSYSTEM_RUNTIME_STATE.json` = `OUT_OF_SCOPE_NO_CREDIT` | P0 | ABERTO | **SIM** |
@@ -115,7 +115,7 @@ Legenda de status:
 | RG7 | `TokenRefreshManager` -- OAuth token refresh e stub (correto para PATs; incorreto para OAuth Apps) | P1 | FECHADO | **SIM** |
 | RG8 | Fine-grained PAT -- scopes nao inspecionados; apenas `/user` validado | P2 | ABERTO | **SIM** |
 | RG9 | `GPGVerifier` retorna sempre `valido` -- verificacao de assinatura GPG e bypass total | P0 | FECHADO | **SIM** |
-| RG10 | `ActivitySingletonManager` guarda `Activity` sem `WeakReference` -- memory leak em rotation/back | P1 | ABERTO | **SIM** |
+| RG10 | `ActivitySingletonManager` -- classe nao existe no codigo-fonte; gap nao se aplica a este projeto | P1 | NAOAPLICAVEL | **SIM** |
 | RG11 | CI desativado por ausencia de credito Actions -- nenhum workflow executou no estado atual | P0 | ABERTO | **SIM** |
 
 ### Proximas acoes -- RafGitTools
@@ -167,16 +167,18 @@ Legenda de status:
 
 | Status | Quantidade |
 |--------|-----------|
-| FECHADO | 20 |
+| FECHADO | 22 |
 | PARCIAL | 4 |
-| ABERTO | 33 |
+| ABERTO | 30 |
 | BLOQUEADO_HW | 2 |
 | BLOQUEADO_SEGREDO | 1 |
+| NAOAPLICAVEL | 1 |
 | **Total** | **60** |
 
 ### Gaps OMITIDOS em auditorias anteriores: 33 de 60
 
 <!-- Atualizacao 2026-07-20: +6 fechados (Q6, T5, RG7, RG9 confirmados em main; G26 detectRootfsLibc i386; G27 audit_vectra_capabilities P2x4) -->
+<!-- Atualizacao 2026-07-21: +2 fechados (G1 CANONICAL_BUILD_STATUS drift corrigido; RG1 HTTP adapters GitLab/Bitbucket implementados); RG10 marcado NAOAPLICAVEL (classe inexistente) -->
 <!-- Atualizacao 2026-07-21: +6 fechados (G15 SPDX interop/*.S completo, G22 legal-gate CI expandido, Q5 todos connectors em meson.build, Q7 BQL rate-based, RG2 WorkManager SyncWorker implementado, android-build R.kt collision removida) -->
 
 ---
