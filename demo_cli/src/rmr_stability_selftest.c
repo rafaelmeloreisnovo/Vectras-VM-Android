@@ -35,6 +35,8 @@ int main(void) {
     RmR_VisionDescriptor uniform, concentrated;
     CHECK(RmR_Vision_BuildDescriptor(gray, 4, 4, 4, uniform_angles, 8, &uniform) == 0u);
     CHECK(RmR_Vision_BuildDescriptor(gray, 4, 4, 4, concentrated_angles, 4, &concentrated) == 0u);
+    CHECK(uniform.otsu_threshold == 0u);
+    CHECK(uniform.foreground_count == 8u);
     CHECK(uniform.angular_chi2_q16 == 0u);
     CHECK(concentrated.angular_chi2_q16 > 0u);
     CHECK(concentrated.angular_concentration_q16 == RMR_STABILITY_Q16_ONE);
