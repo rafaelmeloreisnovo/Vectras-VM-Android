@@ -131,12 +131,12 @@ Ver: `termux-app-rafacodephi/docs/BOOTSTRAP_SOURCE_CONTRACT.md`
 
 ### BG-07: SBOM com hashes reais de binarios
 
-**Status:** `BLOCKED_BY[CI_BUILD_REQUIRED]`
+**Status:** `PARCIAL` (2026-07-21) — libXlorie.so SHA-256 reais adicionados; APK/AAB ainda `BLOCKED_BY[CI_BUILD_REQUIRED]`
 
-O arquivo `sbom/SBOM.spdx.json` foi criado com campos `"checksumValue": "NOASSERTION"`
-para os binarios (APK, OVMF blobs, libXlorie.so se presente).
+O arquivo `sbom/SBOM.spdx.json` agora contem entradas reais para os 4 artefatos libXlorie.so
+(arm64-v8a, armeabi-v7a, x86, x86_64) com SHA-256 computados 2026-07-21.
 
-Os hashes reais so podem ser calculados apos:
+Os hashes de APK/AAB e OVMF blobs ainda requerem:
 1. Build CI completo que produza os artefatos
 2. `sha256sum` dos artefatos gerados
 3. Atualizacao dos campos `checksums` no SBOM
@@ -145,28 +145,31 @@ Os hashes reais so podem ser calculados apos:
 
 ### BG-08: Proveniencia de libXlorie.so
 
-**Status:** `BLOCKED_BY[AUDIT_REQUIRED]`
+**Status:** `PARCIAL` (2026-07-21) — SHA-256 e identidade computados; source-url e licenca `BLOCKED_BY[AUDIT_REQUIRED]`
 
-Se `libXlorie.so` for incluida no APK, requer:
-- Origem (repositorio upstream ou build propria)
+Progresso 2026-07-21: `libXlorie.so` presente em todos os 4 ABIs identificada como biblioteca
+X11/EGL-pixman Android display server. SHA-256 computados e registrados em
+`ASSET_PROVENANCE_REGISTER.csv` e `sbom/SBOM.spdx.json`.
+
+Remanescente (requer Rafael):
+- Origem exata (repositorio upstream ou build propria — possivel relacao com termux-x11)
 - Licenca SPDX
 - Recipe de build (como compilar a partir de fontes)
-- SHA-256 do binario
 
-Sem isso, a biblioteca esta em quarentena para fins de distribuicao publica.
+BuildID sha1: `fa8b07c20a74960492bbf454821fa0a0e7f08c5e` (arm64-v8a).
+Biblioteca permanece em quarentena para distribuicao publica ate confirmacao de licenca.
 
 ---
 
 ### BG-09: libXlorie.so e Alpine/rootfs -- proveniencia total ausente
 
-**Status:** `BLOCKED_BY[AUDIT_REQUIRED]`
+**Status:** `PARCIAL` (2026-07-21) — SHA-256 computados; source-url e licenca `BLOCKED_BY[AUDIT_REQUIRED]`
 
-Identificado em `LICENSES_REGISTER.md`. Dois grupos de binarios distribuidos sem registo:
+Progresso 2026-07-21:
+1. **`app/src/main/jniLibs/*/libXlorie.so`** -- SHA-256 computados para todos os 4 ABIs (arm64, armv7, x86, x86_64); binario identificado como X11/EGL-pixman Android display library. Entradas `blocked-sha256-known` em `ASSET_PROVENANCE_REGISTER.csv`. Licenca e source-url pendentes de Rafael.
+2. **Alpine/rootfs tarballs** -- `ASSET_PROVENANCE_REGISTER.csv` tem entradas de guarda glob. Tarballs nao commitados no repositorio (gitignored); entradas serao preenchidas quando Rafael adicionar os assets.
 
-1. **`app/src/main/jniLibs/*/libXlorie.so`** (arm64-v8a + armeabi-v7a) -- origem exata, build script, licenca SPDX e SHA-256 TOKEN_VAZIO. Biblioteca nao pode entrar em release sem esses dados.
-2. **Alpine/rootfs tarballs** -- `resources/compliance/ASSET_PROVENANCE_REGISTER.csv` existe mas esta completamente vazio (zero linhas de conteudo). Cada tarball incluido no APK ou empacotado junto precisa de upstream URL + licenca + hash.
-
-**Desbloqueio:** Identificar origem de `libXlorie.so` (fork? build propria? upstream?) e preencher `ASSET_PROVENANCE_REGISTER.csv` com uma linha por binario distribuido.
+**Desbloqueio remanescente:** Rafael confirmar origem de `libXlorie.so` (possivel relacao com termux-x11 ou X.Org no Android) e fornecer source-url + licenca SPDX.
 
 ---
 
