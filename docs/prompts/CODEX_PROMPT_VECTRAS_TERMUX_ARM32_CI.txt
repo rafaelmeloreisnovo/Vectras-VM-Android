@@ -1,0 +1,130 @@
+# Prompt para Codex — Vectras + Termux RAFCODEΦ (fixes de build, ARM32, unsigned, CI profissional)
+
+Você está trabalhando em dois repositórios relacionados:
+1. `wojcikiewicz17/Vectras-VM-Android`
+2. `wojcikiewicz17/termux-app-rafacodephi`
+
+Objetivo geral:
+- corrigir os blockers de compilação e integração incremental;
+- garantir compatibilidade real com ARM32 (`armeabi-v7a`) e ARM64 (`arm64-v8a`);
+- permitir compilação e artefatos **sem assinatura** para debug/validação interna;
+- manter release oficial restrito e profissional;
+- organizar um CI limpo, reproduzível, claro e confortável para uso de mantenedor e usuário final;
+- entregar logs e artefatos que provem de forma objetiva o que foi compilado.
+
+## Evidência já observada (não ignorar)
+
+### Artefatos CI recebidos
+- Os artefatos recebidos mostram benchmark host **x86_64** bem instrumentado, com perf gate passando e escolha de flags `balanced` por política de não-regressão.
+- Porém, eles **não comprovam entrega final Android/ARM32**. Não basta o workflow declarar suporte; é preciso publicar artefatos inequívocos por ABI.
+- Há inconsistência de contrato entre artefatos:
+  - `host-ci-results.zip` registra **7 runs** por perfil.
+  - `quality-gates-perf-*.zip` registra **5 runs** por perfil.
+  Padronize isso.
+- `host-logs-*.zip` não contém logs textuais úteis de build Android; contém principalmente binários/objetos host. Corrigir a taxonomia e o conteúdo dos artefatos.
+- Nos artefatos há binários mistos por arquitetura (`libtermux.so` aarch64 Android e `libXlorie.so` i386 Android no mesmo conjunto), sem manifesto claro por ABI. Isso precisa ser separado e descrito.
+
+## Problemas concretos já localizados
+
+### Repo 1 — Vectras-VM-Android
+1. Em `app/build.gradle`, o identificador `abiPoliciesThatRequireTermuxBootstrap` é usado em tarefas de verificação de bootstrap/ABI, mas não foi localizado definido. Corrigir isso de forma explícita e consistente.
+2. O build Android está com gates muito rígidos antes do compile real (SDK/NDK/CMake/JDK, `validate_lowlevel_abi.sh`, freestanding contract, shell-loader no `preBuild`, Firebase/signing gates). Isso deve ser mantido para CI/release, mas **suavizado para debug/local/internal**.
+3. O script `tools/ci/validate_lowlevel_abi.sh` depende de ferramentas externas (`python3`, `nm/llvm-nm`, `rg`). Adicionar fallback para `grep -E` quando `rg` não existir e mensagens de erro mais diretas.
+4. O path do `loader.apk` está rígido demais. Preferir resolver via metadata do AGP, não por caminho fixo.
+5. O workflow `.github/workflows/android-ci.yml` já conhece `internal_arm32_arm64`, mas os artefatos analisados não demonstram essa trilha fechada. O CI precisa **provar** ARM32.
+
+### Repo 2 — termux-app-rafacodephi
+1. O pipeline de bootstrap (`downloadBootstraps`, checksum, `BOOTSTRAP_INFO`, package name, page size) é forte demais para iteração local. Manter estrito em release, mas criar uma trilha debug/local clara e suportada.
+2. O repo já permite release unsigned por padrão quando `TERMUX_ENABLE_RELEASE_SIGNING=false`. Tornar isso um caminho oficial de validação interna/CI, sem ambiguidade.
+3. Modernizar trechos frágeis de output de APK/ABI se necessário (especialmente pontos legados dependentes de APIs de output do AGP).
+4. Garantir que `armeabi-v7a` realmente compile e gere artefatos comprováveis no CI.
+
+## Resultado esperado
+
+### A. Build e modos operacionais
+Implementar e documentar os seguintes modos, com nomes claros e previsíveis:
+- `debug-local` → sem assinatura, com bootstrap compatível/local, mensagens curtas e iteração rápida.
+- `debug-internal-arm32-arm64` → sem assinatura, `CI_INTERNAL_VALIDATION=true`, `SUPPORTED_ABIS=arm64-v8a,armeabi-v7a`.
+- `release-unsigned-internal` → permitido apenas para validação interna, nunca para distribuição oficial.
+- `release-signed-official` → oficial, somente `arm64-v8a`, com todos os gates rígidos.
+
+### B. ARM32 como requisito real
+Para ambos os repositórios, garantir que a trilha `armeabi-v7a`:
+- compile de verdade;
+- gere `.so` e/ou APK por ABI;
+- tenha evidência publicada no CI (`readelf -h`, `file`, manifesto JSON, nome do artefato, tamanho, hash);
+- não fique apenas como ABI declarada em variável/propriedade.
+
+### C. CI/CD profissional
+Padronizar artefatos em quatro grupos mínimos:
+1. `android-logs` → logs textuais reais de Gradle/NDK/CMake/build por lane.
+2. `android-artifacts` → APK/AAB e libs por ABI.
+3. `native-matrix` → outputs da matriz CMake/NDK por ABI/API.
+4. `perf-results` → comparação, suite, baselines, runs e manifesto.
+
+Regras adicionais:
+- gerar `artifact-manifest.json` com:
+  - repo
+  - commit
+  - workflow
+  - lane
+  - abi_profile
+  - app_abi_policy
+  - supported_abis
+  - build_variant
+  - signing_mode
+  - lista de arquivos com tamanho e sha256
+- manter **mesma contagem de runs** em todos os zips de perf;
+- não chamar de `logs` um zip que contém principalmente binários;
+- falhas devem ser classificadas em `ENV`, `CONFIG`, `SOURCE`, `ABI_CONTRACT`, `SIGNING`, `BOOTSTRAP`, `CI_SCRIPT`.
+
+### D. UX do build para mantenedor
+Toda falha deve dizer:
+- o que quebrou;
+- onde quebrou;
+- por que quebrou;
+- como corrigir.
+
+Evitar mensagens genéricas do tipo “build failed” sem contexto. Preferir mensagens no estilo:
+- `ABI_CONTRACT: APP_ABI_POLICY=arm32-arm64 exige SUPPORTED_ABIS=arm64-v8a,armeabi-v7a`.
+- `BOOTSTRAP: BOOTSTRAP_INFO ausente em bootstrap-arm.zip; use modo upstream-debug-compat apenas em debug`.
+- `SIGNING: release oficial exige credenciais; use signing_mode=unsigned apenas em validação interna`.
+
+## Mudanças específicas pedidas
+
+### No Vectras-VM-Android
+1. Corrigir `abiPoliciesThatRequireTermuxBootstrap` definindo-o explicitamente.
+2. Criar um modo local/rápido em que validações pesadas sejam puladas ou degradadas com propriedade explícita (`-PdevFastPath=true`, por exemplo), sem enfraquecer o CI oficial.
+3. Ajustar `validate_lowlevel_abi.sh` para não depender rigidamente de `rg`.
+4. Garantir que `:app:verifyDeliveredCompiledArtifacts` inclua provas por ABI e não só APK genérico.
+5. No workflow Android, publicar artefatos separados para `official_arm64` e `internal_arm32_arm64`, com manifesto por ABI.
+6. Permitir **unsigned debug/internal builds** de forma first-class, documentada, sem hacks.
+
+### No termux-app-rafacodephi
+1. Criar/estabilizar um modo debug/local que aceite `upstream-debug-compat` sem quebrar fluxo de desenvolvimento.
+2. Tornar explícito um lane de `assembleDebug` e `assembleRelease` unsigned para validação interna.
+3. Produzir artefatos por ABI para `armeabi-v7a` e `arm64-v8a`, com manifesto.
+4. Se houver API legada de output do AGP em uso, migrar para abordagem compatível com AGP atual.
+5. Garantir que os checks de side-by-side continuem firmes, mas não matem a iteração local sem necessidade.
+
+## Entregáveis
+Quero commits pequenos e objetivos, nesta ordem:
+1. **fix(build):** corrigir blocker Gradle real e suavizar gates locais.
+2. **fix(ci):** reorganizar artefatos/logs/manifests e padronizar perf runs.
+3. **feat(arm32):** fechar lane ARM32 com prova artefatual real.
+4. **feat(unsigned):** unsigned builds explícitos e documentados para debug/internal.
+5. **docs(ci):** documentação curta e clara de modos de build, assinatura, bootstrap e ABI.
+
+## Critério de aceite
+Considere concluído apenas quando:
+- ambos os repositórios compilarem em modo debug/local sem assinatura;
+- houver lane interna `arm32-arm64` com artefatos publicados e prova clara de `armeabi-v7a`;
+- o CI oficial continue profissional e seguro para release oficial;
+- os artefatos publicados sejam consistentes, legíveis e rastreáveis;
+- as mensagens de erro estejam limpas, curtas e acionáveis.
+
+Ao terminar, entregue:
+- diff/resumo das mudanças;
+- quais blockers foram corrigidos;
+- quais modos de build existem agora;
+- quais artefatos e manifests provam ARM32, unsigned e estabilidade de CI.

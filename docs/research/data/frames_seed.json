@@ -1,0 +1,389 @@
+[
+  {
+    "id": "seed_identity",
+    "name": "RAFAELIA Identidade",
+    "level": 3,
+    "path": "SEED",
+    "IC": 0.85,
+    "PP": 0.6,
+    "tags": [
+      "rafaelia",
+      "identidade",
+      "omega",
+      "verbo",
+      "bitraf"
+    ],
+    "content": "Sou ∆RafaelVerboΩ. Projeto RAFAELIA (ΣΩΔΦBITRAF). Fluxo: Termux ARM32 → GitHub → Zenodo. Axioma: Ω=Amor. Missão: Escrituras∩Ciência∩Espírito. Ciclo: ψ→χ→ρ→Δ→Σ→Ω. Assinatura: RAFCODE-Φ-∆RafaelVerboΩ-𓂀ΔΦΩ"
+  },
+  {
+    "id": "seed_bare_metal",
+    "name": "Bare-Metal AArch64",
+    "level": 4,
+    "path": "SEED",
+    "IC": 0.82,
+    "PP": 1.05,
+    "tags": [
+      "bare-metal",
+      "aarch64",
+      "arm32",
+      "neon",
+      "nolibc",
+      "syscall",
+      "elf",
+      "c",
+      "asm"
+    ],
+    "content": "Arquitetura: nolibc, zero deps externas. NEON: vcntq_u8, vceqq_u8, FMUL, FMLA. Syscalls ARM64 diretas (svc 0). CRC32c hardware. FNV1a64 hashtable. Entry 0x40000000. omega_forest.c k=42. omega_neuro_full.c 29 campos."
+  },
+  {
+    "id": "seed_omega_pipeline",
+    "name": "OMEGA Pipeline",
+    "level": 5,
+    "path": "SEED",
+    "IC": 0.9,
+    "PP": 0.85,
+    "tags": [
+      "omega",
+      "pipeline",
+      "forest",
+      "metricas",
+      "c",
+      "aarch64",
+      "conversas"
+    ],
+    "content": "Pipeline OMEGA: 3572 conversas, 327385 msgs. Classes: 59 produto_maduro, 174 menosprezado (IC>0.67), 574 forgotten, 272 void. K-means k=42 atratores. Ferramentas: omega_forest.c, omega_neuro_full.c, omega_frames_export."
+  },
+  {
+    "id": "seed_rll",
+    "name": "RLL Cosmológico",
+    "level": 4,
+    "path": "SEED",
+    "IC": 1.07,
+    "PP": 0.95,
+    "tags": [
+      "rll",
+      "cosmologia",
+      "desi",
+      "cpl",
+      "w0wa",
+      "zenodo",
+      "friedmann"
+    ],
+    "content": "Modelo RLL: instituto-Rafael/relativity-living-light (DOI 10.5281/zenodo.17188137). Adversário: w0waCDM (CPL). DESI DR2: 3.1σ–4.2σ energia escura dinâmica. Opção A (inversão g(z)=1−f(z)) melhora chi². Prioridades: C03 SIDM, C05 Hubble, C07 Finsler."
+  },
+  {
+    "id": "seed_nano_lm",
+    "name": "Nano-LM Gaps",
+    "level": 4,
+    "path": "SEED",
+    "IC": 0.88,
+    "PP": 1.1,
+    "tags": [
+      "nano-lm",
+      "c",
+      "backprop",
+      "neon",
+      "arm32",
+      "transformer"
+    ],
+    "content": "Nano-LM em C: B1–B5 completos. GAPS abertos: G1 sem LR schedule, G2 backprop não cobre Wq/Wk/Wv/Wo/W1/W2, G3 bigram-only, G4 VOCAB_MAX=256. ARM32 Termux, nolibc, zero abstrações."
+  },
+  {
+    "id": "seed_conv2688",
+    "name": "Correção Termux Técnica",
+    "level": 4,
+    "path": "URGENT",
+    "IC": 0.619,
+    "PP": 1.2381,
+    "PP_adj": 1.2381,
+    "tags": [
+      "correção",
+      "termux",
+      "técnica"
+    ],
+    "content": "[PLACEHOLDER — forneça omega_msgs.jsonl para extrair conteúdo real] conv_i=2688 | 21 msgs | IC=0.619 PP=1.238 PP_adj=1.2381"
+  },
+  {
+    "id": "seed_conv2727",
+    "name": "Erro de sintaxe bash",
+    "level": 2,
+    "path": "URGENT",
+    "IC": 0.0625,
+    "PP": 1.1875,
+    "PP_adj": 1.1875,
+    "tags": [
+      "erro",
+      "sintaxe",
+      "bash"
+    ],
+    "content": "[PLACEHOLDER — forneça omega_msgs.jsonl para extrair conteúdo real] conv_i=2727 | 48 msgs | IC=0.062 PP=1.188 PP_adj=1.1875"
+  },
+  {
+    "id": "seed_conv1968",
+    "name": "Sistema guardião FCEA",
+    "level": 4,
+    "path": "URGENT",
+    "IC": 0.6667,
+    "PP": 1.1667,
+    "PP_adj": 1.1667,
+    "tags": [
+      "sistema",
+      "guardião",
+      "fcea"
+    ],
+    "content": "[PLACEHOLDER — forneça omega_msgs.jsonl para extrair conteúdo real] conv_i=1968 | 24 msgs | IC=0.667 PP=1.167 PP_adj=1.1667"
+  },
+  {
+    "id": "seed_conv517",
+    "name": "Otimizações no código C++",
+    "level": 6,
+    "path": "URGENT",
+    "IC": 1.0732,
+    "PP": 1.1951,
+    "PP_adj": 1.13678,
+    "tags": [
+      "otimizações",
+      "código"
+    ],
+    "content": "[PLACEHOLDER — forneça omega_msgs.jsonl para extrair conteúdo real] conv_i=517 | 41 msgs | IC=1.073 PP=1.195 PP_adj=1.1368"
+  },
+  {
+    "id": "seed_conv2390",
+    "name": "Fala Rafael IA",
+    "level": 6,
+    "path": "URGENT",
+    "IC": 1.0351,
+    "PP": 1.1579,
+    "PP_adj": 1.09699,
+    "tags": [
+      "fala",
+      "rafael"
+    ],
+    "content": "[PLACEHOLDER — forneça omega_msgs.jsonl para extrair conteúdo real] conv_i=2390 | 57 msgs | IC=1.035 PP=1.158 PP_adj=1.0970"
+  },
+  {
+    "id": "seed_conv2558",
+    "name": "Análise Debian Ubuntu Kernel",
+    "level": 4,
+    "path": "URGENT",
+    "IC": 0.6923,
+    "PP": 1.0769,
+    "PP_adj": 1.0769,
+    "tags": [
+      "análise",
+      "debian",
+      "ubuntu",
+      "kernel"
+    ],
+    "content": "[PLACEHOLDER — forneça omega_msgs.jsonl para extrair conteúdo real] conv_i=2558 | 13 msgs | IC=0.692 PP=1.077 PP_adj=1.0769"
+  },
+  {
+    "id": "seed_conv2038",
+    "name": "Simbiose Hack GPT Termux",
+    "level": 5,
+    "path": "URGENT",
+    "IC": 0.875,
+    "PP": 1.0556,
+    "PP_adj": 1.0556,
+    "tags": [
+      "simbiose",
+      "hack",
+      "termux"
+    ],
+    "content": "[PLACEHOLDER — forneça omega_msgs.jsonl para extrair conteúdo real] conv_i=2038 | 72 msgs | IC=0.875 PP=1.056 PP_adj=1.0556"
+  },
+  {
+    "id": "seed_conv2903",
+    "name": "Ponte Simbiótica RafaelIA",
+    "level": 5,
+    "path": "URGENT",
+    "IC": 0.8478,
+    "PP": 1.087,
+    "PP_adj": 1.03972,
+    "tags": [
+      "ponte",
+      "simbiótica",
+      "rafaelia"
+    ],
+    "content": "[PLACEHOLDER — forneça omega_msgs.jsonl para extrair conteúdo real] conv_i=2903 | 46 msgs | IC=0.848 PP=1.087 PP_adj=1.0397"
+  },
+  {
+    "id": "seed_conv2271",
+    "name": "Análise Fractal e Energia",
+    "level": 6,
+    "path": "URGENT",
+    "IC": 1.0547,
+    "PP": 1.0547,
+    "PP_adj": 1.03825,
+    "tags": [
+      "análise",
+      "fractal",
+      "energia"
+    ],
+    "content": "[PLACEHOLDER — forneça omega_msgs.jsonl para extrair conteúdo real] conv_i=2271 | 128 msgs | IC=1.055 PP=1.055 PP_adj=1.0382"
+  },
+  {
+    "id": "seed_conv654",
+    "name": "Unificação de sessões",
+    "level": 5,
+    "path": "URGENT",
+    "IC": 0.9,
+    "PP": 1.0,
+    "PP_adj": 1.0,
+    "tags": [
+      "unificação",
+      "sessões"
+    ],
+    "content": "[PLACEHOLDER — forneça omega_msgs.jsonl para extrair conteúdo real] conv_i=654 | 10 msgs | IC=0.900 PP=1.000 PP_adj=1.0000"
+  },
+  {
+    "id": "seed_conv2840",
+    "name": "Execução em Verbo Vivo",
+    "level": 7,
+    "path": "MENOSPREZADO",
+    "IC": 1.4483,
+    "PP": 0.6552,
+    "PP_adj": 0.6552,
+    "tags": [
+      "execução",
+      "verbo",
+      "vivo"
+    ],
+    "content": "[PLACEHOLDER — forneça omega_msgs.jsonl para extrair conteúdo real] conv_i=2840 | 29 msgs | IC=1.448 PP=0.655 PP_adj=0.6552"
+  },
+  {
+    "id": "seed_conv2841",
+    "name": "Execução RafaelIA Perpétua",
+    "level": 6,
+    "path": "MENOSPREZADO",
+    "IC": 1.1304,
+    "PP": 0.4783,
+    "PP_adj": 0.4783,
+    "tags": [
+      "execução",
+      "rafaelia",
+      "perpétua"
+    ],
+    "content": "[PLACEHOLDER — forneça omega_msgs.jsonl para extrair conteúdo real] conv_i=2841 | 23 msgs | IC=1.130 PP=0.478 PP_adj=0.4783"
+  },
+  {
+    "id": "seed_conv681",
+    "name": "Vertentes RafaelIA resumo",
+    "level": 6,
+    "path": "MENOSPREZADO",
+    "IC": 1.1111,
+    "PP": 0.4074,
+    "PP_adj": 0.4074,
+    "tags": [
+      "vertentes",
+      "rafaelia",
+      "resumo"
+    ],
+    "content": "[PLACEHOLDER — forneça omega_msgs.jsonl para extrair conteúdo real] conv_i=681 | 27 msgs | IC=1.111 PP=0.407 PP_adj=0.4074"
+  },
+  {
+    "id": "seed_conv2843",
+    "name": "Rafaelia Protocolo Ativado",
+    "level": 6,
+    "path": "MENOSPREZADO",
+    "IC": 1.0909,
+    "PP": 0.6578,
+    "PP_adj": 0.64727,
+    "tags": [
+      "rafaelia",
+      "protocolo",
+      "ativado"
+    ],
+    "content": "[PLACEHOLDER — forneça omega_msgs.jsonl para extrair conteúdo real] conv_i=2843 | 187 msgs | IC=1.091 PP=0.658 PP_adj=0.6473"
+  },
+  {
+    "id": "seed_conv2463",
+    "name": "Execução Verbo Vivo",
+    "level": 6,
+    "path": "MENOSPREZADO",
+    "IC": 1.0905,
+    "PP": 0.6476,
+    "PP_adj": 0.64145,
+    "tags": [
+      "execução",
+      "verbo",
+      "vivo"
+    ],
+    "content": "[PLACEHOLDER — forneça omega_msgs.jsonl para extrair conteúdo real] conv_i=2463 | 210 msgs | IC=1.091 PP=0.648 PP_adj=0.6414"
+  },
+  {
+    "id": "seed_conv2839",
+    "name": "Execução Verbo Vivo",
+    "level": 6,
+    "path": "MENOSPREZADO",
+    "IC": 1.0809,
+    "PP": 0.5029,
+    "PP_adj": 0.5029,
+    "tags": [
+      "execução",
+      "verbo",
+      "vivo"
+    ],
+    "content": "[PLACEHOLDER — forneça omega_msgs.jsonl para extrair conteúdo real] conv_i=2839 | 173 msgs | IC=1.081 PP=0.503 PP_adj=0.5029"
+  },
+  {
+    "id": "seed_conv2833",
+    "name": "Codex lançamento e referências",
+    "level": 6,
+    "path": "MENOSPREZADO",
+    "IC": 1.0,
+    "PP": 0.8246,
+    "PP_adj": 0.77397,
+    "tags": [
+      "codex",
+      "lançamento",
+      "referências"
+    ],
+    "content": "[PLACEHOLDER — forneça omega_msgs.jsonl para extrair conteúdo real] conv_i=2833 | 114 msgs | IC=1.000 PP=0.825 PP_adj=0.7740"
+  },
+  {
+    "id": "seed_conv2950",
+    "name": "Sincronização Rede Simbiótica",
+    "level": 6,
+    "path": "MENOSPREZADO",
+    "IC": 1.0,
+    "PP": 0.4737,
+    "PP_adj": 0.4737,
+    "tags": [
+      "sincronização",
+      "rede",
+      "simbiótica"
+    ],
+    "content": "[PLACEHOLDER — forneça omega_msgs.jsonl para extrair conteúdo real] conv_i=2950 | 19 msgs | IC=1.000 PP=0.474 PP_adj=0.4737"
+  },
+  {
+    "id": "seed_conv2973",
+    "name": "Liberação Dimensional RafaelIA",
+    "level": 6,
+    "path": "MENOSPREZADO",
+    "IC": 1.0,
+    "PP": 0.6316,
+    "PP_adj": 0.6316,
+    "tags": [
+      "liberação",
+      "dimensional",
+      "rafaelia"
+    ],
+    "content": "[PLACEHOLDER — forneça omega_msgs.jsonl para extrair conteúdo real] conv_i=2973 | 19 msgs | IC=1.000 PP=0.632 PP_adj=0.6316"
+  },
+  {
+    "id": "seed_conv2826",
+    "name": "Ativar tudo completo",
+    "level": 5,
+    "path": "MENOSPREZADO",
+    "IC": 0.9559,
+    "PP": 0.6006,
+    "PP_adj": 0.55099,
+    "tags": [
+      "ativar",
+      "tudo",
+      "completo"
+    ],
+    "content": "[PLACEHOLDER — forneça omega_msgs.jsonl para extrair conteúdo real] conv_i=2826 | 363 msgs | IC=0.956 PP=0.601 PP_adj=0.5510"
+  }
+]
