@@ -177,18 +177,37 @@ uint32_t RmR_VisualPrototype_AddView(RmR_VisualPrototype *p,
     return RMR_VISUAL_STATUS_OK;
 }
 
-uint32_t RmR_VisualPrototype_Seal(RmR_VisualPrototype *p) {
-    if (!p || p->magic != RMR_VISUAL_PROTOTYPE_MAGIC || p->version != RMR_VISUAL_API_VERSION) return RMR_VISUAL_STATUS_BAD_ARGUMENT;
+static uint32_t rmr_visual_structure_status(const RmR_VisualPrototype *p) {
+    if (!p) return RMR_VISUAL_STATUS_BAD_ARGUMENT;
+    if (p->magic != RMR_VISUAL_PROTOTYPE_MAGIC) return RMR_VISUAL_STATUS_BAD_MAGIC;
+    if (p->version != RMR_VISUAL_API_VERSION) return RMR_VISUAL_STATUS_BAD_VERSION;
+    const size_t label_len = rmr_visual_strnlen(p->label, RMR_VISUAL_MAX_LABEL);
+    if (label_len == 0u || label_len >= RMR_VISUAL_MAX_LABEL) return RMR_VISUAL_STATUS_BAD_ARGUMENT;
+    if (p->class_id == 0u || p->class_id != RmR_Visual_ClassId(p->label)) return RMR_VISUAL_STATUS_CRC_MISMATCH;
     if (p->view_count == 0u) return RMR_VISUAL_STATUS_EMPTY;
+    if (p->view_count > RMR_VISUAL_MAX_VIEWS) return RMR_VISUAL_STATUS_BAD_ARGUMENT;
+    uint32_t mask = 0u;
+    for (uint32_t i = 0u; i < p->view_count; ++i) {
+        const uint32_t view_id = p->views[i].view_id;
+        if (view_id >= RMR_VISUAL_MAX_VIEWS) return RMR_VISUAL_STATUS_BAD_ARGUMENT;
+        const uint32_t bit = 1u << view_id;
+        if ((mask & bit) != 0u) return RMR_VISUAL_STATUS_DUPLICATE_VIEW;
+        mask |= bit;
+    }
+    if (mask != p->view_mask) return RMR_VISUAL_STATUS_CRC_MISMATCH;
+    return RMR_VISUAL_STATUS_OK;
+}
+
+uint32_t RmR_VisualPrototype_Seal(RmR_VisualPrototype *p) {
+    const uint32_t structure = rmr_visual_structure_status(p);
+    if (structure != RMR_VISUAL_STATUS_OK) return structure;
     p->prototype_crc32c = rmr_prototype_crc(p);
     return RMR_VISUAL_STATUS_OK;
 }
 
 uint32_t RmR_VisualPrototype_Verify(const RmR_VisualPrototype *p) {
-    if (!p) return RMR_VISUAL_STATUS_BAD_ARGUMENT;
-    if (p->magic != RMR_VISUAL_PROTOTYPE_MAGIC) return RMR_VISUAL_STATUS_BAD_MAGIC;
-    if (p->version != RMR_VISUAL_API_VERSION) return RMR_VISUAL_STATUS_BAD_VERSION;
-    if (p->view_count == 0u || p->view_count > RMR_VISUAL_MAX_VIEWS) return RMR_VISUAL_STATUS_EMPTY;
+    const uint32_t structure = rmr_visual_structure_status(p);
+    if (structure != RMR_VISUAL_STATUS_OK) return structure;
     if (p->prototype_crc32c == 0u) return RMR_VISUAL_STATUS_UNSEALED;
     return rmr_prototype_crc(p) == p->prototype_crc32c ? RMR_VISUAL_STATUS_OK : RMR_VISUAL_STATUS_CRC_MISMATCH;
 }
