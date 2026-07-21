@@ -38,7 +38,7 @@ Legenda de status:
 | G17 | Firebase `google-services.json` -- placeholder; build de release sem credenciais reais rejeita | P1 | ABERTO | **SIM** |
 | G18 | Certificate pinning -- hash real do certificado substituido por placeholder | P1 | ABERTO | **SIM** |
 | G19 | `getForceRefreshVNCDisplay()` / `setForceRefreshVNCDisplay()` -- `@Deprecated` + javadoc anotacoes adicionadas em `MainSettingsManager.java` | P2 | FECHADO | **SIM** |
-| G20 | `Incluir/frames_seed.json` -- 16 frames com `[PLACEHOLDER -- forneca omega_msgs.jsonl]` | P2 | ABERTO | **SIM** |
+| G20 | `docs/research/data/frames_seed.json` -- 25 frames total: 5 com conteudo real (seed_identity, seed_bare_metal, seed_omega_pipeline, seed_rll, seed_nano_lm); 20 `seed_conv*` com `[PLACEHOLDER]` aguardam `omega_msgs.jsonl` de Rafael | P2 | ABERTO | **SIM** |
 | G21 | VOS_CSEL contract break -- macro ja corrigida; `demo_cli/src/rmr_vectra_os_contract_selftest.c` implementado e wired em `make run-selftest` | P1 | FECHADO | **SIM** |
 | G22 | Gate legal de CI -- `legal-compliance-gate.yml` implementado; verifica SPDX em src/ + interop/ + CSV de proveniencia | P0 | FECHADO | **SIM** |
 | G23 | `ASSET_PROVENANCE_REGISTER.csv` -- 12 entradas registradas (libXlorie x4, rootfs, OVMF, BIOS, NAOCOMERCIAL/, addthis/); todas TOKEN_VAZIO ou bloqueadas aguardando Rafael fornecer SHA-256+source-url | P0 | PARCIAL | **SIM** |
@@ -136,7 +136,7 @@ Legenda de status:
 
 | ID | Gap | Prioridade | Status | Omitido anteriormente |
 |----|-----|-----------|--------|-----------------------|
-| M1 | KOS declara 28+ repositorios; apenas 6 tem acesso/CI ativo nesta infraestrutura | P1 | ABERTO | **SIM** |
+| M1 | KOS cataloga 28 repos; `docs/ACTIVE_SCOPE.md` criado na Mapa: lista 6 ativos vs 22 referenciados fora do escopo CI; Rafael confirma se lista de 22 esta completa | P1 | PARCIAL | **SIM** |
 | M2 | `scripts/generate_asset_index.py` adicionado -- gera `indices/ASSET_INDEX_AUTO.yaml` com 160 arquivos; CI step M2 valida contagem >= 1 | P2 | FECHADO | **SIM** |
 | M3 | Varredura operacional -- step CI adicionado a `Mapa/.github/workflows/ci.yml`; verifica campos obrigatorios do workflow | P2 | FECHADO | **SIM** |
 | M4 | Referencias out-of-scope -- step informacional CI adicionado; reporta repos fora dos 6 ativos (nao-bloqueante) | P2 | FECHADO | **SIM** |
@@ -161,8 +161,8 @@ Legenda de status:
 | Status | Quantidade |
 |--------|-----------|
 | FECHADO | 39 |
-| PARCIAL | 8 |
-| ABERTO | 12 |
+| PARCIAL | 9 |
+| ABERTO | 11 |
 | BLOQUEADO_HW | 3 |
 | BLOQUEADO_SEGREDO | 2 |
 | BLOQUEADO_INFRA | 2 |
@@ -182,6 +182,7 @@ Legenda de status:
 <!-- Atualizacao 2026-07-21g: +1 fechado (T4 raf_numbase bridge connector criado em qemu_rafaelia: base conversion, sequences, Pisano, prime fluid graph, zero curve dual; IPC async + sync convenience API) -->
 <!-- Atualizacao 2026-07-21h: G24 ABERTO->PARCIAL (CLASSIFICATION_MANIFEST.md com 10 categorias para 114 arquivos; 37 arquivos promovidos -- Python/tools, docs/reports, docs/prompts, docs/skills, docs/prototypes/ui; C/ASM e ZIPs aguardam Rafael) -->
 <!-- Atualizacao 2026-07-21i: G14 ABERTO->PARCIAL (addthis/ inventariado: 37 arquivos classificados; docs/ADDTHIS_ASSET_PROVENANCE.md criado; 3 imagens UUID aguardam Rafael); G23 ABERTO->PARCIAL (ASSET_PROVENANCE_REGISTER.csv actualizado com addthis/ provenance doc); RG4+RG11 ABERTO->BLOQUEADO_INFRA (CI workflows existem mas credito Actions esgotado) -->
+<!-- Atualizacao 2026-07-21j: M1 ABERTO->PARCIAL (Mapa/docs/ACTIVE_SCOPE.md criado: lista 6 ativos vs 22 fora do escopo CI; aguarda confirmacao Rafael); G20 corrigido: 20/25 placeholders (nao 16) -->
 
 ---
 
