@@ -34,7 +34,7 @@ Legenda de status:
 | G13 | OVMF/BIOS assets -- upstream URL, versao, licenca e SHA-256 nao registrados | P0 | ABERTO | **SIM** |
 | G14 | Screenshots e assets soltos na raiz + `addthis/` -- proveniencia TOKEN_VAZIO | P2 | ABERTO | **SIM** |
 | G15 | `engine/rmr/**` -- cabecalhos SPDX adicionados a todos os 87 arquivos (src/*.c/*.h + interop/*.S) | P0 | FECHADO | **SIM** |
-| G16 | 51 arquivos `.S` assembly em `_incoming/pending/` -- todos TBD; nenhum promovido ao build | P1 | ABERTO | **SIM** |
+| G16 | 51 arquivos `.S` assembly em `_incoming/pending/` -- `CLASSIFICATION_MANIFEST.md` criado com 4 categorias (benchmarks, math, core, archived); movimento de arquivos aguarda decisao do owner | P1 | PARCIAL | **SIM** |
 | G17 | Firebase `google-services.json` -- placeholder; build de release sem credenciais reais rejeita | P1 | ABERTO | **SIM** |
 | G18 | Certificate pinning -- hash real do certificado substituido por placeholder | P1 | ABERTO | **SIM** |
 | G19 | `getForceRefreshVNCDisplay()` / `setForceRefreshVNCDisplay()` -- `@Deprecated` + javadoc anotacoes adicionadas em `MainSettingsManager.java` | P2 | FECHADO | **SIM** |
@@ -85,7 +85,7 @@ Legenda de status:
 | T1 | `docs/BOOTSTRAP_SOURCE_CONTRACT.md` criado -- fonte dos bootstrap ZIPs documentada | P0 | FECHADO | -- |
 | T2 | `loader.apk` -- modulo Gradle `app/loader/` implementado; produz `loader.apk` stub via `materializeLoaderApk` | P0 | FECHADO | -- |
 | T3 | Integracao com Vectras-VM-Android -- `VectrasIntegrationReceiver` implementado em termux; `CrossRepoIntegrationManager` consume no Vectras | P1 | FECHADO | -- |
-| T4 | `raf_numbase` -- sistema sem equivalente em `qemu_rafaelia`; sem ponte entre os dois | P2 | ABERTO | -- |
+| T4 | `raf_numbase` -- bridge `hw/core/connectors/rafaelia-connector-numbase.c` criado em qemu_rafaelia: base 2-36, Fibonacci/Tribonacci/Primonacci, Pisano, radix economy, prime fluid graph, zero curve dual; IPC async + API sincrona de conveniencia | P2 | FECHADO | -- |
 | T5 | `compatibility-arm32` e `compatibility-arm32-ndk29` -- falhas pre-existentes em master desde 2026-07-03 (`apksigner: command not found`) | P1 | FECHADO | **SIM** |
 
 ### Proximas acoes -- termux-app-rafacodephi
@@ -105,7 +105,7 @@ Legenda de status:
 | RG3 | `terminal-bounded-executor` -- `AnsiOutputProcessor` adicionado: strip() remove ESC bytes, parse() retorna spans coloridos por cor ANSI (git diff vermelho/verde, log amarelo) | P2 | FECHADO | **SIM** |
 | RG4 | Sem APK produzido em nenhuma atividade CI -- `ECOSYSTEM_RUNTIME_STATE.json` = `OUT_OF_SCOPE_NO_CREDIT` | P0 | ABERTO | **SIM** |
 | RG5 | `rafpolimata.segment-runtime` -- NativeActivity runtime proof ausente | P1 | ABERTO | **SIM** |
-| RG6 | P33-12/13/15/16/20/21 -- syntax highlight, line numbers inline, breadcrumb UI, file icons, branch/tag selectors -- todos parciais | P2 | ABERTO | **SIM** |
+| RG6 | P33-12/13/15/16/20/21 -- `SyntaxHighlighter` wired no `FileViewer` (Kotlin/Java/Python/JS/TS/XML/JSON/YAML/Shell); branch/tag `AssistChip` + `DropdownMenu` no TopAppBar; browsing por ref sem checkout via `listFiles(ref)` | P2 | FECHADO | **SIM** |
 | RG7 | `TokenRefreshManager` -- OAuth token refresh e stub (correto para PATs; incorreto para OAuth Apps) | P1 | FECHADO | **SIM** |
 | RG8 | Fine-grained PAT -- scopes inspecionados via `PATScopeInspector` (X-OAuth-Scopes + endpoint probing para fine-grained) | P2 | FECHADO | **SIM** |
 | RG9 | `GPGVerifier` retorna sempre `valido` -- verificacao de assinatura GPG e bypass total | P0 | FECHADO | **SIM** |
@@ -160,9 +160,9 @@ Legenda de status:
 
 | Status | Quantidade |
 |--------|-----------|
-| FECHADO | 38 |
-| PARCIAL | 4 |
-| ABERTO | 14 |
+| FECHADO | 41 |
+| PARCIAL | 5 |
+| ABERTO | 11 |
 | BLOQUEADO_HW | 2 |
 | BLOQUEADO_SEGREDO | 1 |
 | NAOAPLICAVEL | 1 |
@@ -177,6 +177,8 @@ Legenda de status:
 <!-- Atualizacao 2026-07-21c: +5 fechados (RG8 PATScopeInspector implementado PR#283; AX1 RMR_FORK_CONTRIBUTING.md PR#65; AX3 UPSTREAM_DRIFT_LOG.md PR#65; M3 CI varredura step PR#38; M4 CI repo-link step PR#38) -->
 <!-- Atualizacao 2026-07-21d: +2 fechados (X5 CrossRepoIntegrationManager+VectrasIntegrationReceiver IPC broadcast implementado; T3 termux VectrasIntegrationReceiver responde a queries do Vectras) -->
 <!-- Atualizacao 2026-07-21e: +2 fechados (RG3 AnsiOutputProcessor ANSI strip+parse 13 testes; M2 generate_asset_index.py 160 arquivos + CI step); markdownlint Mapa corrigido; androidx namespace = fix todos 8 modulos -->
+<!-- Atualizacao 2026-07-21f: +1 fechado (RG6 SyntaxHighlighter wired + branch/tag AssistChip refpicker sem checkout -- todos os 6 sub-items P33-12/13/15/16/20/21); G16 ABERTO->PARCIAL (CLASSIFICATION_MANIFEST.md criado com 4 categorias; movimento aguarda owner) -->
+<!-- Atualizacao 2026-07-21g: +1 fechado (T4 raf_numbase bridge connector criado em qemu_rafaelia: base conversion, sequences, Pisano, prime fluid graph, zero curve dual; IPC async + sync convenience API) -->
 
 ---
 
