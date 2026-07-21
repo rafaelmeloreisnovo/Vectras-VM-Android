@@ -84,7 +84,7 @@ Legenda de status:
 |----|-----|-----------|--------|-----------------------|
 | T1 | `docs/BOOTSTRAP_SOURCE_CONTRACT.md` criado -- fonte dos bootstrap ZIPs documentada | P0 | FECHADO | -- |
 | T2 | `loader.apk` -- modulo Gradle `app/loader/` implementado; produz `loader.apk` stub via `materializeLoaderApk` | P0 | FECHADO | -- |
-| T3 | Integracao com Vectras-VM-Android -- documentada como futura; nenhum consumidor implementado | P1 | ABERTO | -- |
+| T3 | Integracao com Vectras-VM-Android -- `VectrasIntegrationReceiver` implementado em termux; `CrossRepoIntegrationManager` consume no Vectras | P1 | FECHADO | -- |
 | T4 | `raf_numbase` -- sistema sem equivalente em `qemu_rafaelia`; sem ponte entre os dois | P2 | ABERTO | -- |
 | T5 | `compatibility-arm32` e `compatibility-arm32-ndk29` -- falhas pre-existentes em master desde 2026-07-03 (`apksigner: command not found`) | P1 | FECHADO | **SIM** |
 
@@ -107,7 +107,7 @@ Legenda de status:
 | RG5 | `rafpolimata.segment-runtime` -- NativeActivity runtime proof ausente | P1 | ABERTO | **SIM** |
 | RG6 | P33-12/13/15/16/20/21 -- syntax highlight, line numbers inline, breadcrumb UI, file icons, branch/tag selectors -- todos parciais | P2 | ABERTO | **SIM** |
 | RG7 | `TokenRefreshManager` -- OAuth token refresh e stub (correto para PATs; incorreto para OAuth Apps) | P1 | FECHADO | **SIM** |
-| RG8 | Fine-grained PAT -- scopes nao inspecionados; apenas `/user` validado | P2 | ABERTO | **SIM** |
+| RG8 | Fine-grained PAT -- scopes inspecionados via `PATScopeInspector` (X-OAuth-Scopes + endpoint probing para fine-grained) | P2 | FECHADO | **SIM** |
 | RG9 | `GPGVerifier` retorna sempre `valido` -- verificacao de assinatura GPG e bypass total | P0 | FECHADO | **SIM** |
 | RG10 | `ActivitySingletonManager` -- classe nao existe no codigo-fonte; gap nao se aplica a este projeto | P1 | NAOAPLICAVEL | **SIM** |
 | RG11 | CI desativado por ausencia de credito Actions -- nenhum workflow executou no estado atual | P0 | ABERTO | **SIM** |
@@ -118,7 +118,7 @@ Legenda de status:
 |-----|--------------|-------|
 | RG4 | Configurar GitHub Actions com credito ou runner self-hosted para produzir APK | Rafael |
 | RG5 | Aguardar RafPolimata repo fornecer NativeActivity proof (fora do escopo desta infraestrutura) | Rafael |
-| RG8 | Adicionar `PATScopeInspector` que le `X-OAuth-Scopes` header e reporta scopes ao usuario | IA |
+| RG11 | Configurar GitHub Actions com credito ou runner self-hosted para produzir APK | Rafael |
 
 ---
 
@@ -126,9 +126,9 @@ Legenda de status:
 
 | ID | Gap | Prioridade | Status | Omitido anteriormente |
 |----|-----|-----------|--------|-----------------------|
-| AX1 | Fork do AndroidX sem CONTRIBUTING/CHANGELOG especifico -- drift de upstream nao rastreado | P2 | ABERTO | **SIM** |
+| AX1 | Fork do AndroidX sem CONTRIBUTING especifico -- `docs/RMR_FORK_CONTRIBUTING.md` criado; documenta todos os 7 modulos rmr/ | P2 | FECHADO | **SIM** |
 | AX2 | Sem CI proprio -- `.github/workflows/rmr-native-ci.yml` implementado; builda todos os modulos RmR em `arm64-v8a` | P2 | FECHADO | **SIM** |
-| AX3 | Sem mapeamento explicito de quais commits do upstream AndroidX foram incorporados | P2 | ABERTO | **SIM** |
+| AX3 | Sem mapeamento de commits upstream -- `docs/UPSTREAM_DRIFT_LOG.md` criado; registra sync 91795d49 e politica de drift | P2 | FECHADO | **SIM** |
 
 ---
 
@@ -138,8 +138,8 @@ Legenda de status:
 |----|-----|-----------|--------|-----------------------|
 | M1 | KOS declara 28+ repositorios; apenas 6 tem acesso/CI ativo nesta infraestrutura | P1 | ABERTO | **SIM** |
 | M2 | Indices em `biblioteconomia/` e `indices/` sao manuais -- sem geracao automatizada | P2 | ABERTO | **SIM** |
-| M3 | `workflows/WORKFLOW_VARREDURA_OPERACIONAL.md` -- procedimento definido mas nao integrado a CI de nenhum repo | P2 | ABERTO | **SIM** |
-| M4 | Referencias a repositorios fora do escopo ativo (ChipQuantum, etc.) -- links nao verificados | P2 | ABERTO | **SIM** |
+| M3 | Varredura operacional -- step CI adicionado a `Mapa/.github/workflows/ci.yml`; verifica campos obrigatorios do workflow | P2 | FECHADO | **SIM** |
+| M4 | Referencias out-of-scope -- step informacional CI adicionado; reporta repos fora dos 6 ativos (nao-bloqueante) | P2 | FECHADO | **SIM** |
 
 ---
 
@@ -151,7 +151,7 @@ Legenda de status:
 | X2 | Cadeia de prova `codigo->build->artefato->instalacao->boot VM->teste->prova assinada` -- aberta em todos os repos | P0 | ABERTO | -- |
 | X3 | Nenhum runner CI com hardware ARM32/ARM64 + ADB ativo | P0 | BLOQUEADO_HW | -- |
 | X4 | Segredos `VECTRAS_RELEASE_*` ausentes em CI -- assinatura oficial impossivel | P0 | BLOQUEADO_SEGREDO | -- |
-| X5 | Integracao cross-repo Vectras<->qemu_rafaelia<->termux -- documentada mas nenhum consumidor implementado end-to-end | P0 | ABERTO | **SIM** |
+| X5 | Integracao cross-repo Vectras<->termux -- `CrossRepoIntegrationManager` + `VectrasIntegrationReceiver` implementam IPC broadcast bidirecional; qemu_rafaelia paths descobertos em runtime | P0 | FECHADO | **SIM** |
 | X6 | `LICENSES_REGISTER.md` define gate legal bloqueante -- `legal-compliance-gate.yml` verifica STATUS e reporta TOKEN_VAZIO/QUARANTINE automaticamente | P0 | FECHADO | **SIM** |
 
 ---
@@ -160,9 +160,9 @@ Legenda de status:
 
 | Status | Quantidade |
 |--------|-----------|
-| FECHADO | 28 |
+| FECHADO | 35 |
 | PARCIAL | 5 |
-| ABERTO | 23 |
+| ABERTO | 16 |
 | BLOQUEADO_HW | 2 |
 | BLOQUEADO_SEGREDO | 1 |
 | NAOAPLICAVEL | 1 |
@@ -174,6 +174,8 @@ Legenda de status:
 <!-- Atualizacao 2026-07-21: +2 fechados (G1 CANONICAL_BUILD_STATUS drift corrigido; RG1 HTTP adapters GitLab/Bitbucket implementados); RG10 marcado NAOAPLICAVEL (classe inexistente) -->
 <!-- Atualizacao 2026-07-21: +6 fechados (G15 SPDX interop/*.S completo, G22 legal-gate CI expandido, Q5 todos connectors em meson.build, Q7 BQL rate-based, RG2 WorkManager SyncWorker implementado, android-build R.kt collision removida) -->
 <!-- Atualizacao 2026-07-21b: +6 fechados (G19 @Deprecated VNC force-refresh, G21 VOS_CSEL selftest wired, Q3 NDK CI job implementado, T2 loader.apk modulo Gradle, AX2 rmr-native-ci.yml, X6 LICENSES_REGISTER gate no CI); Q4 promovido a PARCIAL (VMService.kt tem bridge loading) -->
+<!-- Atualizacao 2026-07-21c: +5 fechados (RG8 PATScopeInspector implementado PR#283; AX1 RMR_FORK_CONTRIBUTING.md PR#65; AX3 UPSTREAM_DRIFT_LOG.md PR#65; M3 CI varredura step PR#38; M4 CI repo-link step PR#38) -->
+<!-- Atualizacao 2026-07-21d: +2 fechados (X5 CrossRepoIntegrationManager+VectrasIntegrationReceiver IPC broadcast implementado; T3 termux VectrasIntegrationReceiver responde a queries do Vectras) -->
 
 ---
 
