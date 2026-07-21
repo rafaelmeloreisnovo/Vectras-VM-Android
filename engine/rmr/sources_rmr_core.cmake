@@ -19,6 +19,8 @@ set(RMR_SOURCE_GROUP_CORE
   engine/rmr/src/rmr_qemu_bridge.c
   engine/rmr/src/rmr_math_fabric.c
   engine/rmr/src/rmr_torus_flow.c
+  engine/rmr/src/rmr_stability.c
+  engine/rmr/src/rmr_visual_prototype.c
   engine/rmr/src/rafaelia_formulas_core.c
   engine/rmr/src/rmr_corelib.c
   engine/rmr/src/rmr_ll_ops.c
@@ -28,6 +30,7 @@ set(RMR_SOURCE_GROUP_CORE
   engine/rmr/src/rmr_unified_jni_bridge.c
   engine/rmr/src/rmr_host_compat.c
   engine/rmr/src/rmr_zipraf_core.c
+  engine/rmr/src/rmr_visual_zipraf.c
   engine/rmr/src/topological_guard.c
   engine/rmr/src/rmr_lowlevel_portable.c
   engine/rmr/src/rmr_lowlevel_mix.c
@@ -77,6 +80,24 @@ set(RMR_SOURCE_GROUP_ASM_RISCV64
   engine/rmr/interop/rmr_vectra_os_riscv64.S
 )
 
+set(RMR_SOURCE_GROUP_ASM_ARM32
+  engine/rmr/interop/rmr_stability_armv7.S
+  engine/rmr/interop/rmr_vectra_os_armv7.S
+)
+
+# The pre-existing stability ASM was previously listed but not consumed by the
+# APK CMake path. Add only that narrow backend to the core list on armeabi-v7a;
+# rmr_stability.c weak-dispatches to it and remains the bit-identical fallback.
+if(ANDROID)
+  set(_rmr_android_abi "${ANDROID_ABI}")
+  if(_rmr_android_abi STREQUAL "" AND DEFINED CMAKE_ANDROID_ARCH_ABI)
+    set(_rmr_android_abi "${CMAKE_ANDROID_ARCH_ABI}")
+  endif()
+  if(_rmr_android_abi STREQUAL "armeabi-v7a")
+    list(APPEND RMR_SOURCE_GROUP_CORE engine/rmr/interop/rmr_stability_armv7.S)
+  endif()
+endif()
+
 function(rmr_manifest_apply_base OUT_VAR)
   set(_rmr_manifest_out)
   foreach(_rmr_manifest_src IN LISTS ARGN)
@@ -88,8 +109,3 @@ function(rmr_manifest_apply_base OUT_VAR)
   endforeach()
   set(${OUT_VAR} "${_rmr_manifest_out}" PARENT_SCOPE)
 endfunction()
-
-set(RMR_SOURCE_GROUP_ASM_ARM32
-  engine/rmr/interop/rmr_stability_armv7.S
-  engine/rmr/interop/rmr_vectra_os_armv7.S
-)
