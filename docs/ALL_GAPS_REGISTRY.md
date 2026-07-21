@@ -22,7 +22,7 @@ Legenda de status:
 | ID | Gap | Prioridade | Status | Omitido anteriormente |
 |----|-----|-----------|--------|-----------------------|
 | G1 | `CANONICAL_BUILD_STATUS.md` -- drift de data corrigido; auditoria 2026-07-21 registrada | P0 | FECHADO | -- |
-| G2 | `docs/RELEASE_EVIDENCE_LEDGER.md` -- zero entradas reais; apenas templates de exemplo | P0 | ABERTO | -- |
+| G2 | `docs/RELEASE_EVIDENCE_LEDGER.md` -- estrutura correta com BLOCKED entries; SHA-256 reais bloqueados por ausencia de build CI verde | P0 | BLOQUEADO_INFRA | -- |
 | G3 | SBOM criado (`sbom/SBOM.spdx.json`) mas todos os checksums em `NOASSERTION` ate build real | P0 | PARCIAL | -- |
 | G4 | `_incoming/termux.c` -> promovido para `app/src/main/cpp/termux_jni.c` | P1 | FECHADO | -- |
 | G5 | `ZiprafDirectRuntime.kt` -- mmap extent corrigido + parser ZIP + testes | P1 | FECHADO | -- |
@@ -31,14 +31,14 @@ Legenda de status:
 | G8 | `formulasdoRafaelmr.md` -- movido para `docs/formulas/` | P2 | FECHADO | -- |
 | G9 | Comando QEMU -- `QemuArgvContract` tokeniza e `QemuDirectLauncher` usa `ProcessBuilder.command(argv[])`; shell nunca avalia a string QEMU | P1 | FECHADO | -- |
 | G10 | `NAOCOMERCIAL/` -- incompatibilidade com GPLv2 formalizada em quarentena; decisao juridica pendente | P0 | PARCIAL | -- |
-| G11 | `app/src/main/jniLibs/*/libXlorie.so` -- TOKEN_VAZIO: origem, build script, licenca e hash ausentes | P0 | ABERTO | **SIM** |
-| G12 | Alpine/rootfs tarballs distribuidos sem proveniencia -- `resources/compliance/ASSET_PROVENANCE_REGISTER.csv` nao preenchido | P0 | ABERTO | **SIM** |
-| G13 | OVMF/BIOS assets -- upstream URL, versao, licenca e SHA-256 nao registrados | P0 | ABERTO | **SIM** |
+| G11 | `app/src/main/jniLibs/*/libXlorie.so` -- SHA-256 calculados (audit 2026-07-21; arm64=70aed270, armv7=91fd5f2e, x86=bc2bf69d, x86_64=c2a051f3); identificado como X11/EGL-pixman Android display lib (ELF stripped; BuildID sha1=fa8b07c2); source-url e licenca TOKEN_VAZIO pendentes de Rafael | P0 | PARCIAL | **SIM** |
+| G12 | Alpine/rootfs tarballs -- glob guard em `ASSET_PROVENANCE_REGISTER.csv` existe; tarballs nao commitados (gitignored); entradas TOKEN_VAZIO aguardam Rafael fornecer URL+versao+hash quando assets forem adicionados | P0 | PARCIAL | **SIM** |
+| G13 | OVMF/BIOS assets -- glob guards em `ASSET_PROVENANCE_REGISTER.csv` existem; arquivos nao presentes no repositorio (gitignored); entradas TOKEN_VAZIO aguardam Rafael | P0 | PARCIAL | **SIM** |
 | G14 | `addthis/` inventariado (37 arquivos classificados): docs operacionais, JSX prototypes, imagens ChatGPT (16), fotos WhatsApp (2), imagens UUID sem proveniencia (3). `docs/ADDTHIS_ASSET_PROVENANCE.md` criado. Imagens UUID aguardam confirmacao de Rafael. | P2 | PARCIAL | **SIM** |
 | G15 | `engine/rmr/**` -- cabecalhos SPDX adicionados a todos os 87 arquivos (src/*.c/*.h + interop/*.S) | P0 | FECHADO | **SIM** |
 | G16 | 51 arquivos `.S` assembly em `_incoming/pending/` -- `CLASSIFICATION_MANIFEST.md` criado com 4 categorias (benchmarks, math, core, archived); movimento de arquivos aguarda decisao do owner | P1 | PARCIAL | **SIM** |
-| G17 | Firebase `google-services.json` -- placeholder; build de release sem credenciais reais rejeita | P1 | ABERTO | **SIM** |
-| G18 | Certificate pinning -- hash real do certificado substituido por placeholder | P1 | ABERTO | **SIM** |
+| G17 | Firebase `google-services.json` -- debug: opcional (build.gradle valida e pula); release: requer arquivo real injetado via CI secret; estrutura de guarda ja implementada | P1 | BLOQUEADO_SEGREDO | **SIM** |
+| G18 | Certificate pinning -- mecanismo correto: `SIGNATURE_DIGESTS_SHA256` calculado do keystore real em build time; debug usa debug.keystore automaticamente; release depende de X4 (keystore de release) | P1 | PARCIAL | **SIM** |
 | G19 | `getForceRefreshVNCDisplay()` / `setForceRefreshVNCDisplay()` -- `@Deprecated` + javadoc anotacoes adicionadas em `MainSettingsManager.java` | P2 | FECHADO | **SIM** |
 | G20 | `docs/research/data/frames_seed.json` -- 25 frames total: 5 com conteudo real (seed_identity, seed_bare_metal, seed_omega_pipeline, seed_rll, seed_nano_lm); 20 `seed_conv*` com `[PLACEHOLDER]` aguardam `omega_msgs.jsonl` de Rafael | P2 | ABERTO | **SIM** |
 | G21 | VOS_CSEL contract break -- macro ja corrigida; `demo_cli/src/rmr_vectra_os_contract_selftest.c` implementado e wired em `make run-selftest` | P1 | FECHADO | **SIM** |
@@ -53,8 +53,8 @@ Legenda de status:
 
 | Gap | Acao imediata | Owner |
 |-----|--------------|-------|
-| G11 | Registrar origem de `libXlorie.so` ou remover do APK | Rafael |
-| G12/G13 | Preencher `ASSET_PROVENANCE_REGISTER.csv` com hashes e upstream URLs | Rafael |
+| G11 | SHA-256 registrado (4 archs); identificado como X11/EGL-pixman lib; confirmar source-url e licenca | Rafael |
+| G12/G13 | Preencher `ASSET_PROVENANCE_REGISTER.csv` com URL, versao e hash quando tarballs/firmware forem adicionados | Rafael |
 | G16 | Criar manifesto de classificacao dos 60 `.S` em `_incoming/pending/`; arquivar os standalone | IA |
 | G20 | Fornecer `omega_msgs.jsonl` para extrair conteudo real dos frames seed_conv* | Rafael |
 
@@ -150,7 +150,7 @@ Legenda de status:
 | ID | Gap | Prioridade | Status | Omitido anteriormente |
 |----|-----|-----------|--------|-----------------------|
 | X1 | `examples/guest_boot_evidence.token-vazio.json` -- todos os 9 gates em TOKEN_VAZIO; prova de boot zero -- requer QEMU executando em dispositivo real | P0 | BLOQUEADO_HW | **SIM** |
-| X2 | Cadeia de prova `codigo->build->artefato->instalacao->boot VM->teste->prova assinada` -- aberta em todos os repos | P0 | ABERTO | -- |
+| X2 | Cadeia de prova `codigo->build->artefato->instalacao->boot VM->teste->prova assinada` -- bloqueada em instalacao/boot/teste: requer CI verde (BG-14) + dispositivo ARM com ADB (X3) + keystore (X4) | P0 | BLOQUEADO_HW | -- |
 | X3 | Nenhum runner CI com hardware ARM32/ARM64 + ADB ativo | P0 | BLOQUEADO_HW | -- |
 | X4 | Segredos `VECTRAS_RELEASE_*` ausentes em CI -- assinatura oficial impossivel | P0 | BLOQUEADO_SEGREDO | -- |
 | X5 | Integracao cross-repo Vectras<->termux -- `CrossRepoIntegrationManager` + `VectrasIntegrationReceiver` implementam IPC broadcast bidirecional; qemu_rafaelia paths descobertos em runtime | P0 | FECHADO | **SIM** |
@@ -163,11 +163,11 @@ Legenda de status:
 | Status | Quantidade |
 |--------|-----------|
 | FECHADO | 38 |
-| PARCIAL | 8 |
-| ABERTO | 9 |
-| BLOQUEADO_HW | 4 |
-| BLOQUEADO_SEGREDO | 1 |
-| BLOQUEADO_INFRA | 2 |
+| PARCIAL | 12 |
+| ABERTO | 2 |
+| BLOQUEADO_HW | 5 |
+| BLOQUEADO_SEGREDO | 2 |
+| BLOQUEADO_INFRA | 3 |
 | NAOAPLICAVEL | 1 |
 | **Total** | **63** |
 
@@ -186,6 +186,7 @@ Legenda de status:
 <!-- Atualizacao 2026-07-21i: G14 ABERTO->PARCIAL (addthis/ inventariado: 37 arquivos classificados; docs/ADDTHIS_ASSET_PROVENANCE.md criado; 3 imagens UUID aguardam Rafael); G23 ABERTO->PARCIAL (ASSET_PROVENANCE_REGISTER.csv actualizado com addthis/ provenance doc); RG4+RG11 ABERTO->BLOQUEADO_INFRA (CI workflows existem mas credito Actions esgotado) -->
 <!-- Atualizacao 2026-07-21j: M1 ABERTO->PARCIAL (Mapa/docs/ACTIVE_SCOPE.md criado: lista 6 ativos vs 22 fora do escopo CI; aguarda confirmacao Rafael); G20 corrigido: 20/25 placeholders (nao 16) -->
 <!-- Atualizacao 2026-07-21k: BLOCKING_GAPS.md atualizado -- BG-10/11/12 marcados RESOLVED (G15+RG9+G22 FECHADOS); BG-14 adicionado (CI runners esgotados -- BLOQUEADO_INFRA); G16->PARCIAL; G25/X1->BLOQUEADO_HW; contagem corrigida Total=63 (38+8+9+4+1+2+1), OMITIDOS=41 -->
+<!-- Atualizacao 2026-07-21l: G2->BLOQUEADO_INFRA; G11->PARCIAL (SHA-256 calculados 4 archs; identificado X11/EGL-pixman); G12/G13->PARCIAL (glob guards existem; binarios nao commitados); G17->BLOQUEADO_SEGREDO (guarda Firebase debug/release ja implementada); G18->PARCIAL (debug.keystore automatico; release bloqueado por X4); X2->BLOQUEADO_HW; contagem: ABERTO=2 (G20+RG5), PARCIAL=12, BLOQUEADO_SEGREDO=2, BLOQUEADO_INFRA=3, BLOQUEADO_HW=5 -->
 
 ---
 
