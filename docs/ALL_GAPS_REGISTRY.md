@@ -106,7 +106,7 @@ Legenda de status:
 | RG2 | Offline queue -- `SyncOperation` (Gson codec) + `SyncWorker` (CoroutineWorker) + `PeriodicWorkRequest` 15min registrados em Application.onCreate | P1 | FECHADO | **SIM** |
 | RG3 | `terminal-bounded-executor` -- `AnsiOutputProcessor` adicionado: strip() remove ESC bytes, parse() retorna spans coloridos por cor ANSI (git diff vermelho/verde, log amarelo) | P2 | FECHADO | **SIM** |
 | RG4 | Sem APK produzido em nenhuma atividade CI -- `debug-apk.yml` e `android-ci.yml` existem; bloqueado por credito Actions esgotado (runner_id=0 em todos os jobs do PR#289; `ECOSYSTEM_RUNTIME_STATE.json` = `OUT_OF_SCOPE_NO_CREDIT`) | P0 | BLOQUEADO_INFRA | **SIM** |
-| RG5 | `rafpolimata.segment-runtime` -- NativeActivity runtime proof ausente | P1 | ABERTO | **SIM** |
+| RG5 | `rafpolimata.segment-runtime` -- NativeActivity runtime proof pertence ao repo `rafaelmeloreisnovo/RafPolimata` (fora do escopo dos 6 repos auditados); nao ha implementacao no RafGitTools a fazer | P1 | NAOAPLICAVEL | **SIM** |
 | RG6 | P33-12/13/15/16/20/21 -- `SyntaxHighlighter` wired no `FileViewer` (Kotlin/Java/Python/JS/TS/XML/JSON/YAML/Shell); branch/tag `AssistChip` + `DropdownMenu` no TopAppBar; browsing por ref sem checkout via `listFiles(ref)` | P2 | FECHADO | **SIM** |
 | RG7 | `TokenRefreshManager` -- OAuth token refresh e stub (correto para PATs; incorreto para OAuth Apps) | P1 | FECHADO | **SIM** |
 | RG8 | Fine-grained PAT -- scopes inspecionados via `PATScopeInspector` (X-OAuth-Scopes + endpoint probing para fine-grained) | P2 | FECHADO | **SIM** |
@@ -164,11 +164,11 @@ Legenda de status:
 |--------|-----------|
 | FECHADO | 38 |
 | PARCIAL | 13 |
-| ABERTO | 1 |
+| ABERTO | 0 |
 | BLOQUEADO_HW | 5 |
 | BLOQUEADO_SEGREDO | 2 |
 | BLOQUEADO_INFRA | 3 |
-| NAOAPLICAVEL | 1 |
+| NAOAPLICAVEL | 2 |
 | **Total** | **63** |
 
 ### Gaps OMITIDOS em auditorias anteriores: 41 de 63
@@ -186,7 +186,7 @@ Legenda de status:
 <!-- Atualizacao 2026-07-21i: G14 ABERTO->PARCIAL (addthis/ inventariado: 37 arquivos classificados; docs/ADDTHIS_ASSET_PROVENANCE.md criado; 3 imagens UUID aguardam Rafael); G23 ABERTO->PARCIAL (ASSET_PROVENANCE_REGISTER.csv actualizado com addthis/ provenance doc); RG4+RG11 ABERTO->BLOQUEADO_INFRA (CI workflows existem mas credito Actions esgotado) -->
 <!-- Atualizacao 2026-07-21j: M1 ABERTO->PARCIAL (Mapa/docs/ACTIVE_SCOPE.md criado: lista 6 ativos vs 22 fora do escopo CI; aguarda confirmacao Rafael); G20 corrigido: 20/25 placeholders (nao 16) -->
 <!-- Atualizacao 2026-07-21k: BLOCKING_GAPS.md atualizado -- BG-10/11/12 marcados RESOLVED (G15+RG9+G22 FECHADOS); BG-14 adicionado (CI runners esgotados -- BLOQUEADO_INFRA); G16->PARCIAL; G25/X1->BLOQUEADO_HW; contagem corrigida Total=63 (38+8+9+4+1+2+1), OMITIDOS=41 -->
-<!-- Atualizacao 2026-07-21l: G2->BLOQUEADO_INFRA; G11->PARCIAL (SHA-256 calculados 4 archs; identificado X11/EGL-pixman); G12/G13->PARCIAL (glob guards existem; binarios nao commitados); G17->BLOQUEADO_SEGREDO (guarda Firebase debug/release ja implementada); G18->PARCIAL (debug.keystore automatico; release bloqueado por X4); X2->BLOQUEADO_HW; G20->PARCIAL (tools/populate_seed_frames.py implementado; aguarda omega_msgs.jsonl de Rafael); contagem: ABERTO=1 (RG5 only), PARCIAL=13, BLOQUEADO_SEGREDO=2, BLOQUEADO_INFRA=3, BLOQUEADO_HW=5 -->
+<!-- Atualizacao 2026-07-21l: G2->BLOQUEADO_INFRA; G11->PARCIAL (SHA-256 calculados 4 archs; identificado X11/EGL-pixman); G12/G13->PARCIAL (glob guards existem; binarios nao commitados); G17->BLOQUEADO_SEGREDO (guarda Firebase debug/release ja implementada); G18->PARCIAL (debug.keystore automatico; release bloqueado por X4); X2->BLOQUEADO_HW; G20->PARCIAL (tools/populate_seed_frames.py implementado; aguarda omega_msgs.jsonl de Rafael); RG5->NAOAPLICAVEL (prova pertence ao repo RafPolimata, fora do escopo); ABERTO=0 (zero gaps abertos sem owner/razao); NAOAPLICAVEL=2 -->
 
 ---
 
