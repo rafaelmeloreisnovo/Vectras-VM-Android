@@ -1,4 +1,4 @@
-<!-- DOC_ORG_SCAN: 2026-04-07 | source-scan: pending-manual-by-domain -->
+<!-- DOC_ORG_SCAN: 2026-07-21 | source-scan: active-rmr-visual -->
 
 # engine/
 
@@ -18,12 +18,20 @@ Núcleo nativo C/Rust para políticas e performance.
 ## Cadeia de comando (lógica de inspeção)
 ```bash
 find engine -maxdepth 3 -type d | sort
-sed -n '1,120p' engine/FILES_MAP.md
+sed -n '1,180p' engine/FILES_MAP.md
 ```
 
 ## Core RMR unificado
 - O ponto único de verdade do core nativo agora é `engine/rmr/include/rmr_unified_kernel.h`.
 - A implementação correspondente está em `engine/rmr/src/rmr_unified_kernel.c`, encapsulando policy kernel, autodetect de hardware, bitraf e corelib por uma API pública estável.
+
+## Estabilidade e memória visual por protótipos
+- Contrato de estabilidade: `engine/rmr/include/rmr_stability.h` e `engine/rmr/src/rmr_stability.c`.
+- Protótipos, vistas e RAFSTORE fixo: `engine/rmr/include/rmr_visual_prototype.h` e `engine/rmr/src/rmr_visual_prototype.c`.
+- Custódia da cápsula pelo ZIPRAF: `engine/rmr/include/rmr_visual_zipraf.h` e `engine/rmr/src/rmr_visual_zipraf.c`.
+- Documento de integração: [`rmr/VISUAL_PROTOTYPE_INTEGRATION.md`](rmr/VISUAL_PROTOTYPE_INTEGRATION.md).
+- Autoteste independente: `sh tools/test_rmr_visual_prototype.sh`.
+- Limite atual: o descritor mede Otsu, foreground e distribuição angular; acurácia semântica com imagens reais permanece `TOKEN_VAZIO` até conjunto rotulado externo.
 
 ## Fonte de verdade para linkagem do APK (JNI `vectra_core_accel.c`)
 
@@ -62,6 +70,7 @@ Target de link esperado no APK:
 | `bitraf_*` | Não encontrado no JNI direto | Hoje é dependência transitiva interna de `rmr_unified_kernel.c` |
 | `RmR_HW_Detect` | Não encontrado no JNI direto | Usado internamente no core unificado e implementado em `engine/rmr/src/rmr_hw_detect.c` |
 | `RmR_CRC32C` | Não encontrado no JNI direto | Usado internamente no core unificado e implementado em `engine/rmr/src/rmr_policy_kernel.c` |
+| `RmR_Visual*` | Não encontrado no JNI direto | Compilado no core; exposição JNI/Termux deve ser adicionada somente com contrato de permissão e buffer explícito |
 
 ### Controle de dependência externa
 - Símbolos `RmR_UnifiedKernel_*` sem implementação C local (caso apareçam em regressões futuras) devem ser marcados como **dependência externa / artefato separado**.
