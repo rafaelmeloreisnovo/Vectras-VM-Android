@@ -40,7 +40,7 @@ Legenda de status:
 | G17 | Firebase `google-services.json` -- debug: opcional (build.gradle valida e pula); release: requer arquivo real injetado via CI secret; estrutura de guarda ja implementada | P1 | BLOQUEADO_SEGREDO | **SIM** |
 | G18 | Certificate pinning -- mecanismo correto: `SIGNATURE_DIGESTS_SHA256` calculado do keystore real em build time; debug usa debug.keystore automaticamente; release depende de X4 (keystore de release) | P1 | PARCIAL | **SIM** |
 | G19 | `getForceRefreshVNCDisplay()` / `setForceRefreshVNCDisplay()` -- `@Deprecated` + javadoc anotacoes adicionadas em `MainSettingsManager.java` | P2 | FECHADO | **SIM** |
-| G20 | `docs/research/data/frames_seed.json` -- 25 frames total: 5 com conteudo real (seed_identity, seed_bare_metal, seed_omega_pipeline, seed_rll, seed_nano_lm); 20 `seed_conv*` com `[PLACEHOLDER]` aguardam `omega_msgs.jsonl` de Rafael | P2 | ABERTO | **SIM** |
+| G20 | `docs/research/data/frames_seed.json` -- 5 frames com conteudo real; 20 `seed_conv*` com `[PLACEHOLDER]`; `tools/populate_seed_frames.py` implementado e pronto para executar quando Rafael fornecer `omega_msgs.jsonl` | P2 | PARCIAL | **SIM** |
 | G21 | VOS_CSEL contract break -- macro ja corrigida; `demo_cli/src/rmr_vectra_os_contract_selftest.c` implementado e wired em `make run-selftest` | P1 | FECHADO | **SIM** |
 | G22 | Gate legal de CI -- `legal-compliance-gate.yml` implementado; verifica SPDX em src/ + interop/ + CSV de proveniencia | P0 | FECHADO | **SIM** |
 | G23 | `ASSET_PROVENANCE_REGISTER.csv` -- 12 entradas registradas (libXlorie x4, rootfs, OVMF, BIOS, NAOCOMERCIAL/, addthis/); todas TOKEN_VAZIO ou bloqueadas aguardando Rafael fornecer SHA-256+source-url | P0 | PARCIAL | **SIM** |
@@ -56,7 +56,7 @@ Legenda de status:
 | G11 | SHA-256 registrado (4 archs); identificado como X11/EGL-pixman lib; confirmar source-url e licenca | Rafael |
 | G12/G13 | Preencher `ASSET_PROVENANCE_REGISTER.csv` com URL, versao e hash quando tarballs/firmware forem adicionados | Rafael |
 | G16 | Criar manifesto de classificacao dos 60 `.S` em `_incoming/pending/`; arquivar os standalone | IA |
-| G20 | Fornecer `omega_msgs.jsonl` para extrair conteudo real dos frames seed_conv* | Rafael |
+| G20 | Fornecer `omega_msgs.jsonl` para executar `tools/populate_seed_frames.py --jsonl omega_msgs.jsonl` | Rafael |
 
 ---
 
@@ -163,8 +163,8 @@ Legenda de status:
 | Status | Quantidade |
 |--------|-----------|
 | FECHADO | 38 |
-| PARCIAL | 12 |
-| ABERTO | 2 |
+| PARCIAL | 13 |
+| ABERTO | 1 |
 | BLOQUEADO_HW | 5 |
 | BLOQUEADO_SEGREDO | 2 |
 | BLOQUEADO_INFRA | 3 |
@@ -186,7 +186,7 @@ Legenda de status:
 <!-- Atualizacao 2026-07-21i: G14 ABERTO->PARCIAL (addthis/ inventariado: 37 arquivos classificados; docs/ADDTHIS_ASSET_PROVENANCE.md criado; 3 imagens UUID aguardam Rafael); G23 ABERTO->PARCIAL (ASSET_PROVENANCE_REGISTER.csv actualizado com addthis/ provenance doc); RG4+RG11 ABERTO->BLOQUEADO_INFRA (CI workflows existem mas credito Actions esgotado) -->
 <!-- Atualizacao 2026-07-21j: M1 ABERTO->PARCIAL (Mapa/docs/ACTIVE_SCOPE.md criado: lista 6 ativos vs 22 fora do escopo CI; aguarda confirmacao Rafael); G20 corrigido: 20/25 placeholders (nao 16) -->
 <!-- Atualizacao 2026-07-21k: BLOCKING_GAPS.md atualizado -- BG-10/11/12 marcados RESOLVED (G15+RG9+G22 FECHADOS); BG-14 adicionado (CI runners esgotados -- BLOQUEADO_INFRA); G16->PARCIAL; G25/X1->BLOQUEADO_HW; contagem corrigida Total=63 (38+8+9+4+1+2+1), OMITIDOS=41 -->
-<!-- Atualizacao 2026-07-21l: G2->BLOQUEADO_INFRA; G11->PARCIAL (SHA-256 calculados 4 archs; identificado X11/EGL-pixman); G12/G13->PARCIAL (glob guards existem; binarios nao commitados); G17->BLOQUEADO_SEGREDO (guarda Firebase debug/release ja implementada); G18->PARCIAL (debug.keystore automatico; release bloqueado por X4); X2->BLOQUEADO_HW; contagem: ABERTO=2 (G20+RG5), PARCIAL=12, BLOQUEADO_SEGREDO=2, BLOQUEADO_INFRA=3, BLOQUEADO_HW=5 -->
+<!-- Atualizacao 2026-07-21l: G2->BLOQUEADO_INFRA; G11->PARCIAL (SHA-256 calculados 4 archs; identificado X11/EGL-pixman); G12/G13->PARCIAL (glob guards existem; binarios nao commitados); G17->BLOQUEADO_SEGREDO (guarda Firebase debug/release ja implementada); G18->PARCIAL (debug.keystore automatico; release bloqueado por X4); X2->BLOQUEADO_HW; G20->PARCIAL (tools/populate_seed_frames.py implementado; aguarda omega_msgs.jsonl de Rafael); contagem: ABERTO=1 (RG5 only), PARCIAL=13, BLOQUEADO_SEGREDO=2, BLOQUEADO_INFRA=3, BLOQUEADO_HW=5 -->
 
 ---
 
