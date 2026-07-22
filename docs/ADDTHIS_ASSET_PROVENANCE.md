@@ -50,13 +50,18 @@ Contém relatórios de bugs, análises de arquitetura e assets de contexto do pr
 > **Nota legal:** Imagens geradas pelo ChatGPT são atribuídas ao usuário que gerou (Rafael Melo Reis)
 > conforme Termos de Serviço da OpenAI. Uso em projeto GPLv2 requer verificação de compatibilidade.
 
-### Imagens — UUID-named (Origem: desconhecida, possivelmente downloads/capturas)
+### Imagens — UUID-named (Origem: ChatGPT/GPT-4o — confirmado por metadados C2PA)
 
-| Arquivo | Tamanho | Status |
-|---------|---------|--------|
-| `22443140-100f-4fbe-9bcf-f0253e302683.png` | 758 KB | PROVENIÊNCIA_AUSENTE — aguarda confirmação Rafael |
-| `73e8b7f6-5959-4216-ba52-caa39120bf3a.png` | 1.1 MB | PROVENIÊNCIA_AUSENTE — aguarda confirmação Rafael |
-| `8a3fca37-f2f6-4e37-9a84-d9c6169dd76f.png` | 1.7 MB | PROVENIÊNCIA_AUSENTE — aguarda confirmação Rafael |
+| Arquivo | Dimensões | Status |
+|---------|-----------|--------|
+| `22443140-100f-4fbe-9bcf-f0253e302683.png` | 1024×1536 (740 KB) | GERADA_CHATGPT_C2PA — softwareAgent=GPT-4o confirmado; C2PA manifest id=urn:c2pa:04a67156-2e8b-4bbb-b4c5-a039c69f2023 |
+| `73e8b7f6-5959-4216-ba52-caa39120bf3a.png` | 1024×1024 (1.0 MB) | GERADA_CHATGPT_C2PA — softwareAgent=GPT-4o confirmado; C2PA manifest id=urn:c2pa:a26d3e06-f327-4d95-8d82-d7c33f422098 |
+| `8a3fca37-f2f6-4e37-9a84-d9c6169dd76f.png` | 1536×1024 (1.7 MB) | GERADA_CHATGPT_C2PA — softwareAgent=GPT-4o confirmado; C2PA manifest id=urn:c2pa:62b10878-a9ec-4294-b74c-ca37587d7c10 |
+
+> **Método de verificação:** Análise forense do chunk PNG `caBX` (C2PA — Coalition for Content Provenance
+> and Authenticity). Cada arquivo contém um JUMBF manifest com `c2pa.actions.v2` action `c2pa.created`
+> e `softwareAgent: GPT-4o`. Os nomes UUID são o padrão de exportação do ChatGPT para algumas sessões.
+> Atribuição: Rafael Melo Reis (usuário da conta OpenAI que gerou as imagens). Auditado: 2026-07-21.
 
 ### Imagens — file_* (Origem: provavelmente ChatGPT/OpenAI API response files)
 
@@ -104,8 +109,7 @@ Contém declarações espirituais, jurídicas e de autoria.
 | Categoria | Distribuível via APK? | Observação |
 |-----------|-----------------------|------------|
 | Documentos operacionais (.md, .sh, .h, .jsx) | NÃO (não são assets de runtime) | Permanecer em docs/addthis/ |
-| Imagens ChatGPT (file_*, ChatGPT*) | AGUARDA_RAFAEL | Verificar compatibilidade ToS com GPL-2.0 |
-| Imagens UUID | AGUARDA_RAFAEL | Proveniência não confirmada |
+| Imagens ChatGPT (file_*, ChatGPT*, UUID-named) | AGUARDA_RAFAEL | Proveniência confirmada (GPT-4o C2PA); verificar compatibilidade ToS com GPL-2.0 se for incluir em APK |
 | Fotos pessoais WhatsApp | NÃO (dados pessoais) | Não incluir em APK |
 | ARKHE .docx | NÃO (binário, não é runtime) | Não incluir em APK |
 
