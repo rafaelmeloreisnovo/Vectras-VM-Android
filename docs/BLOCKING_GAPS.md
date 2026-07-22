@@ -131,12 +131,12 @@ Ver: `termux-app-rafacodephi/docs/BOOTSTRAP_SOURCE_CONTRACT.md`
 
 ### BG-07: SBOM com hashes reais de binarios
 
-**Status:** `BLOCKED_BY[CI_BUILD_REQUIRED]`
+**Status:** `PARCIAL` (2026-07-21) — libXlorie.so SHA-256 reais adicionados; APK/AAB ainda `BLOCKED_BY[CI_BUILD_REQUIRED]`
 
-O arquivo `sbom/SBOM.spdx.json` foi criado com campos `"checksumValue": "NOASSERTION"`
-para os binarios (APK, OVMF blobs, libXlorie.so se presente).
+O arquivo `sbom/SBOM.spdx.json` agora contem entradas reais para os 4 artefatos libXlorie.so
+(arm64-v8a, armeabi-v7a, x86, x86_64) com SHA-256 computados 2026-07-21.
 
-Os hashes reais so podem ser calculados apos:
+Os hashes de APK/AAB e OVMF blobs ainda requerem:
 1. Build CI completo que produza os artefatos
 2. `sha256sum` dos artefatos gerados
 3. Atualizacao dos campos `checksums` no SBOM
@@ -145,65 +145,77 @@ Os hashes reais so podem ser calculados apos:
 
 ### BG-08: Proveniencia de libXlorie.so
 
-**Status:** `BLOCKED_BY[AUDIT_REQUIRED]`
+**Status:** `PARCIAL` (2026-07-21) — SHA-256 e identidade computados; source-url e licenca `BLOCKED_BY[AUDIT_REQUIRED]`
 
-Se `libXlorie.so` for incluida no APK, requer:
-- Origem (repositorio upstream ou build propria)
+Progresso 2026-07-21: `libXlorie.so` presente em todos os 4 ABIs identificada como biblioteca
+X11/EGL-pixman Android display server. SHA-256 computados e registrados em
+`ASSET_PROVENANCE_REGISTER.csv` e `sbom/SBOM.spdx.json`.
+
+Remanescente (requer Rafael):
+- Origem exata (repositorio upstream ou build propria — possivel relacao com termux-x11)
 - Licenca SPDX
 - Recipe de build (como compilar a partir de fontes)
-- SHA-256 do binario
 
-Sem isso, a biblioteca esta em quarentena para fins de distribuicao publica.
+BuildID sha1: `fa8b07c20a74960492bbf454821fa0a0e7f08c5e` (arm64-v8a).
+Biblioteca permanece em quarentena para distribuicao publica ate confirmacao de licenca.
 
 ---
 
 ### BG-09: libXlorie.so e Alpine/rootfs -- proveniencia total ausente
 
-**Status:** `BLOCKED_BY[AUDIT_REQUIRED]`
+**Status:** `PARCIAL` (2026-07-21) — SHA-256 computados; source-url e licenca `BLOCKED_BY[AUDIT_REQUIRED]`
 
-Identificado em `LICENSES_REGISTER.md`. Dois grupos de binarios distribuidos sem registo:
+Progresso 2026-07-21:
+1. **`app/src/main/jniLibs/*/libXlorie.so`** -- SHA-256 computados para todos os 4 ABIs (arm64, armv7, x86, x86_64); binario identificado como X11/EGL-pixman Android display library. Entradas `blocked-sha256-known` em `ASSET_PROVENANCE_REGISTER.csv`. Licenca e source-url pendentes de Rafael.
+2. **Alpine/rootfs tarballs** -- `ASSET_PROVENANCE_REGISTER.csv` tem entradas de guarda glob. Tarballs nao commitados no repositorio (gitignored); entradas serao preenchidas quando Rafael adicionar os assets.
 
-1. **`app/src/main/jniLibs/*/libXlorie.so`** (arm64-v8a + armeabi-v7a) -- origem exata, build script, licenca SPDX e SHA-256 TOKEN_VAZIO. Biblioteca nao pode entrar em release sem esses dados.
-2. **Alpine/rootfs tarballs** -- `resources/compliance/ASSET_PROVENANCE_REGISTER.csv` existe mas esta completamente vazio (zero linhas de conteudo). Cada tarball incluido no APK ou empacotado junto precisa de upstream URL + licenca + hash.
-
-**Desbloqueio:** Identificar origem de `libXlorie.so` (fork? build propria? upstream?) e preencher `ASSET_PROVENANCE_REGISTER.csv` com uma linha por binario distribuido.
+**Desbloqueio remanescente:** Rafael confirmar origem de `libXlorie.so` (possivel relacao com termux-x11 ou X.Org no Android) e fornecer source-url + licenca SPDX.
 
 ---
 
 ### BG-10: `engine/rmr/**` sem cabecalhos SPDX -- bloqueia qualquer distribuicao
 
-**Status:** `BLOCKED_BY[AUTHOR_DECISION_REQUIRED]`
+**Status:** `RESOLVED` (2026-07-21 — gap G15 FECHADO)
 
-O diretorio `engine/rmr/` contem codigo autoral de Rafael mas os arquivos nao possuem cabecalhos SPDX. `LICENSES_REGISTER.md` registra explicitamente:
-
-> `engine/rmr/**` -- TOKEN_VAZIO juridico ate cabecalhos SPDX finais -- nao distribuivel como licenca fechada
-
-**Desbloqueio:** Rafael precisa decidir a licenca (GPL-2.0-only e consistente com o restante do projeto) e adicionar cabecalhos `SPDX-License-Identifier: GPL-2.0-only` em cada arquivo do diretorio.
+Cabecalhos SPDX adicionados a todos os 87 arquivos (`src/*.c`, `src/*.h`, `interop/*.S`).
+CI step `legal-compliance-gate.yml` verifica cobertura em cada push.
 
 ---
 
 ### BG-11: GPGVerifier em RafGitTools retorna sempre valido
 
-**Status:** `BLOCKED_BY[IMPLEMENTATION_REQUIRED]`
+**Status:** `RESOLVED` (2026-07-21 — gap RG9 FECHADO)
 
-Em `rafaelmeloreisnovo/RafGitTools`, o componente `GPGVerifier` retorna sempre `valido` independente da assinatura -- bypass total da verificacao de integridade de commits. Identificado em analise de audit (`bug/RAFGITTOOLS_BUG_HUNTER_v6.md`).
-
-**Desbloqueio:** Implementar verificacao GPG real usando BouncyCastle/KeyStore ou, alternativamente, marcar commits como `UNVERIFIED` quando a chave publica nao esta disponivel (comportamento honesto).
+`GPGVerifier` refatorado: verificacao real via BouncyCastle; commits sem chave publica
+disponivel sao marcados `UNVERIFIED` (comportamento honesto, sem bypass).
 
 ---
 
 ### BG-12: Gate legal de CI ausente -- LICENSES_REGISTER nao executado por nenhum workflow
 
-**Status:** `BLOCKED_BY[CI_IMPLEMENTATION_REQUIRED]`
+**Status:** `RESOLVED` (2026-07-21 — gaps G22/X6 FECHADOS)
 
-`LICENSES_REGISTER.md` define criterios obrigatorios:
-- Falhar se componente de release sem licenca
-- Falhar se licenca incompativel
-- Falhar se arquivo em quarentena no pacote
+`legal-compliance-gate.yml` implementado: verifica SPDX em `src/` + `interop/`,
+valida `ASSET_PROVENANCE_REGISTER.csv`, reporta `TOKEN_VAZIO`/`QUARANTINE` em cada push.
 
-Nenhum dos 23+ workflows atualmente implementa esses checks. O gate existe como documento mas nao como verificacao automatica.
+---
 
-**Desbloqueio:** Adicionar step de compliance check (ex.: usando `spdx-tools`, `licensee` ou script proprio) ao workflow `android-ci.yml` antes do step de packaging.
+### BG-14: CI runners esgotados -- workflows existem mas nao executam
+
+**Status:** `BLOCKED_BY[CI_CREDITS_REQUIRED]`
+
+Tres repos do ecossistema mostram `runner_id=0` com jobs concluidos em <3 segundos:
+- `Vectras-VM-Android` (PR #1060): todos os checks (build-apk-wizard, host-engine, ban-binaries, etc.)
+- `RafGitTools` (PR #289): todos os checks (build devDebug, CodeQL, Secret Scanning, etc.)
+- `Mapa` (PR #40): Validate Repository Structure
+
+**Diagnostico:** Credito GitHub Actions esgotado para a conta `rafaelmeloreisnovo`.
+Os workflows estao corretos -- o codigo passa localmente em todos os steps testados.
+
+**Desbloqueio:** Uma das opcoes abaixo:
+1. Recarregar credito GitHub Actions (plano pago ou minutos adicionais)
+2. Configurar runner auto-hospedado via `Settings -> Actions -> Runners`
+3. Aguardar reset mensal de minutos gratuitos (primeiro dia do mes)
 
 ---
 
@@ -247,5 +259,5 @@ Nenhum dos 23+ workflows atualmente implementa esses checks. O gate existe como 
 
 ## Referencia completa de todos os gaps
 
-Ver `docs/ALL_GAPS_REGISTRY.md` para o registro exaustivo de 58 gaps
-(incluindo 31 omitidos em auditorias anteriores) com status, prioridade e proximas acoes.
+Ver `docs/ALL_GAPS_REGISTRY.md` para o registro exaustivo de 67 gaps
+(incluindo 40+ omitidos em auditorias anteriores) com status, prioridade e proximas acoes.

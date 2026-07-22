@@ -1,0 +1,6228 @@
+{
+  "total_files": 1833,
+  "summary_by_status": {
+    "other": 590,
+    "code": 761,
+    "doc": 340,
+    "binary_or_archive": 142
+  },
+  "pending_count": 1036,
+  "pending": [
+    {
+      "file": ".gitignore",
+      "ext": "",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "gradlew.bat",
+      "ext": ".bat",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "1;.jkjjh",
+      "ext": ".jkjjh",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": ".java-version",
+      "ext": "",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "CMakePresets.json",
+      "ext": ".json",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "1.111",
+      "ext": ".111",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "build.gradle",
+      "ext": ".gradle",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "settings.gradle",
+      "ext": ".gradle",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": ".mise.toml",
+      "ext": ".toml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "LICENSE",
+      "ext": "",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "local.properties.example",
+      "ext": ".example",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "gradlew",
+      "ext": "",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "gradle.properties",
+      "ext": ".properties",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "Makefile",
+      "ext": "",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": ".firebaserc",
+      "ext": "",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "engine/vectra_policy_kernel/.gitignore",
+      "ext": "",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "engine/vectra_policy_kernel/Cargo.toml",
+      "ext": ".toml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "engine/vectra_policy_kernel/build.rs",
+      "ext": ".rs",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "engine/vectra_policy_kernel/Cargo.lock",
+      "ext": ".lock",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "engine/vectra_policy_kernel/tests/policy_kernel_tests.rs",
+      "ext": ".rs",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "engine/vectra_policy_kernel/src/lib.rs",
+      "ext": ".rs",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "engine/vectra_policy_kernel/src/ffi.rs",
+      "ext": ".rs",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "engine/vectra_policy_kernel/src/main.rs",
+      "ext": ".rs",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "engine/vectra_policy_kernel/src/ops/mod.rs",
+      "ext": ".rs",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "engine/vectra_policy_kernel/src/ops/anchor.rs",
+      "ext": ".rs",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "engine/vectra_policy_kernel/src/ops/focus.rs",
+      "ext": ".rs",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "engine/vectra_policy_kernel/src/ops/trim_ws.rs",
+      "ext": ".rs",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "engine/vectra_policy_kernel/src/ops/replace_char.rs",
+      "ext": ".rs",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "engine/vectra_policy_kernel/src/ops/len.rs",
+      "ext": ".rs",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "engine/rmr/sources_rmr_core.mk",
+      "ext": ".mk",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "engine/rmr/sources_rmr_core.cmake",
+      "ext": ".cmake",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "engine/rmr/sources.cmake",
+      "ext": ".cmake",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "engine/rmr/sources.mk",
+      "ext": ".mk",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "engine/rmr/cmake/rmr_sources.cmake",
+      "ext": ".cmake",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "engine/rmr/interop/rmr_casm_arm64.S",
+      "ext": ".s",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "engine/rmr/interop/rmr_casm_x86_64.S",
+      "ext": ".s",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "engine/rmr/interop/rmr_lowlevel_x86_64.S",
+      "ext": ".s",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "engine/rmr/interop/rmr_casm_riscv64.S",
+      "ext": ".s",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "engine/rmr/include/rmr_ll_tuning.h",
+      "ext": ".h",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "engine/rmr/include/zero_compat.h",
+      "ext": ".h",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "engine/rmr/include/rmr_ethica_loss.h",
+      "ext": ".h",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "engine/rmr/include/rmr_qemu_bridge.h",
+      "ext": ".h",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "engine/rmr/include/bitraf_version.h",
+      "ext": ".h",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "engine/rmr/include/rmr_host_compat.h",
+      "ext": ".h",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "engine/rmr/include/rmr_attractor.h",
+      "ext": ".h",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "engine/rmr/include/rmr_tcg_cache.h",
+      "ext": ".h",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "engine/rmr/include/rmr_casm_bridge.h",
+      "ext": ".h",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "engine/rmr/include/rmr_zipraf_core.h",
+      "ext": ".h",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "engine/rmr/include/rmr_unified_jni_base.h",
+      "ext": ".h",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "engine/rmr/include/rmr_virtio_blk.h",
+      "ext": ".h",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "engine/rmr/include/rmr_policy_kernel.h",
+      "ext": ".h",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "engine/rmr/include/rmr_torus_flow.h",
+      "ext": ".h",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "engine/rmr/include/rmr_ll_ops.h",
+      "ext": ".h",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "engine/rmr/include/rmr_math_fabric.h",
+      "ext": ".h",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "engine/rmr/include/rmr_vhw_model.h",
+      "ext": ".h",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "engine/rmr/include/rmr_types.h",
+      "ext": ".h",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "engine/rmr/include/rmr_unified_kernel.h",
+      "ext": ".h",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "engine/rmr/src/rmr_ethica_loss.c",
+      "ext": ".c",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "engine/rmr/src/rmr_casm_bridge.c",
+      "ext": ".c",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "engine/rmr/src/rafa_cti_scan.c",
+      "ext": ".c",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "engine/rmr/src/rmr_math_fabric.c",
+      "ext": ".c",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "engine/rmr/src/rmr_unified_jni_bridge.c",
+      "ext": ".c",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "engine/rmr/src/rmr_lowlevel_portable.c",
+      "ext": ".c",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "engine/rmr/src/rmr_hw_detect_selftest.c",
+      "ext": ".c",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "engine/rmr/src/bitomega.c",
+      "ext": ".c",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "engine/rmr/src/rmr_host_compat.c",
+      "ext": ".c",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "engine/rmr/src/rmr_vhw_model.c",
+      "ext": ".c",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "engine/rmr/src/rmr_lowlevel_mix.c",
+      "ext": ".c",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "engine/rmr/src/rmr_unified_kernel.c",
+      "ext": ".c",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "engine/rmr/src/rmr_ll_tuning.c",
+      "ext": ".c",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "engine/rmr/src/rmr_tcg_cache.c",
+      "ext": ".c",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "engine/rmr/src/rmr_zipraf_core.c",
+      "ext": ".c",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "engine/rmr/src/rmr_ll_ops.c",
+      "ext": ".c",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "engine/rmr/src/rmr_apk_module.c",
+      "ext": ".c",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "engine/rmr/src/rmr_corelib.c",
+      "ext": ".c",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "engine/rmr/src/rmr_virtio_blk.c",
+      "ext": ".c",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "engine/rmr/src/rmr_attractor.c",
+      "ext": ".c",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "engine/rmr/src/bitraf.c",
+      "ext": ".c",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "engine/rmr/src/rmr_qemu_bridge.c",
+      "ext": ".c",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "engine/platform/android/rmr_android_compat.c",
+      "ext": ".c",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "terminal-view/.gitignore",
+      "ext": "",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "terminal-view/build.gradle",
+      "ext": ".gradle",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "terminal-view/proguard-rules.pro",
+      "ext": ".pro",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "terminal-view/src/main/AndroidManifest.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "terminal-view/src/main/java/com/termux/view/TerminalView.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "terminal-view/src/main/res/values/strings.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "terminal-view/src/main/res/drawable/text_select_handle_right_material.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "terminal-view/src/main/res/drawable/text_select_handle_left_material.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "3dfx/3dfx-wrappers-3.5.0.iso",
+      "ext": ".iso",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "3dfx/3dfx-wrappers-2.9.5.iso",
+      "ext": ".iso",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "3dfx/3dfx-wrappers-3.0.0.iso",
+      "ext": ".iso",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "3dfx/3dfx-wrappers-3.4.7.iso",
+      "ext": ".iso",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "android/gradlew.bat",
+      "ext": ".bat",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "android/build.gradle",
+      "ext": ".gradle",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "android/settings.gradle",
+      "ext": ".gradle",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "android/gradlew",
+      "ext": "",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "android/app/build.gradle",
+      "ext": ".gradle",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "android/app/src/release/AndroidManifest.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "android/app/src/main/AndroidManifest.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "android/app/src/main/java/com/rafacodephi/app/MainActivity.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "android/app/src/main/cpp/rafcoder_jni.c",
+      "ext": ".c",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "android/app/src/main/res/xml/network_security_config.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "android/.gradle/8.7/gc.properties",
+      "ext": ".properties",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "android/.gradle/8.7/fileHashes/fileHashes.lock",
+      "ext": ".lock",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "android/.gradle/8.7/dependencies-accessors/gc.properties",
+      "ext": ".properties",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "android/.gradle/8.7/fileChanges/last-build.bin",
+      "ext": ".bin",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "android/.gradle/8.7/checksums/md5-checksums.bin",
+      "ext": ".bin",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "android/.gradle/8.7/checksums/sha1-checksums.bin",
+      "ext": ".bin",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "android/.gradle/8.7/checksums/checksums.lock",
+      "ext": ".lock",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "android/.gradle/vcs-1/gc.properties",
+      "ext": ".properties",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "android/.gradle/buildOutputCleanup/buildOutputCleanup.lock",
+      "ext": ".lock",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "android/.gradle/buildOutputCleanup/cache.properties",
+      "ext": ".properties",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "terminal-emulator/.gitignore",
+      "ext": "",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "terminal-emulator/build.gradle",
+      "ext": ".gradle",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "terminal-emulator/proguard-rules.pro",
+      "ext": ".pro",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "terminal-emulator/src/main/AndroidManifest.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "terminal-emulator/src/main/java/com/termux/terminal/TerminalSession.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "terminal-emulator/src/main/java/com/termux/terminal/KeyHandler.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "terminal-emulator/src/main/jniLibs/arm64-v8a/libtermux.so",
+      "ext": ".so",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "terminal-emulator/src/test/java/com/termux/terminal/KeyHandlerTest.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "terminal-emulator/src/test/java/com/termux/terminal/TerminalTest.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "terminal-emulator/src/test/java/com/termux/terminal/ByteQueueTest.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "terminal-emulator/src/test/java/com/termux/terminal/TerminalTestCase.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "terminal-emulator/src/test/java/com/termux/terminal/WcWidthTest.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "terminal-emulator/src/test/java/com/termux/terminal/EscapeControlCharacterTest.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "terminal-emulator/src/test/java/com/termux/terminal/ScreenBufferTest.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "terminal-emulator/src/test/java/com/termux/terminal/TextStyleTest.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "terminal-emulator/src/test/java/com/termux/terminal/HistoryTest.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "scripts/native/build.sh",
+      "ext": ".sh",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "scripts/native/test.sh",
+      "ext": ".sh",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "scripts/native/benchmark.sh",
+      "ext": ".sh",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": ".git/FETCH_HEAD",
+      "ext": "",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": ".git/index",
+      "ext": "",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": ".git/shallow",
+      "ext": "",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": ".git/HEAD",
+      "ext": "",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": ".git/COMMIT_EDITMSG",
+      "ext": "",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": ".git/packed-refs",
+      "ext": "",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": ".git/description",
+      "ext": "",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": ".git/config",
+      "ext": "",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": ".git/info/exclude",
+      "ext": "",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": ".git/hooks/applypatch-msg.sample",
+      "ext": ".sample",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": ".git/hooks/pre-push.sample",
+      "ext": ".sample",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": ".git/hooks/sendemail-validate.sample",
+      "ext": ".sample",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": ".git/hooks/commit-msg.sample",
+      "ext": ".sample",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": ".git/hooks/pre-rebase.sample",
+      "ext": ".sample",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": ".git/hooks/fsmonitor-watchman.sample",
+      "ext": ".sample",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": ".git/hooks/pre-applypatch.sample",
+      "ext": ".sample",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": ".git/hooks/post-update.sample",
+      "ext": ".sample",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": ".git/hooks/pre-commit.sample",
+      "ext": ".sample",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": ".git/hooks/update.sample",
+      "ext": ".sample",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": ".git/hooks/push-to-checkout.sample",
+      "ext": ".sample",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": ".git/hooks/prepare-commit-msg.sample",
+      "ext": ".sample",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": ".git/hooks/pre-merge-commit.sample",
+      "ext": ".sample",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": ".git/hooks/pre-receive.sample",
+      "ext": ".sample",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": ".git/logs/HEAD",
+      "ext": "",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": ".git/logs/refs/heads/work",
+      "ext": "",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": ".git/objects/45/ed2e712b927aefc381b197936d223c29bfc0e9",
+      "ext": "",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": ".git/objects/90/4dff83eab5b572fdb4152bd1e7a9901962adb2",
+      "ext": "",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": ".git/objects/28/5db3a577b7490dd06fcf4d55e40307b850c1f4",
+      "ext": "",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": ".git/objects/31/5e7a3021bd3c290b78a23302f61583f3d71543",
+      "ext": "",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": ".git/objects/ae/838a0b721772ede0b17d66cb2801ab1ad67d0a",
+      "ext": "",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": ".git/objects/0e/7b362465660f6760c774f021eaafcbfbf86f0e",
+      "ext": "",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": ".git/objects/14/b01a108716fcd78ed152115e75b1db0d50c3d9",
+      "ext": "",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": ".git/objects/3f/7272b1aff02c5a556eade465989092c5a4cc2d",
+      "ext": "",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": ".git/objects/06/57516ab18fcbde0700e205c1fba41bdb7e7465",
+      "ext": "",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": ".git/objects/21/beeb7c0b547bf3f9994ea57949e45993641266",
+      "ext": "",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": ".git/objects/22/4dfe4ca78ecefcdf14d1cd04e99e8ac599fbb5",
+      "ext": "",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": ".git/objects/pack/pack-e5b7397fe86bec36afd57a9120423f13f5e43ed3.rev",
+      "ext": ".rev",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": ".git/objects/pack/pack-e5b7397fe86bec36afd57a9120423f13f5e43ed3.idx",
+      "ext": ".idx",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": ".git/objects/pack/pack-e5b7397fe86bec36afd57a9120423f13f5e43ed3.pack",
+      "ext": ".pack",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": ".git/refs/heads/work",
+      "ext": "",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": ".github/dependabot.yml",
+      "ext": ".yml",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": ".github/FUNDING.yml",
+      "ext": ".yml",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": ".github/workflows/rmrorigem.yml",
+      "ext": ".yml",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": ".github/workflows/compile-matrix.yml",
+      "ext": ".yml",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": ".github/workflows/ci.yml",
+      "ext": ".yml",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": ".github/workflows/validate-formula.yml",
+      "ext": ".yml",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": ".github/workflows/apk-wizard.yml",
+      "ext": ".yml",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": ".github/workflows/copilot-setup-steps.yml",
+      "ext": ".yml",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": ".github/workflows/host-ci.yml",
+      "ext": ".yml",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": ".github/workflows/quality-gates.yml",
+      "ext": ".yml",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": ".github/workflows/rafaelmeloreisformulasprorias287424.yml",
+      "ext": ".yml",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": ".github/workflows/android-ci.yml",
+      "ext": ".yml",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": ".github/workflows/archive/android-build.yml",
+      "ext": ".yml",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": ".github/workflows/archive/playstore-deploy.yml",
+      "ext": ".yml",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": ".ci/rmr_asm_x86_64.S",
+      "ext": ".s",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "shell-loader/.gitignore",
+      "ext": "",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "shell-loader/build.gradle",
+      "ext": ".gradle",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "shell-loader/src/main/AndroidManifest.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "shell-loader/src/test/java/com/vectras/vm/LoaderSignatureVerificationTest.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "shell-loader/stub/.gitignore",
+      "ext": "",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "shell-loader/stub/build.gradle",
+      "ext": ".gradle",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "shell-loader/stub/src/main/AndroidManifest.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "shell-loader/stub/src/main/java/android/content/pm/IPackageManager.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "shell-loader/stub/src/main/java/android/app/IActivityManager.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "shell-loader/stub/src/main/java/android/app/ContextImpl.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "shell-loader/stub/src/main/java/android/app/ActivityThread.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "web/index.html",
+      "ext": ".html",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "web/how.html",
+      "ext": ".html",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "web/coffee.html",
+      "ext": ".html",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "web/favicon.ico",
+      "ext": ".ico",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "web/data/roms-ppc.json",
+      "ext": ".json",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "web/data/roms-aarch64.json",
+      "ext": ".json",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "web/data/roms-i386.json",
+      "ext": ".json",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "web/data/roms-X86_64.json",
+      "ext": ".json",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "reports/non_md_inventory.tsv",
+      "ext": ".tsv",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "reports/full_repo_audit.tsv",
+      "ext": ".tsv",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "reports/baremetal/.gitignore",
+      "ext": "",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "archive/experimental/rafael quantico melo reis",
+      "ext": "",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "bench/baseline/host_x86_64_balanced.json",
+      "ext": ".json",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "bench/baseline/host_x86_64_aggressive.json",
+      "ext": ".json",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "bench/results/.gitignore",
+      "ext": "",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "bench/results/.gitkeep",
+      "ext": "",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "bench/scripts/run_bench.sh",
+      "ext": ".sh",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "bench/src/rmr_benchmark_main.c",
+      "ext": ".c",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/.gitignore",
+      "ext": "",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/build.gradle",
+      "ext": ".gradle",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/proguard-rules.pro",
+      "ext": ".pro",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/AndroidManifest.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/antlersoft/android/drawing/OverlappingCopy.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/k2/zoomimageview/ZoomImageView.kt",
+      "ext": ".kt",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/termux/filepicker/TermuxFileReceiverActivity.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/termux/app/BellUtil.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/termux/app/RunCommandService.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/termux/app/TermuxService.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/termux/app/TermuxViewClient.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/termux/app/TermuxPreferences.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/termux/app/DialogUtils.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/termux/app/BackgroundJob.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/termux/app/TermuxActivity.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/termux/app/TermuxInstaller.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/termux/app/ExtraKeysView.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/termux/app/TermuxHelpActivity.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/termux/shared/termux/extrakeys/ExtraKeysView.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/vectras/qemu/MainSettingsManager.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/vectras/qemu/SettingsFragment.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/vectras/qemu/MainVNCActivity.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/vectras/qemu/VNCConfig.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/vectras/qemu/utils/RamInfo.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/vectras/qemu/utils/QmpClient.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/vectras/vm/CqcmActivity.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/vectras/vm/QemuParamsEditorActivity.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/vectras/vm/VMCreatorActivity.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/vectras/vm/Minitools.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/vectras/vm/StartVM.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/vectras/vm/VmImageCommandRules.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/vectras/vm/AboutActivity.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/vectras/vm/VectrasApp.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/vectras/vm/RomReceiverActivity.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/vectras/vm/DataExplorerActivity.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/vectras/vm/MainService.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/vectras/vm/RomInfo.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/vectras/vm/VMManager.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/vectras/vm/WebViewActivity.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/vectras/vm/ImagePrvActivity.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/vectras/vm/SplashActivity.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/vectras/vm/ExportRomActivity.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/vectras/vm/x11/X11Activity.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/vectras/vm/x11/LoriePreferences.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/vectras/vm/x11/CmdEntryPoint.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/vectras/vm/x11/utils/KeyInterceptor.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/vectras/vm/x11/utils/SamsungDexUtils.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/vectras/vm/x11/utils/X11ToolbarViewPager.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/vectras/vm/x11/utils/TermuxX11ExtraKeys.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/vectras/vm/settings/ExternalVNCSettingsActivity.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/vectras/vm/settings/VNCSettingsActivity.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/vectras/vm/settings/X11DisplaySettingsActivity.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/vectras/vm/settings/UpdaterActivity.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/vectras/vm/settings/LanguageModulesActivity.kt",
+      "ext": ".kt",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/vectras/vm/settings/ImportExportSettingsActivity.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/vectras/vm/settings/ThemeActivity.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/vectras/vm/network/EndpointPolicy.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/vectras/vm/network/RequestNetworkController.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/vectras/vm/network/EndpointValidator.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/vectras/vm/network/RequestNetwork.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/vectras/vm/network/EndpointFeature.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/vectras/vm/setupwizard/SetupValidationParser.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/vectras/vm/setupwizard/SetupFeatureCore.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/vectras/vm/setupwizard/SetupProfileMode.kt",
+      "ext": ".kt",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/vectras/vm/setupwizard/SetupFeatureCoreKtBridge.kt",
+      "ext": ".kt",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/vectras/vm/setupwizard/SetupStateValidator.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/vectras/vm/setupwizard/BootstrapAbiMapper.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/vectras/vm/setupwizard/SetupUiState.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/vectras/vm/setupwizard/SetupProcessIntegration.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/vectras/vm/setupwizard/SetupFlowOrchestrator.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/vectras/vm/setupwizard/FirstRunPermissionOrchestrator.kt",
+      "ext": ".kt",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/vectras/vm/telemetry/TelemetryHub.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/vectras/vm/telemetry/TelemetryClock.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/vectras/vm/telemetry/TelemetrySchema.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/vectras/vm/telemetry/TelemetrySink.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/vectras/vm/telemetry/TelemetryRecord.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/vectras/vm/telemetry/LocalTelemetrySink.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/vectras/vm/qemu/QemuBinaryResolver.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/vectras/vm/qemu/QemuArgsBuilder.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/vectras/vm/qemu/KvmProbe.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/vectras/vm/qemu/QemuExecConfig.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/vectras/vm/qemu/VmProfile.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/vectras/vm/crashtracker/CrashHandler.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/vectras/vm/crashtracker/LastCrashActivity.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/vectras/vm/benchmark/BenchmarkManager.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/vectras/vm/benchmark/VectraBenchmark.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/vectras/vm/benchmark/BenchmarkActivity.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/vectras/vm/rafaelia/RafaeliaQemuTuning.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/vectras/vm/rafaelia/HdCacheMvp.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/vectras/vm/rafaelia/RafaeliaSettings.kt",
+      "ext": ".kt",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/vectras/vm/rafaelia/RafaeliaReportStorage.kt",
+      "ext": ".kt",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/vectras/vm/rafaelia/RafaeliaBenchManager.kt",
+      "ext": ".kt",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/vectras/vm/rafaelia/RafaeliaEventRecorder.kt",
+      "ext": ".kt",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/vectras/vm/rafaelia/RafaeliaPathValidator.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/vectras/vm/rafaelia/RafaeliaLogActivity.kt",
+      "ext": ".kt",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/vectras/vm/rafaelia/RafaeliaMvp.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/vectras/vm/Fragment/ControlersOptionsFragment.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/vectras/vm/Fragment/LoggerDialogFragment.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/vectras/vm/Fragment/LoggerFragment.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/vectras/vm/Fragment/CreateImageDialogFragment.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/vectras/vm/model/GithubUser.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/vectras/vm/download/DownloadStatus.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/vectras/vm/download/DownloadStateReconciler.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/vectras/vm/download/DownloadWorker.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/vectras/vm/download/DownloadItemState.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/vectras/vm/download/DownloadPathResolver.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/vectras/vm/download/DownloadViewModel.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/vectras/vm/download/DownloadStateStore.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/vectras/vm/download/DownloadCoordinator.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/vectras/vm/vectra/VectraCore.kt",
+      "ext": ".kt",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/vectras/vm/vectra/VectraDeterministicContainer.kt",
+      "ext": ".kt",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/vectras/vm/utils/TarUtils.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/vectras/vm/utils/JSONUtils.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/vectras/vm/utils/NumberUtils.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/vectras/vm/utils/ImageUtils.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/vectras/vm/utils/TextUtils.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/vectras/vm/utils/PermissionUtils.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/vectras/vm/utils/PermissionCapabilitySupport.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/vectras/vm/utils/LibraryChecker.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/vectras/vm/utils/FileUtils.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/vectras/vm/utils/UIUtils.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/vectras/vm/utils/DialogUtils.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/vectras/vm/utils/ServiceUtils.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/vectras/vm/utils/SimpleAnimations.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/vectras/vm/utils/SimulateKeyEvent.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/vectras/vm/utils/AppUpdater.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/vectras/vm/utils/CommandUtils.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/vectras/vm/utils/ZipUtils.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/vectras/vm/utils/NetworkUtils.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/vectras/vm/utils/ListUtils.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/vectras/vm/utils/SafeFileName.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/vectras/vm/utils/NotificationUtils.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/vectras/vm/utils/PackageUtils.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/vectras/vm/utils/ClipboardUltils.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/vectras/vm/adapter/LogsAdapter.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/vectras/vm/logger/VMStatus.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/vectras/vm/logger/VectrasStatus.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/vectras/vm/audit/AuditLedger.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/vectras/vm/audit/AuditEvent.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/vectras/vm/main/MainActivity.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/vectras/vm/main/MainUiStateViewModel.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/vectras/vm/main/vms/VmsFragment.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/vectras/vm/main/vms/VmsHomeAdapter.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/vectras/vm/main/vms/VmsDiffUtil.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/vectras/vm/main/vms/DataMainRoms.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/vectras/vm/main/softwarestore/SoftwareStoreViewModel.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/vectras/vm/main/softwarestore/SoftwareStoreHomeAdapter.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/vectras/vm/main/softwarestore/SoftwareStoreFragment.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/vectras/vm/main/softwarestore/SoftwareStoreHomeAdapterSearch.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/vectras/vm/main/romstore/RomCatalogLabels.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/vectras/vm/main/romstore/HomeRomStoreViewModel.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/vectras/vm/main/romstore/DataRoms.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/vectras/vm/main/romstore/RomStoreHomeAdapterSearch.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/vectras/vm/main/romstore/RomStoreHomeAdpater.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/vectras/vm/main/romstore/RomStoreFragment.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/vectras/vm/main/monitor/SystemMonitorFragment.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/vectras/vm/main/core/DisplaySystem.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/vectras/vm/main/core/MainStartVM.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/vectras/vm/main/core/RomOptionsDialog.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/vectras/vm/main/core/PendingCommand.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/vectras/vm/main/core/SharedData.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/vectras/vm/view/GithubUserView.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/vectras/vm/widgets/JoystickView.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/vectras/vm/widgets/RadioGroupPlus.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/vectras/vm/localization/LocaleManager.kt",
+      "ext": ".kt",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/vectras/vm/localization/EndpointValidator.kt",
+      "ext": ".kt",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/vectras/vm/localization/LanguageModulesFragment.kt",
+      "ext": ".kt",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/vectras/vm/tools/ProfessionalToolsActivity.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/vectras/vm/core/LogcatRuntime.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/vectras/vm/core/ProotCommandBuilder.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/vectras/vm/core/LowLevelBridge.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/vectras/vm/core/LowLevelDeterminism.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/vectras/vm/core/HardwareProfileBridge.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/vectras/vm/core/ProcessLaunch.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/vectras/vm/core/TermuxX11.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/vectras/vm/core/ShellExecutor.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/vectras/vm/core/NativeLogcatBridge.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/vectras/vm/core/ProcessOutputDrainer.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/vectras/vm/core/PulseAudio.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/vectras/vm/core/LowLevelVector.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/vectras/vm/adapters/GithubUserAdapter.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/vectras/vm/importer/ImportStateStore.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/vectras/vm/importer/ImportSessionWorker.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/vectras/vterm/Terminal.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/vectras/vterm/TerminalBottomSheetDialog.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/com/vectras/vterm/view/ZoomableTextView.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/android/androidVNC/ColorModel256.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/android/androidVNC/ColorModel64.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/android/androidVNC/BitmapImplHint.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/android/androidVNC/COLORMODEL.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/android/androidVNC/VncCursorView.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/android/androidVNC/Utils.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/java/android/androidVNC/ColorModel8.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/jniLibs/x86_64/libXlorie.so",
+      "ext": ".so",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/jniLibs/armeabi-v7a/libXlorie.so",
+      "ext": ".so",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/jniLibs/arm64-v8a/libXlorie.so",
+      "ext": ".so",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/jniLibs/x86/libXlorie.so",
+      "ext": ".so",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/cpp/vectra_lowlevel_backend_armv7.c",
+      "ext": ".c",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/cpp/vectra_lowlevel_backend.h",
+      "ext": ".h",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/cpp/vectra_core_accel.c",
+      "ext": ".c",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/cpp/vectra_lowlevel_backend_x86.c",
+      "ext": ".c",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/cpp/lowlevel_bridge.c",
+      "ext": ".c",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/cpp/termux_bootstrap_bridge.c",
+      "ext": ".c",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/cpp/hardware_profile_bridge.c",
+      "ext": ".c",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/cpp/vectra_lowlevel_backend_x86_64.c",
+      "ext": ".c",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/cpp/lowlevel_abi.h",
+      "ext": ".h",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/cpp/hardware_profile_bridge_internal.h",
+      "ext": ".h",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/cpp/vectra_lowlevel_backend_riscv64.c",
+      "ext": ".c",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/cpp/core/sector.c",
+      "ext": ".c",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/cpp/core/sector.h",
+      "ext": ".h",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/cpp/core/tests/sector_snapshot_42.c",
+      "ext": ".c",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/cpp/core/tests/sector_selftest.c",
+      "ext": ".c",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/cpp/core/tests/core_benchmark_smoke.c",
+      "ext": ".c",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/cpp/core/arch/primitives.c",
+      "ext": ".c",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/aidl/com/vectras/vm/x11/ICmdEntryInterface.aidl",
+      "ext": ".aidl",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/assets/bootstrap/arm64-v8a.tar",
+      "ext": ".tar",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/assets/bootstrap/armeabi-v7a.tar",
+      "ext": ".tar",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/assets/bootstrap/x86_64.tar",
+      "ext": ".tar",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/assets/bootstrap/x86.tar",
+      "ext": ".tar",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/assets/roms/RELEASEX64_OVMF_VARS.fd",
+      "ext": ".fd",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/assets/roms/bios-vectras.bin",
+      "ext": ".bin",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/assets/roms/QEMU_EFI.img",
+      "ext": ".img",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/assets/roms/QEMU_VARS.img",
+      "ext": ".img",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/assets/roms/RELEASEX64_OVMF.fd",
+      "ext": ".fd",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/assets/alpine19/arm64-v8a.tar",
+      "ext": ".tar",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/assets/alpine19/armeabi-v7a.tar",
+      "ext": ".tar",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/assets/alpine19/x86_64.tar",
+      "ext": ".tar",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/assets/alpine19/x86.tar",
+      "ext": ".tar",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/menu/home_bottom_app_bar.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/menu/vnccanvasactivitymenu.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/menu/home_drawer_menu.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/menu/searchbar_menu.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/menu/bottom_navigation_home_menu.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/menu/settings_dialog.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/menu/androidvncmenu.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/menu/set_arch_toolbar_menu.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/menu/home_toolbar_menu.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/values-es/strings.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/animator/dialog_out.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/animator/dialog_in.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/values-pt/strings.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/values-night/theme.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/values-night/colors.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/font/googlesansvodevariablefontwght.ttf",
+      "ext": ".ttf",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/font/googlesansflex.ttf",
+      "ext": ".ttf",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/values-de/strings.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/values-ru/strings.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/values-fr/strings.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/values/theme.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/values/strings.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/values/ids.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/values/array.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/values/dimens.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/values/attrs.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/values/styles.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/values/colors.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/values/dimen.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/values-zh-rCN/strings.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable-anydpi-v26/current_session_black.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable-anydpi-v26/round_edit_24.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable-anydpi-v26/round_logout_24.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable-anydpi-v26/round_menu_24.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable-anydpi-v26/ic_service_notification.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable-anydpi-v26/round_file_download_24.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable-anydpi-v26/session_ripple.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable-anydpi-v26/round_shop_24.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable-anydpi-v26/current_session.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable-anydpi-v26/round_settings_24.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable-anydpi-v26/controls_button.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable-anydpi-v26/terminal_scroll_shape.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable-anydpi-v26/session_ripple_black.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable-anydpi-v26/access_point_network_off.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable-anydpi-v26/round_build_24.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/xml/userinterface.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/xml/file_provider_paths.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/xml/gma_ad_services_config.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/xml/preferences.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/xml/settings.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/xml/vnc.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/xml/headers_preference.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/xml/accessibility_service_config.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/xml/qemu.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/values-ar/strings.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/layout/activity_updater.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/layout/extra_keys_main.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/layout/extra_keys_config.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/layout/activity_terminal.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/layout/activity_external_vnc_settings.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/layout/bottomsheetdialog_logger.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/layout/nav_header_main.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/layout/view_terminal_toolbar_text_input.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/layout/dialog_programs.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/layout/activity_vm_creator.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/layout/fragment_logs.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/layout/row.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/layout/activity_rafaelia_logs.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/layout/create_vhd.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/layout/setup_wizard_stepper.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/layout/setup_wizard_step_installing.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/layout/simple_layout_list_view_with_check.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/layout/send_key_dialog.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/layout/iv_prv.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/layout/container_function.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/layout/activity_language_modules.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/layout/activity_last_crash.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/layout/activity_main_content.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/layout/activity_vnc.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/layout/container_roms.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/layout/dialog_progress_style.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/layout/activity_web_view.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/layout/activity_splash.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/layout/activity_minitools.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/layout/controls_fragment.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/layout/github_user_view.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/layout/activity_settings.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/layout/activity_professional_tools.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/layout/rom_options_dialog.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/layout/setup_wizard_step_system_update.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/layout/activity_cqcm.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/layout/fragment_language_modules.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/layout/switch_mui3.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/layout/activity_main.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/layout/setup_qemu_advanced.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/layout/simple_layout_for_spiner.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/layout/activity_set_arch.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/layout/activity_x11_display_settings.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/layout/activity_x11.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/layout/fragment_home_vms.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/layout/main_vnc.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/layout/widgetlayout.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/layout/widget_edittext_dialog.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/layout/game_controls.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/layout/fragment_home_software_store.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/layout/item_language_module.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/layout/activity_theme.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/layout/list_item_log.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/layout/repeater_dialog.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/layout/activity_import_export_settings.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/layout/extra_keys_right.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/layout/activity_data_explorer.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/layout/fragment_home_system_monitor.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/layout/container_main_roms.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/layout/setup_qemu_done.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/layout/github_user_item.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/layout/activity_qemu_params_editor.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/layout/setup_wizard_step_error.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/layout/fragment_home_rom_store.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/layout/dialog_layout.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/layout/list_view.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/layout/activity_export_rom.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/layout/setup_wizard_step_options.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/layout/terminal_bottom_sheet.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/layout/desktop_controls.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/layout/fragment_controlers_options.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/layout/activity_benchmark.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/layout/activity_rom_info.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/layout/dialog_change_removable_devices.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/layout/setup_wizard_step_extracting.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/layout/activity_about.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/layout/view_terminal_toolbar_extra_keys.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/layout/activity_setup_wizard2.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/layout/dialog_start_vm.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/layout/setup_wizard_step_permission.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/layout/external_vnc.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/layout/content_about.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/layout/activity_vnc_settings.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/layout/dialog_progress_operation.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/layout/update_bottom_dialog_layout.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/layout/line_in_drawer.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/layout/setup_wizard_step_welcome.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/layout/setup_wizard_step_getting_data.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/layout/importexport.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/layout/layout_for_send_keys.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/sync_alt_24px.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/dialog_shape_top_button.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/round_folder_24.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/arrow_warm_up_24px.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/hard_disk_24px.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/object_shape_top.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/delete_24px.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/content_copy_24px.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/folder_24px.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/eject_24px.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/dialog_shape_bottom_button.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/schedule_24px.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/system_update_24px.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/select_all_24px.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/home_storage_filled_24px.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/input_circle.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/touchpad_mouse_24px.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/left_click_btn.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/free_palestine.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/left_click_24px.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/memory_alt_24px.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/round_edit_24.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/object_shape_single_high.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/home_filled_24px.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/monitor_heart_24px.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/progress_activity_24px.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/ic_computer_180dp_with_padding.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/round_update_24.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/open_in_new_24px.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/home_storage_24px.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/stop_24px.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/host_24px.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/arrow_cool_down_24px.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/round_logout_24.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/round_menu_24.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/backgroud_round_only_left_25_black_50_style.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/ic_launcher_foreground.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/science_24px.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/devices_other_24px.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/disc_full_100px.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/manufacturing_24px.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/folder_100px.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/vertical_align_bottom_24px.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/selected_session_background_black.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/gamepad.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/cursor.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/computer_180px.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/thumb_up_filled_24px.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/content_paste_24px.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/gpp_maybe_24px.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/android_wifi_3_bar_alert_100px.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/more_vert_24px.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/open_in_full_24px.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/ic_download.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/arrow_upward_24px.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/view_real_size_24px.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/album_24px.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/folder_96px.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/ic_esc.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/fullscreen_24px.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/object_shape_middle.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/error_96px.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/round_mouse_24.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/package_filled_24px.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/warning_24px.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/ic_check_circle.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/publish_24px.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/cast_24px.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/zoom_out_24px.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/ic_facebook.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/delete_forever_24px.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/round_file_download_24.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/home_repair_service_24px.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/ic_qemu.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/info_24px.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/package_24px.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/thumb_up_24px.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/round_games_24.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/verified_user_24px.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/settings_24px.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/search_96px.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/notes_24px.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/round_storage_24.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/hard_drive_24px.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/round_info_24.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/object_shape_middle_on_surface.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/grid_view_24px.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/shadow_24px.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/round_dns_24.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/ic_del.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/dialog_shape_single_button.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/ic_delete.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/outline_bug_report_24.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/round_volume_up_24.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/ic_instagram.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/object_shape_top_on_surface.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/ic_arrow_left.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/arrow_back_rounded_24px.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/object_shape_bottom_on_surface.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/round_shop_24.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/visibility_24px.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/cloud_off_96px.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/exit_to_app_24px.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/middle_click_btn.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/ic_copy.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/ic_alt.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/round_computer_24.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/edit_24px.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/ic_enter.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/ic_arrow_down.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/visibility_off.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/cleaning_services_24px.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/round_aspect_ratio_24.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/zoom_in_24px.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/selected_session_background.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/keyboard_arrow_right_24px.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/right_click_btn.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/language_24px.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/ic_home_selector.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/switch_thumb_icon.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/mouse_buttons.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/round_settings_24.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/cast_warning_24px.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/controls_button.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/ic_arrow_up.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/broken_image_24px.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/ic_windows.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/bg_setup_wizard_step_badge_pending.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/ic_home_storage_selector.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/object_shape_single.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/controls_button1.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/backgroud_round_dialog.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/apps_24px.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/sd_card_24px.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/arrow_back_24px.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/bg_setup_wizard_step_badge_done.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/settings_backup_restore_24px.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/refresh_24px.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/ic_cloud_download.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/round_language_24.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/ic_youtube.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/power_settings_new_24px.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/object_shape_bottom_tertiary.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/object_shape_single_on_surface.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/keyboard_24px.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/content_cut_24px.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/power_input_24px.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/help_24px.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/ic_arrow_right.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/close_fullscreen_24px.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/insert_text_24px.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/round_terminal_24.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/keyboard_arrow_down_24px.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/round_keyboard_24.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/volume_up_24px.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/arrow_forward_24px.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/object_shape_top_tertiary.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/check_24px.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/round_add_24.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/access_point_network_off.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/keyboard_return_24px.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/account_circle_24px.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/desktop_windows_24px.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/activity_setup_wizard2.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/vertical_align_top_24px.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/person_24.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/ic_telegram.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/ic_package_selector.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/ic_github.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/controls_button2.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/terminal_24px.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/backgroud_round_edittext_50.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/file_copy_24px.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/show_chart_24px.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/arrow_downward_24px.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/mobile_arrow_down_100px.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/android_wifi_3_bar_100px.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/docs_24px.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/home_24px.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/dialog_shape_click_effect_button.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/upcoming_96px.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/warning_48px.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/ic_ctrl.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/object_shape_bottom.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/overview_24px.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/object_shape_top_high.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/monitor_heart_filled_24px.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/ic_discord.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/save_24px.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/groups_24px.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/object_shape_bottom_high.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/send_24px.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/desktop_24px.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/backspace_24px.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/round_memory_24.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/deployed_code_24px.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/file_open_24px.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/add_24px.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/round_build_24.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/close_24px.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/highlight_mouse_cursor_24px.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/task_alt_96px.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/photo_24px.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/dialog_shape_middle_button.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/ic_b.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/background1.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/round_dark_mode_24.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/package_2_96px.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/bg_setup_wizard_step_badge_current.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/computer.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/object_shape_middle_high.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/build_24px.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/transparent_background.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/ic_monitor_heart_selector.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/main/res/drawable/object_shape_inside_object_top.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/test/java/com/termux/filepicker/TermuxDocumentsProviderIsChildDocumentTest.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/test/java/com/termux/app/TermuxInstallerTest.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/test/java/com/termux/app/BackgroundJobTest.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/test/java/com/vectras/qemu/MainVNCActivityDispatchKeyEventTest.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/test/java/com/vectras/qemu/utils/RamInfoTest.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/test/java/com/vectras/qemu/utils/QmpClientContractTest.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/test/java/com/vectras/vm/StartVMVncPasswordCliRegressionTest.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/test/java/com/vectras/vm/StartVMCommandBuildTest.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/test/java/com/vectras/vm/VmImageCommandRulesTest.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/test/java/com/vectras/vm/VMManagerDeleteVmGuardsTest.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/test/java/com/vectras/vm/VMManagerLifecycleKillAllTest.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/test/java/com/vectras/vm/StartVMEnvNullCdromPathTest.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/test/java/com/vectras/vm/VMManagerRestoreVMsJsonAppendTest.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/test/java/com/vectras/vm/VMManagerStopVmProcessTest.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/test/java/com/vectras/vm/StartVMCdromArgumentNormalizationTest.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/test/java/com/vectras/vm/StartVMShellQuoteTest.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/test/java/com/vectras/vm/setupwizard/SetupPreflightRulesTest.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/test/java/com/vectras/vm/setupwizard/BootstrapAbiMapperTest.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/test/java/com/vectras/vm/setupwizard/SetupFeatureCoreKtBridgeTest.kt",
+      "ext": ".kt",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/test/java/com/vectras/vm/setupwizard/SetupFeatureCoreBootstrapValidationTest.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/test/java/com/vectras/vm/setupwizard/SetupFeatureCorePkgInstalledJavaTest.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/test/java/com/vectras/vm/setupwizard/SetupFeatureCorePreflightTest.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/test/java/com/vectras/vm/setupwizard/SetupValidationParserTest.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/test/java/com/vectras/vm/setupwizard/SetupFlowOrchestratorTest.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/test/java/com/vectras/vm/setupwizard/SetupStateValidatorTest.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/test/java/com/vectras/vm/setupwizard/SetupFeatureCoreProotSelfCheckTest.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/test/java/com/vectras/vm/setupwizard/SetupProcessIntegrationTest.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/test/java/com/vectras/vm/qemu/QemuBinaryResolverTest.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/test/java/com/vectras/vm/qemu/ExecutionBudgetPolicyTest.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/test/java/com/vectras/vm/qemu/KvmProbeTest.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/test/java/com/vectras/vm/crashtracker/CrashHandlerTest.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/test/java/com/vectras/vm/benchmark/BenchmarkManagerTest.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/test/java/com/vectras/vm/rafaelia/RafaeliaSalmoCoreTest.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/test/java/com/vectras/vm/rafaelia/HdCacheMvpTest.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/test/java/com/vectras/vm/rafaelia/RafaeliaMvpTest.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/test/java/com/vectras/vm/rafaelia/RafaeliaKernelV22Test.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/test/java/com/vectras/vm/vectra/VectraCrc32CTest.kt",
+      "ext": ".kt",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/test/java/com/vectras/vm/vectra/VectraDeterministicContainerTest.kt",
+      "ext": ".kt",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/test/java/com/vectras/vm/vectra/VectraDataOrchestratorTest.kt",
+      "ext": ".kt",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/test/java/com/vectras/vm/utils/FileUtilsGetPathExternalStorageTest.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/test/java/com/vectras/vm/utils/FileUtilsReadFromFileRegressionTest.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/test/java/com/vectras/vm/utils/FileUtilsOpenModeTest.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/test/java/com/vectras/vm/utils/UIUtilsLogFormatTest.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/test/java/com/vectras/vm/main/core/MainStartVMTest.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/test/java/com/vectras/vm/localization/LocaleManagerTest.kt",
+      "ext": ".kt",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/test/java/com/vectras/vm/core/NativeFastPathTest.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/test/java/com/vectras/vm/core/ProotCommandBuilderTest.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/test/java/com/vectras/vm/core/ProcessSupervisorFailoverTest.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/test/java/com/vectras/vm/core/VmJsonParserTest.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/test/java/com/vectras/vm/core/ShellExecutorConcurrencyTest.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/test/java/com/vectras/vm/core/ProcessSupervisorConcurrencyTest.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/test/java/com/vectras/vm/core/LowLevelBridgeEquivalenceTest.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/test/java/com/vectras/vm/core/BoundedStringRingBufferTest.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/test/java/com/vectras/vm/core/VmCommandSafetyValidatorTest.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/test/java/com/vectras/vm/core/ProcessOutputDrainerTest.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/test/java/com/vectras/vm/core/ExecutionExecutorsPolicyTest.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/test/java/com/vectras/vm/core/TokenBucketRateLimiterTest.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/test/java/com/vectras/vm/core/BareMetalProfileTest.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/test/java/com/vectras/vm/core/DeterministicRuntimeMatrixIoQuantumTest.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/test/java/com/vectras/vterm/TerminalProcessTerminationTest.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/test/java/com/vectras/vterm/TerminalOutputReferenceTest.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/test/java/android/androidVNC/VncCanvasHoverMouseTest.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/test/java/android/androidVNC/LargeBitmapDataIOExceptionRegressionTest.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "app/src/test/java/android/androidVNC/VncCanvasRetryPolicyTest.java",
+      "ext": ".java",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "formula_ci/tests/__pycache__/thon-313-pytest-9.0.2.pyc",
+      "ext": ".pyc",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "gradle/wrapper/gradle-wrapper.properties",
+      "ext": ".properties",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "gradle/wrapper/gradle-wrapper.jar",
+      "ext": ".jar",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "_incoming/rafaelia_lowlevel.c",
+      "ext": ".c",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "_incoming/rafaelia_ultra.c",
+      "ext": ".c",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "_incoming/rafaelia_flow.c",
+      "ext": ".c",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "_incoming/termux.c",
+      "ext": ".c",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "_incoming/rafaelia_arm.c",
+      "ext": ".c",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "_incoming/pending/rafaelia_flash.S",
+      "ext": ".s",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "_incoming/pending/rafaelia_7d.S",
+      "ext": ".s",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "_incoming/pending/rmr_final.S",
+      "ext": ".s",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "_incoming/pending/rmr_persist.S",
+      "ext": ".s",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "_incoming/pending/r.S",
+      "ext": ".s",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "_incoming/pending/rafaelia_10x10.S",
+      "ext": ".s",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "_incoming/pending/rafaelia_hw_sync.S",
+      "ext": ".s",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "_incoming/pending/rafaelia_vortex.S",
+      "ext": ".s",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "_incoming/pending/rafaelia_ttl.S",
+      "ext": ".s",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "_incoming/pending/rafaelia_fractal.S",
+      "ext": ".s",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "_incoming/pending/rafaelia_stabile.S",
+      "ext": ".s",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "_incoming/pending/rafaelia_invasion.S",
+      "ext": ".s",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "_incoming/pending/rafaelia_8way.S",
+      "ext": ".s",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "_incoming/pending/rafaelia_bench_phi.S",
+      "ext": ".s",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "_incoming/pending/rafaelia_sin_log.S",
+      "ext": ".s",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "_incoming/pending/rafaelia_7d_shapes.S",
+      "ext": ".s",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "_incoming/pending/rafaelia_vortex_v2.S",
+      "ext": ".s",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "_incoming/pending/rafaelia_vacuo_v2.S",
+      "ext": ".s",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "_incoming/pending/rafaelia_l2.S",
+      "ext": ".s",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "_incoming/pending/rafaelia_vortex_live.S",
+      "ext": ".s",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "_incoming/pending/rafaelia_central_link.S",
+      "ext": ".s",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "_incoming/pending/rafaelia_final_bench.S",
+      "ext": ".s",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "_incoming/pending/rafaelia_final.S",
+      "ext": ".s",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "_incoming/pending/rafaelia_936_fast.S",
+      "ext": ".s",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "_incoming/pending/rafaelia_vacuo.S",
+      "ext": ".s",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "_incoming/pending/rmr_matrix.S",
+      "ext": ".s",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "_incoming/pending/rafaelia_final_seal.S",
+      "ext": ".s",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "_incoming/pending/rafaelia_999_logsin.S",
+      "ext": ".s",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "_incoming/pending/rafaelia_avalanche.S",
+      "ext": ".s",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "_incoming/pending/rmr_hidden.S",
+      "ext": ".s",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "_incoming/pending/rafaelia_decision.S",
+      "ext": ".s",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "_incoming/pending/rafaelia_life.S",
+      "ext": ".s",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "_incoming/pending/rmr_spiral.S",
+      "ext": ".s",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "_incoming/pending/rafaelia_toro.S",
+      "ext": ".s",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "_incoming/pending/rafaelia_prime.S",
+      "ext": ".s",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "_incoming/pending/rafaelia_abs.S",
+      "ext": ".s",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "_incoming/pending/rafaelia_flops.S",
+      "ext": ".s",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "_incoming/pending/rafaelia_ultra.S",
+      "ext": ".s",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "_incoming/pending/rafaelia_torus.S",
+      "ext": ".s",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "_incoming/pending/rmr_nihil.S",
+      "ext": ".s",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "_incoming/pending/rafaelia_ttl",
+      "ext": "",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "_incoming/pending/rafaelia_equitas.S",
+      "ext": ".s",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "_incoming/pending/rafaelia_delta.S",
+      "ext": ".s",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "_incoming/pending/rafaelia_chrono.S",
+      "ext": ".s",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "_incoming/pending/rafaelia_fix.S",
+      "ext": ".s",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "_incoming/pending/rafaelia_avalanche_v2.S",
+      "ext": ".s",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "_incoming/pending/rafaelia_pilar.S",
+      "ext": ".s",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "_incoming/pending/rafaelia_prob.S",
+      "ext": ".s",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "_incoming/pending/rafaelia_integrity.S",
+      "ext": ".s",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "_incoming/pending/rafaelia_next.S",
+      "ext": ".s",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "_incoming/pending/rafaelia_hold.S",
+      "ext": ".s",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "_incoming/pending/rafaelia_7d_gyro.S",
+      "ext": ".s",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "resources/android/res/mipmap-anydpi-v26/ic_launcher.xml",
+      "ext": ".xml",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "resources/lang/de.json",
+      "ext": ".json",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "resources/lang/fr.json",
+      "ext": ".json",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "resources/lang/es.json",
+      "ext": ".json",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "resources/lang/pt.json",
+      "ext": ".json",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "resources/web/favicon.ico",
+      "ext": ".ico",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "addthis/vectras_speed_estimate.jsx",
+      "ext": ".jsx",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "addthis/rafaelia_audit.jsx",
+      "ext": ".jsx",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "demo_cli/src/bitomega_smoketest.c",
+      "ext": ".c",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "demo_cli/src/determinism_signature_selftest.c",
+      "ext": ".c",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "demo_cli/src/zipraf_core_selftest.c",
+      "ext": ".c",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "demo_cli/src/rmr_asm_equivalence_selftest.c",
+      "ext": ".c",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "demo_cli/src/bitraf_selftest.c",
+      "ext": ".c",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "demo_cli/src/rmr_legacy_kernel_selftest.c",
+      "ext": ".c",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "demo_cli/src/policy_kernel_selftest.c",
+      "ext": ".c",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "demo_cli/src/math_fabric_selftest.c",
+      "ext": ".c",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "demo_cli/src/rmr_torus_flow_selftest.c",
+      "ext": ".c",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "demo_cli/src/rmr_casm_bridge_selftest.c",
+      "ext": ".c",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "demo_cli/src/rmr_unified_arena_selftest.c",
+      "ext": ".c",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "demo_cli/src/rmr_hw_detect_selftest.c",
+      "ext": ".c",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "demo_cli/src/rmr_qemu_bridge_demo.c",
+      "ext": ".c",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "demo_cli/src/rmr_qemu_bridge_selftest.c",
+      "ext": ".c",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "demo_cli/src/policy_kernel_demo.c",
+      "ext": ".c",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "demo_cli/src/main.c",
+      "ext": ".c",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "demo_cli/src/apk_module_demo.c",
+      "ext": ".c",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "__DELTA__/rrrrr",
+      "ext": "",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "tools/configure_java_home.sh",
+      "ext": ".sh",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "tools/check_target_api_baseline.sh",
+      "ext": ".sh",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "tools/verify_rmr_source_alignment.sh",
+      "ext": ".sh",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "tools/gradle_with_jdk21.sh",
+      "ext": ".sh",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "tools/verify_engine_source_parity.py",
+      "ext": ".py",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "tools/sync_rmr_manifest_to_mk.py",
+      "ext": ".py",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "tools/check_sensitive_artifacts.sh",
+      "ext": ".sh",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "tools/check_overlay_zip_duplicates.sh",
+      "ext": ".sh",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "tools/check_android_toolchain.sh",
+      "ext": ".sh",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "tools/check_docs_reference_commit.sh",
+      "ext": ".sh",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "tools/check_no_firebasestorage_links.sh",
+      "ext": ".sh",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "tools/dependency_hotspots.py",
+      "ext": ".py",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "tools/tests/test_verify_repo_file_dependencies.py",
+      "ext": ".py",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "tools/security/block_sensitive_artifacts.sh",
+      "ext": ".sh",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "tools/apk/build_release_signed_local.sh",
+      "ext": ".sh",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "tools/termux-arm64-orchestrator/run-local-termux-build.sh",
+      "ext": ".sh",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "tools/termux-arm64-orchestrator/build-native-helpers.sh",
+      "ext": ".sh",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "tools/termux-arm64-orchestrator/bootstrap-termux-android15.sh",
+      "ext": ".sh",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "tools/termux-arm64-orchestrator/forks-sync.sh",
+      "ext": ".sh",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "tools/termux-arm64-orchestrator/orchestrate-build.sh",
+      "ext": ".sh",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "tools/termux-arm64-orchestrator/resolve-release-keystore.sh",
+      "ext": ".sh",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "tools/termux-arm64-orchestrator/toolchain-core/verify-toolchain.sh",
+      "ext": ".sh",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "tools/termux-arm64-orchestrator/toolchain-core/resolve-toolchain.sh",
+      "ext": ".sh",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "tools/termux-arm64-orchestrator/toolchain-core/activate-env.sh",
+      "ext": ".sh",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "tools/termux-arm64-orchestrator/toolchain-core/detect-host.sh",
+      "ext": ".sh",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "tools/termux-arm64-orchestrator/c/host_probe.c",
+      "ext": ".c",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "tools/termux-arm64-orchestrator/c/arm64_neon_probe.c",
+      "ext": ".c",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "tools/termux-arm64-orchestrator/c/storage_spill_allocator.c",
+      "ext": ".c",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "tools/termux-arm64-orchestrator/fork-manifests/forks-sources.json",
+      "ext": ".json",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "tools/ci/build_apk_wizard.sh",
+      "ext": ".sh",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "tools/ci/run_asm_compiler_refactor_gate.sh",
+      "ext": ".sh",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "tools/ci/verify_android_local_properties_contract.sh",
+      "ext": ".sh",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "tools/ci/validate_lowlevel_abi.sh",
+      "ext": ".sh",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "tools/ci/verify_android_freestanding_contract.sh",
+      "ext": ".sh",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "tools/ci/materialize_android_ci_artifacts.sh",
+      "ext": ".sh",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "tools/ci/assert_make_cmake_build_config.sh",
+      "ext": ".sh",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "tools/ci/check_incoming_ingestion.py",
+      "ext": ".py",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "tools/ci/build_artifact_matrix_local.sh",
+      "ext": ".sh",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "tools/ci/verify_cmake_config.sh",
+      "ext": ".sh",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "tools/ci/iso8000_27000_sixsigma_controls.json",
+      "ext": ".json",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "tools/ci/lowlevel_abi_contract.json",
+      "ext": ".json",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "tools/ci/check_java_contracts.py",
+      "ext": ".py",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "tools/ci/verify_bootstrap_contract.sh",
+      "ext": ".sh",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "tools/ci/validate_android_sdk_alignment.sh",
+      "ext": ".sh",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "tools/ci/external_sources.manifest",
+      "ext": ".manifest",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "tools/ci/materialize_google_services_placeholder.sh",
+      "ext": ".sh",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "tools/perf/run_suite.py",
+      "ext": ".py",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "tools/perf/resolve_contract.py",
+      "ext": ".py",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "tools/perf/compare_baseline.py",
+      "ext": ".py",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "tools/perf/validate_artifact_runs.py",
+      "ext": ".py",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "tools/perf/profiles.json",
+      "ext": ".json",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "tools/baremetal/hw_caps_detect.sh",
+      "ext": ".sh",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "tools/baremetal/verify_cmake_arm64_flags.sh",
+      "ext": ".sh",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "tools/baremetal/rafcode_phi/test_regression_crc32c.sh",
+      "ext": ".sh",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "tools/baremetal/rafcode_phi/demo_emit_hex.sh",
+      "ext": ".sh",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "tools/baremetal/rafcode_phi/c/rafcode_phi_front_shell.c",
+      "ext": ".c",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "tools/baremetal/rafcode_phi/c/rafcode_phi_cli.c",
+      "ext": ".c",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "tools/baremetal/rafcode_phi/c/rafcode_phi_vecbit.c",
+      "ext": ".c",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "tools/baremetal/rafcode_phi/asm/rafcode_phi_emit_word.S",
+      "ext": ".s",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "bug/core/rmr_casm_arm64.S",
+      "ext": ".s",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "bug/core/rmr_casm_x86_64.S",
+      "ext": ".s",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "bug/core/rmr_casm_riscv64.S",
+      "ext": ".s",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "bug/core/rmr_unified_kernel.c",
+      "ext": ".c",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": ".gradle/8.7/gc.properties",
+      "ext": ".properties",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": ".gradle/8.7/fileHashes/fileHashes.lock",
+      "ext": ".lock",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": ".gradle/8.7/dependencies-accessors/gc.properties",
+      "ext": ".properties",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": ".gradle/8.7/fileChanges/last-build.bin",
+      "ext": ".bin",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": ".gradle/8.7/checksums/md5-checksums.bin",
+      "ext": ".bin",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": ".gradle/8.7/checksums/sha1-checksums.bin",
+      "ext": ".bin",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": ".gradle/8.7/checksums/checksums.lock",
+      "ext": ".lock",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": ".gradle/vcs-1/gc.properties",
+      "ext": ".properties",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": ".gradle/buildOutputCleanup/buildOutputCleanup.lock",
+      "ext": ".lock",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": ".gradle/buildOutputCleanup/cache.properties",
+      "ext": ".properties",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "Incluir/FIX_03_sources_rmr_core-1.cmake",
+      "ext": ".cmake",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "Incluir/AUDIT_REPORT.json",
+      "ext": ".json",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "Incluir/FIX_02_google-services-1.json",
+      "ext": ".json",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "Incluir/FIX_06_CMakePresets-1.json",
+      "ext": ".json",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "Incluir/FIX_01_local-1.properties",
+      "ext": ".properties",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "Incluir/test_repo_audit_and_plan.py",
+      "ext": ".py",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "Incluir/test_t7_invariant_engine.py",
+      "ext": ".py",
+      "status": "code",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "Incluir/__pycache__/t7_invariant_engine.cpython-310.pyc",
+      "ext": ".pyc",
+      "status": "other",
+      "needs_doc_or_action": true
+    },
+    {
+      "file": "Incluir/__pycache__/repo_audit_and_plan.cpython-310.pyc",
+      "ext": ".pyc",
+      "status": "other",
+      "needs_doc_or_action": true
+    }
+  ]
+}
