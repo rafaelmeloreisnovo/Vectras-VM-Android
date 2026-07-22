@@ -1,3 +1,5 @@
+@ SPDX-License-Identifier: GPL-2.0-only
+@ SPDX-FileCopyrightText: Copyright (C) rafaelmeloreisnovo
 @ ===========================================================================
 @ RAFAELIA B7 — Hz-AS-MEMORY + 4-CYCLE COMMIT GATE + TOROIDAL ROUTING
 @ ARM32 · Cortex-A53 · zero deps · semáforo via atomic ops

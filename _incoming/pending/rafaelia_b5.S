@@ -1,3 +1,5 @@
+@ SPDX-License-Identifier: GPL-2.0-only
+@ SPDX-FileCopyrightText: Copyright (C) rafaelmeloreisnovo
 @ ===========================================================================
 @ RAFAELIA B5 — BITSTACK 1008 + COMMIT GATE 4 CICLOS + HYPERFORMS
 @ ARM32 · Cortex-A53 · zero deps · zero malloc

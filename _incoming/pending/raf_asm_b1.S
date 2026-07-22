@@ -1,3 +1,5 @@
+@ SPDX-License-Identifier: GPL-2.0-only
+@ SPDX-FileCopyrightText: Copyright (C) rafaelmeloreisnovo
 @ ===========================================================================
 @ raf_asm_b1.S — RAFAELIA B1 ARM32 Termux
 @ Toro T^7 · CRC32C · EMA · 42 atratores

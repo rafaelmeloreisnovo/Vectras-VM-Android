@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-2.0-only
+// SPDX-FileCopyrightText: Copyright (C) rafaelmeloreisnovo
 /* ============================================================
  * RAFAELIA SKILL: rafaelia_core
  * Domain  : toroid_spiral

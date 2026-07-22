@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-2.0-only
+// SPDX-FileCopyrightText: Copyright (C) rafaelmeloreisnovo
 /* bench_v3: roda N=20 trials, reporta mediana, para reduzir efeito de ruído
    de scheduling do host sob qemu-arm. */
 #include <stdio.h>

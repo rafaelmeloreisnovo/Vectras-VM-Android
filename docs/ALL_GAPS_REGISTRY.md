@@ -30,21 +30,22 @@ Legenda de status:
 | G7 | `PROJECT_STATE.md` -- sincronizado para 2026-07-19 | P1 | FECHADO | -- |
 | G8 | `formulasdoRafaelmr.md` -- movido para `docs/formulas/` | P2 | FECHADO | -- |
 | G9 | Comando QEMU -- `QemuArgvContract` tokeniza e `QemuDirectLauncher` usa `ProcessBuilder.command(argv[])`; shell nunca avalia a string QEMU | P1 | FECHADO | -- |
-| G10 | `NAOCOMERCIAL/` -- incompatibilidade com GPLv2 formalizada em quarentena; decisao juridica pendente | P0 | PARCIAL | -- |
+| G10 | `NAOCOMERCIAL/` -- audit 2026-07-22: identificado como papeis academicos proprios de Rafael (pre-prints de geometria toroidal v0.1/v0.2/v0.3 + imagem ChatGPT); NAO e codigo de terceiros com licenca nao-comercial; 4 entradas especificas em ASSET_PROVENANCE_REGISTER.csv com status `excluded-from-release`; Rafael precisa declarar licenca open-source explicita para eventual distribuicao | P0 | PARCIAL | -- |
 | G11 | `app/src/main/jniLibs/*/libXlorie.so` -- SHA-256 calculados (audit 2026-07-21; arm64=70aed270, armv7=91fd5f2e, x86=bc2bf69d, x86_64=c2a051f3); identificado como X11/EGL-pixman Android display lib (ELF stripped; BuildID sha1=fa8b07c2); source-url e licenca TOKEN_VAZIO pendentes de Rafael | P0 | PARCIAL | **SIM** |
 | G12 | Alpine/rootfs tarballs -- glob guard em `ASSET_PROVENANCE_REGISTER.csv` existe; tarballs nao commitados (gitignored); entradas TOKEN_VAZIO aguardam Rafael fornecer URL+versao+hash quando assets forem adicionados | P0 | PARCIAL | **SIM** |
-| G13 | OVMF/BIOS assets -- glob guards em `ASSET_PROVENANCE_REGISTER.csv` existem; arquivos nao presentes no repositorio (gitignored); entradas TOKEN_VAZIO aguardam Rafael | P0 | PARCIAL | **SIM** |
-| G14 | `addthis/` inventariado (37 arquivos classificados): docs operacionais, JSX prototypes, imagens ChatGPT (16), fotos WhatsApp (2), imagens UUID sem proveniencia (3). `docs/ADDTHIS_ASSET_PROVENANCE.md` criado. Imagens UUID aguardam confirmacao de Rafael. | P2 | PARCIAL | **SIM** |
+| G13 | OVMF/BIOS assets -- audit 2026-07-22: 4 entradas especificas de firmware em `ASSET_PROVENANCE_REGISTER.csv` com source_url e licenca preenchidos (TianoCore BSD-2-Clause-Patent; Linaro BSD-2-Clause-Patent); runtime paths corrigidos para `${filesDir}/firmware/` (NAO APK-bundled); sha256 TOKEN_VAZIO aguardando build CI produzir artefatos; SBOM tem 4 packages especificos; `qemu_rafaelia_assets.lock.yml` preenchido | P0 | PARCIAL | **SIM** |
+| G14 | `addthis/` inventariado: 37 arquivos, proveniencia 22/22 documentada. Imagens UUID (3) confirmadas GPT-4o via forense C2PA (chunk caBX -- JUMBF manifest c2pa.actions.v2, softwareAgent=GPT-4o; manifest IDs registrados). Distribuicao das imagens ChatGPT aguarda decisao de Rafael (ToS OpenAI + GPL-2.0 compat). | P2 | PARCIAL | **SIM** |
 | G15 | `engine/rmr/**` -- cabecalhos SPDX adicionados a todos os 87 arquivos (src/*.c/*.h + interop/*.S) | P0 | FECHADO | **SIM** |
-| G16 | 51 arquivos `.S` assembly em `_incoming/pending/` -- `CLASSIFICATION_MANIFEST.md` criado com 4 categorias (benchmarks, math, core, archived); movimento de arquivos aguarda decisao do owner | P1 | PARCIAL | **SIM** |
+| G16 | Arquivos `.S`/`.c`/`.h` em `_incoming/pending/` e `Incluir/` -- audit 2026-07-22: cabecalhos SPDX `GPL-2.0-only` adicionados a TODOS os 60 `.S` + 25 arquivos C/H; `CLASSIFICATION_MANIFEST.md` criado com categorias; movimento/promocao a `engine/rmr/` ou `app/` aguarda decisao de Rafael | P1 | PARCIAL | **SIM** |
 | G17 | Firebase `google-services.json` -- debug: opcional (build.gradle valida e pula); release: requer arquivo real injetado via CI secret; estrutura de guarda ja implementada | P1 | BLOQUEADO_SEGREDO | **SIM** |
 | G18 | Certificate pinning -- mecanismo correto: `SIGNATURE_DIGESTS_SHA256` calculado do keystore real em build time; debug usa debug.keystore automaticamente; release depende de X4 (keystore de release) | P1 | PARCIAL | **SIM** |
 | G19 | `getForceRefreshVNCDisplay()` / `setForceRefreshVNCDisplay()` -- `@Deprecated` + javadoc anotacoes adicionadas em `MainSettingsManager.java` | P2 | FECHADO | **SIM** |
 | G20 | `docs/research/data/frames_seed.json` -- 5 frames com conteudo real; 20 `seed_conv*` com `[PLACEHOLDER]`; `tools/populate_seed_frames.py` implementado e pronto para executar quando Rafael fornecer `omega_msgs.jsonl` | P2 | PARCIAL | **SIM** |
 | G21 | VOS_CSEL contract break -- macro ja corrigida; `demo_cli/src/rmr_vectra_os_contract_selftest.c` implementado e wired em `make run-selftest` | P1 | FECHADO | **SIM** |
 | G22 | Gate legal de CI -- `legal-compliance-gate.yml` implementado; verifica SPDX em src/ + interop/ + CSV de proveniencia | P0 | FECHADO | **SIM** |
-| G23 | `ASSET_PROVENANCE_REGISTER.csv` -- 12 entradas registradas (libXlorie x4, rootfs, OVMF, BIOS, NAOCOMERCIAL/, addthis/); todas TOKEN_VAZIO ou bloqueadas aguardando Rafael fornecer SHA-256+source-url | P0 | PARCIAL | **SIM** |
-| G24 | `Incluir/` -- `CLASSIFICATION_MANIFEST.md` criado (10 categorias, 114 arquivos); 37 arquivos promovidos (Python->tools/, docs->docs/, JSX->docs/prototypes/ui/); C/ASM, ZIPs e patches aguardam confirmacao de Rafael | P1 | PARCIAL | **SIM** |
+| G23 | `ASSET_PROVENANCE_REGISTER.csv` -- audit 2026-07-22: 18 entradas registradas (libXlorie x4, rootfs glob, 4 firmware runtime com source_url+licenca preenchidos, 4 NAOCOMERCIAL/ especificos, addthis/, rafaelia_ttl novo binario CRITICAL); libXlorie e rafaelia_ttl bloqueados por source-url/licenca; sha256 firmware aguarda CI | P0 | PARCIAL | **SIM** |
+| G24 | `Incluir/` -- `CLASSIFICATION_MANIFEST.md` criado (10 categorias, 114 arquivos); 37 arquivos promovidos; cabecalhos SPDX GPL-2.0-only adicionados a todos os 15 arquivos C/H (audit 2026-07-22); C/ASM, ZIPs e patches aguardam confirmacao de Rafael | P1 | PARCIAL | **SIM** |
+| G28 | `_incoming/pending/rafaelia_ttl` -- binario ELF32 ARM (410520 bytes, sem extensao; audit 2026-07-22) provavelmente compilado de `rafaelia_ttl.S`; sha256=d2878624...; source, build script e licenca TOKEN_VAZIO; registrado em `ASSET_PROVENANCE_REGISTER.csv` e SBOM; NAO promover ao APK ate proveniencia confirmada por Rafael | P0 | PARCIAL | **SIM** |
 | G25 | `examples/guest_boot_evidence.token-vazio.json` -- todos os gates em TOKEN_VAZIO; nenhum boot de VM registrado -- requer QEMU executando em dispositivo real | P0 | BLOQUEADO_HW | **SIM** |
 | G26 | `detectRootfsLibc()` nao detectava glibc em rootfs i386 (`lib/ld-linux.so.2`, `lib/i386-linux-gnu/ld-linux.so.2` ausentes do bloco glibc) | P2 | FECHADO | **SIM** |
 | G27 | `tools/audit_vectra_capabilities.py` -- 4 falhas de seguranca: ABI desconhecida passava silencioso, e_type nao validado, versao DEX desconhecida aceita, DEX em subdiretorio incluido | P2 | FECHADO | **SIM** |
@@ -54,9 +55,11 @@ Legenda de status:
 | Gap | Acao imediata | Owner |
 |-----|--------------|-------|
 | G11 | SHA-256 registrado (4 archs); identificado como X11/EGL-pixman lib; confirmar source-url e licenca | Rafael |
-| G12/G13 | Preencher `ASSET_PROVENANCE_REGISTER.csv` com URL, versao e hash quando tarballs/firmware forem adicionados | Rafael |
-| G16 | Criar manifesto de classificacao dos 60 `.S` em `_incoming/pending/`; arquivar os standalone | IA |
+| G12 | Preencher `ASSET_PROVENANCE_REGISTER.csv` com URL, versao e hash das rootfs/alpine tarballs quando forem adicionados | Rafael |
+| G13 | source_url e licenca preenchidos; aguardar build CI para preencher sha256 de cada firmware | CI/Rafael |
+| G16/G24 | SPDX headers adicionados; decidir quais arquivos promover a engine/rmr/ ou app/ | Rafael |
 | G20 | Fornecer `omega_msgs.jsonl` para executar `tools/populate_seed_frames.py --jsonl omega_msgs.jsonl` | Rafael |
+| G28 | Confirmar que `rafaelia_ttl` foi compilado de `rafaelia_ttl.S`; fornecer build script e licenca | Rafael |
 
 ---
 
@@ -163,15 +166,15 @@ Legenda de status:
 | Status | Quantidade |
 |--------|-----------|
 | FECHADO | 38 |
-| PARCIAL | 13 |
+| PARCIAL | 14 |
 | ABERTO | 0 |
 | BLOQUEADO_HW | 5 |
 | BLOQUEADO_SEGREDO | 2 |
 | BLOQUEADO_INFRA | 3 |
 | NAOAPLICAVEL | 2 |
-| **Total** | **63** |
+| **Total** | **64** |
 
-### Gaps OMITIDOS em auditorias anteriores: 41 de 63
+### Gaps OMITIDOS em auditorias anteriores: 42 de 64
 
 <!-- Atualizacao 2026-07-20: +6 fechados (Q6, T5, RG7, RG9 confirmados em main; G26 detectRootfsLibc i386; G27 audit_vectra_capabilities P2x4) -->
 <!-- Atualizacao 2026-07-21: +2 fechados (G1 CANONICAL_BUILD_STATUS drift corrigido; RG1 HTTP adapters GitLab/Bitbucket implementados); RG10 marcado NAOAPLICAVEL (classe inexistente) -->
@@ -187,6 +190,7 @@ Legenda de status:
 <!-- Atualizacao 2026-07-21j: M1 ABERTO->PARCIAL (Mapa/docs/ACTIVE_SCOPE.md criado: lista 6 ativos vs 22 fora do escopo CI; aguarda confirmacao Rafael); G20 corrigido: 20/25 placeholders (nao 16) -->
 <!-- Atualizacao 2026-07-21k: BLOCKING_GAPS.md atualizado -- BG-10/11/12 marcados RESOLVED (G15+RG9+G22 FECHADOS); BG-14 adicionado (CI runners esgotados -- BLOQUEADO_INFRA); G16->PARCIAL; G25/X1->BLOQUEADO_HW; contagem corrigida Total=63 (38+8+9+4+1+2+1), OMITIDOS=41 -->
 <!-- Atualizacao 2026-07-21l: G2->BLOQUEADO_INFRA; G11->PARCIAL (SHA-256 calculados 4 archs; identificado X11/EGL-pixman); G12/G13->PARCIAL (glob guards existem; binarios nao commitados); G17->BLOQUEADO_SEGREDO (guarda Firebase debug/release ja implementada); G18->PARCIAL (debug.keystore automatico; release bloqueado por X4); X2->BLOQUEADO_HW; G20->PARCIAL (tools/populate_seed_frames.py implementado; aguarda omega_msgs.jsonl de Rafael); RG5->NAOAPLICAVEL (prova pertence ao repo RafPolimata, fora do escopo); ABERTO=0 (zero gaps abertos sem owner/razao); NAOAPLICAVEL=2 -->
+<!-- Atualizacao 2026-07-22: G10 atualizado (NAOCOMERCIAL/ = papeis academicos proprios de Rafael, NAO codigo terceiros; 4 entradas especificas CSV); G13 atualizado (source_url+licenca firmware preenchidos em CSV+SBOM+lock; sha256 aguarda CI); G16/G24 atualizados (SPDX GPL-2.0-only adicionados a TODOS 60 .S + 25 C/H em _incoming/pending/ e Incluir/); G23 atualizado (18 entradas CSV); G28 NOVO PARCIAL (rafaelia_ttl ELF32 ARM 410KB; sha256 registrado; source/licenca TOKEN_VAZIO); SBOM corrigido: paths firmware runtime:${filesDir}/firmware/; relacionamentos SPDXRef-ovmf-bios->4 entries especificas; Total=64 PARCIAL=14 OMITIDOS=42 -->
 
 ---
 

@@ -187,19 +187,98 @@
       ]
     },
     {
-      "SPDXID": "SPDXRef-ovmf-bios",
-      "name": "OVMF/EDK2-BIOS",
+      "SPDXID": "SPDXRef-ovmf-x86-64-code",
+      "name": "RELEASEX64_OVMF.fd",
       "versionInfo": "NOASSERTION",
-      "downloadLocation": "https://www.tianocore.org/",
+      "downloadLocation": "https://github.com/tianocore/edk2",
       "filesAnalyzed": false,
       "licenseConcluded": "BSD-2-Clause-Patent",
       "licenseDeclared": "BSD-2-Clause-Patent",
-      "copyrightText": "Copyright (C) Intel Corporation and EDK2 contributors",
-      "comment": "Pre-compiled BIOS/OVMF blobs sourced from QEMU upstream pc-bios/ directory. SHA256 values require CI build to be filled. Upstream license: BSD-2-Clause-Patent.",
+      "copyrightText": "Copyright (C) Intel Corporation and TianoCore contributors",
+      "comment": "EDK2 OVMF x86_64 release code flash. Runtime-downloaded to ${filesDir}/firmware/RELEASEX64_OVMF.fd (not APK-bundled). SHA256 requires CI artifact to be filled. Source: tianocore/edk2.",
       "checksums": [
         {
           "algorithm": "SHA256",
           "checksumValue": "NOASSERTION"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-ovmf-x86-64-vars",
+      "name": "RELEASEX64_OVMF_VARS.fd",
+      "versionInfo": "NOASSERTION",
+      "downloadLocation": "https://github.com/tianocore/edk2",
+      "filesAnalyzed": false,
+      "licenseConcluded": "BSD-2-Clause-Patent",
+      "licenseDeclared": "BSD-2-Clause-Patent",
+      "copyrightText": "Copyright (C) Intel Corporation and TianoCore contributors",
+      "comment": "EDK2 OVMF x86_64 variable store flash. Runtime-downloaded to ${filesDir}/firmware/RELEASEX64_OVMF_VARS.fd (not APK-bundled). SHA256 requires CI artifact to be filled.",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "NOASSERTION"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-uefi-aarch64-code",
+      "name": "QEMU_EFI.img",
+      "versionInfo": "NOASSERTION",
+      "downloadLocation": "https://releases.linaro.org/components/kernel/uefi-linaro/",
+      "filesAnalyzed": false,
+      "licenseConcluded": "BSD-2-Clause-Patent",
+      "licenseDeclared": "BSD-2-Clause-Patent",
+      "copyrightText": "Copyright (C) Linaro Ltd and TianoCore contributors",
+      "comment": "AArch64 UEFI firmware image for QEMU virt machine. Runtime-downloaded to ${filesDir}/firmware/QEMU_EFI.img (not APK-bundled). SHA256 requires CI artifact. Verify source: Linaro vs Debian qemu-efi-aarch64.",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "NOASSERTION"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-uefi-aarch64-vars",
+      "name": "QEMU_VARS.img",
+      "versionInfo": "NOASSERTION",
+      "downloadLocation": "https://releases.linaro.org/components/kernel/uefi-linaro/",
+      "filesAnalyzed": false,
+      "licenseConcluded": "BSD-2-Clause-Patent",
+      "licenseDeclared": "BSD-2-Clause-Patent",
+      "copyrightText": "Copyright (C) Linaro Ltd and TianoCore contributors",
+      "comment": "AArch64 UEFI variable store for QEMU virt machine. Runtime-downloaded to ${filesDir}/firmware/QEMU_VARS.img (not APK-bundled). SHA256 requires CI artifact.",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "NOASSERTION"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-bios-vectras",
+      "name": "bios-vectras.bin",
+      "versionInfo": "NOASSERTION",
+      "downloadLocation": "NOASSERTION",
+      "filesAnalyzed": false,
+      "licenseConcluded": "NOASSERTION",
+      "licenseDeclared": "NOASSERTION",
+      "copyrightText": "NOASSERTION",
+      "comment": "QUARANTENA: custom BIOS blob with vectras branding. Possible SeaBIOS fork or custom build. Origin and license TOKEN_VAZIO pending Rafael confirmation. Runtime asset loaded from filesDir at runtime. Do not distribute until provenance confirmed."
+    },
+    {
+      "SPDXID": "SPDXRef-rafaelia-ttl",
+      "name": "_incoming/pending/rafaelia_ttl",
+      "versionInfo": "NOASSERTION",
+      "downloadLocation": "NOASSERTION",
+      "filesAnalyzed": false,
+      "licenseConcluded": "NOASSERTION",
+      "licenseDeclared": "NOASSERTION",
+      "copyrightText": "NOASSERTION",
+      "comment": "QUARANTENA-CRITICA: ELF32 ARM binary (410520 bytes, no file extension) in _incoming/pending/. Likely compiled from rafaelia_ttl.S (ARM32 assembly). Source, build script and license TOKEN_VAZIO. NOT promoted to APK; must remain in _incoming/pending/ until provenance confirmed by Rafael.",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "d2878624ed8b327a4308f3d8a805859cb13ab06a39be0f1f0c4ba5a48c7384ba"
         }
       ]
     }
@@ -233,7 +312,27 @@
     {
       "spdxElementId": "SPDXRef-app",
       "relationshipType": "DEPENDS_ON",
-      "relatedSpdxElement": "SPDXRef-ovmf-bios"
+      "relatedSpdxElement": "SPDXRef-ovmf-x86-64-code"
+    },
+    {
+      "spdxElementId": "SPDXRef-app",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-ovmf-x86-64-vars"
+    },
+    {
+      "spdxElementId": "SPDXRef-app",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-uefi-aarch64-code"
+    },
+    {
+      "spdxElementId": "SPDXRef-app",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-uefi-aarch64-vars"
+    },
+    {
+      "spdxElementId": "SPDXRef-app",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-bios-vectras"
     },
     {
       "spdxElementId": "SPDXRef-app",

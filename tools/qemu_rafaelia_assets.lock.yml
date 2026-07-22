@@ -85,27 +85,35 @@ external_artifacts:
   - id: ovmf-x86_64-code
     kind: firmware
     runtime_path: '${filesDir}/firmware/RELEASEX64_OVMF.fd'
-    source_url: TODO
-    sha256: TODO
-    license: TODO
+    source_url: 'https://github.com/tianocore/edk2/releases'
+    sha256: TODO  # fill from CI artifact; run: sha256sum RELEASEX64_OVMF.fd
+    license: BSD-2-Clause-Patent
+    author: 'TianoCore contributors / Intel Corporation'
+    note: 'EDK2 OVMF x86_64 release code flash. Pin to a specific edk2 release tag and record sha256.'
   - id: ovmf-x86_64-vars-template
     kind: firmware-vars-template
     runtime_path: '${filesDir}/firmware/RELEASEX64_OVMF_VARS.fd'
-    source_url: TODO
-    sha256: TODO
-    license: TODO
+    source_url: 'https://github.com/tianocore/edk2/releases'
+    sha256: TODO  # fill from CI artifact
+    license: BSD-2-Clause-Patent
+    author: 'TianoCore contributors / Intel Corporation'
+    note: 'EDK2 OVMF x86_64 variable store template. Must match code flash version.'
   - id: qemu-efi-aarch64-code
     kind: firmware
     runtime_path: '${filesDir}/firmware/QEMU_EFI.img'
-    source_url: TODO
-    sha256: TODO
-    license: TODO
+    source_url: 'https://releases.linaro.org/components/kernel/uefi-linaro/'
+    sha256: TODO  # fill from CI artifact; alternative source: Debian qemu-efi-aarch64 package
+    license: BSD-2-Clause-Patent
+    author: 'Linaro Ltd / TianoCore contributors'
+    note: 'AArch64 UEFI firmware for QEMU virt machine. Verify source: Linaro vs debian:qemu-efi-aarch64.'
   - id: qemu-efi-aarch64-vars-template
     kind: firmware-vars-template
     runtime_path: '${filesDir}/firmware/QEMU_VARS.img'
-    source_url: TODO
-    sha256: TODO
-    license: TODO
+    source_url: 'https://releases.linaro.org/components/kernel/uefi-linaro/'
+    sha256: TODO  # fill from CI artifact
+    license: BSD-2-Clause-Patent
+    author: 'Linaro Ltd / TianoCore contributors'
+    note: 'AArch64 UEFI variable store template. Must match code flash version.'
 
 notes:
   - Vectra should launch QEMU from runtime dirs using QemuBinaryResolver.

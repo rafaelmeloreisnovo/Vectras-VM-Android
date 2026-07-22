@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-2.0-only
+// SPDX-FileCopyrightText: Copyright (C) rafaelmeloreisnovo
 /**
  * rafaelia_glue.c
  * RAFAELIA — integração completa em C puro

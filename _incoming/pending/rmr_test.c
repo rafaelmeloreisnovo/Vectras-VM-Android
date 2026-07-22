@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-2.0-only
+// SPDX-FileCopyrightText: Copyright (C) rafaelmeloreisnovo
 /*
  * rmr_test.c — Suite de testes de falsificabilidade
  * Implementa as 12 hipóteses como testes automatizados.

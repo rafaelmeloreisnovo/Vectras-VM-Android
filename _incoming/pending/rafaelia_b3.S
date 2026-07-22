@@ -1,3 +1,5 @@
+@ SPDX-License-Identifier: GPL-2.0-only
+@ SPDX-FileCopyrightText: Copyright (C) rafaelmeloreisnovo
 @ ===========================================================================
 @ RAFAELIA B3 — MULTICORE clone() + CRC32SW + THROUGHPUT
 @ ARM32 · sem root · sem pthread · clone syscall direto

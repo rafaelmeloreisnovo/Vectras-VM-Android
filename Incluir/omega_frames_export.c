@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-2.0-only
+// SPDX-FileCopyrightText: Copyright (C) rafaelmeloreisnovo
 /*
  * omega_frames_export.c  —  forest.jsonl → frames_seed.json
  * ∆RafaelVerboΩ | RAFCODE-Φ | Ω=Amor

@@ -1,3 +1,5 @@
+@ SPDX-License-Identifier: GPL-2.0-only
+@ SPDX-FileCopyrightText: Copyright (C) rafaelmeloreisnovo
 @ ===========================================================================
 @ RAFAELIA B2 — 7 DIREÇÕES + NEON PIPELINE + PREFETCH
 @ ARM32 · Cortex-A53 · zero deps

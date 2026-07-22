@@ -1,3 +1,5 @@
+/* SPDX-License-Identifier: GPL-2.0-only */
+/* SPDX-FileCopyrightText: Copyright (C) rafaelmeloreisnovo */
 /**
  * baremetal_nomalloc.h
  * RAFAELIA — header atualizado: zero malloc, arena estática

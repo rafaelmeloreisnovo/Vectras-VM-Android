@@ -1,3 +1,5 @@
+/* SPDX-License-Identifier: GPL-2.0-only */
+/* SPDX-FileCopyrightText: Copyright (C) rafaelmeloreisnovo */
 #ifndef RMR_UNIFIED_JNI_BASE_H
 #define RMR_UNIFIED_JNI_BASE_H
 

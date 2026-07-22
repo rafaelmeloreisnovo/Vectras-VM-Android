@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-2.0-only
+// SPDX-FileCopyrightText: Copyright (C) rafaelmeloreisnovo
 /* torus_path_sweep.c
  *
  * Path-sweep orchestrator for the torus/spiral trajectory generator, built

@@ -1,3 +1,5 @@
+@ SPDX-License-Identifier: GPL-2.0-only
+@ SPDX-FileCopyrightText: Copyright (C) rafaelmeloreisnovo
 @ ===========================================================================
 @ RAFAELIA B4 — ORQUESTRAÇÃO FINAL: SENOIDE + SOBREPOSIÇÃO + VETOR-CAMADAS
 @ ARM32 · zero deps · usa NEON para senoides aproximadas + pesos sobrepostos
