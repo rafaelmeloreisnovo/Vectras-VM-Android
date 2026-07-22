@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-2.0-only
+// SPDX-FileCopyrightText: Copyright (C) rafaelmeloreisnovo
 /* Omega Kernel v2
  * Freestanding / no malloc / fixed 10x10x10 matrix / branchless-friendly
  *

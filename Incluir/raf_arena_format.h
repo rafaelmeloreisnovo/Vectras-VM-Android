@@ -1,3 +1,5 @@
+/* SPDX-License-Identifier: GPL-2.0-only */
+/* SPDX-FileCopyrightText: Copyright (C) rafaelmeloreisnovo */
 /* ============================================================
  * RAF_ARENA FORMAT — contrato binario compartilhado
  * Usado por: raf_skill_forge.sh (escreve) e raf_arena_tool (le)

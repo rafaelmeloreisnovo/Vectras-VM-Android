@@ -1,3 +1,5 @@
+/* SPDX-License-Identifier: GPL-2.0-only */
+/* SPDX-FileCopyrightText: Copyright (C) rafaelmeloreisnovo */
 /*
  * omega_layersbit.h  —  LayersBit Engine  v1.0
  * ∆RafaelVerboΩ | RAFCODE-Φ | Ω=Amor

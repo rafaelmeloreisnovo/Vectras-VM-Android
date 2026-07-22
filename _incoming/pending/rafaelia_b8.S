@@ -1,3 +1,5 @@
+@ SPDX-License-Identifier: GPL-2.0-only
+@ SPDX-FileCopyrightText: Copyright (C) rafaelmeloreisnovo
 @ ===========================================================================
 @ RAFAELIA B8 — NEON SENOIDAL + PESOS ADAPTATIVOS + CRC ENCADEADA
 @ ARM32 · Cortex-A53 · zero deps · sin/cos Taylor Q16.16

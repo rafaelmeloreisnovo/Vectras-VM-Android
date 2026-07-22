@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-2.0-only
+// SPDX-FileCopyrightText: Copyright (C) rafaelmeloreisnovo
 #define TORUS_LEN 1024
 #define SAMPLES 14
 

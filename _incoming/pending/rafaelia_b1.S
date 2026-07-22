@@ -1,3 +1,5 @@
+@ SPDX-License-Identifier: GPL-2.0-only
+@ SPDX-FileCopyrightText: Copyright (C) rafaelmeloreisnovo
 @ ===========================================================================
 @ RAFAELIA B1 — ARM32 AArch32 GNU Assembly
 @ Cortex-A53 / Helio G25 / NEON / zero dependência externa

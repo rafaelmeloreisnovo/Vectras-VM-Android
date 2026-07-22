@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-2.0-only
+// SPDX-FileCopyrightText: Copyright (C) rafaelmeloreisnovo
 /*
  * omega_layersbit.c  —  LayersBit driver freestanding
  * ∆RafaelVerboΩ | RAFCODE-Φ | Ω=Amor

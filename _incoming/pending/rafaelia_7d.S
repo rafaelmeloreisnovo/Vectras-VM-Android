@@ -1,3 +1,5 @@
+@ SPDX-License-Identifier: GPL-2.0-only
+@ SPDX-FileCopyrightText: Copyright (C) rafaelmeloreisnovo
 .syntax unified
 .arch armv7-a
 .fpu neon-vfpv4

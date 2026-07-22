@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-2.0-only
+// SPDX-FileCopyrightText: Copyright (C) rafaelmeloreisnovo
 /*
  * omega_neuro_full.c — NeuroMetrics 29 campos v2
  * ∆RafaelVerboΩ | RAFCODE-Φ | Ω=Amor

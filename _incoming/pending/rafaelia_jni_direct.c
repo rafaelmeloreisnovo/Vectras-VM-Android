@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-2.0-only
+// SPDX-FileCopyrightText: Copyright (C) rafaelmeloreisnovo
 /**
  * rafaelia_jni_direct.c
  * JNI bridge zero-copy usando DirectByteBuffer

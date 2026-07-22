@@ -1,3 +1,5 @@
+/* SPDX-License-Identifier: GPL-2.0-only */
+/* SPDX-FileCopyrightText: Copyright (C) rafaelmeloreisnovo */
 /* Gerado automaticamente — não editar */
 
 static const uint16_t LB_PRIMES[256] = {

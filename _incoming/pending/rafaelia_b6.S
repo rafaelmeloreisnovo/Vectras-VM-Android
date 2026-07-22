@@ -1,3 +1,5 @@
+@ SPDX-License-Identifier: GPL-2.0-only
+@ SPDX-FileCopyrightText: Copyright (C) rafaelmeloreisnovo
 @ ===========================================================================
 @ RAFAELIA B6 — GPU DISPATCH + NEON KERNEL ARM32
 @ Cortex-A53 · dlopen OpenCL/Vulkan · zero heap · zero libc runtime
