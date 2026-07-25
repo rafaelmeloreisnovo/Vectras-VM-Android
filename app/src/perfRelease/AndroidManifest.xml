@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <uses-permission android:name="com.termux.rafacodephi.permission.RUN_COMMAND" />
+    <queries>
+        <package android:name="com.termux.rafacodephi" />
+    </queries>
+    <application>
+        <receiver
+            android:name="com.vectras.vm.integration.VectrasTermuxResultReceiver"
+            android:exported="false" />
+    </application>
+</manifest>
