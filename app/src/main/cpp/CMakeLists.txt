@@ -67,7 +67,6 @@ endif()
 #     list(APPEND VECTRA_CASM_SOURCES ${VECTRA_ENGINE_ASM_RISCV64_SOURCES})
 # endif()
 
-
 if(ANDROID AND VECTRA_ANDROID_ABI STREQUAL "armeabi-v7a")
     list(APPEND RAFCODER_PRIMITIVES_BACKEND_SOURCES ${RAFCODER_PRIMITIVES_C_SOURCE})
     set(RAFCODER_PRIMITIVES_BACKEND_NAME "armv7-c-fallback")
@@ -229,12 +228,12 @@ set(VECTRA_FREESTANDING_COMPILE_OPTIONS
     -fno-fast-math
     -fvisibility=hidden
     -ffreestanding
-    -fno-exceptions
-    -fno-rtti
+    -fno-builtin
     -fno-unwind-tables
     -fno-asynchronous-unwind-tables
     -fdata-sections
     -ffunction-sections
+    -Werror=implicit-function-declaration
     -DRMR_BUILD_HOST_TOOLING=1)
 set(VECTRA_ABI_COMPILE_OPTIONS)
 set(VECTRA_LTO_MODE "${VECTRA_LTO_MODE}" CACHE STRING "LTO mode from CI perf decisions")
@@ -344,10 +343,14 @@ target_include_directories(abi_core_freestanding PRIVATE
     ${VECTRA_RMR_INCLUDE_DIR}
     ${CMAKE_CURRENT_LIST_DIR}
     ${CMAKE_CURRENT_LIST_DIR}/core)
-target_link_options(abi_core_freestanding PRIVATE
-    -nostdlib
-    -Wl,--gc-sections
-    -Wl,--build-id=none)
+
+# abi_core_freestanding is a STATIC archive. It has a compile/source contract,
+# but no final linker invocation of its own; assigning -nostdlib or linker-only
+# switches here created a false proof surface. The actual Android JNI artifact
+# is vectra_core_accel and remains hosted by design. A true freestanding final
+# link must be a dedicated executable/shared probe with its own entry point.
+set_property(TARGET abi_core_freestanding PROPERTY
+    VECTRA_FREESTANDING_LINK_STATE "TOKEN_VAZIO_DEDICATED_LINK_PROBE")
 
 if(ANDROID)
     # Compatibilidade Android 15/16 (dispositivos com page size de 16 KiB).

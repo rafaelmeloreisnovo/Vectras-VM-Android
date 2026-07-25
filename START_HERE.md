@@ -25,10 +25,12 @@ O **Vectras VM Android** é um sistema híbrido (Android + nativo) com foco em d
 - Orquestrador canônico: `.github/workflows/pipeline-orchestrator.yml`
 - Pipeline host: `.github/workflows/host-ci.yml`
 - Pipeline Android: `.github/workflows/android-ci.yml`
+- Contrato CMake C/ASM e fronteira de link: `.github/workflows/cmake-language-link-contract.yml`
 
 ### Arquitetura operacional (fonte primária)
 - Fluxo fechado UI → `StartVM` → builders/resolvers → JNI (`NativeFastPath`/bridges) → `rmr_*` → args finais QEMU: `docs/architecture/VM_EXECUTION_FLOW.md`
 - Fronteira canônica entre base Vectras, engine RMR, cache TCG, QEMU e evidência de produção: `docs/active/VECTRAS_QEMU_RMR_BOUNDARY_AUDIT_2026-07-24.md`
+- Contrato de linguagens, flags Android e diferença entre archive estático e link final: `docs/active/VECTRAS_CMAKE_LANGUAGE_LINK_CONTRACT_2026-07-24.md`
 
 ### Domínios técnicos principais
 - App Android: `app/`
@@ -59,6 +61,8 @@ cp local.properties.example local.properties
 - Evitar `ndk.dir` em `local.properties` (usar contrato atual com `ndk.version`).
 - Não usar caminho legado `android/` como trilha oficial de build/release (apenas compatibilidade local).
 - Não promover selftest do cache para claim de performance QEMU/Android sem callsite, baseline e artifact.
+- Não tratar `target_link_options` em library `STATIC` como prova de link final freestanding.
+- Aplicar flags C++ somente a targets/languages C++ e flags de ISA somente ao ABI correspondente.
 
 ## 6) Mapa de leitura recomendado (30 minutos)
 1. `README.md`
@@ -67,6 +71,7 @@ cp local.properties.example local.properties
 4. `tools/README.md`
 5. `app/README.md` e `engine/README.md`
 6. `docs/active/VECTRAS_QEMU_RMR_BOUNDARY_AUDIT_2026-07-24.md`
+7. `docs/active/VECTRAS_CMAKE_LANGUAGE_LINK_CONTRACT_2026-07-24.md`
 
 ## 7) Metadados e tags
 **Perfil:** Formal · Profissional · Contemporâneo · Moderno · Elegante · Ultra Moderno  
