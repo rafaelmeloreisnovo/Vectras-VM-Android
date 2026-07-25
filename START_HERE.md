@@ -28,6 +28,7 @@ O **Vectras VM Android** é um sistema híbrido (Android + nativo) com foco em d
 
 ### Arquitetura operacional (fonte primária)
 - Fluxo fechado UI → `StartVM` → builders/resolvers → JNI (`NativeFastPath`/bridges) → `rmr_*` → args finais QEMU: `docs/architecture/VM_EXECUTION_FLOW.md`
+- Fronteira canônica entre base Vectras, engine RMR, cache TCG, QEMU e evidência de produção: `docs/active/VECTRAS_QEMU_RMR_BOUNDARY_AUDIT_2026-07-24.md`
 
 ### Domínios técnicos principais
 - App Android: `app/`
@@ -57,6 +58,7 @@ cp local.properties.example local.properties
 - Manter alinhamento de ABIs entre `gradle.properties` e `tools/qemu_launch.yml`.
 - Evitar `ndk.dir` em `local.properties` (usar contrato atual com `ndk.version`).
 - Não usar caminho legado `android/` como trilha oficial de build/release (apenas compatibilidade local).
+- Não promover selftest do cache para claim de performance QEMU/Android sem callsite, baseline e artifact.
 
 ## 6) Mapa de leitura recomendado (30 minutos)
 1. `README.md`
@@ -64,6 +66,7 @@ cp local.properties.example local.properties
 3. `docs/README.md`
 4. `tools/README.md`
 5. `app/README.md` e `engine/README.md`
+6. `docs/active/VECTRAS_QEMU_RMR_BOUNDARY_AUDIT_2026-07-24.md`
 
 ## 7) Metadados e tags
 **Perfil:** Formal · Profissional · Contemporâneo · Moderno · Elegante · Ultra Moderno  
