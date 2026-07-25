@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
+import java.security.MessageDigest
 import java.util.UUID
 
 /**
@@ -93,12 +94,21 @@ object VectrasTermuxBridge {
         }
 
         val transactionId = "tx-vectras-termux-${UUID.randomUUID()}"
+        val requestSha256 = sha256Request(binaryName, arguments)
         val receiptIntent = Intent(context, VectrasTermuxResultReceiver::class.java).apply {
             action = VectrasTermuxResultReceiver.ACTION_EXECUTION_RESULT
             putExtra(VectrasTermuxResultReceiver.EXTRA_TRANSACTION_ID, transactionId)
             putExtra(VectrasTermuxResultReceiver.EXTRA_BINARY_NAME, binaryName)
+            putExtra(VectrasTermuxResultReceiver.EXTRA_REQUEST_SHA256, requestSha256)
         }
-        val pendingFlags = PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        // Termux must fill the result Bundle into this explicit PendingIntent.
+        // On Android 12+ this narrowly-scoped token must therefore be mutable.
+        val pendingFlags = PendingIntent.FLAG_UPDATE_CURRENT or
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                PendingIntent.FLAG_MUTABLE
+            } else {
+                0
+            }
         val resultPendingIntent = PendingIntent.getBroadcast(
             context,
             transactionId.hashCode(),
@@ -155,6 +165,18 @@ object VectrasTermuxBridge {
     }
 
     fun allowedBinaryNames(): Set<String> = allowedBinaries.toSet()
+
+    private fun sha256Request(binaryName: String, arguments: List<String>): String {
+        val canonical = buildString {
+            append(binaryName.length).append(':').append(binaryName).append('\n')
+            arguments.forEach { argument ->
+                append(argument.length).append(':').append(argument).append('\n')
+            }
+        }
+        return MessageDigest.getInstance("SHA-256")
+            .digest(canonical.toByteArray(Charsets.UTF_8))
+            .joinToString("") { "%02x".format(it) }
+    }
 
     private fun hasRunCommandPermission(context: Context): Boolean {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) return true
