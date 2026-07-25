@@ -1,0 +1,28 @@
+name: Vectras Termux IPC v2
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "app/src/main/java/com/vectras/vm/integration/CrossRepoIntegrationManager.kt"
+      - "app/src/main/java/com/vectras/vm/integration/VectrasTermuxBridge.kt"
+      - "app/src/main/java/com/vectras/vm/integration/VectrasTermuxResultReceiver.kt"
+      - "app/src/*/AndroidManifest.xml"
+      - "tools/verify_vectras_termux_ipc_v2.py"
+      - "docs/contracts/VECTRAS_TERMUX_IPC_V2.md"
+      - ".github/workflows/vectras-termux-ipc-v2.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  static-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: Validate capability, permission and receipt boundaries
+        run: python3 tools/verify_vectras_termux_ipc_v2.py
