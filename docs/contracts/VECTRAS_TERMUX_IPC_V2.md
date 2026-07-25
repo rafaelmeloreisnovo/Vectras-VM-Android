@@ -18,8 +18,8 @@ path discovery != cross-app execution
 4. Vectras declara e verifica a permissão do `RunCommandService`.
 5. `VectrasTermuxBridge` exige `vmRequired=true` e despacha somente QEMU permitido.
 6. Argumentos com NUL ou quebra de linha são rejeitados.
-7. Um `PendingIntent` recebe exit code; stdout/stderr brutos não são persistidos.
-8. O receipt guarda apenas tamanhos e SHA-256 de stdout/stderr.
+7. Um `PendingIntent` explícito e mutável recebe apenas o bundle de resultado do comando.
+8. O receipt não persiste stdout/stderr brutos: guarda tamanho, SHA-256, exit code, hashes de entrada/saída, status e R3.
 9. A VM permanece em safe state até o gate explícito; exit code não equivale a guest boot.
 
 ## Estado
@@ -30,6 +30,7 @@ nonce_binding: IMPLEMENTED
 bounded_dispatcher: IMPLEMENTED
 manifest_permission_and_query: IMPLEMENTED_FOR_DEBUG_RELEASE_PERFRELEASE
 async_exit_receipt: IMPLEMENTED
+complete_receipt_envelope: IMPLEMENTED
 android_build: TOKEN_VAZIO
 device_permission_grant: TOKEN_VAZIO
 dispatch_execution_receipt: TOKEN_VAZIO
@@ -43,19 +44,10 @@ claim_allowed: false
 python3 tools/verify_vectras_termux_ipc_v2.py
 ```
 
-Resultado local limitado:
-
-```yaml
-static_validator: PASS
-kotlin_syntax_with_android_stubs: PASS
-apk_build: TOKEN_VAZIO
-physical_device: TOKEN_VAZIO
-```
-
 ## R3
 
 ```text
-F_ok   = capability discovery, nonce, permissão, dispatcher limitado e receipt minimizado
+F_ok   = capability discovery, nonce, permissão, dispatcher limitado e receipt completo minimizado
 F_gap  = build APK, grant no device, receipt real e guest boot
 F_next = compilar os dois APKs e executar o primeiro dispatch com vmRequired=true
 ```
