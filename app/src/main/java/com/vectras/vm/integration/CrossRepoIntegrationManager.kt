@@ -9,16 +9,14 @@ import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
+import java.util.UUID
 
 /**
- * CrossRepoIntegrationManager — discovers Vectras ecosystem siblings at runtime.
+ * Discovers the external Termux RAFCODE-Φ runtime without trusting or exposing
+ * another application's private sandbox paths.
  *
- * Queries [TERMUX_PACKAGE] for bootstrap readiness and available QEMU binary paths.
- * If termux-app-rafacodephi is installed and its bootstrap is ready, the returned
- * [IntegrationStatus.qemuBinaryPaths] can be fed directly into QemuBinaryResolver
- * as additional search paths.
- *
- * Closes X5 (cross-repo Vectras↔qemu_rafaelia↔termux integration consumer).
+ * Protocol v2 returns capability names. Actual QEMU dispatch is performed by
+ * [VectrasTermuxBridge] through the permission-gated RunCommandService.
  */
 object CrossRepoIntegrationManager {
 
@@ -26,48 +24,61 @@ object CrossRepoIntegrationManager {
     private const val QUERY_TIMEOUT_MS = 3_000L
 
     const val TERMUX_PACKAGE = "com.termux.rafacodephi"
+    const val TERMUX_RUN_COMMAND_PERMISSION =
+        "com.termux.rafacodephi.permission.RUN_COMMAND"
+
     private const val ACTION_QUERY = "com.vectras.vm.ACTION_QUERY_INTEGRATION"
     private const val ACTION_RESPONSE = "com.vectras.vm.ACTION_INTEGRATION_RESPONSE"
+    private const val KEY_NONCE = "nonce"
 
     data class IntegrationStatus(
         val termuxInstalled: Boolean,
         val bootstrapReady: Boolean,
-        val prefixPath: String?,
-        val qemuBinaryPaths: List<String>,
-        val termuxVersion: String?
+        val protocolVersion: Int,
+        val qemuBinaryNames: List<String>,
+        val executionMode: String?,
+        val runCommandPermission: String?,
+        val privatePathsExposed: Boolean,
+        val termuxVersion: String?,
     ) {
         val isFullyReady: Boolean
-            get() = termuxInstalled && bootstrapReady && qemuBinaryPaths.isNotEmpty()
+            get() = termuxInstalled &&
+                bootstrapReady &&
+                protocolVersion >= 2 &&
+                qemuBinaryNames.isNotEmpty() &&
+                executionMode == VectrasTermuxBridge.EXECUTION_MODE &&
+                runCommandPermission == TERMUX_RUN_COMMAND_PERMISSION &&
+                !privatePathsExposed
     }
 
-    /**
-     * Asynchronously queries termux-app-rafacodephi for integration data.
-     *
-     * [onResult] is called on the main thread, either when the response arrives or after
-     * [QUERY_TIMEOUT_MS] ms with whatever data is available.
-     */
     fun queryIntegration(context: Context, onResult: (IntegrationStatus) -> Unit) {
         if (!isTermuxInstalled(context)) {
-            onResult(IntegrationStatus(false, false, null, emptyList(), null))
+            onResult(emptyStatus(termuxInstalled = false))
             return
         }
 
         val mainHandler = Handler(Looper.getMainLooper())
+        val nonce = UUID.randomUUID().toString()
         var responded = false
 
         val receiver = object : BroadcastReceiver() {
             override fun onReceive(ctx: Context, intent: Intent) {
                 if (intent.action != ACTION_RESPONSE || responded) return
+                if (intent.getStringExtra(KEY_NONCE) != nonce) return
                 responded = true
                 runCatching { ctx.unregisterReceiver(this) }
 
                 val status = IntegrationStatus(
                     termuxInstalled = true,
                     bootstrapReady = intent.getBooleanExtra("bootstrap_ready", false),
-                    prefixPath = intent.getStringExtra("prefix_path"),
-                    qemuBinaryPaths = intent.getStringArrayExtra("qemu_binary_paths")
-                        ?.toList() ?: emptyList(),
-                    termuxVersion = intent.getStringExtra("termux_version")
+                    protocolVersion = intent.getIntExtra("protocol_version", 0),
+                    qemuBinaryNames = intent.getStringArrayExtra("qemu_binary_names")
+                        ?.toList().orEmpty(),
+                    executionMode = intent.getStringExtra("execution_mode"),
+                    runCommandPermission = intent.getStringExtra("run_command_permission"),
+                    privatePathsExposed =
+                        intent.getBooleanExtra("private_paths_exposed", true),
+                    termuxVersion = intent.getStringExtra("termux_version"),
                 )
                 mainHandler.post { onResult(status) }
             }
@@ -75,22 +86,39 @@ object CrossRepoIntegrationManager {
 
         val filter = IntentFilter(ACTION_RESPONSE)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            context.registerReceiver(receiver, filter, Context.RECEIVER_NOT_EXPORTED)
+            context.registerReceiver(
+                receiver,
+                filter,
+                TERMUX_RUN_COMMAND_PERMISSION,
+                mainHandler,
+                Context.RECEIVER_EXPORTED,
+            )
         } else {
             @Suppress("UnspecifiedRegisterReceiverFlag")
-            context.registerReceiver(receiver, filter)
+            context.registerReceiver(
+                receiver,
+                filter,
+                TERMUX_RUN_COMMAND_PERMISSION,
+                mainHandler,
+            )
         }
 
         mainHandler.postDelayed({
             if (!responded) {
                 responded = true
                 runCatching { context.unregisterReceiver(receiver) }
-                Log.w(TAG, "termux did not respond within ${QUERY_TIMEOUT_MS}ms; assuming bootstrap not ready")
-                onResult(IntegrationStatus(true, false, null, emptyList(), null))
+                Log.w(TAG, "Termux did not answer the v2 discovery request")
+                onResult(emptyStatus(termuxInstalled = true))
             }
         }, QUERY_TIMEOUT_MS)
 
-        context.sendBroadcast(Intent(ACTION_QUERY).setPackage(TERMUX_PACKAGE))
+        // The query is package-targeted and contains only a nonce. The response
+        // is permission-gated and contains no private paths.
+        context.sendBroadcast(
+            Intent(ACTION_QUERY)
+                .setPackage(TERMUX_PACKAGE)
+                .putExtra(KEY_NONCE, nonce),
+        )
     }
 
     fun isTermuxInstalled(context: Context): Boolean = try {
@@ -101,10 +129,26 @@ object CrossRepoIntegrationManager {
     }
 
     fun logStatus(status: IntegrationStatus) {
-        Log.i(TAG, "termux_installed=${status.termuxInstalled} " +
-            "bootstrap_ready=${status.bootstrapReady} " +
-            "qemu_count=${status.qemuBinaryPaths.size} " +
-            "version=${status.termuxVersion}")
-        status.qemuBinaryPaths.forEach { Log.i(TAG, "  qemu=$it") }
+        Log.i(
+            TAG,
+            "termux_installed=${status.termuxInstalled} " +
+                "bootstrap_ready=${status.bootstrapReady} " +
+                "protocol=${status.protocolVersion} " +
+                "qemu_count=${status.qemuBinaryNames.size} " +
+                "private_paths_exposed=${status.privatePathsExposed} " +
+                "version=${status.termuxVersion}",
+        )
+        status.qemuBinaryNames.forEach { Log.i(TAG, "qemu_name=$it") }
     }
+
+    private fun emptyStatus(termuxInstalled: Boolean) = IntegrationStatus(
+        termuxInstalled = termuxInstalled,
+        bootstrapReady = false,
+        protocolVersion = 0,
+        qemuBinaryNames = emptyList(),
+        executionMode = null,
+        runCommandPermission = null,
+        privatePathsExposed = false,
+        termuxVersion = null,
+    )
 }
