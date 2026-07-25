@@ -11,27 +11,30 @@ MANIFESTS = [ROOT / f"app/src/{name}/AndroidManifest.xml" for name in ("debug", 
 
 REQUIRED_MANAGER = (
     'TERMUX_PACKAGE = "com.termux.rafacodephi"',
-    "TERMUX_RUN_COMMAND_PERMISSION =",
+    'TERMUX_RUN_COMMAND_PERMISSION =',
     '"qemu_binary_names"',
     '"protocol_version"',
     '"private_paths_exposed"',
-    "Context.RECEIVER_EXPORTED",
-    "UUID.randomUUID()",
+    'Context.RECEIVER_EXPORTED',
+    'UUID.randomUUID()',
 )
 FORBIDDEN_MANAGER = (
     '"prefix_path"',
     '"qemu_binary_paths"',
-    "Context.RECEIVER_NOT_EXPORTED",
+    'Context.RECEIVER_NOT_EXPORTED',
 )
 REQUIRED_BRIDGE = (
     'SERVICE_CLASS = "com.termux.app.RunCommandService"',
     'ACTION_RUN_COMMAND = "$TERMUX_PACKAGE.RUN_COMMAND"',
-    "EXTRA_PENDING_INTENT",
-    "vmRequired: Boolean",
-    "State.VM_NOT_REQUIRED",
-    "State.DISPATCHED",
-    "executionProven = false",
-    "claimAllowed = false",
+    'EXTRA_PENDING_INTENT',
+    'PendingIntent.FLAG_MUTABLE',
+    'EXTRA_REQUEST_SHA256',
+    'sha256Request',
+    'vmRequired: Boolean',
+    'State.VM_NOT_REQUIRED',
+    'State.DISPATCHED',
+    'executionProven = false',
+    'claimAllowed = false',
     '"vm-stopped-no-image-mutation"',
 )
 REQUIRED_RECEIVER = (
@@ -40,13 +43,19 @@ REQUIRED_RECEIVER = (
     'EXTRA_EXIT_CODE = "exitCode"',
     '"stdout_sha256"',
     '"stderr_sha256"',
+    '"input_sha256"',
+    '"output_sha256"',
+    '"status"',
     '"guest_boot_artifact_sha256"',
+    '"F_ok"',
+    '"F_gap"',
+    '"F_next"',
     '"claim_allowed", false',
 )
 REQUIRED_MANIFEST = (
-    "com.termux.rafacodephi.permission.RUN_COMMAND",
+    'com.termux.rafacodephi.permission.RUN_COMMAND',
     '<package android:name="com.termux.rafacodephi"',
-    "com.vectras.vm.integration.VectrasTermuxResultReceiver",
+    'com.vectras.vm.integration.VectrasTermuxResultReceiver',
     'android:exported="false"',
 )
 
