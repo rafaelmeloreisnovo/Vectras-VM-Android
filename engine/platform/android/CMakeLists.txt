@@ -36,7 +36,7 @@ function(vectra_apply_android_platform_c_flags target_name)
   endif()
 
   target_compile_options(${target_name} PRIVATE
-    $<$<COMPILE_LANGUAGE:C>:${_vectra_android_cflags}>)
+    "$<$<COMPILE_LANGUAGE:C>:${_vectra_android_cflags}>")
   target_compile_definitions(${target_name} PRIVATE RMR_JNI_BUILD=1)
 endfunction()
 
