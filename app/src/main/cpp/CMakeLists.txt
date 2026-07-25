@@ -10,6 +10,7 @@ option(RMR_ASM_CORE_X86_64_VALIDATED "Enable ASM hot paths on x86_64 (validated 
 option(RMR_ASM_CORE_ARM64_VALIDATED "Enable ASM hot paths on arm64-v8a (validated ABI)" ON)
 option(RMR_ASM_CORE_RISCV64_VALIDATED "Enable RV64I-compatible CASM path on riscv64 (validated ABI)" ON)
 option(VECTRA_REQUIRE_FREESTANDING_CORE "Fail configuration when freestanding ABI core is not active" ON)
+option(VECTRA_BUILD_FREESTANDING_LINK_PROBE "Build the dedicated no-libc final-link probe on demand" ON)
 
 set(VECTRA_REPO_ROOT ${CMAKE_CURRENT_LIST_DIR}/../../../../)
 set(VECTRA_RMR_INCLUDE_DIR ${VECTRA_REPO_ROOT}/engine/rmr/include)
@@ -229,6 +230,7 @@ set(VECTRA_FREESTANDING_COMPILE_OPTIONS
     -fvisibility=hidden
     -ffreestanding
     -fno-builtin
+    -fno-stack-protector
     -fno-unwind-tables
     -fno-asynchronous-unwind-tables
     -fdata-sections
@@ -344,13 +346,64 @@ target_include_directories(abi_core_freestanding PRIVATE
     ${CMAKE_CURRENT_LIST_DIR}
     ${CMAKE_CURRENT_LIST_DIR}/core)
 
-# abi_core_freestanding is a STATIC archive. It has a compile/source contract,
-# but no final linker invocation of its own; assigning -nostdlib or linker-only
-# switches here created a false proof surface. The actual Android JNI artifact
-# is vectra_core_accel and remains hosted by design. A true freestanding final
-# link must be a dedicated executable/shared probe with its own entry point.
-set_property(TARGET abi_core_freestanding PROPERTY
-    VECTRA_FREESTANDING_LINK_STATE "TOKEN_VAZIO_DEDICATED_LINK_PROBE")
+# abi_core_freestanding remains a STATIC archive: linker-only options belong to
+# the consuming executable below, never to the archive. The Android JNI target
+# stays hosted by design and is not evidence for a no-libc final link.
+if(VECTRA_BUILD_FREESTANDING_LINK_PROBE)
+    if(NOT CMAKE_C_COMPILER_ID MATCHES "GNU|Clang")
+        message(FATAL_ERROR
+            "vectra_freestanding_link_probe requires a GNU/Clang-compatible C driver and ELF linker")
+    endif()
+
+    if(ANDROID)
+        set(VECTRA_FREESTANDING_PROBE_ABI "${VECTRA_ANDROID_ABI}")
+    else()
+        set(VECTRA_FREESTANDING_PROBE_ABI "${CMAKE_SYSTEM_PROCESSOR}")
+    endif()
+    if(NOT VECTRA_FREESTANDING_PROBE_ABI)
+        set(VECTRA_FREESTANDING_PROBE_ABI "unknown")
+    endif()
+    string(REGEX REPLACE "[^A-Za-z0-9_.-]" "_"
+        VECTRA_FREESTANDING_PROBE_ABI "${VECTRA_FREESTANDING_PROBE_ABI}")
+
+    set(VECTRA_FREESTANDING_PROBE_MAP
+        "${CMAKE_CURRENT_BINARY_DIR}/vectra_freestanding_link_probe.map")
+
+    add_executable(vectra_freestanding_link_probe EXCLUDE_FROM_ALL
+        freestanding_link_probe_entry.c)
+    target_compile_options(vectra_freestanding_link_probe PRIVATE
+        ${VECTRA_FREESTANDING_COMPILE_OPTIONS}
+        ${VECTRA_ABI_COMPILE_OPTIONS})
+    target_compile_definitions(vectra_freestanding_link_probe PRIVATE
+        VECTRA_LL_NO_STDLIB_TYPES=1)
+    target_include_directories(vectra_freestanding_link_probe PRIVATE
+        ${VECTRA_RMR_INCLUDE_DIR}
+        ${CMAKE_CURRENT_LIST_DIR}
+        ${CMAKE_CURRENT_LIST_DIR}/core)
+    target_link_libraries(vectra_freestanding_link_probe PRIVATE
+        abi_core_freestanding)
+    target_link_options(vectra_freestanding_link_probe PRIVATE
+        -nostdlib
+        -Wl,--gc-sections
+        -Wl,--build-id=none
+        -Wl,--no-undefined
+        -Wl,-e,vectra_freestanding_probe_entry
+        "-Wl,-Map,${VECTRA_FREESTANDING_PROBE_MAP}")
+    if(ANDROID)
+        target_link_options(vectra_freestanding_link_probe PRIVATE
+            -Wl,-z,max-page-size=16384)
+    endif()
+    set_target_properties(vectra_freestanding_link_probe PROPERTIES
+        OUTPUT_NAME "vectra_freestanding_link_probe_${VECTRA_FREESTANDING_PROBE_ABI}"
+        VECTRA_FREESTANDING_LINK_STATE "IMPLEMENTED_DEDICATED_LINK_PROBE")
+    add_custom_target(freestanding_link_probe
+        DEPENDS vectra_freestanding_link_probe)
+    set_property(TARGET abi_core_freestanding PROPERTY
+        VECTRA_FREESTANDING_LINK_STATE "CONSUMED_BY_DEDICATED_LINK_PROBE")
+else()
+    set_property(TARGET abi_core_freestanding PROPERTY
+        VECTRA_FREESTANDING_LINK_STATE "TOKEN_VAZIO_PROBE_DISABLED")
+endif()
 
 if(ANDROID)
     # Compatibilidade Android 15/16 (dispositivos com page size de 16 KiB).

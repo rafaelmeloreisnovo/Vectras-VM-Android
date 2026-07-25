@@ -10,7 +10,8 @@
 - Estado do contrato estático: `IMPLEMENTED`.
 - Execução do workflow no head: `TOKEN_VAZIO` até run.
 - Build Android NDK ARM32/ARM64 no head: `TOKEN_VAZIO` até run.
-- Link final freestanding dedicado: `TOKEN_VAZIO_DEDICATED_LINK_PROBE`.
+- Implementação do link final freestanding dedicado: `IMPLEMENTED`.
+- Prova remota do link final: `TOKEN_VAZIO` até run.
 
 ## Problema observado
 
@@ -74,17 +75,25 @@ E reforçou o contrato C:
 -Werror=implicit-function-declaration
 ```
 
-### 3. Fronteira de link corrigida
+### 3. Fronteira de link corrigida e probe separado
 
 `abi_core_freestanding` é um archive `STATIC`. Ele não executa o linker final; portanto, opções como `-nostdlib`, `--gc-sections` e `--build-id` naquele target não provavam um link freestanding.
 
-A propriedade explícita ficou:
+A propriedade explícita do archive ficou:
 
 ```text
-VECTRA_FREESTANDING_LINK_STATE=TOKEN_VAZIO_DEDICATED_LINK_PROBE
+VECTRA_FREESTANDING_LINK_STATE=CONSUMED_BY_DEDICATED_LINK_PROBE
 ```
 
-O artefato JNI `vectra_core_accel` continua hosted por desenho, pois usa JNI/Android log. Um link final freestanding real deve possuir target separado, entry point e inspeção de símbolos.
+O target `vectra_freestanding_link_probe` agora:
+
+- possui `vectra_freestanding_probe_entry` como entry point;
+- consome `abi_core_freestanding`;
+- recebe `-nostdlib`, `--gc-sections`, `--no-undefined` e map file somente na fronteira de link final;
+- não usa JNI, Android log nem headers hosted;
+- é auditado por `readelf`, `nm -u` e `objdump`.
+
+O artefato JNI `vectra_core_accel` continua hosted por desenho e não é usado como prova do contrato freestanding.
 
 ## Gate automático
 
@@ -104,7 +113,8 @@ Verifica:
 - ausência de otimização na plataforma;
 - presença de `-ffreestanding` e `-fno-builtin`;
 - ausência do falso `target_link_options` no archive;
-- manutenção explícita do `TOKEN_VAZIO` do link final.
+- presença do target de link final, entry point e auditor de ELF;
+- matriz de CI host, `armeabi-v7a` e `arm64-v8a`.
 
 Workflow:
 
@@ -119,15 +129,15 @@ C0_STATIC_CONTRACT: IMPLEMENTED
 C1_WORKFLOW_EXECUTION: TOKEN_VAZIO
 C2_ANDROID_NDK_ARM32_BUILD: TOKEN_VAZIO
 C3_ANDROID_NDK_ARM64_BUILD: TOKEN_VAZIO
-C4_UNDEFINED_SYMBOL_AUDIT: TOKEN_VAZIO
-C5_DEDICATED_FREESTANDING_LINK_PROBE: TOKEN_VAZIO
+C4_UNDEFINED_SYMBOL_AUDIT: PASS_LOCAL_HOST
+C5_DEDICATED_FREESTANDING_LINK_PROBE: PASS_LOCAL_HOST
 C6_DEVICE_SMOKE: TOKEN_VAZIO
 ```
 
 ## Retroalimentação
 
 ```text
-F_ok   = flags C/ASM corrigidas; variável morta eliminada; link estático classificado honestamente
-F_gap  = execução NDK, símbolos e link final dedicado
-F_next = executar workflow e integrar probe final sem contaminar o JNI hosted
+F_ok   = flags C/ASM corrigidas; falso gate por comentário removido; probe host reproduzível
+F_gap  = execução CI/NDK ARM32+ARM64; BLAKE3 local; device opcional
+F_next = publicar branch, executar matriz remota e anexar manifests por ABI
 ```
