@@ -1,0 +1,46 @@
+name: CMake Language and Link Contract
+
+on:
+  pull_request:
+    paths:
+      - 'CMakeLists.txt'
+      - 'app/src/main/cpp/CMakeLists.txt'
+      - 'engine/platform/android/CMakeLists.txt'
+      - 'tools/ci/validate_cmake_language_link_contract.py'
+      - '.github/workflows/cmake-language-link-contract.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cmake-language-link-contract-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  static-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Tool identity
+        run: |
+          cmake --version
+          python3 --version
+
+      - name: Python syntax
+        run: python3 -m py_compile tools/ci/validate_cmake_language_link_contract.py
+
+      - name: CMake language and linker boundary
+        run: python3 tools/ci/validate_cmake_language_link_contract.py
+
+      - name: Preserve runtime boundary
+        run: |
+          cat <<'EOF'
+          STATIC_CONTRACT=VERIFIED_BY_EXECUTION
+          ANDROID_NDK_BUILD=TOKEN_VAZIO
+          DEVICE_RUNTIME=TOKEN_VAZIO
+          FREESTANDING_FINAL_LINK=TOKEN_VAZIO_DEDICATED_LINK_PROBE
+          EOF
