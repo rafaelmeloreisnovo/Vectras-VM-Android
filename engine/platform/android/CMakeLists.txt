@@ -39,3 +39,8 @@ function(vectra_apply_android_platform_c_flags target_name)
     $<$<COMPILE_LANGUAGE:C>:${_vectra_android_cflags}>)
   target_compile_definitions(${target_name} PRIVATE RMR_JNI_BUILD=1)
 endfunction()
+
+# engine/platform/android/CMakeLists.txt is included before add_library(rmr).
+# Defer the call to the end of the current directory so the target exists while
+# keeping the platform policy attached to the target that actually consumes it.
+cmake_language(DEFER CALL vectra_apply_android_platform_c_flags rmr)
