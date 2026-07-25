@@ -5,8 +5,11 @@ on:
     paths:
       - 'CMakeLists.txt'
       - 'app/src/main/cpp/CMakeLists.txt'
+      - 'app/src/main/cpp/freestanding_link_probe_entry.c'
       - 'engine/platform/android/CMakeLists.txt'
+      - 'tools/ci/audit_freestanding_link_probe.py'
       - 'tools/ci/validate_cmake_language_link_contract.py'
+      - 'tools/ci/verify_android_freestanding_contract.sh'
       - '.github/workflows/cmake-language-link-contract.yml'
   workflow_dispatch:
 
@@ -16,6 +19,9 @@ permissions:
 concurrency:
   group: cmake-language-link-contract-${{ github.ref }}
   cancel-in-progress: true
+
+env:
+  SOURCE_COMMIT: ${{ github.event.pull_request.head.sha || github.sha }}
 
 jobs:
   static-contract:
@@ -31,16 +37,202 @@ jobs:
           python3 --version
 
       - name: Python syntax
-        run: python3 -m py_compile tools/ci/validate_cmake_language_link_contract.py
+        run: |
+          python3 -m py_compile \
+            tools/ci/audit_freestanding_link_probe.py \
+            tools/ci/validate_cmake_language_link_contract.py
 
       - name: CMake language and linker boundary
         run: python3 tools/ci/validate_cmake_language_link_contract.py
+
+      - name: Shell boundary
+        run: bash tools/ci/verify_android_freestanding_contract.sh
 
       - name: Preserve runtime boundary
         run: |
           cat <<'EOF'
           STATIC_CONTRACT=VERIFIED_BY_EXECUTION
-          ANDROID_NDK_BUILD=TOKEN_VAZIO
-          DEVICE_RUNTIME=TOKEN_VAZIO
-          FREESTANDING_FINAL_LINK=TOKEN_VAZIO_DEDICATED_LINK_PROBE
+          HOST_FINAL_LINK=GATED_BY_HOST_PROBE_JOB
+          ANDROID_NDK_ARM32_LINK=GATED_BY_ANDROID_MATRIX
+          ANDROID_NDK_ARM64_LINK=GATED_BY_ANDROID_MATRIX
+          DEVICE_RUNTIME=OPTIONAL_TOKEN_VAZIO
           EOF
+
+  host-probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Java for JNI configure boundary
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Install deterministic probe tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes b3sum ninja-build
+
+      - name: Configure host probe
+        run: |
+          cmake \
+            -S app/src/main/cpp \
+            -B build/freestanding-host \
+            -G Ninja \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
+            -DRMR_ASM_CORE_EXPERIMENTAL=OFF \
+            -DVECTRA_BUILD_FREESTANDING_LINK_PROBE=ON
+
+      - name: Build twice and audit host ELF
+        run: |
+          set -euo pipefail
+          artifact_dir="artifacts/freestanding-host"
+          build_dir="build/freestanding-host"
+          mkdir -p "${artifact_dir}"
+
+          cmake --build "${build_dir}" \
+            --target freestanding_link_probe \
+            --verbose 2>&1 | tee "${artifact_dir}/build-first.log"
+
+          probe="$(find "${build_dir}" -maxdepth 1 -type f \
+            -name 'vectra_freestanding_link_probe_*' -print -quit)"
+          test -n "${probe}"
+          cp "${probe}" "${artifact_dir}/reference.elf"
+
+          cmake --build "${build_dir}" --target clean
+          cmake --build "${build_dir}" \
+            --target freestanding_link_probe \
+            --verbose 2>&1 | tee "${artifact_dir}/build.log"
+
+          probe="$(find "${build_dir}" -maxdepth 1 -type f \
+            -name 'vectra_freestanding_link_probe_*' -print -quit)"
+          test -n "${probe}"
+
+          python3 tools/ci/audit_freestanding_link_probe.py \
+            --binary "${probe}" \
+            --map "${build_dir}/vectra_freestanding_link_probe.map" \
+            --build-log "${artifact_dir}/build.log" \
+            --reference-binary "${artifact_dir}/reference.elf" \
+            --output "${artifact_dir}/manifest.json" \
+            --abi "host-$(uname -m)" \
+            --commit "${SOURCE_COMMIT}" \
+            --compiler "$(command -v cc)" \
+            --linker "$(command -v ld)" \
+            --require-blake3
+
+          cp "${probe}" "${artifact_dir}/probe.elf"
+          cp "${build_dir}/vectra_freestanding_link_probe.map" \
+            "${artifact_dir}/probe.map"
+
+      - name: Upload host proof
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: freestanding-link-probe-host
+          path: artifacts/freestanding-host
+          if-no-files-found: error
+
+  android-ndk-probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        abi:
+          - arm64-v8a
+          - armeabi-v7a
+    env:
+      ANDROID_NDK_VERSION: 27.2.12479018
+      ANDROID_CMAKE_VERSION: 3.22.1
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Install Android NDK, CMake and BLAKE3
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes b3sum
+          sdkmanager="${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin/sdkmanager"
+          yes | "${sdkmanager}" --licenses >/dev/null || true
+          "${sdkmanager}" \
+            "ndk;${ANDROID_NDK_VERSION}" \
+            "cmake;${ANDROID_CMAKE_VERSION}"
+
+      - name: Configure ${{ matrix.abi }} probe
+        run: |
+          set -euo pipefail
+          cmake_dir="${ANDROID_SDK_ROOT}/cmake/${ANDROID_CMAKE_VERSION}"
+          ndk_dir="${ANDROID_SDK_ROOT}/ndk/${ANDROID_NDK_VERSION}"
+          build_dir="build/freestanding-${{ matrix.abi }}"
+
+          "${cmake_dir}/bin/cmake" \
+            -S app/src/main/cpp \
+            -B "${build_dir}" \
+            -G Ninja \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_MAKE_PROGRAM="${cmake_dir}/bin/ninja" \
+            -DCMAKE_TOOLCHAIN_FILE="${ndk_dir}/build/cmake/android.toolchain.cmake" \
+            -DANDROID_ABI="${{ matrix.abi }}" \
+            -DANDROID_PLATFORM=android-29 \
+            -DANDROID_STL=none \
+            -DRMR_ASM_CORE_EXPERIMENTAL=OFF \
+            -DVECTRA_BUILD_FREESTANDING_LINK_PROBE=ON
+
+      - name: Build twice and audit ${{ matrix.abi }} ELF
+        run: |
+          set -euo pipefail
+          build_dir="build/freestanding-${{ matrix.abi }}"
+          artifact_dir="artifacts/freestanding-${{ matrix.abi }}"
+          cmake_dir="${ANDROID_SDK_ROOT}/cmake/${ANDROID_CMAKE_VERSION}"
+          ndk_bin="${ANDROID_SDK_ROOT}/ndk/${ANDROID_NDK_VERSION}/toolchains/llvm/prebuilt/linux-x86_64/bin"
+          probe="${build_dir}/vectra_freestanding_link_probe_${{ matrix.abi }}"
+          map_file="${build_dir}/vectra_freestanding_link_probe.map"
+          mkdir -p "${artifact_dir}"
+
+          "${cmake_dir}/bin/cmake" --build "${build_dir}" \
+            --target freestanding_link_probe \
+            --verbose 2>&1 | tee "${artifact_dir}/build-first.log"
+          test -f "${probe}"
+          cp "${probe}" "${artifact_dir}/reference.elf"
+
+          "${cmake_dir}/bin/cmake" --build "${build_dir}" --target clean
+          "${cmake_dir}/bin/cmake" --build "${build_dir}" \
+            --target freestanding_link_probe \
+            --verbose 2>&1 | tee "${artifact_dir}/build.log"
+          test -f "${probe}"
+
+          python3 tools/ci/audit_freestanding_link_probe.py \
+            --binary "${probe}" \
+            --map "${map_file}" \
+            --build-log "${artifact_dir}/build.log" \
+            --reference-binary "${artifact_dir}/reference.elf" \
+            --output "${artifact_dir}/manifest.json" \
+            --abi "${{ matrix.abi }}" \
+            --commit "${SOURCE_COMMIT}" \
+            --compiler "${ndk_bin}/clang" \
+            --linker "${ndk_bin}/ld.lld" \
+            --readelf "${ndk_bin}/llvm-readelf" \
+            --nm "${ndk_bin}/llvm-nm" \
+            --objdump "${ndk_bin}/llvm-objdump" \
+            --require-blake3
+
+          cp "${probe}" "${artifact_dir}/probe.elf"
+          cp "${map_file}" "${artifact_dir}/probe.map"
+
+      - name: Upload ${{ matrix.abi }} proof
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: freestanding-link-probe-${{ matrix.abi }}
+          path: artifacts/freestanding-${{ matrix.abi }}
+          if-no-files-found: error
