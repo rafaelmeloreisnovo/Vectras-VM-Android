@@ -65,7 +65,7 @@ def main() -> int:
         inputs[label] = {"path": str(path.relative_to(ROOT)), "sha256": sha256_file(path)}
 
     for manifest in MANIFESTS:
-        label = f"manifest:{manifest.parent.parent.name}"
+        label = f"manifest:{manifest.parent.name}"
         if not manifest.is_file():
             errors.append(f"missing {label}: {manifest}")
             continue
@@ -213,7 +213,7 @@ def main() -> int:
 
     require(texts.get("app_build", ""), ['applicationId "com.rafacodephi.app"'], "app_build", errors)
     for manifest in MANIFESTS:
-        label = f"manifest:{manifest.parent.parent.name}"
+        label = f"manifest:{manifest.parent.name}"
         text = texts.get(label, "")
         require(
             text,
