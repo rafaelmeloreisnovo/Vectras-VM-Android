@@ -1,0 +1,43 @@
+{
+  "schema": "raf.vectras-x3264-square-median-poc.v1",
+  "date": "2026-07-26",
+  "producer": {
+    "repository": "rafaelmeloreisnovo/qemu_rafaelia",
+    "pull_request": 65,
+    "head": "97e1e4efaf706818d74448155ee1adb494e84475",
+    "test_source": "tests/tcg/multiarch/rafaelia-square-median.c",
+    "executors": ["qemu-i386", "qemu-x86_64"]
+  },
+  "scientific_authority": {
+    "repository": "rafaelmeloreisnovo/papers",
+    "pull_request": 28,
+    "paper": "papers/square_median_rotation_x3264_v1/paper.md"
+  },
+  "consumer": {
+    "repository": "rafaelmeloreisnovo/Vectras-VM-Android",
+    "base_commit": "581e8e66d67c4c3a236afb8a44a2d2eda3577164",
+    "bridge": "app/src/main/java/com/vectras/vm/integration/VectrasTermuxBridge.kt",
+    "ipc_contract": "app/src/main/java/com/vectras/vm/integration/VectrasTermuxIpcContract.kt",
+    "current_profile": "qemu-system-v3",
+    "current_allowed_x86": ["qemu-system-i386", "qemu-system-x86_64"],
+    "required_linux_user": ["qemu-i386", "qemu-x86_64"]
+  },
+  "finding": {
+    "id": "VECTRAS-X3264-PROFILE-001",
+    "severity": "P1",
+    "state": "BLOCKED_PROFILE_MISMATCH",
+    "statement": "The current IPC v3 prepends full-system QEMU arguments and cannot safely dispatch the linux-user executors required by the bounded x32/x64 proof of concept.",
+    "unsafe_shortcut_forbidden": "Do not add qemu-i386 or qemu-x86_64 to the current allowlist without a separate linux-user argument profile.",
+    "next_contract": "raf.vectras-termux-ipc.v4 with explicit SYSTEM_VM and LINUX_USER profiles"
+  },
+  "gates": {
+    "static_profile_detection": "IMPLEMENTED",
+    "linux_user_profile": "TOKEN_VAZIO_NOT_IMPLEMENTED",
+    "termux_payload_install": "TOKEN_VAZIO",
+    "android_dispatch": "TOKEN_VAZIO",
+    "qemu_exit_receipt": "TOKEN_VAZIO",
+    "full_system_guest_boot": "NOT_REQUIRED_FOR_THIS_POC"
+  },
+  "dispatch_allowed": false,
+  "claim_allowed": false
+}

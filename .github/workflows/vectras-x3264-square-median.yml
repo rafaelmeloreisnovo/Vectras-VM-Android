@@ -1,0 +1,54 @@
+name: Vectras x3264 Square Median Boundary
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "app/src/main/java/com/vectras/vm/integration/VectrasTermuxBridge.kt"
+      - "app/src/main/java/com/vectras/vm/integration/VectrasTermuxIpcContract.kt"
+      - "docs/contracts/VECTRAS_X3264_SQUARE_MEDIAN_POC_V1.json"
+      - "docs/contracts/VECTRAS_X3264_SQUARE_MEDIAN_POC_V1.md"
+      - "tools/verify_vectras_x3264_square_median.py"
+      - ".github/workflows/vectras-x3264-square-median.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  static-profile-boundary:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Python syntax
+        run: python3 -m py_compile tools/verify_vectras_x3264_square_median.py
+
+      - name: Verify system versus linux-user boundary
+        run: |
+          python3 tools/verify_vectras_x3264_square_median.py \
+            --repo-root . \
+            --output artifacts/x3264-square-median/vectras-boundary.json
+
+      - name: Seal static contract
+        run: |
+          sha256sum \
+            app/src/main/java/com/vectras/vm/integration/VectrasTermuxBridge.kt \
+            app/src/main/java/com/vectras/vm/integration/VectrasTermuxIpcContract.kt \
+            docs/contracts/VECTRAS_X3264_SQUARE_MEDIAN_POC_V1.json \
+            docs/contracts/VECTRAS_X3264_SQUARE_MEDIAN_POC_V1.md \
+            tools/verify_vectras_x3264_square_median.py \
+            > artifacts/x3264-square-median/FILES.sha256
+          printf '%s\n' \
+            'qemu_system_profile=VERIFIED_STATIC' \
+            'qemu_linux_user_profile=TOKEN_VAZIO_NOT_IMPLEMENTED' \
+            'unsafe_allowlist_widening=FORBIDDEN' \
+            'dispatch_allowed=false' \
+            'claim_allowed=false' \
+            > artifacts/x3264-square-median/BOUNDARY.txt
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: vectras-x3264-square-median-${{ github.sha }}
+          path: artifacts/x3264-square-median/
+          retention-days: 30
