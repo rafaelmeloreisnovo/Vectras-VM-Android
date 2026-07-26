@@ -1,0 +1,74 @@
+{
+  "schema": "raf.vectras-termux-ipc-contract.v3",
+  "state": "IMPLEMENTED_EXECUTION_PENDING",
+  "claim_allowed": false,
+  "consumer": {
+    "repository": "rafaelmeloreisnovo/Vectras-VM-Android",
+    "base_commit": "a29392e65948463ab9cb6dbfefe64eb060e23a07"
+  },
+  "provider": {
+    "repository": "rafaelmeloreisnovo/termux-app-rafacodephi",
+    "base_commit": "508efb3d01594cc20d51b7fb01d5f2a790169bf2",
+    "package": "com.termux.rafacodephi",
+    "service_class": "com.termux.app.RunCommandService",
+    "permission": "com.termux.rafacodephi.permission.RUN_COMMAND",
+    "action": "com.termux.rafacodephi.RUN_COMMAND"
+  },
+  "request": {
+    "command_path_key": "com.termux.rafacodephi.RUN_COMMAND_PATH",
+    "arguments_key": "com.termux.rafacodephi.RUN_COMMAND_ARGUMENTS",
+    "workdir_key": "com.termux.rafacodephi.RUN_COMMAND_WORKDIR",
+    "runner_key": "com.termux.rafacodephi.RUN_COMMAND_RUNNER",
+    "pending_intent_key": "com.termux.rafacodephi.RUN_COMMAND_PENDING_INTENT",
+    "runner": "app-shell",
+    "workdir": "~/",
+    "max_total_arguments": 32,
+    "max_extra_arguments": 21,
+    "max_argument_length": 256,
+    "max_argument_bytes": 4096,
+    "fixed_arguments": [
+      "-accel",
+      "tcg",
+      "-display",
+      "none",
+      "-monitor",
+      "none",
+      "-serial",
+      "stdio",
+      "-no-reboot",
+      "-name",
+      "vectras-termux-ipc-v3"
+    ],
+    "request_persistence": "REQUIRED_BEFORE_DISPATCH",
+    "request_hash": "SHA-256_CANONICAL_LENGTH_PREFIXED_ENVELOPE"
+  },
+  "result": {
+    "bundle_key": "result",
+    "stdout_key": "stdout",
+    "stdout_original_length_key": "stdout_original_length",
+    "stderr_key": "stderr",
+    "stderr_original_length_key": "stderr_original_length",
+    "exit_code_key": "exitCode",
+    "error_code_key": "err",
+    "error_message_key": "errmsg",
+    "raw_stdout_persisted": false,
+    "raw_stderr_persisted": false,
+    "raw_error_message_persisted": false,
+    "receipt_schema": "raf.android-runtime-receipt.v2"
+  },
+  "security": {
+    "pending_intent": "EXPLICIT_MUTABLE_REQUIRED_FOR_PROVIDER_FILL_IN",
+    "receiver_exported": false,
+    "result_requires_local_pending_request": true,
+    "protected_qemu_options_cannot_be_overridden": true,
+    "private_paths_exposed": false
+  },
+  "claim_boundary": {
+    "dispatch_accepted": "NOT_EXECUTION",
+    "exit_code_zero": "NOT_GUEST_BOOT",
+    "execution_receipt": "NOT_VM_CORRECTNESS",
+    "guest_boot": "TOKEN_VAZIO",
+    "device_runtime": "TOKEN_VAZIO",
+    "claim_allowed": false
+  }
+}
