@@ -4,7 +4,7 @@
   "producer": {
     "repository": "rafaelmeloreisnovo/qemu_rafaelia",
     "pull_request": 65,
-    "head": "edc5e6fa18d28719803879c76ad01643decaf9c6",
+    "head": "97e1e4efaf706818d74448155ee1adb494e84475",
     "test_source": "tests/tcg/multiarch/rafaelia-square-median.c",
     "executors": ["qemu-i386", "qemu-x86_64"]
   },
