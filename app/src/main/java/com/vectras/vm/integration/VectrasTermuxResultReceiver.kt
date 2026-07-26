@@ -8,9 +8,8 @@ import org.json.JSONArray
 import org.json.JSONObject
 
 /**
- * Receives the PendingIntent result emitted by Termux RunCommandService and
- * materializes a privacy-minimized receipt. Raw stdout, stderr and errmsg are
- * not stored; only lengths, truncation state and SHA-256 digests are retained.
+ * Receives the Termux result and materializes a privacy-minimized receipt.
+ * Raw stdout, stderr and errmsg are never persisted.
  */
 class VectrasTermuxResultReceiver : BroadcastReceiver() {
 
@@ -54,6 +53,14 @@ class VectrasTermuxResultReceiver : BroadcastReceiver() {
         val stdoutSha256 = VectrasTermuxIpcContract.sha256(stdout)
         val stderrSha256 = VectrasTermuxIpcContract.sha256(stderr)
         val errorMessageSha256 = VectrasTermuxIpcContract.sha256(errorMessage)
+        val guestEvidence = GuestBootEvidenceContract.analyze(
+            stdout = stdout,
+            nonce = pending.guestBootNonce,
+            stdoutTruncated = stdoutTruncated,
+            exitCode = exitCode,
+            termuxErrorCode = errorCode,
+        )
+
         val status = when {
             !resultBundlePresent -> "RESULT_BUNDLE_TOKEN_VAZIO"
             errorCode != null && errorCode != 0 -> "TERMUX_INTERNAL_ERROR"
@@ -75,6 +82,11 @@ class VectrasTermuxResultReceiver : BroadcastReceiver() {
                 "stderr_sha256=$stderrSha256",
                 "stderr_original_length=${stderrOriginalLength ?: "TOKEN_VAZIO"}",
                 "errmsg_sha256=$errorMessageSha256",
+                "guest_evidence_state=${guestEvidence.state}",
+                "guest_nonce=${pending.guestBootNonce ?: "TOKEN_VAZIO"}",
+                "boot_marker_sha256=${guestEvidence.bootMarkerSha256 ?: "TOKEN_VAZIO"}",
+                "userspace_marker_sha256=${guestEvidence.userspaceMarkerSha256 ?: "TOKEN_VAZIO"}",
+                "shutdown_marker_sha256=${guestEvidence.shutdownMarkerSha256 ?: "TOKEN_VAZIO"}",
             ).joinToString("\n", postfix = "\n"),
         )
 
@@ -84,8 +96,8 @@ class VectrasTermuxResultReceiver : BroadcastReceiver() {
         val fGap = JSONArray()
             .put("producer_commit:TOKEN_VAZIO")
             .put("termux_commit:TOKEN_VAZIO")
-            .put("guest_boot:TOKEN_VAZIO")
-        val fNext = JSONArray().put("capture_guest_boot_artifact")
+        val fNext = JSONArray().put("collect_device_manifest_and_apk_hashes")
+
         if (resultBundlePresent) {
             fOk.put("termux_result_bundle_present")
         } else {
@@ -96,12 +108,22 @@ class VectrasTermuxResultReceiver : BroadcastReceiver() {
         } else {
             fGap.put("execution_exit_receipt:TOKEN_VAZIO")
         }
+        if (guestEvidence.complete) {
+            fOk.put("nonce_bound_guest_markers_complete_ordered_exit_zero")
+        } else if (guestEvidence.requested) {
+            fGap.put("guest_boot_evidence:${guestEvidence.state}")
+        } else {
+            fGap.put("guest_boot_evidence:NOT_REQUESTED")
+        }
         if (stdoutTruncated == true) fGap.put("stdout_truncated")
         if (stderrTruncated == true) fGap.put("stderr_truncated")
 
         val effectsObserved = JSONArray().put("REQUEST_PERSISTED")
         if (resultBundlePresent) effectsObserved.put("RESULT_BUNDLE")
         if (executionReceiptPresent) effectsObserved.put("EXECUTION_RECEIPT")
+        if (guestEvidence.bootObserved) effectsObserved.put("GUEST_BOOT_MARKER")
+        if (guestEvidence.userspaceObserved) effectsObserved.put("GUEST_USERSPACE_MARKER")
+        if (guestEvidence.shutdownObserved) effectsObserved.put("GUEST_SHUTDOWN_MARKER")
 
         val receipt = JSONObject().apply {
             put("schema", "raf.android-runtime-receipt.v2")
@@ -137,7 +159,23 @@ class VectrasTermuxResultReceiver : BroadcastReceiver() {
             put("stderr_sha256", stderrSha256)
             put("request_created_at_epoch_ms", pending.createdAtEpochMs)
             put("receipt_created_at_epoch_ms", System.currentTimeMillis())
-            put("guest_boot_artifact_sha256", JSONObject.NULL)
+            put("guest_boot_evidence_schema", GuestBootEvidenceContract.SCHEMA)
+            put("guest_boot_nonce", pending.guestBootNonce ?: JSONObject.NULL)
+            put("guest_boot_evidence_state", guestEvidence.state)
+            put("guest_boot_evidence_requested", guestEvidence.requested)
+            put("guest_boot_evidence_complete", guestEvidence.complete)
+            put("guest_boot_marker_observed", guestEvidence.bootObserved)
+            put("guest_userspace_marker_observed", guestEvidence.userspaceObserved)
+            put("guest_shutdown_marker_observed", guestEvidence.shutdownObserved)
+            put("guest_markers_ordered", guestEvidence.markersOrdered)
+            put("guest_arch", guestEvidence.arch ?: JSONObject.NULL)
+            put("guest_kernel", guestEvidence.kernel ?: JSONObject.NULL)
+            put("guest_init", guestEvidence.init ?: JSONObject.NULL)
+            put("guest_shutdown_reason", guestEvidence.shutdownReason ?: JSONObject.NULL)
+            put("guest_boot_marker_sha256", guestEvidence.bootMarkerSha256 ?: JSONObject.NULL)
+            put("guest_userspace_marker_sha256", guestEvidence.userspaceMarkerSha256 ?: JSONObject.NULL)
+            put("guest_shutdown_marker_sha256", guestEvidence.shutdownMarkerSha256 ?: JSONObject.NULL)
+            put("guest_boot_artifact_sha256", outputSha256)
             put("private_paths_exposed", false)
             put("effects_observed", effectsObserved)
             put("safe_state", "vm-stopped-no-image-mutation")
