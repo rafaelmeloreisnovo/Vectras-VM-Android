@@ -5,32 +5,56 @@ on:
     paths:
       - 'engine/rmr/**'
       - 'app/src/main/jniLibs/**'
+      - '_incoming/pending/**'
       - 'resources/compliance/**'
       - 'LICENSES_REGISTER.md'
+      - 'legal/**'
       - 'sbom/**'
+      - 'tools/qemu_rafaelia_assets.lock.yml'
+      - 'tools/ci/check_legal_gate.py'
+      - 'tools/ci/build_provenance_closure_report.py'
+      - 'tests/test_build_provenance_closure_report.py'
       - '.github/workflows/legal-compliance-gate.yml'
   pull_request:
     paths:
       - 'engine/rmr/**'
       - 'app/src/main/jniLibs/**'
+      - '_incoming/pending/**'
       - 'resources/compliance/**'
       - 'LICENSES_REGISTER.md'
+      - 'legal/**'
       - 'sbom/**'
+      - 'tools/qemu_rafaelia_assets.lock.yml'
+      - 'tools/ci/check_legal_gate.py'
+      - 'tools/ci/build_provenance_closure_report.py'
+      - 'tests/test_build_provenance_closure_report.py'
       - '.github/workflows/legal-compliance-gate.yml'
   workflow_dispatch:
 
 permissions:
   contents: read
 
+env:
+  SOURCE_COMMIT: ${{ github.event.pull_request.head.sha || github.sha }}
+  EXPECTED_QEMU_COMMIT: d4b3ef09956fa1abaeacba61dca3965f591c3a6a
+
 jobs:
   legal-gate:
     name: Legal / Provenance Gate
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Run legal compliance check
+      - name: Python syntax and unit tests
+        run: |
+          python3 -m py_compile \
+            tools/ci/check_legal_gate.py \
+            tools/ci/build_provenance_closure_report.py
+          python3 -m unittest tests/test_build_provenance_closure_report.py -v
+
+      - name: Run existing legal compliance check
         run: python3 tools/ci/check_legal_gate.py
 
       - name: Verify engine/rmr SPDX coverage
@@ -38,35 +62,46 @@ jobs:
           missing=$(grep -rL "SPDX-License-Identifier" engine/rmr/src/ --include="*.c" --include="*.h" 2>/dev/null || true)
           missing_asm=$(grep -rL "SPDX-License-Identifier" engine/rmr/interop/ --include="*.S" 2>/dev/null || true)
           if [ -n "$missing" ] || [ -n "$missing_asm" ]; then
-            [ -n "$missing" ]     && echo "FAIL: Missing SPDX in engine/rmr/src/:" && echo "$missing"
+            [ -n "$missing" ] && echo "FAIL: Missing SPDX in engine/rmr/src/:" && echo "$missing"
             [ -n "$missing_asm" ] && echo "FAIL: Missing SPDX in engine/rmr/interop/:" && echo "$missing_asm"
             exit 1
           fi
-          echo "OK: All engine/rmr/src and engine/rmr/interop files have SPDX-License-Identifier headers"
+          echo "OK: all engine/rmr source and interop files have SPDX headers"
 
-      - name: Verify LICENSES_REGISTER is not empty
+      - name: Build C06 provenance closure report
         run: |
-          lines=$(grep -c "TOKEN_VAZIO\|QUARANTINE\|blocked" LICENSES_REGISTER.md || true)
-          echo "INFO: $lines line(s) with TOKEN_VAZIO/QUARANTINE/blocked status in LICENSES_REGISTER.md"
-          echo "These require resolution before public distribution."
+          mkdir -p artifacts/c06-provenance
+          python3 tools/ci/build_provenance_closure_report.py \
+            --repo . \
+            --expected-qemu-commit "${EXPECTED_QEMU_COMMIT}" \
+            --source-commit "${SOURCE_COMMIT}" \
+            --output artifacts/c06-provenance/provenance_closure_report.json
 
-      - name: Validate ASSET_PROVENANCE_REGISTER structure
+      - name: Summarize C06 boundary
+        if: always()
         run: |
-          python3 - <<'EOF'
-          import csv, sys
-          path = "resources/compliance/ASSET_PROVENANCE_REGISTER.csv"
-          required = {"asset_path", "asset_type", "license_spdx", "status"}
-          try:
-              with open(path, newline="") as f:
-                  reader = csv.DictReader(f)
-                  fields = set(reader.fieldnames or [])
-                  missing = required - fields
-                  if missing:
-                      print(f"FAIL: {path} missing required columns: {missing}", file=sys.stderr)
-                      sys.exit(1)
-                  count = sum(1 for _ in reader)
-              print(f"OK: {path} valid ({count} data rows)")
-          except FileNotFoundError:
-              print(f"FAIL: {path} not found", file=sys.stderr)
-              sys.exit(1)
-          EOF
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+
+          path = Path('artifacts/c06-provenance/provenance_closure_report.json')
+          if not path.is_file():
+              print('C06_STATE=TOKEN_VAZIO_REPORT_NOT_CREATED')
+              raise SystemExit(0)
+          report = json.loads(path.read_text())
+          print(f"C06_STATE={report['state']}")
+          print(f"REGISTER_ROWS={report['summary']['register_rows']}")
+          print(f"CRITICAL_UNRESOLVED={report['summary']['critical_unresolved_rows']}")
+          print(f"QEMU_PIN_MATCHES={report['qemu_pin_matches']}")
+          print('PUBLIC_RELEASE_ALLOWED=false')
+          print('CLAIM_ALLOWED=false')
+          PY
+
+      - name: Upload C06 provenance receipt
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: c06-provenance-closure-${{ github.sha }}
+          path: artifacts/c06-provenance/
+          if-no-files-found: warn
+          retention-days: 30
