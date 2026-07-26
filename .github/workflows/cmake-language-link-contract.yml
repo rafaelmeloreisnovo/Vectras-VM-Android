@@ -8,8 +8,10 @@ on:
       - 'app/src/main/cpp/freestanding_link_probe_entry.c'
       - 'engine/platform/android/CMakeLists.txt'
       - 'tools/ci/audit_freestanding_link_probe.py'
+      - 'tools/ci/aggregate_freestanding_ndk_receipts.py'
       - 'tools/ci/validate_cmake_language_link_contract.py'
       - 'tools/ci/verify_android_freestanding_contract.sh'
+      - 'tests/test_aggregate_freestanding_ndk_receipts.py'
       - '.github/workflows/cmake-language-link-contract.yml'
   workflow_dispatch:
 
@@ -40,7 +42,11 @@ jobs:
         run: |
           python3 -m py_compile \
             tools/ci/audit_freestanding_link_probe.py \
+            tools/ci/aggregate_freestanding_ndk_receipts.py \
             tools/ci/validate_cmake_language_link_contract.py
+
+      - name: Aggregator unit tests
+        run: python3 -m unittest tests/test_aggregate_freestanding_ndk_receipts.py -v
 
       - name: CMake language and linker boundary
         run: python3 tools/ci/validate_cmake_language_link_contract.py
@@ -236,3 +242,58 @@ jobs:
           name: freestanding-link-probe-${{ matrix.abi }}
           path: artifacts/freestanding-${{ matrix.abi }}
           if-no-files-found: error
+
+  c05-closure-receipt:
+    if: always()
+    needs:
+      - host-probe
+      - android-ndk-probe
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download host manifest
+        continue-on-error: true
+        uses: actions/download-artifact@v4
+        with:
+          name: freestanding-link-probe-host
+          path: artifacts/downloaded/host
+
+      - name: Download ARM32 manifest
+        continue-on-error: true
+        uses: actions/download-artifact@v4
+        with:
+          name: freestanding-link-probe-armeabi-v7a
+          path: artifacts/downloaded/armeabi-v7a
+
+      - name: Download ARM64 manifest
+        continue-on-error: true
+        uses: actions/download-artifact@v4
+        with:
+          name: freestanding-link-probe-arm64-v8a
+          path: artifacts/downloaded/arm64-v8a
+
+      - name: Aggregate C05 closure receipt
+        id: aggregate
+        continue-on-error: true
+        run: |
+          python3 tools/ci/aggregate_freestanding_ndk_receipts.py \
+            --host artifacts/downloaded/host/manifest.json \
+            --arm32 artifacts/downloaded/armeabi-v7a/manifest.json \
+            --arm64 artifacts/downloaded/arm64-v8a/manifest.json \
+            --output artifacts/c05-closure/receipt.json \
+            --commit "${SOURCE_COMMIT}"
+
+      - name: Upload C05 closure receipt
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: c05-freestanding-closure-${{ github.sha }}
+          path: artifacts/c05-closure/
+          if-no-files-found: error
+
+      - name: Enforce C05 result
+        if: steps.aggregate.outcome != 'success'
+        run: exit 1
