@@ -2,13 +2,7 @@ package com.vectras.vm.integration
 
 import java.security.MessageDigest
 
-/**
- * Canonical, bounded IPC contract for Vectras -> Termux RAFCODE-Phi.
- *
- * This object intentionally duplicates the public Termux intent/result strings
- * instead of linking Vectras against Termux internals. The exact values are
- * cross-checked by repository gates on both sides.
- */
+/** Canonical, bounded IPC contract for Vectras -> Termux RAFCODE-Phi. */
 object VectrasTermuxIpcContract {
 
     const val PROTOCOL = "raf.vectras-termux-ipc.v3"
@@ -89,6 +83,7 @@ object VectrasTermuxIpcContract {
         transactionId: String,
         binaryName: String,
         arguments: List<String>,
+        guestBootNonce: String? = null,
     ): String = buildString {
         appendField("protocol", PROTOCOL)
         appendField("transaction_id", transactionId)
@@ -99,6 +94,8 @@ object VectrasTermuxIpcContract {
         appendField("command_path", commandPath(binaryName))
         appendField("workdir", WORKDIR)
         appendField("runner", RUNNER_APP_SHELL)
+        appendField("guest_boot_evidence_schema", GuestBootEvidenceContract.SCHEMA)
+        appendField("guest_boot_nonce", guestBootNonce ?: "TOKEN_VAZIO_NOT_REQUESTED")
         appendField("argument_count", arguments.size.toString())
         arguments.forEachIndexed { index, argument ->
             appendField("argument_$index", argument)

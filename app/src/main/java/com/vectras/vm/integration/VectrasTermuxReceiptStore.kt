@@ -18,6 +18,7 @@ object VectrasTermuxReceiptStore {
         val requestSha256: String,
         val argumentCount: Int,
         val argumentsSha256: String,
+        val guestBootNonce: String?,
         val createdAtEpochMs: Long,
     )
 
@@ -27,7 +28,11 @@ object VectrasTermuxReceiptStore {
         binaryName: String,
         arguments: List<String>,
         requestSha256: String,
+        guestBootNonce: String? = null,
     ): Boolean {
+        if (guestBootNonce != null && !GuestBootEvidenceContract.validNonce(guestBootNonce)) {
+            return false
+        }
         val directory = requestDirectory(context) ?: return false
         val target = File(directory, "$transactionId.json")
         if (target.exists()) return false
@@ -55,6 +60,14 @@ object VectrasTermuxReceiptStore {
             put("argument_count", arguments.size)
             put("arguments_sha256", argumentsSha256)
             put("arguments", JSONArray(arguments))
+            put("guest_boot_evidence_schema", GuestBootEvidenceContract.SCHEMA)
+            put("guest_boot_nonce", guestBootNonce ?: JSONObject.NULL)
+            put(
+                "guest_boot_nonce_argument_present",
+                guestBootNonce?.let {
+                    GuestBootEvidenceContract.containsNonceArgument(arguments, it)
+                } ?: false,
+            )
             put("request_sha256", requestSha256)
             put("created_at_epoch_ms", System.currentTimeMillis())
             put("state", "PENDING_DISPATCH_RESULT")
@@ -75,12 +88,21 @@ object VectrasTermuxReceiptStore {
             val argumentsSha256 = value.optString("arguments_sha256")
             if (!SHA256_PATTERN.matches(requestSha256)) return null
             if (!SHA256_PATTERN.matches(argumentsSha256)) return null
+            val nonce = value.optString("guest_boot_nonce", "")
+                .takeIf(GuestBootEvidenceContract::validNonce)
+            if (value.has("guest_boot_nonce") && !value.isNull("guest_boot_nonce") && nonce == null) {
+                return null
+            }
+            if (nonce != null && !value.optBoolean("guest_boot_nonce_argument_present", false)) {
+                return null
+            }
             PendingRequest(
                 transactionId = transactionId,
                 binaryName = value.optString("binary_name"),
                 requestSha256 = requestSha256,
                 argumentCount = value.optInt("argument_count", -1),
                 argumentsSha256 = argumentsSha256,
+                guestBootNonce = nonce,
                 createdAtEpochMs = value.optLong("created_at_epoch_ms", -1L),
             )
         } catch (_: Exception) {
