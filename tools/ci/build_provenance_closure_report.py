@@ -18,6 +18,7 @@ HEX64 = re.compile(r"^[0-9a-f]{64}$")
 TOKEN_VALUES = {"", "TOKEN_VAZIO", "NOASSERTION", "TODO"}
 BLOCKED_PREFIXES = ("blocked", "excluded", "quarantine", "quarentena")
 BINARY_SUFFIXES = {".so", ".bin", ".elf", ".apk", ".aab", ".img", ".fd"}
+BINARY_MAGICS = (b"\x7fELF", b"PK\x03\x04", b"PK\x05\x06", b"PK\x07\x08")
 
 
 def parse_args() -> argparse.Namespace:
@@ -60,6 +61,16 @@ def repository_path(repo: Path, candidate: Path) -> Path:
     return candidate if candidate.is_absolute() else repo / candidate
 
 
+def binary_candidate(path: Path) -> bool:
+    if path.suffix.lower() in BINARY_SUFFIXES:
+        return True
+    try:
+        prefix = path.read_bytes()[:4]
+    except OSError:
+        return False
+    return any(prefix.startswith(magic) for magic in BINARY_MAGICS)
+
+
 def load_csv(path: Path) -> tuple[list[dict[str, str]], list[str]]:
     errors: list[str] = []
     required = {
@@ -84,9 +95,7 @@ def load_csv(path: Path) -> tuple[list[dict[str, str]], list[str]]:
 
 
 def local_matches(repo: Path, asset_path: str) -> tuple[str, list[Path]]:
-    if asset_path.startswith("runtime:"):
-        return "runtime_external", []
-    if "${" in asset_path:
+    if asset_path.startswith("runtime:") or "${" in asset_path:
         return "runtime_external", []
     if any(char in asset_path for char in "*?["):
         matches = [Path(item) for item in glob.glob(str(repo / asset_path), recursive=True)]
@@ -162,17 +171,14 @@ def audit_register(repo: Path, rows: list[dict[str, str]]) -> tuple[list[dict[st
         )
 
     discovered = []
-    scan_roots = [repo / "app/src/main/jniLibs", repo / "_incoming/pending"]
-    for root in scan_roots:
+    for root in (repo / "app/src/main/jniLibs", repo / "_incoming/pending"):
         if not root.is_dir():
             continue
         for path in root.rglob("*"):
-            if not path.is_file():
+            if not path.is_file() or not binary_candidate(path):
                 continue
             relative = str(path.relative_to(repo))
-            suffix = path.suffix.lower()
-            is_candidate = suffix in BINARY_SUFFIXES or root.name == "pending"
-            if is_candidate and relative not in exact_registered:
+            if relative not in exact_registered:
                 discovered.append(relative)
     for path in sorted(set(discovered)):
         hard_errors.append(f"unregistered binary candidate: {path}")
