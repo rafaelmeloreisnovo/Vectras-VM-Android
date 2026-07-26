@@ -1,0 +1,83 @@
+name: C08 Device Evidence Contract
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'app/src/main/java/com/vectras/vm/integration/GuestBootEvidenceContract.kt'
+      - 'app/src/main/java/com/vectras/vm/integration/VectrasTermuxIpcContract.kt'
+      - 'app/src/main/java/com/vectras/vm/integration/VectrasTermuxBridge.kt'
+      - 'app/src/main/java/com/vectras/vm/integration/VectrasTermuxReceiptStore.kt'
+      - 'app/src/main/java/com/vectras/vm/integration/VectrasTermuxResultReceiver.kt'
+      - 'app/src/*/AndroidManifest.xml'
+      - 'app/build.gradle'
+      - 'tools/device/c08_*'
+      - 'tests/test_c08_validate_device_evidence.py'
+      - 'docs/active/C08_DEVICE_EVIDENCE_CLOSURE_2026-07-26.md'
+      - '.github/workflows/c08-device-evidence-contract.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: c08-device-evidence-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  static-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout exact revision
+        uses: actions/checkout@v4
+
+      - name: Python and shell syntax
+        run: |
+          python3 -m py_compile \
+            tools/device/c08_validate_device_evidence.py \
+            tools/device/c08_verify_static_contract.py \
+            tests/test_c08_validate_device_evidence.py
+          bash -n tools/device/c08_collect_device_evidence.sh
+          sh -n tools/device/c08_guest_marker.sh
+
+      - name: Device closure validator tests
+        run: python3 -m unittest tests/test_c08_validate_device_evidence.py -v
+
+      - name: Static C08 contract receipt
+        run: |
+          python3 tools/device/c08_verify_static_contract.py \
+            --output artifacts/c08-static/static_contract.json
+
+      - name: Compile Android Kotlin boundary
+        run: |
+          chmod +x gradlew
+          ./gradlew :app:compileDebugKotlin \
+            -PdevFastPath=true \
+            --no-daemon \
+            --stacktrace
+
+      - name: Verify no physical claim was promoted
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+
+          report = json.loads(Path('artifacts/c08-static/static_contract.json').read_text())
+          assert report['schema'] == 'raf.c08-static-contract-verification.v1'
+          assert report['state'] == 'PASS_STATIC_CONTRACT'
+          assert report['claim_allowed'] is False
+          assert report['physical_boundary']['device_collection'] == 'TOKEN_VAZIO'
+          assert report['physical_boundary']['guest_markers'] == 'TOKEN_VAZIO'
+          assert report['physical_boundary']['arm32_device'] == 'TOKEN_VAZIO'
+          assert report['physical_boundary']['arm64_device'] == 'TOKEN_VAZIO'
+          print('PASS C08 static/physical boundary')
+          PY
+
+      - name: Upload C08 static receipt
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: c08-device-evidence-static-${{ github.sha }}
+          path: artifacts/c08-static/
+          if-no-files-found: error
+          retention-days: 30
