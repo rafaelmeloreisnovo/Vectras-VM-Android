@@ -55,6 +55,15 @@ mkdir -p "$OUT"
 OUT="$(CDPATH= cd -- "$OUT" && pwd)"
 mkdir -p "$OUT/packages"
 
+cleanup_sensitive_temporaries() {
+  rm -f \
+    "$OUT/packages/"*.dumpsys.txt \
+    "$OUT/packages/"*.paths.txt \
+    "$OUT/packages/"*.hashes.txt \
+    "$OUT/"run-as-*.stderr
+}
+trap cleanup_sensitive_temporaries EXIT
+
 ADB=(adb)
 if [ -n "$SERIAL" ]; then
   ADB+=( -s "$SERIAL" )
@@ -112,14 +121,12 @@ collect_package() {
     installed=true
     version_name="$(sed -n 's/^[[:space:]]*versionName=//p' "$dump_file" | head -n 1)"
     version_code="$(sed -n 's/.*versionCode=\([0-9][0-9]*\).*/\1/p' "$dump_file" | head -n 1)"
-    local index=0
     while IFS= read -r line; do
       local remote_path="${line#package:}"
       [ -n "$remote_path" ] || continue
       local digest
       digest="$(adb_cmd exec-out cat "$remote_path" | sha256sum | awk '{print $1}')"
       printf '%s\n' "$digest" >>"$hashes_file"
-      index=$((index + 1))
     done <"$paths_file"
   fi
 
@@ -131,6 +138,7 @@ collect_package() {
   HASHES_FILE="$hashes_file" \
   JSON_FILE="$json_file" \
   python3 - <<'PY'
+import hashlib
 import json
 import os
 from pathlib import Path
@@ -147,10 +155,9 @@ value = {
     "version_name": os.environ["VERSION_NAME"] or "TOKEN_VAZIO",
     "version_code": os.environ["VERSION_CODE"] or "TOKEN_VAZIO",
     "apk_path_count": len(paths),
-    "apk_paths_sha256": [
-        __import__("hashlib").sha256(path.encode()).hexdigest() for path in paths
-    ],
+    "apk_paths_sha256": [hashlib.sha256(path.encode()).hexdigest() for path in paths],
     "apk_sha256": hashes,
+    "raw_apk_paths_retained": False,
 }
 Path(os.environ["JSON_FILE"]).write_text(json.dumps(value, indent=2, sort_keys=True) + "\n")
 PY
@@ -230,6 +237,9 @@ manifest = {
     "exported_test_component_used": False,
     "raw_adb_serial_persisted": False,
     "raw_build_fingerprint_persisted": False,
+    "raw_apk_paths_retained": False,
+    "raw_dumpsys_retained": False,
+    "raw_run_as_diagnostics_retained": False,
     "claim_allowed": False,
 }
 (out / "device_manifest.json").write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n")
@@ -258,6 +268,7 @@ status = {
     "receipt_present": (out / "receipt.json").is_file(),
     "logcat_cleared": False,
     "exported_test_component_used": False,
+    "temporary_sensitive_files_retained": False,
     "claim_allowed": False,
 }
 (out / "collector_status.json").write_text(json.dumps(status, indent=2, sort_keys=True) + "\n")
