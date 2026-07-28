@@ -583,13 +583,13 @@ static float neon_dot(const float * restrict a,
         float32x4_t vb = vld1q_f32(b + i);
         acc = vmlaq_f32(acc, va, vb);
     }
-    float sum = vaddvq_f32(acc);  /* ARM64 */
-    /* ARM32 fallback: */
-#if RAF_ARCH == 32
+#if defined(__aarch64__)
+    float sum = vaddvq_f32(acc);
+#else
     float32x2_t lo = vget_low_f32(acc);
     float32x2_t hi = vget_high_f32(acc);
     float32x2_t s2 = vadd_f32(lo, hi);
-    sum = vget_lane_f32(vpadd_f32(s2, s2), 0);
+    float sum = vget_lane_f32(vpadd_f32(s2, s2), 0);
 #endif
     for (; i < n; i++) sum += a[i] * b[i];
     return sum;
@@ -775,7 +775,6 @@ static work_t execute_work(uint32_t core_idx, uint32_t layer) {
  * PRINT UTILITIES — sem printf pesado, usa write() direto
  * ========================================================================== */
 static const char HEX[] = "0123456789ABCDEF";
-static char g_pbuf[256];
 
 static void p_str(const char *s) {
     size_t n = strlen(s);

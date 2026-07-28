@@ -473,9 +473,6 @@ class ZiprafDirectRuntime(
             randomAccess.close()
             throw failure
         }
-        require(extent.payloadOffset >= 0 && extent.payloadSize > 0)
-        require(extent.payloadOffset <= randomAccess.length())
-        require(extent.payloadSize <= randomAccess.length() - extent.payloadOffset)
         require(extent.payloadOffset + extent.payloadSize <= Int.MAX_VALUE.toLong()) {
             "extent exceeds 2GiB addressable limit"
         }

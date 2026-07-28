@@ -67,7 +67,7 @@ static void rmr_bind_api(const struct RMR_API *api){
 
 static void rmr_panic(const char *msg){
   if(g_api.panic) g_api.panic(g_api.ctx, msg);
-  for(;;) { /* loop */ }
+  __builtin_trap();
 }
 
 static void rmr_write_bytes(const u8 *buf, u32 len){

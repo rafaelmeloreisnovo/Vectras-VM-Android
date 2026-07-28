@@ -288,7 +288,6 @@ Java_com_termux_rafaelia_RafaeliaCore_profileNative(
         "generic";
 #endif
 
-#define HAS_NEON_STR (defined(HAS_NEON) ? "true" : "false")
 
     /* escreve JSON manualmente no buffer out */
     int pos = 0;
