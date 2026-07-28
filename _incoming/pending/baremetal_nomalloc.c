@@ -36,7 +36,6 @@
 static unsigned char __attribute__((aligned(64)))
     g_bm_arena_buf[BM_ARENA_SZ];
 
-static size_t g_bm_arena_off = 0;
 
 /* arena pública (exposta via header) */
 static mx_arena_t g_bm_arena_hdr = {
@@ -100,7 +99,9 @@ static void bm_init_caps(void) {
 #if defined(HAS_NEON) || defined(__ARM_NEON) || defined(__ARM_NEON__)
     bin |= CAP_NEON | CAP_ASIMD;
 #endif
-#if defined(HAS_AVX2);  bin |= CAP_AVX2; bin |= CAP_AVX; }
+#if defined(HAS_AVX2)
+    bin |= CAP_AVX2;
+    bin |= CAP_AVX;
 #endif
 #if defined(HAS_AVX)
     bin |= CAP_AVX;

@@ -2,16 +2,11 @@
 // Copyright (C) Rafael M. R. — rafaelmeloreisnovo
 #include "rmr_qemu_bridge.h"
 #include "rmr_corelib.h"
+#include "rmr_ll_ops.h"
 #include "rmr_ll_tuning.h"
 #include "rmr_unified_kernel.h"
 
 #include "zero_compat.h"
-
-static uint32_t clamp_u32(uint32_t v, uint32_t lo, uint32_t hi) {
-  if (v < lo) return lo;
-  if (v > hi) return hi;
-  return v;
-}
 
 void RmR_QemuPlan_Default(RmR_QemuPlan *plan) {
   if (!plan) return;
@@ -33,13 +28,13 @@ void RmR_QemuPlan_Autotune(const RmR_HW_Info *hw,
   RmR_QemuPlan_Default(plan);
   plan->arch = arch;
   plan->low_latency = low_latency ? 1u : 0u;
-  plan->vm_mem_mib = clamp_u32(mem_mib ? mem_mib : 2048u, 512u, 32768u);
+  plan->vm_mem_mib = rmr_clamp_u32(mem_mib ? mem_mib : 2048u, 512u, 32768u);
 
   uint32_t host_cores = 2u;
   {
     RmR_LL_TunePlan tune;
     RmR_LL_ApplyTuneDefaults(hw, &tune);
-    host_cores = clamp_u32(tune.qemu_smp_cpus, 2u, 16u);
+    host_cores = rmr_clamp_u32(tune.qemu_smp_cpus, 2u, 16u);
     plan->use_iothread = tune.qemu_use_iothread ? 1u : 0u;
     plan->use_direct_io = tune.qemu_use_direct_io ? 1u : 0u;
   }
@@ -52,7 +47,7 @@ void RmR_QemuPlan_Autotune(const RmR_HW_Info *hw,
     if (hw->cache_hint_l4 >= (16u * 1024u * 1024u)) {
       plan->preset = RMR_QEMU_PRESET_PERFORMANCE;
       plan->use_multifd = 1u;
-      if (host_cores < 16u) host_cores = clamp_u32(host_cores + 2u, 2u, 16u);
+      if (host_cores < 16u) host_cores = rmr_clamp_u32(host_cores + 2u, 2u, 16u);
     }
     if (hw->ptr_bits < 64u) {
       plan->preset = RMR_QEMU_PRESET_COMPATIBILITY;
@@ -72,7 +67,7 @@ void RmR_QemuPlan_Autotune(const RmR_HW_Info *hw,
   plan->host_cores = host_cores;
   switch (plan->preset) {
     case RMR_QEMU_PRESET_PERFORMANCE:
-      plan->vm_cpus = clamp_u32(host_cores - 1u, 2u, 12u);
+      plan->vm_cpus = rmr_clamp_u32(host_cores - 1u, 2u, 12u);
       plan->use_iothread = 1u;
       plan->use_direct_io = 1u;
       plan->use_multifd = 1u;
@@ -85,7 +80,7 @@ void RmR_QemuPlan_Autotune(const RmR_HW_Info *hw,
       break;
     case RMR_QEMU_PRESET_BALANCED:
     default:
-      plan->vm_cpus = clamp_u32(host_cores / 2u, 2u, 8u);
+      plan->vm_cpus = rmr_clamp_u32(host_cores / 2u, 2u, 8u);
       plan->use_multifd = 0u;
       break;
   }
@@ -205,7 +200,9 @@ int RmR_QmpTelemetry_Parse(const char *qmp_json_line, RmR_QmpTelemetry *out) {
       out->running_count = out->vcpu_count - out->halted_count;
     }
   } else {
-    parse_u32_after_key(qmp_json_line, "\"cpus\"", &out->vcpu_count);
+    if (!parse_u32_after_key(qmp_json_line, "\"cpus\"", &out->vcpu_count)) {
+      out->vcpu_count = 1;
+    }
   }
 
   return 0;

@@ -26,6 +26,10 @@ static inline uint8_t select_u8(uint32_t mask, uint8_t a, uint8_t b) {
   return (uint8_t)select_u32(mask, (uint32_t)a, (uint32_t)b);
 }
 
+static inline uint32_t rmr_clamp_u32(uint32_t v, uint32_t lo, uint32_t hi) {
+  return v < lo ? lo : v > hi ? hi : v;
+}
+
 uint64_t RmR_LL_ReadCycles(void);
 void RmR_LL_FenceFull(void);
 void RmR_LL_FenceLoad(void);

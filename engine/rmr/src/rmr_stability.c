@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0-only
 // Copyright (C) Rafael M. R. — rafaelmeloreisnovo
 #include "rmr_stability.h"
+#include "rmr_crc_internal.h"
 
 #include <limits.h>
 
@@ -41,17 +42,6 @@ static uint32_t rmr_ratio_q16(uint32_t numerator, uint32_t denominator) {
 
 static uint32_t rmr_absdiff_u32(uint32_t a, uint32_t b) {
     return (a >= b) ? (a - b) : (b - a);
-}
-
-static uint32_t rmr_crc32c_update(uint32_t crc, const uint8_t *p, size_t n) {
-    while (n--) {
-        crc ^= *p++;
-        for (uint32_t i = 0; i < 8u; ++i) {
-            const uint32_t mask = (uint32_t)-(int32_t)(crc & 1u);
-            crc = (crc >> 1u) ^ (0x82F63B78u & mask);
-        }
-    }
-    return crc;
 }
 
 uint32_t RmR_Stability_CRC32C(const void *data, size_t size) {

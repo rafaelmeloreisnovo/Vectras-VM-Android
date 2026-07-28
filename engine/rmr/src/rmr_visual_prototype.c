@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0-only
 // Copyright (C) Rafael M. R. — rafaelmeloreisnovo
 #include "rmr_visual_prototype.h"
+#include "rmr_crc_internal.h"
 
 #include <limits.h>
 
@@ -24,17 +25,6 @@ static void rmr_visual_copy(void *dst, const void *src, size_t n) {
     uint8_t *d = (uint8_t *)dst;
     const uint8_t *s = (const uint8_t *)src;
     while (n--) *d++ = *s++;
-}
-
-static uint32_t rmr_crc32c_update(uint32_t crc, const uint8_t *p, size_t n) {
-    while (n--) {
-        crc ^= *p++;
-        for (uint32_t i = 0u; i < 8u; ++i) {
-            const uint32_t mask = (uint32_t)-(int32_t)(crc & 1u);
-            crc = (crc >> 1u) ^ (0x82F63B78u & mask);
-        }
-    }
-    return crc;
 }
 
 static uint32_t rmr_crc_u8(uint32_t crc, uint8_t value) {

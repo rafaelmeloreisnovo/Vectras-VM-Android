@@ -29,11 +29,7 @@ typedef struct {
 } ChunkVec;
 
 
-static uint32_t clamp_u32_local(uint32_t v, uint32_t lo, uint32_t hi) {
-  if (v < lo) return lo;
-  if (v > hi) return hi;
-  return v;
-}
+
 static const char *route_target_from_id(uint8_t id) {
   switch (id) {
     case RMR_ROUTE_CPU: return "CPU";
@@ -356,7 +352,7 @@ int RmR_RunPolicyPipeline(const char *input_path,
   RmR_HW_Detect(&hw);
   RmR_MathFabric_AutodetectPlan(&hw, &math_plan);
   RmR_LL_ApplyTuneDefaults(&hw, &tune);
-  math_plan.lane_count = clamp_u32_local(tune.policy_lane_width, 4u, 32u);
+  math_plan.lane_count = rmr_clamp_u32(tune.policy_lane_width, 4u, 32u);
   io_batch_size = config->chunk_size;
   if (tune.policy_batch_size > 0u && (size_t)tune.policy_batch_size < io_batch_size) {
     io_batch_size = (size_t)tune.policy_batch_size;
