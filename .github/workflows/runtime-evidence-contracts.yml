@@ -1,0 +1,114 @@
+name: Runtime Evidence Contracts
+
+on:
+  pull_request:
+    branches: [master]
+    paths:
+      - 'tools/ci/generate_apk_abi_bootstrap_inventory.py'
+      - 'tools/ci/collect_apk_report.sh'
+      - 'tools/ci/test_apk_report_contracts.py'
+      - 'app/src/main/java/com/vectras/vm/rafaelia/connector/BrainVaultStore.java'
+      - 'app/src/test/java/com/vectras/vm/rafaelia/connector/BrainVaultStoreTest.java'
+      - '.github/workflows/runtime-evidence-contracts.yml'
+  push:
+    branches: [master]
+    paths:
+      - 'tools/ci/generate_apk_abi_bootstrap_inventory.py'
+      - 'tools/ci/collect_apk_report.sh'
+      - 'tools/ci/test_apk_report_contracts.py'
+      - 'app/src/main/java/com/vectras/vm/rafaelia/connector/BrainVaultStore.java'
+      - 'app/src/test/java/com/vectras/vm/rafaelia/connector/BrainVaultStoreTest.java'
+      - '.github/workflows/runtime-evidence-contracts.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: runtime-evidence-contracts-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  apk-report-contracts:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Test ARM64 and dual-ABI report behavior
+        run: python3 tools/ci/test_apk_report_contracts.py
+
+  brainvault-append-only-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: true
+
+      - name: Resolve Android build versions
+        shell: bash
+        run: |
+          set -euo pipefail
+          for key in compile.api tools.version ndk.version cmake.version; do
+            value="$(awk -F= -v key="$key" '$1==key {print $2; exit}' gradle.properties | tr -d '[:space:]')"
+            [[ -n "$value" ]] || { echo "Missing $key" >&2; exit 1; }
+            env_name="$(printf '%s' "$key" | tr '[:lower:].' '[:upper:]_')"
+            echo "${env_name}=${value}" >> "$GITHUB_ENV"
+          done
+
+      - uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: temurin
+
+      - uses: android-actions/setup-android@v3
+
+      - name: Install deterministic Android toolchain
+        shell: bash
+        run: |
+          set -euo pipefail
+          set +o pipefail
+          yes | sdkmanager --licenses >/dev/null
+          set -o pipefail
+          sdkmanager \
+            "platform-tools" \
+            "platforms;android-${COMPILE_API}" \
+            "build-tools;${TOOLS_VERSION}" \
+            "cmake;${CMAKE_VERSION}" \
+            "ndk;${NDK_VERSION}"
+          ./tools/ci/prepare_android_env.sh \
+            --java-version 21 \
+            --ndk-version "${NDK_VERSION}" \
+            --require-sdkmanager
+
+      - name: Execute focused BrainVault persistence tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          ./tools/gradle_with_jdk21.sh \
+            :app:testDebugUnitTest \
+            --tests 'com.vectras.vm.rafaelia.connector.BrainVaultStoreTest' \
+            -PAPP_ABI_POLICY=arm64-only \
+            -PSUPPORTED_ABIS=arm64-v8a \
+            -PCI_INTERNAL_VALIDATION=false
+
+      - name: Assert focused JUnit result exists
+        shell: bash
+        run: |
+          set -euo pipefail
+          result='app/build/test-results/testDebugUnitTest/TEST-com.vectras.vm.rafaelia.connector.BrainVaultStoreTest.xml'
+          [[ -s "$result" ]] || { echo "JUnit result missing: $result" >&2; exit 1; }
+          python3 - "$result" <<'PY'
+          import sys
+          import xml.etree.ElementTree as ET
+          root = ET.parse(sys.argv[1]).getroot()
+          tests = int(root.attrib.get('tests', '0'))
+          failures = int(root.attrib.get('failures', '0'))
+          errors = int(root.attrib.get('errors', '0'))
+          skipped = int(root.attrib.get('skipped', '0'))
+          assert tests >= 10, tests
+          assert failures == 0, failures
+          assert errors == 0, errors
+          assert skipped == 0, skipped
+          print(f'BrainVault focused contract: PASS tests={tests}')
+          PY
