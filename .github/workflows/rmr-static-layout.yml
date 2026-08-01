@@ -1,0 +1,31 @@
+name: RMR Static Layout Invariant
+
+on:
+  push:
+    paths:
+      - 'engine/rmr/include/rmr_static_layout.h'
+      - 'engine/rmr/src/rmr_static_layout.c'
+      - 'demo_cli/src/rmr_static_layout_selftest.c'
+      - 'tools/test_rmr_static_layout.sh'
+      - 'engine/rmr/OMEGA_STATIC_LAYOUT_INVARIANT_V1.md'
+      - '.github/workflows/rmr-static-layout.yml'
+  pull_request:
+    paths:
+      - 'engine/rmr/include/rmr_static_layout.h'
+      - 'engine/rmr/src/rmr_static_layout.c'
+      - 'demo_cli/src/rmr_static_layout_selftest.c'
+      - 'tools/test_rmr_static_layout.sh'
+      - 'engine/rmr/OMEGA_STATIC_LAYOUT_INVARIANT_V1.md'
+      - '.github/workflows/rmr-static-layout.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  static-layout-gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Compile and run adversarial selftest
+        run: sh tools/test_rmr_static_layout.sh
