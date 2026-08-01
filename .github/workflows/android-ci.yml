@@ -124,7 +124,6 @@ jobs:
             exit 1
           fi
 
-
           if [[ "${ci_lane}" == "release-signed-official" && "${abi_profile}" != "official_arm64" ]]; then
             echo "release-signed-official must resolve to abi_profile=official_arm64; got ${abi_profile}" >&2
             exit 1
@@ -212,7 +211,6 @@ jobs:
           echo "lane_label=${lane_label}" >> "$GITHUB_OUTPUT"
           echo "expect_perf_results=${expect_perf_results}" >> "$GITHUB_OUTPUT"
 
-
   abi-contract-gate:
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -274,7 +272,6 @@ jobs:
       - name: Validate Java source contracts
         run: python3 ./tools/ci/check_java_contracts.py
 
-
       - name: Validate Android SDK/build path alignment
         run: ./tools/ci/validate_android_sdk_alignment.sh
 
@@ -318,7 +315,6 @@ jobs:
             -PAPP_ABI_POLICY="${{ needs.resolve.outputs.app_abi_policy }}" \
             -PSUPPORTED_ABIS="${{ needs.resolve.outputs.supported_abis }}" \
             -PCI_INTERNAL_VALIDATION="${{ needs.resolve.outputs.ci_internal_validation }}"
-
 
       - name: Resolve release signing contract
         id: signing
@@ -380,10 +376,10 @@ jobs:
           set -euo pipefail
           ./tools/gradle_with_jdk21.sh :app:verifyTermuxBootstrapAbiCoverage             -PAPP_ABI_POLICY="${{ needs.resolve.outputs.app_abi_policy }}"             -PSUPPORTED_ABIS="${{ needs.resolve.outputs.supported_abis }}"             -PCI_INTERNAL_VALIDATION="${{ needs.resolve.outputs.ci_internal_validation }}"
 
-
       - name: Validate lowbasic handoff ABI matrix
         if: ${{ needs.resolve.outputs.expect_app_artifacts == 'true' }}
         run: ./tools/ci/test_lowbasic_handoff_matrix.sh
+
       - name: Validate critical native binary freestanding policy
         if: ${{ needs.resolve.outputs.expect_app_artifacts == 'true' }}
         run: ./tools/ci/validate_lowlevel_abi.sh --require-critical-binary
@@ -458,7 +454,6 @@ jobs:
           rm -rf ci-artifacts/android-logs ci-artifacts/android-artifacts ci-artifacts/perf-results
           mkdir -p ci-artifacts/android-logs ci-artifacts/android-artifacts ci-artifacts/perf-results
 
-          # android-logs: apenas logs textuais (Gradle/NDK/CMake) por lane.
           while IFS= read -r p; do
             rel="${p#./}"
             dst="ci-artifacts/android-logs/${rel}"
@@ -475,7 +470,6 @@ jobs:
           if [[ -d app/build/outputs/bundle ]]; then
             cp -a app/build/outputs/bundle/. ci-artifacts/android-artifacts/
           fi
-          # android-artifacts: pacotes + libs nativas por ABI.
           while IFS= read -r p; do
             rel="${p#./}"
             dst="ci-artifacts/android-artifacts/${rel}"
@@ -522,11 +516,11 @@ jobs:
 
       - name: Generate APK report (sizes, ABIs, checksums)
         if: always()
-        run: |
-          ./tools/ci/collect_apk_report.sh ci-artifacts/apk-report
-
+        run: ./tools/ci/collect_apk_report.sh ci-artifacts/apk-report
 
       - name: Upload Android logs
+        id: upload_android_logs
+        continue-on-error: true
         uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -535,6 +529,8 @@ jobs:
           if-no-files-found: warn
 
       - name: Upload Android artifacts
+        id: upload_android_artifacts
+        continue-on-error: true
         uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -543,6 +539,8 @@ jobs:
           if-no-files-found: warn
 
       - name: Upload native matrix
+        id: upload_native_matrix
+        continue-on-error: true
         uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -550,8 +548,9 @@ jobs:
           path: ci-artifacts/upload-staging/native-matrix-${{ needs.resolve.outputs.lane_label }}/**
           if-no-files-found: warn
 
-
       - name: Upload Android reports
+        id: upload_android_reports
+        continue-on-error: true
         uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -560,6 +559,8 @@ jobs:
           if-no-files-found: warn
 
       - name: Upload APK report
+        id: upload_apk_report
+        continue-on-error: true
         uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -568,9 +569,45 @@ jobs:
           if-no-files-found: warn
 
       - name: Upload perf results
+        id: upload_perf_results
+        continue-on-error: true
         uses: actions/upload-artifact@v4
         if: always() && hashFiles(format('ci-artifacts/upload-staging/perf-results-{0}/files/**', needs.resolve.outputs.lane_label)) != ''
         with:
           name: perf-results-${{ needs.resolve.outputs.lane_label }}
           path: ci-artifacts/upload-staging/perf-results-${{ needs.resolve.outputs.lane_label }}/**
           if-no-files-found: warn
+
+      - name: Record artifact publication state
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          outcomes=(
+            "android_logs=${{ steps.upload_android_logs.outcome }}"
+            "android_artifacts=${{ steps.upload_android_artifacts.outcome }}"
+            "native_matrix=${{ steps.upload_native_matrix.outcome }}"
+            "android_reports=${{ steps.upload_android_reports.outcome }}"
+            "apk_report=${{ steps.upload_apk_report.outcome }}"
+            "perf_results=${{ steps.upload_perf_results.outcome }}"
+          )
+          blocked=false
+          {
+            echo '## Android artifact publication'
+            echo
+            echo '- Local build/artifact verification is controlled by the preceding fatal gates.'
+            for item in "${outcomes[@]}"; do
+              name="${item%%=*}"
+              outcome="${item#*=}"
+              echo "- ${name}: `${outcome}`"
+              if [[ "${outcome}" == "failure" ]]; then
+                blocked=true
+              fi
+            done
+            if [[ "${blocked}" == "true" ]]; then
+              echo '- Remote publication: `BLOCKED_EXTERNAL` (GitHub Actions artifact storage/quota or service failure)'
+              echo '- This does not promote remote artifacts to PASS and does not invalidate already completed local build gates.'
+            else
+              echo '- Remote publication: `PASS` for all attempted uploads.'
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
