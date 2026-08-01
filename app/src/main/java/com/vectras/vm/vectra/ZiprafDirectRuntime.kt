@@ -5,8 +5,10 @@ import java.io.File
 import java.io.RandomAccessFile
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
+import java.nio.MappedByteBuffer
 import java.nio.channels.FileChannel
 import java.util.zip.CRC32
+import kotlin.math.ceil
 
 data class ZiprafStoredExtent(
     val payloadOffset: Long,
@@ -78,12 +80,7 @@ private object ZiprafEntryNamePolicy {
     }
 }
 
-/**
- * Parses one classic ZIP local-file header and emits a bounded STORE extent.
- *
- * This low-level parser validates the local record only. Distribution or trusted execution should
- * use [ZiprafArchiveValidator.parseStoredEntry], which cross-checks the central directory and EOCD.
- */
+/** Parses one classic ZIP local-file header and emits a bounded STORE extent. */
 object ZiprafStoredEntryParser {
     fun parse(
         file: File,
@@ -197,12 +194,7 @@ private data class ZiprafCentralDirectory(
     val entries: List<ZiprafCentralDirectoryEntry>
 )
 
-/**
- * Strict classic-ZIP validator for the direct STORE runtime.
- *
- * It validates EOCD, single-disk layout, central-directory bounds, entry uniqueness and equality
- * between central and local metadata. ZIP64, encrypted entries and data descriptors remain blocked.
- */
+/** Strict classic-ZIP validator for the direct STORE runtime. */
 object ZiprafArchiveValidator {
     fun parseStoredEntry(file: File, expectedName: String? = null): ZiprafStoredEntry {
         RandomAccessFile(file, "r").use { randomAccess ->
@@ -446,12 +438,91 @@ data class ZiprafMappedWindow(
     val bytes: ByteBuffer
 )
 
+data class ZiprafRuntimeMetricsSnapshot(
+    val mapOperations: Long,
+    val mapReuseHits: Long,
+    val bytesMapped: Long,
+    val bytesExposed: Long,
+    val crcBytesRead: Long,
+    val mappingSamples: Int,
+    val mapLatencyP50Nanos: Long,
+    val mapLatencyP95Nanos: Long,
+    val mapLatencyP99Nanos: Long
+) {
+    val mappingReuseRatio: Double
+        get() {
+            val total = mapOperations + mapReuseHits
+            return if (total == 0L) 0.0 else mapReuseHits.toDouble() / total.toDouble()
+        }
+}
+
+class ZiprafRuntimeMetrics internal constructor(private val sampleCapacity: Int = 256) {
+    private val mappingSamples = LongArray(sampleCapacity)
+    private var sampleCount = 0
+    private var sampleCursor = 0
+    private var mapOperations = 0L
+    private var mapReuseHits = 0L
+    private var bytesMapped = 0L
+    private var bytesExposed = 0L
+    private var crcBytesRead = 0L
+
+    init {
+        require(sampleCapacity > 0)
+    }
+
+    @Synchronized
+    internal fun recordMapping(bytes: Long, elapsedNanos: Long) {
+        mapOperations += 1
+        bytesMapped = Math.addExact(bytesMapped, bytes)
+        mappingSamples[sampleCursor] = elapsedNanos.coerceAtLeast(0L)
+        sampleCursor = (sampleCursor + 1) % sampleCapacity
+        if (sampleCount < sampleCapacity) sampleCount += 1
+    }
+
+    @Synchronized
+    internal fun recordReuse() {
+        mapReuseHits += 1
+    }
+
+    @Synchronized
+    internal fun recordExposed(bytes: Long) {
+        bytesExposed = Math.addExact(bytesExposed, bytes)
+    }
+
+    @Synchronized
+    internal fun recordCrc(bytes: Long) {
+        crcBytesRead = Math.addExact(crcBytesRead, bytes)
+    }
+
+    @Synchronized
+    fun snapshot(): ZiprafRuntimeMetricsSnapshot {
+        val sorted = mappingSamples.copyOf(sampleCount).sortedArray()
+        return ZiprafRuntimeMetricsSnapshot(
+            mapOperations = mapOperations,
+            mapReuseHits = mapReuseHits,
+            bytesMapped = bytesMapped,
+            bytesExposed = bytesExposed,
+            crcBytesRead = crcBytesRead,
+            mappingSamples = sampleCount,
+            mapLatencyP50Nanos = percentile(sorted, 0.50),
+            mapLatencyP95Nanos = percentile(sorted, 0.95),
+            mapLatencyP99Nanos = percentile(sorted, 0.99)
+        )
+    }
+
+    private fun percentile(sorted: LongArray, quantile: Double): Long {
+        if (sorted.isEmpty()) return 0L
+        val index = (ceil(quantile * sorted.size).toInt() - 1).coerceIn(0, sorted.lastIndex)
+        return sorted[index]
+    }
+}
+
 /**
  * Read-only direct runtime for a validated STORE payload.
  *
- * Each request maps only the requested logical window. The whole payload is never forced into one
- * Int-sized ByteBuffer, so large extents remain addressable while every individual window stays
- * bounded by [ZiprafRuntimePlan].
+ * The runtime maps bounded L2-sized cache spans and slices smaller logical windows from the active
+ * mapping. It never maps the whole payload merely to open the archive, so payloads are not limited
+ * by a single Int-sized ByteBuffer. Absolute mapped handles remain epoch/session scoped.
  */
 class ZiprafDirectRuntime(
     file: File,
@@ -460,6 +531,14 @@ class ZiprafDirectRuntime(
 ) : Closeable {
     private val randomAccess = RandomAccessFile(file, "r")
     private val channel: FileChannel = randomAccess.channel
+    private val cacheLock = Any()
+    private var cachedLogicalOffset = -1L
+    private var cachedLength = 0
+    private var cachedMapping: MappedByteBuffer? = null
+    val metrics = ZiprafRuntimeMetrics()
+
+    val payloadSize: Long
+        get() = extent.payloadSize
 
     init {
         try {
@@ -473,14 +552,6 @@ class ZiprafDirectRuntime(
             randomAccess.close()
             throw failure
         }
-        require(extent.payloadOffset + extent.payloadSize <= Int.MAX_VALUE.toLong()) {
-            "extent exceeds 2GiB addressable limit"
-        }
-        mapping = randomAccess.channel.map(
-            FileChannel.MapMode.READ_ONLY,
-            extent.payloadOffset,
-            extent.payloadSize
-        ).order(ByteOrder.LITTLE_ENDIAN) as MappedByteBuffer
     }
 
     fun window(
@@ -493,43 +564,98 @@ class ZiprafDirectRuntime(
             plan.sizeFor(stage).toLong(),
             extent.payloadSize - logicalOffset
         ).toInt()
-        val absoluteOffset = Math.addExact(extent.payloadOffset, logicalOffset)
-        val mapping = channel.map(FileChannel.MapMode.READ_ONLY, absoluteOffset, length.toLong())
-        mapping.order(ByteOrder.LITTLE_ENDIAN)
 
+        val bytes = synchronized(cacheLock) {
+            val cached = cachedMapping
+            val cachedEnd = if (cachedLogicalOffset < 0) -1L else cachedLogicalOffset + cachedLength
+            val requestedEnd = Math.addExact(logicalOffset, length.toLong())
+            val selected = if (
+                cached != null &&
+                logicalOffset >= cachedLogicalOffset &&
+                requestedEnd <= cachedEnd
+            ) {
+                metrics.recordReuse()
+                cached
+            } else {
+                mapCacheSpan(logicalOffset, length)
+            }
+
+            val relative = Math.toIntExact(logicalOffset - cachedLogicalOffset)
+            val view = selected.asReadOnlyBuffer().order(ByteOrder.LITTLE_ENDIAN)
+            view.position(relative)
+            view.limit(Math.addExact(relative, length))
+            view.slice().asReadOnlyBuffer().order(ByteOrder.LITTLE_ENDIAN)
+        }
+
+        metrics.recordExposed(length.toLong())
         return ZiprafMappedWindow(
             stage = stage,
             logicalOffset = logicalOffset,
             length = length,
             coreLane = plan.lane(routeId),
-            bytes = mapping.asReadOnlyBuffer().order(ByteOrder.LITTLE_ENDIAN)
+            bytes = bytes
         )
+    }
+
+    private fun mapCacheSpan(logicalOffset: Long, requestedLength: Int): MappedByteBuffer {
+        val granule = plan.l2WindowBytes.toLong()
+        val spanStart = logicalOffset / granule * granule
+        val requestedEnd = Math.addExact(logicalOffset, requestedLength.toLong())
+        val nominalEnd = minOf(extent.payloadSize, Math.addExact(spanStart, granule))
+        val spanEnd = maxOf(nominalEnd, requestedEnd)
+        val spanLength = Math.toIntExact(spanEnd - spanStart)
+        val absoluteOffset = Math.addExact(extent.payloadOffset, spanStart)
+
+        val started = System.nanoTime()
+        val mapped = channel.map(FileChannel.MapMode.READ_ONLY, absoluteOffset, spanLength.toLong())
+        val elapsed = System.nanoTime() - started
+        mapped.order(ByteOrder.LITTLE_ENDIAN)
+
+        cachedLogicalOffset = spanStart
+        cachedLength = spanLength
+        cachedMapping = mapped
+        metrics.recordMapping(spanLength.toLong(), elapsed)
+        return mapped
     }
 
     fun verifyCrc32(
         expectedCrc32: Long = extent.expectedCrc32
             ?: throw IllegalStateException("No expected CRC-32 is attached to this extent"),
-        chunkBytes: Int = 64 * 1024
+        chunkBytes: Int = plan.bufferBytes
     ): Boolean {
-        require(expectedCrc32 in 0..ZiprafStoredExtent.UINT32_MAX)
         require(chunkBytes > 0)
+        return verifyCrc32(expectedCrc32, ByteArray(chunkBytes))
+    }
+
+    /** Caller-owned scratch permits repeated verification without reallocating the transfer array. */
+    fun verifyCrc32(expectedCrc32: Long, scratch: ByteArray): Boolean {
+        require(expectedCrc32 in 0..ZiprafStoredExtent.UINT32_MAX)
+        require(scratch.isNotEmpty())
 
         val crc = CRC32()
-        val chunk = ByteBuffer.allocate(chunkBytes)
+        val target = ByteBuffer.wrap(scratch)
         var logicalOffset = 0L
         while (logicalOffset < extent.payloadSize) {
-            chunk.clear()
-            chunk.limit(minOf(chunk.capacity().toLong(), extent.payloadSize - logicalOffset).toInt())
+            target.clear()
+            val count = minOf(scratch.size.toLong(), extent.payloadSize - logicalOffset).toInt()
+            target.limit(count)
             val absoluteOffset = Math.addExact(extent.payloadOffset, logicalOffset)
-            readFullyAt(channel, chunk, absoluteOffset)
-            val count = chunk.position()
-            crc.update(chunk.array(), 0, count)
+            readFullyAt(channel, target, absoluteOffset)
+            crc.update(scratch, 0, count)
             logicalOffset += count
+            metrics.recordCrc(count.toLong())
         }
         return crc.value == expectedCrc32
     }
 
+    fun metricsSnapshot(): ZiprafRuntimeMetricsSnapshot = metrics.snapshot()
+
     override fun close() {
+        synchronized(cacheLock) {
+            cachedMapping = null
+            cachedLogicalOffset = -1L
+            cachedLength = 0
+        }
         randomAccess.close()
     }
 
