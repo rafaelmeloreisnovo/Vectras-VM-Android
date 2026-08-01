@@ -11,20 +11,30 @@ Vectras-VM-Android = runtime Android que valida, instala, resolve, executa e aud
 
 ## Resolução aplicada
 
-O manifesto `tools/ci/external_sources.manifest` passa a apontar o contrato `qemu_rafaelia` para:
+O manifesto `tools/ci/external_sources.manifest` aponta o contrato `qemu_rafaelia` para:
 
 ```text
 https://github.com/rafaelmeloreisnovo/qemu_rafaelia
 branch: master
-pinned_commit_sha: 2346c30c2ba77881c2930add83523ea903b173fe
+pinned_commit_sha: ae94fc60aabb0bbe82abb01038b33ecba790e4ce
 ```
 
-Motivo técnico: o commit pinado contém a correção `fix: link IPC connector in RAFAELIA integration build`, incluindo `connectors/rafaelia-connector-ipc.c` no build de integração RAFAELIA/QEMU.
+O pin anterior `2346c30c2ba77881c2930add83523ea903b173fe` registrava a correção `fix: link IPC connector in RAFAELIA integration build`, mas deixou de estar alcançável pela branch remota e passou a falhar no gate de fonte externa.
+
+O commit substituto foi escolhido por evidência, não apenas por ser o head atual: em `ae94fc60aabb0bbe82abb01038b33ecba790e4ce`, `hw/core/Makefile.integration` continua incluindo explicitamente:
+
+```text
+connectors/rafaelia-connector-ipc.c
+```
+
+Assim, o requisito funcional que justificava o pin antigo permanece presente, enquanto o novo objeto é alcançável pelo `master` e verificável pelo CI.
 
 ## Invariante de integração
 
 ```text
-fonte pinada + artifact verificável + qemu-exec.json + resolver determinístico + preflight bloqueante + ledger runtime
+fonte pinada + requisito IPC observado + artifact verificável
++ qemu-exec.json + resolver determinístico + preflight bloqueante
++ ledger runtime
 ```
 
 Em termos operacionais:
@@ -52,7 +62,7 @@ tools/qemu/import_qemu_rafaelia_artifact.sh --artifact qemu-rafaelia-artifact-<s
 |---|---|---|
 | Código QEMU e RAFAELIA IPC | `qemu_rafaelia` | Mantém core, hub, IPC e binários QEMU customizados. |
 | Build QEMU | `qemu_rafaelia` | Deve gerar artifacts por arquitetura e checksums. |
-| Manifesto de fonte externa | `Vectras-VM-Android` | Pinagem do repo/branch/SHA. |
+| Manifesto de fonte externa | `Vectras-VM-Android` | Pinagem do repo/branch/SHA e requisito funcional observado. |
 | Verificação/importação de artifact | `Vectras-VM-Android` | Scripts em `tools/qemu/*`. |
 | Instalação/descoberta do binário | `Vectras-VM-Android` | `qemu-exec.json`, resolver e preflight. |
 | Execução Android | `Vectras-VM-Android` | `StartVM`, `MainStartVM`, `MainService`, `Terminal`. |
@@ -62,6 +72,7 @@ tools/qemu/import_qemu_rafaelia_artifact.sh --artifact qemu-rafaelia-artifact-<s
 
 - Não copiar o QEMU inteiro para dentro do Vectras.
 - Não depender de `master` flutuante sem SHA pinado.
+- Não trocar um pin apenas porque existe um commit mais novo; o requisito funcional deve ser observado.
 - Não tratar docs antigas como prova de build atual.
 - Não declarar release estável sem CI/artifact/logcat/ledger do commit atual.
 
@@ -79,7 +90,7 @@ Campos mínimos:
 {
   "vm_id": "...",
   "qemu_source_repo": "rafaelmeloreisnovo/qemu_rafaelia",
-  "qemu_source_commit": "2346c30c2ba77881c2930add83523ea903b173fe",
+  "qemu_source_commit": "ae94fc60aabb0bbe82abb01038b33ecba790e4ce",
   "qemu_binary": "...",
   "qemu_sha256": "...",
   "arch": "...",
@@ -95,4 +106,18 @@ Campos mínimos:
 
 ```text
 QEMU compila fora; Vectras executa dentro; o contrato prova a ponte.
+```
+
+## R3 da repinagem
+
+```text
+F_ok:
+  o novo commit é alcançável e mantém o conector IPC no build.
+
+F_gap:
+  artifact QEMU compilado e importado no Android ainda não foi demonstrado.
+
+F_next:
+  executar verify_external_sources, compilar o pipeline Android e exigir
+  qemu-exec.json + BUILD_INFO.json + SHA256SUMS no artifact real.
 ```
