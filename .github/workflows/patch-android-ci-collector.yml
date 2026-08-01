@@ -1,0 +1,60 @@
+name: Patch Android CI Collector
+
+on:
+  pull_request:
+    branches: [master]
+    paths:
+      - '.github/workflows/patch-android-ci-collector.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: patch-android-ci-collector-${{ github.event.pull_request.number }}
+  cancel-in-progress: false
+
+jobs:
+  exact-source-patch:
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+          fetch-depth: 0
+          persist-credentials: true
+
+      - name: Replace malformed Python quoting exactly once
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+
+          path = Path('.github/workflows/android-ci.yml')
+          text = path.read_text(encoding='utf-8')
+          old = "python3 -c 'import json,sys; print(json.load(sys.stdin)[\\\"perf_runs\\\"])'"
+          new = "python3 -c 'import json,sys; print(json.load(sys.stdin)[\"perf_runs\"])'"
+          count = text.count(old)
+          if count != 1:
+              raise SystemExit(f'expected exactly one malformed collector expression, found {count}')
+          path.write_text(text.replace(old, new), encoding='utf-8')
+          PY
+
+          grep -Fq 'print(json.load(sys.stdin)["perf_runs"])' .github/workflows/android-ci.yml
+          if grep -Fq 'print(json.load(sys.stdin)[\"perf_runs\"])' .github/workflows/android-ci.yml; then
+            echo 'malformed expression still present' >&2
+            exit 1
+          fi
+
+      - name: Commit exact workflow repair
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add .github/workflows/android-ci.yml
+          git diff --cached --check
+          git commit -m 'fix(ci): repair artifact collector JSON quoting'
+          git push origin "HEAD:${{ github.head_ref }}"
