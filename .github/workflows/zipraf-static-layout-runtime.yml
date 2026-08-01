@@ -1,0 +1,53 @@
+name: ZIPRAF Static Layout Runtime
+
+on:
+  pull_request:
+    paths:
+      - 'app/src/main/java/com/vectras/vm/vectra/ZiprafDirectRuntime.kt'
+      - 'app/src/main/java/com/vectras/vm/vectra/ZiprafStaticLayout.kt'
+      - 'app/src/main/java/com/vectras/vm/vectra/ZiprafDirectStoreSession.kt'
+      - 'app/src/main/java/com/vectras/vm/vectra/ZiprafDirectEntryPolicy.kt'
+      - 'tools/zipraf/**'
+      - '.github/workflows/zipraf-static-layout-runtime.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: zipraf-static-layout-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  host-kat:
+    name: Host KAT — layout, mapping cache and evidence
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Verify Kotlin toolchain
+        run: |
+          set -euo pipefail
+          command -v kotlinc
+          kotlinc -version
+
+      - name: Execute ZIPRAF host KAT
+        run: bash tools/zipraf/run_zipraf_host_kat.sh
+
+      - name: Upload deterministic receipt
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: zipraf-static-layout-host-kat
+          path: build/zipraf-host-kat/result.json
+          if-no-files-found: error
+          retention-days: 30

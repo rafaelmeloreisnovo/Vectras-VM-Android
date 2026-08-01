@@ -103,10 +103,7 @@ object ZiprafDirectPolicyVerifier {
     private fun computeSha256(session: ZiprafDirectStoreSession): String {
         val digest = MessageDigest.getInstance("SHA-256")
         session.scan(ZiprafMemoryStage.BUFFER) { window ->
-            val bytes = window.bytes
-            val chunk = ByteArray(bytes.remaining())
-            bytes.get(chunk)
-            digest.update(chunk)
+            digest.update(window.bytes)
         }
         return digest.digest().joinToString("") { "%02x".format(it.toInt() and 0xff) }
     }

@@ -20,6 +20,7 @@ mkdir -p "${OUT_DIR}"
 
 kotlinc \
   "${ROOT_DIR}/app/src/main/java/com/vectras/vm/vectra/ZiprafDirectRuntime.kt" \
+  "${ROOT_DIR}/app/src/main/java/com/vectras/vm/vectra/ZiprafStaticLayout.kt" \
   "${ROOT_DIR}/app/src/main/java/com/vectras/vm/vectra/ZiprafDirectStoreSession.kt" \
   "${ROOT_DIR}/app/src/main/java/com/vectras/vm/vectra/ZiprafDirectEntryPolicy.kt" \
   "${ROOT_DIR}/tools/zipraf/ZiprafDirectRuntimeKat.kt" \
