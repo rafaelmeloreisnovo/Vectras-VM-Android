@@ -1,0 +1,70 @@
+name: ZIPRAF Payload Digest U1
+
+on:
+  push:
+    paths:
+      - 'engine/rmr/include/rmr_zipraf_payload_digest.h'
+      - 'engine/rmr/src/rmr_zipraf_payload_digest.c'
+      - 'demo_cli/src/zipraf_payload_digest_selftest.c'
+      - 'tools/zipraf/test_zipraf_payload_digest_u1.sh'
+      - 'engine/rmr/ZIPRAF_PAYLOAD_DIGEST_U1_V1.md'
+      - '.github/workflows/zipraf-payload-digest-u1.yml'
+  pull_request:
+    paths:
+      - 'engine/rmr/include/rmr_zipraf_payload_digest.h'
+      - 'engine/rmr/src/rmr_zipraf_payload_digest.c'
+      - 'demo_cli/src/zipraf_payload_digest_selftest.c'
+      - 'tools/zipraf/test_zipraf_payload_digest_u1.sh'
+      - 'engine/rmr/ZIPRAF_PAYLOAD_DIGEST_U1_V1.md'
+      - '.github/workflows/zipraf-payload-digest-u1.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  payload-digest-u1:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout ZIPRAF producer
+        uses: actions/checkout@v4
+
+      - name: Checkout pinned BLAKE3 provider
+        uses: actions/checkout@v4
+        with:
+          repository: rafaelmeloreisnovo/BLAKE3
+          ref: ff6991d8b13f5b4b16dc311b5acc9c63ae835152
+          path: _deps/blake3
+          persist-credentials: false
+
+      - name: Compile portable providers and run KAT
+        env:
+          BLAKE3_ROOT: _deps/blake3
+          BLAKE3_COMMIT: ff6991d8b13f5b4b16dc311b5acc9c63ae835152
+          ZIPRAF_DIGEST_RECEIPT_PATH: zipraf-payload-digest-u1.json
+        run: sh tools/zipraf/test_zipraf_payload_digest_u1.sh
+
+      - name: Record immutable provider and receipt
+        run: |
+          set -euo pipefail
+          test "$(git -C _deps/blake3 rev-parse HEAD)" = ff6991d8b13f5b4b16dc311b5acc9c63ae835152
+          {
+            echo '## ZIPRAF Payload Digest U1'
+            echo
+            echo '- SHA-256 provider: `RMR_PORTABLE_C`'
+            echo '- BLAKE3 provider: `rafaelmeloreisnovo/BLAKE3@ff6991d8b13f5b4b16dc311b5acc9c63ae835152`'
+            echo "- Receipt SHA-256: \`$(cut -d' ' -f1 zipraf-payload-digest-u1.json.sha256)\`"
+            echo '- Logical DEFLATE digest: `MATERIALIZATION_REQUIRED`'
+            echo '- claim_allowed: `false`'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload payload digest receipt (best effort)
+        continue-on-error: true
+        uses: actions/upload-artifact@v4
+        with:
+          name: zipraf-payload-digest-u1
+          path: |
+            zipraf-payload-digest-u1.json
+            zipraf-payload-digest-u1.json.sha256
+          if-no-files-found: error
+          retention-days: 30
