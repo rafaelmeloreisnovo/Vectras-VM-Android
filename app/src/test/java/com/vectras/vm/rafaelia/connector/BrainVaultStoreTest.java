@@ -4,9 +4,18 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.List;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 public class BrainVaultStoreTest {
 
@@ -34,10 +43,10 @@ public class BrainVaultStoreTest {
     public void testHitCountIncrements() throws Exception {
         BrainVaultStore store = BrainVaultStore.open(tmp.newFolder("vault"));
         store.store("key", "val", "cat");
-        BrainVaultStore.Entry e1 = store.recall("key");
-        assertEquals(1, e1.hits);
-        BrainVaultStore.Entry e2 = store.recall("key");
-        assertEquals(2, e2.hits);
+        BrainVaultStore.Entry first = store.recall("key");
+        assertEquals(1, first.hits);
+        BrainVaultStore.Entry second = store.recall("key");
+        assertEquals(2, second.hits);
     }
 
     @Test
@@ -47,8 +56,11 @@ public class BrainVaultStoreTest {
         for (int i = 0; i < BrainVaultStore.LEARN_THRESHOLD; i++) {
             store.recall("key");
         }
-        BrainVaultStore.Entry e = store.recall("key");
-        assertTrue("should be learned after " + BrainVaultStore.LEARN_THRESHOLD + " hits", e.learned);
+        BrainVaultStore.Entry entry = store.recall("key");
+        assertTrue(
+                "should be learned after " + BrainVaultStore.LEARN_THRESHOLD + " hits",
+                entry.learned
+        );
     }
 
     @Test
@@ -59,7 +71,9 @@ public class BrainVaultStoreTest {
         store.store("c", "3", "catB");
         List<BrainVaultStore.Entry> results = store.queryByCategory("catA");
         assertEquals(2, results.size());
-        for (BrainVaultStore.Entry e : results) assertEquals("catA", e.category);
+        for (BrainVaultStore.Entry entry : results) {
+            assertEquals("catA", entry.category);
+        }
     }
 
     @Test
@@ -67,8 +81,9 @@ public class BrainVaultStoreTest {
         BrainVaultStore store = BrainVaultStore.open(tmp.newFolder("vault"));
         store.store("x", "vx", "cat");
         store.store("y", "vy", "cat");
-        // Only recall "x" enough to learn it
-        for (int i = 0; i <= BrainVaultStore.LEARN_THRESHOLD; i++) store.recall("x");
+        for (int i = 0; i <= BrainVaultStore.LEARN_THRESHOLD; i++) {
+            store.recall("x");
+        }
         List<BrainVaultStore.Entry> learned = store.queryLearned();
         assertEquals(1, learned.size());
         assertEquals("x", learned.get(0).key);
@@ -78,9 +93,9 @@ public class BrainVaultStoreTest {
     public void testCrcIsComputedOnEntry() throws Exception {
         BrainVaultStore store = BrainVaultStore.open(tmp.newFolder("vault"));
         store.store("k", "v", "c");
-        BrainVaultStore.Entry e = store.recall("k");
-        assertNotNull(e);
-        assertTrue(e.crc32c != 0);
+        BrainVaultStore.Entry entry = store.recall("k");
+        assertNotNull(entry);
+        assertTrue(entry.crc32c != 0);
     }
 
     @Test
@@ -90,5 +105,54 @@ public class BrainVaultStoreTest {
         store.store("a", "1", "c");
         store.store("b", "2", "c");
         assertEquals(2, store.totalEntries());
+    }
+
+    @Test
+    public void testAppendOnlyLogReplaysCurrentProjection() throws Exception {
+        File directory = tmp.newFolder("vault-replay");
+        BrainVaultStore first = BrainVaultStore.open(directory);
+        first.store("persisted-key", "persisted-value", "persisted-category");
+
+        BrainVaultStore reopened = BrainVaultStore.open(directory);
+        assertEquals(1, reopened.totalEntries());
+        BrainVaultStore.Entry entry = reopened.recall("persisted-key");
+        assertNotNull(entry);
+        assertEquals("persisted-value", entry.value);
+        assertEquals(1, entry.hits);
+    }
+
+    @Test
+    public void testReplayRejectsTamperedRecordByCrc() throws Exception {
+        File directory = tmp.newFolder("vault-tampered");
+        BrainVaultStore store = BrainVaultStore.open(directory);
+        store.store("integrity-key", "original-value", "integrity-category");
+
+        File warmFile = new File(directory, "brainvault.jsonl");
+        String original = Files.readString(warmFile.toPath(), StandardCharsets.UTF_8);
+        String tampered = original.replace("original-value", "tampered-value");
+        assertFalse("test fixture must alter the persisted bytes", original.equals(tampered));
+        Files.writeString(warmFile.toPath(), tampered, StandardCharsets.UTF_8);
+
+        BrainVaultStore reopened = BrainVaultStore.open(directory);
+        assertEquals(0, reopened.totalEntries());
+        assertNull(reopened.recall("integrity-key"));
+    }
+
+    @Test
+    public void testFailedAppendDoesNotMutateMemoryProjection() throws Exception {
+        File directory = tmp.newFolder("vault-io-failure");
+        BrainVaultStore store = BrainVaultStore.open(directory);
+        File warmPathAsDirectory = new File(directory, "brainvault.jsonl");
+        assertTrue(warmPathAsDirectory.mkdir());
+
+        try {
+            store.store("must-not-appear", "value", "category");
+            fail("store should fail when WARM path is a directory");
+        } catch (IOException expected) {
+            assertTrue(expected.getMessage() != null && !expected.getMessage().isBlank());
+        }
+
+        assertEquals(0, store.totalEntries());
+        assertNull(store.recall("must-not-appear"));
     }
 }
