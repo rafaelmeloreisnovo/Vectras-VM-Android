@@ -4,7 +4,7 @@
 
 #include <stdint.h>
 
-#define RMR_FNV1A64_OFFSET 1469598103934665603ULL
+#define RMR_FNV1A64_OFFSET 14695981039346656037ULL
 #define RMR_FNV1A64_PRIME 1099511628211ULL
 
 static int rmr_is_power_of_two_u32(uint32_t value) {
