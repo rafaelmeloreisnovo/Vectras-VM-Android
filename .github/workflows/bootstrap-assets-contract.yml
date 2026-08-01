@@ -1,0 +1,77 @@
+name: Bootstrap Assets Contract
+
+on:
+  pull_request:
+    branches: [master]
+    paths:
+      - 'tools/ci/bootstrap-assets.v1.json'
+      - 'tools/ci/materialize_bootstrap_assets.py'
+      - 'tools/ci/external_sources.manifest'
+      - 'tools/verify_bootstrap_assets.py'
+      - 'tools/ci/verify_bootstrap_contract.sh'
+      - 'evidence/bootstrap/**'
+      - '.github/workflows/bootstrap-assets-contract.yml'
+  push:
+    branches: [master]
+    paths:
+      - 'tools/ci/bootstrap-assets.v1.json'
+      - 'tools/ci/materialize_bootstrap_assets.py'
+      - 'tools/ci/external_sources.manifest'
+      - 'evidence/bootstrap/**'
+      - '.github/workflows/bootstrap-assets-contract.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: bootstrap-assets-contract-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  pinned-materialization:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate manifest and external-source coherence
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tools/ci/materialize_bootstrap_assets.py --validate-manifest-only
+          bash tools/ci/verify_external_sources.sh --check-remote
+
+      - name: Materialize four bootstrap TARs from exact commit
+        run: python3 tools/ci/materialize_bootstrap_assets.py
+
+      - name: Gate receipt and frozen SHA-256 enforcement
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+
+          receipt_path = Path('app/build/reports/bootstrap/bootstrap-materialization.json')
+          receipt = json.loads(receipt_path.read_text(encoding='utf-8'))
+          assets = receipt.get('assets', [])
+          assert receipt['source']['commit'] == 'b7f7f681147d7502bc63bd03ee02d95f4dbe8ee2'
+          assert receipt['source']['commit_verified'] is True
+          assert receipt['all_assets_valid_tar'] is True
+          assert receipt['all_paths_safe'] is True
+          assert len(assets) == 4
+          assert {asset['abi'] for asset in assets} == {'arm64-v8a', 'armeabi-v7a', 'x86', 'x86_64'}
+          assert all(asset['sha256_enforced'] is True for asset in assets)
+          assert all(asset['sha256'] == asset['expected_sha256'] for asset in assets)
+          assert all(asset['entries'] > 0 and asset['size_bytes'] > 0 for asset in assets)
+          print('bootstrap receipt gate: PASS')
+          PY
+
+      - name: Upload bootstrap provenance receipt
+        uses: actions/upload-artifact@v4
+        with:
+          name: bootstrap-assets-receipt-${{ github.sha }}
+          path: app/build/reports/bootstrap/bootstrap-materialization.json
+          if-no-files-found: error
+          retention-days: 30
