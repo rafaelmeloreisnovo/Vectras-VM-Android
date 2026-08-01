@@ -454,7 +454,7 @@ jobs:
         run: |
           set -euo pipefail
           lane="${{ needs.resolve.outputs.lane }}"
-          perf_runs="$(python3 tools/perf/resolve_contract.py --require-consistency | python3 -c 'import json,sys; print(json.load(sys.stdin)[\"perf_runs\"])')"
+          perf_runs="$(python3 tools/perf/resolve_contract.py --require-consistency | python3 -c 'import json,sys; print(json.load(sys.stdin)["perf_runs"])')"
           rm -rf ci-artifacts/android-logs ci-artifacts/android-artifacts ci-artifacts/perf-results
           mkdir -p ci-artifacts/android-logs ci-artifacts/android-artifacts ci-artifacts/perf-results
 
