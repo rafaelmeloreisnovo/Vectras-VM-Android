@@ -3,6 +3,9 @@ package com.vectras.vm.rafaelia.connector;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
+import org.junit.runner.RunWith;
+import org.robolectric.RobolectricTestRunner;
+import org.robolectric.annotation.Config;
 
 import java.io.File;
 import java.io.IOException;
@@ -17,6 +20,8 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+@RunWith(RobolectricTestRunner.class)
+@Config(sdk = 28)
 public class BrainVaultStoreTest {
 
     @Rule
@@ -57,10 +62,7 @@ public class BrainVaultStoreTest {
             store.recall("key");
         }
         BrainVaultStore.Entry entry = store.recall("key");
-        assertTrue(
-                "should be learned after " + BrainVaultStore.LEARN_THRESHOLD + " hits",
-                entry.learned
-        );
+        assertTrue("should be learned after " + BrainVaultStore.LEARN_THRESHOLD + " hits", entry.learned);
     }
 
     @Test
@@ -112,7 +114,6 @@ public class BrainVaultStoreTest {
         File directory = tmp.newFolder("vault-replay");
         BrainVaultStore first = BrainVaultStore.open(directory);
         first.store("persisted-key", "persisted-value", "persisted-category");
-
         BrainVaultStore reopened = BrainVaultStore.open(directory);
         assertEquals(1, reopened.totalEntries());
         BrainVaultStore.Entry entry = reopened.recall("persisted-key");
@@ -126,13 +127,11 @@ public class BrainVaultStoreTest {
         File directory = tmp.newFolder("vault-tampered");
         BrainVaultStore store = BrainVaultStore.open(directory);
         store.store("integrity-key", "original-value", "integrity-category");
-
         File warmFile = new File(directory, "brainvault.jsonl");
         String original = Files.readString(warmFile.toPath(), StandardCharsets.UTF_8);
         String tampered = original.replace("original-value", "tampered-value");
         assertFalse("test fixture must alter the persisted bytes", original.equals(tampered));
         Files.writeString(warmFile.toPath(), tampered, StandardCharsets.UTF_8);
-
         BrainVaultStore reopened = BrainVaultStore.open(directory);
         assertEquals(0, reopened.totalEntries());
         assertNull(reopened.recall("integrity-key"));
@@ -144,14 +143,12 @@ public class BrainVaultStoreTest {
         BrainVaultStore store = BrainVaultStore.open(directory);
         File warmPathAsDirectory = new File(directory, "brainvault.jsonl");
         assertTrue(warmPathAsDirectory.mkdir());
-
         try {
             store.store("must-not-appear", "value", "category");
             fail("store should fail when WARM path is a directory");
         } catch (IOException expected) {
             assertTrue(expected.getMessage() != null && !expected.getMessage().isBlank());
         }
-
         assertEquals(0, store.totalEntries());
         assertNull(store.recall("must-not-appear"));
     }
