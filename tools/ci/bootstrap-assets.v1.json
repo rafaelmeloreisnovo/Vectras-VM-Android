@@ -1,0 +1,41 @@
+{
+  "schema_version": "1.0.0",
+  "contract": "pinned_git_sparse_materialization",
+  "source": {
+    "external_manifest_name": "bootstrap_assets_source",
+    "repository": "ednadefatima1959-max/Vectra",
+    "url": "https://github.com/ednadefatima1959-max/Vectra",
+    "branch": "master",
+    "commit": "b7f7f681147d7502bc63bd03ee02d95f4dbe8ee2"
+  },
+  "output_directory": "app/build/generated/bootstrapAssets/bootstrap",
+  "receipt": "app/build/reports/bootstrap/bootstrap-materialization.json",
+  "assets": [
+    {
+      "abi": "arm64-v8a",
+      "source_path": "app/src/main/assets/bootstrap/arm64-v8a.tar",
+      "output_name": "arm64-v8a.tar",
+      "expected_sha256": "TOKEN_VAZIO"
+    },
+    {
+      "abi": "armeabi-v7a",
+      "source_path": "app/src/main/assets/bootstrap/armeabi-v7a.tar",
+      "output_name": "armeabi-v7a.tar",
+      "expected_sha256": "TOKEN_VAZIO"
+    },
+    {
+      "abi": "x86",
+      "source_path": "app/src/main/assets/bootstrap/x86.tar",
+      "output_name": "x86.tar",
+      "expected_sha256": "TOKEN_VAZIO"
+    },
+    {
+      "abi": "x86_64",
+      "source_path": "app/src/main/assets/bootstrap/x86_64.tar",
+      "output_name": "x86_64.tar",
+      "expected_sha256": "TOKEN_VAZIO"
+    }
+  ],
+  "claim_allowed": false,
+  "next_gate": "materialize_from_exact_commit_then_record_sha256"
+}
