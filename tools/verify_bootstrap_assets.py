@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
-"""Valida presença e integridade básica dos bootstraps versionados no app.
-Pode ser executado diretamente (./tools/verify_bootstrap_assets.py) ou via python3.
+"""Valida presença, proveniência operacional e integridade dos bootstraps.
+
+Os TARs podem estar versionados no source tree ou materializados no diretório de
+assets gerados a partir de commit Git pinado. Quando as duas cópias existem, elas
+precisam ser byte-identical por SHA-256.
 """
 
 from __future__ import annotations
@@ -10,11 +13,12 @@ import hashlib
 import os
 import sys
 import tarfile
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 
 ROOT = Path(__file__).resolve().parents[1]
-BOOTSTRAP_DIR = ROOT / "app" / "src" / "main" / "assets" / "bootstrap"
+SOURCE_BOOTSTRAP_DIR = ROOT / "app" / "src" / "main" / "assets" / "bootstrap"
 GENERATED_BOOTSTRAP_DIR = ROOT / "app" / "build" / "generated" / "bootstrapAssets" / "bootstrap"
+BOOTSTRAP_DIRS = (SOURCE_BOOTSTRAP_DIR, GENERATED_BOOTSTRAP_DIR)
 REQUIRED_BOOTSTRAPS = [
     "arm64-v8a.tar",
     "armeabi-v7a.tar",
@@ -30,25 +34,48 @@ STRICT_ENV_VAR = "VERIFY_BOOTSTRAP_STRICT_GENERATED_ASSETS"
 CI_ENV_VARS = ("CI", "GITHUB_ACTIONS", "GITLAB_CI", "BUILDKITE")
 
 
-def sha256_prefix(path: Path, limit_bytes: int = 1024 * 1024) -> str:
+def sha256_file(path: Path) -> str:
     digest = hashlib.sha256()
     with path.open("rb") as handle:
-        remaining = limit_bytes
-        while remaining > 0:
-            chunk = handle.read(min(65536, remaining))
-            if not chunk:
-                break
+        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
             digest.update(chunk)
-            remaining -= len(chunk)
-    return digest.hexdigest()[:16]
+    return digest.hexdigest()
+
+
+def safe_tar_member(name: str) -> bool:
+    pure = PurePosixPath(name)
+    return not pure.is_absolute() and ".." not in pure.parts
 
 
 def validate_tar(path: Path) -> tuple[int, str]:
-    with tarfile.open(path, "r") as archive:
+    with tarfile.open(path, "r:*") as archive:
         members = archive.getmembers()
         if not members:
             raise RuntimeError("arquivo tar vazio")
+        unsafe = [member.name for member in members if not safe_tar_member(member.name)]
+        if unsafe:
+            raise RuntimeError(f"caminhos inseguros: {unsafe[:5]}")
         return len(members), members[0].name
+
+
+def resolve_bootstrap(name: str) -> tuple[Path | None, list[str]]:
+    candidates = [directory / name for directory in BOOTSTRAP_DIRS]
+    existing = [candidate for candidate in candidates if candidate.is_file()]
+    if not existing:
+        rendered = ", ".join(str(candidate.relative_to(ROOT)) for candidate in candidates)
+        return None, [f"ausente: {name}; esperado em {rendered}"]
+
+    if len(existing) > 1:
+        hashes = {sha256_file(candidate) for candidate in existing}
+        if len(hashes) != 1:
+            rendered = ", ".join(
+                f"{candidate.relative_to(ROOT)}={sha256_file(candidate)}" for candidate in existing
+            )
+            return None, [f"cópias conflitantes de {name}: {rendered}"]
+
+    generated = GENERATED_BOOTSTRAP_DIR / name
+    selected = generated if generated in existing else existing[0]
+    return selected, []
 
 
 def is_termux_enabled() -> bool:
@@ -70,15 +97,13 @@ def env_flag_enabled(name: str) -> bool:
 
 def parse_args(argv: list[str]) -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description=(
-            "Valida o contrato oficial de bootstrap (TAR assets + loader.apk obrigatório no caminho TAR)."
-        )
+        description="Valida o contrato oficial de bootstrap (TAR assets + loader.apk)."
     )
     parser.add_argument(
         "--strict-generated-assets",
         action="store_true",
         help=(
-            "Exige contrato oficial completo no caminho gerado (incluindo bootstrap/loader.apk obrigatório) mesmo fora de CI. "
+            "Exige loader.apk no caminho gerado/versionado mesmo fora de CI. "
             f"Também pode ser ativado por {STRICT_ENV_VAR}=1."
         ),
     )
@@ -105,18 +130,14 @@ def should_require_generated_loader(strict_generated_assets: bool) -> tuple[bool
 def main(argv: list[str] | None = None) -> int:
     args = parse_args(argv or [])
     strict_generated_assets = args.strict_generated_assets or env_flag_enabled(STRICT_ENV_VAR)
-    print("[verify_bootstrap_assets] Validando bootstraps do repositório...")
-
-    if not BOOTSTRAP_DIR.exists():
-        print(f"[verify_bootstrap_assets] FALHA: diretório ausente: {BOOTSTRAP_DIR.relative_to(ROOT)}")
-        return 1
+    print("[verify_bootstrap_assets] Validando bootstraps do repositório/gerados...")
 
     failures: list[str] = []
 
     for name in REQUIRED_BOOTSTRAPS:
-        path = BOOTSTRAP_DIR / name
-        if not path.exists():
-            failures.append(f"ausente: {path.relative_to(ROOT)}")
+        path, resolution_failures = resolve_bootstrap(name)
+        failures.extend(resolution_failures)
+        if path is None:
             continue
 
         size = path.stat().st_size
@@ -126,22 +147,18 @@ def main(argv: list[str] | None = None) -> int:
 
         try:
             member_count, first_member = validate_tar(path)
-        except (tarfile.TarError, RuntimeError) as exc:
+        except (tarfile.TarError, RuntimeError, OSError) as exc:
             failures.append(f"inválido: {path.relative_to(ROOT)} ({exc})")
             continue
 
         print(
             f"  - OK {path.relative_to(ROOT)} size={size} entries={member_count} "
-            f"sha256_prefix={sha256_prefix(path)} first_entry={first_member}"
+            f"sha256={sha256_file(path)} first_entry={first_member}"
         )
 
     if is_termux_enabled():
-        # Origem esperada do loader.apk:
-        # - app/build.gradle task syncShellLoaderBootstrap (linhas ~161-167),
-        #   que copia o APK de :shell-loader para app/build/generated/bootstrapAssets/bootstrap/loader.apk.
-        # - fallback versionado em app/src/main/assets/bootstrap/loader.apk, quando presente no repositório.
         loader_candidates = [
-            BOOTSTRAP_DIR / LOADER_APK_NAME,
+            SOURCE_BOOTSTRAP_DIR / LOADER_APK_NAME,
             GENERATED_BOOTSTRAP_DIR / LOADER_APK_NAME,
         ]
         loader_path = next((candidate for candidate in loader_candidates if candidate.exists()), None)
@@ -149,9 +166,9 @@ def main(argv: list[str] | None = None) -> int:
             require_loader, reason = should_require_generated_loader(strict_generated_assets)
             message = (
                 "CONTRATO VIOLADO (Termux habilitado): loader.apk obrigatório no caminho TAR; esperado em "
-                f"{(BOOTSTRAP_DIR / LOADER_APK_NAME).relative_to(ROOT)} "
+                f"{(SOURCE_BOOTSTRAP_DIR / LOADER_APK_NAME).relative_to(ROOT)} "
                 f"ou {(GENERATED_BOOTSTRAP_DIR / LOADER_APK_NAME).relative_to(ROOT)}; "
-                "a cópia para gerados ocorre na task app:syncShellLoaderBootstrap e é obrigatória para cumprir o contrato oficial TAR"
+                "a cópia para gerados ocorre na task app:syncShellLoaderBootstrap"
             )
             if require_loader:
                 failures.append(f"{message} (falha fatal: {reason})")
@@ -160,7 +177,9 @@ def main(argv: list[str] | None = None) -> int:
         else:
             loader_size = loader_path.stat().st_size
             if loader_size <= 0:
-                failures.append(f"CONTRATO VIOLADO (Termux habilitado): loader.apk vazio em {loader_path.relative_to(ROOT)}")
+                failures.append(
+                    f"CONTRATO VIOLADO (Termux habilitado): loader.apk vazio em {loader_path.relative_to(ROOT)}"
+                )
             else:
                 print(f"  - OK {loader_path.relative_to(ROOT)} size={loader_size} (Termux habilitado)")
 
@@ -170,7 +189,7 @@ def main(argv: list[str] | None = None) -> int:
             print(f"  - {failure}")
         return 1
 
-    print("\n[verify_bootstrap_assets] OK: bootstraps essenciais estão versionados e íntegros.")
+    print("\n[verify_bootstrap_assets] OK: TARs e loader atendem ao contrato observável.")
     return 0
 
 
