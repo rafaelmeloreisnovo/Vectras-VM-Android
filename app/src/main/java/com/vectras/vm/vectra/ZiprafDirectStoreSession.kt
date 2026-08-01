@@ -71,6 +71,8 @@ class ZiprafDirectStoreSession private constructor(
         )
     }
 
+    fun metricsSnapshot(): ZiprafRuntimeMetricsSnapshot = runtime.metricsSnapshot()
+
     override fun close() {
         runtime.close()
     }
