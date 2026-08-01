@@ -1,0 +1,71 @@
+name: Bootstrap Assets Provenance V1
+
+on:
+  push:
+    paths:
+      - 'configs/bootstrap_assets.production.v1.json'
+      - 'configs/bootstrap_assets.production.v1.schema.json'
+      - 'tools/bootstrap/validate_bootstrap_assets_manifest.py'
+      - 'tools/bootstrap/materialize_bootstrap_assets.py'
+      - 'tests/test_bootstrap_assets_provenance.py'
+      - 'docs/BOOTSTRAP_ASSET_PROVENANCE_RECOVERY_V1.md'
+      - '.github/workflows/bootstrap-assets-provenance-v1.yml'
+  pull_request:
+    paths:
+      - 'configs/bootstrap_assets.production.v1.json'
+      - 'configs/bootstrap_assets.production.v1.schema.json'
+      - 'tools/bootstrap/validate_bootstrap_assets_manifest.py'
+      - 'tools/bootstrap/materialize_bootstrap_assets.py'
+      - 'tests/test_bootstrap_assets_provenance.py'
+      - 'docs/BOOTSTRAP_ASSET_PROVENANCE_RECOVERY_V1.md'
+      - '.github/workflows/bootstrap-assets-provenance-v1.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  provenance-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate canonical blocked production state
+        run: |
+          mkdir -p build/bootstrap-assets-provenance
+          python3 tools/bootstrap/validate_bootstrap_assets_manifest.py \
+            --manifest configs/bootstrap_assets.production.v1.json \
+            --expect blocked \
+            --write-report build/bootstrap-assets-provenance/blocked-report.json
+          python3 -m json.tool build/bootstrap-assets-provenance/blocked-report.json >/dev/null
+
+      - name: Run positive and adversarial provenance tests
+        run: python3 -m unittest tests.test_bootstrap_assets_provenance -v
+
+      - name: Hash blocked-state evidence
+        run: |
+          set -euo pipefail
+          sha256sum \
+            configs/bootstrap_assets.production.v1.json \
+            build/bootstrap-assets-provenance/blocked-report.json \
+            | tee build/bootstrap-assets-provenance/SHA256SUMS
+          {
+            echo '## Bootstrap Assets Provenance V1'
+            echo
+            echo '- Production state: `BETA_BLOCKED_MISSING_BOOTSTRAP_ASSETS`'
+            echo '- Required architecture TARs: `4`'
+            echo '- Canonical blocked-state validation: `PASS`'
+            echo '- Synthetic verified/tamper/path-traversal KATs: `PASS`'
+            echo '- Android runtime: `TOKEN_VAZIO`'
+            echo '- claim_allowed: `false`'
+            echo '- release_allowed: `false`'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload provenance reports (best effort)
+        continue-on-error: true
+        uses: actions/upload-artifact@v4
+        with:
+          name: bootstrap-assets-provenance-v1
+          path: build/bootstrap-assets-provenance/
+          if-no-files-found: error
+          retention-days: 30
