@@ -1,0 +1,101 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://rafaelia.invalid/schemas/bootstrap-assets.production.v1.json",
+  "title": "RAFAELIA production bootstrap assets",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "observed_at",
+    "state",
+    "claim_allowed",
+    "release_allowed",
+    "android_runtime_verified",
+    "source_directory",
+    "generated_directory",
+    "loader",
+    "required_assets",
+    "promotion_requirements",
+    "claims"
+  ],
+  "properties": {
+    "schema_version": {"const": "bootstrap-assets.production.v1"},
+    "observed_at": {"type": "string", "format": "date"},
+    "state": {
+      "enum": [
+        "BETA_BLOCKED_MISSING_BOOTSTRAP_ASSETS",
+        "BOOTSTRAP_ASSETS_VERIFIED_NOT_DEVICE_TESTED",
+        "DEVICE_BOOTSTRAP_VERIFIED_LIMITED"
+      ]
+    },
+    "claim_allowed": {"type": "boolean"},
+    "release_allowed": {"type": "boolean"},
+    "android_runtime_verified": {"type": "boolean"},
+    "source_directory": {"const": "app/src/main/assets/bootstrap"},
+    "generated_directory": {"const": "app/build/generated/bootstrapAssets/bootstrap"},
+    "loader": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["filename", "producer", "state", "substitutes_for_architecture_tar"],
+      "properties": {
+        "filename": {"const": "loader.apk"},
+        "producer": {"const": ":shell-loader:assembleDebug"},
+        "state": {"enum": ["TOKEN_VAZIO", "GENERATED_IN_CI", "VERIFIED"]},
+        "substitutes_for_architecture_tar": {"const": false}
+      }
+    },
+    "required_assets": {
+      "type": "array",
+      "minItems": 4,
+      "maxItems": 4,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "abi",
+          "filename",
+          "state",
+          "source_uri",
+          "source_ref",
+          "license_or_provenance",
+          "sha256",
+          "size_bytes"
+        ],
+        "properties": {
+          "abi": {"enum": ["arm64-v8a", "armeabi-v7a", "x86", "x86_64"]},
+          "filename": {"type": "string", "pattern": "^[A-Za-z0-9_.-]+\\.tar$"},
+          "state": {"enum": ["MISSING", "SUPPLIED_UNVERIFIED", "VERIFIED"]},
+          "source_uri": {"type": "string", "minLength": 1},
+          "source_ref": {"type": "string", "minLength": 1},
+          "license_or_provenance": {"type": "string", "minLength": 1},
+          "sha256": {"type": "string", "minLength": 1},
+          "size_bytes": {"type": ["integer", "null"], "minimum": 1}
+        }
+      }
+    },
+    "promotion_requirements": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"type": "string", "minLength": 1},
+      "uniqueItems": true
+    },
+    "claims": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "official_bootstrap_assets_present",
+        "beta_installable",
+        "apk_runtime_verified",
+        "device_bootstrap_verified",
+        "claim_allowed"
+      ],
+      "properties": {
+        "official_bootstrap_assets_present": {"type": "boolean"},
+        "beta_installable": {"type": "boolean"},
+        "apk_runtime_verified": {"type": "boolean"},
+        "device_bootstrap_verified": {"type": "boolean"},
+        "claim_allowed": {"type": "boolean"}
+      }
+    }
+  }
+}

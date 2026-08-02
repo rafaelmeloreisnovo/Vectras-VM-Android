@@ -1,0 +1,79 @@
+{
+  "schema_version": "bootstrap-assets.production.v1",
+  "observed_at": "2026-08-01",
+  "state": "BETA_BLOCKED_MISSING_BOOTSTRAP_ASSETS",
+  "claim_allowed": false,
+  "release_allowed": false,
+  "android_runtime_verified": false,
+  "source_directory": "app/src/main/assets/bootstrap",
+  "generated_directory": "app/build/generated/bootstrapAssets/bootstrap",
+  "loader": {
+    "filename": "loader.apk",
+    "producer": ":shell-loader:assembleDebug",
+    "state": "GENERATED_IN_CI",
+    "substitutes_for_architecture_tar": false
+  },
+  "required_assets": [
+    {
+      "abi": "arm64-v8a",
+      "filename": "arm64-v8a.tar",
+      "state": "MISSING",
+      "source_uri": "TOKEN_VAZIO_SOURCE_URI",
+      "source_ref": "TOKEN_VAZIO_SOURCE_REF",
+      "license_or_provenance": "TOKEN_VAZIO_LICENSE_OR_PROVENANCE",
+      "sha256": "TOKEN_VAZIO_SHA256",
+      "size_bytes": null
+    },
+    {
+      "abi": "armeabi-v7a",
+      "filename": "armeabi-v7a.tar",
+      "state": "MISSING",
+      "source_uri": "TOKEN_VAZIO_SOURCE_URI",
+      "source_ref": "TOKEN_VAZIO_SOURCE_REF",
+      "license_or_provenance": "TOKEN_VAZIO_LICENSE_OR_PROVENANCE",
+      "sha256": "TOKEN_VAZIO_SHA256",
+      "size_bytes": null
+    },
+    {
+      "abi": "x86",
+      "filename": "x86.tar",
+      "state": "MISSING",
+      "source_uri": "TOKEN_VAZIO_SOURCE_URI",
+      "source_ref": "TOKEN_VAZIO_SOURCE_REF",
+      "license_or_provenance": "TOKEN_VAZIO_LICENSE_OR_PROVENANCE",
+      "sha256": "TOKEN_VAZIO_SHA256",
+      "size_bytes": null
+    },
+    {
+      "abi": "x86_64",
+      "filename": "x86_64.tar",
+      "state": "MISSING",
+      "source_uri": "TOKEN_VAZIO_SOURCE_URI",
+      "source_ref": "TOKEN_VAZIO_SOURCE_REF",
+      "license_or_provenance": "TOKEN_VAZIO_LICENSE_OR_PROVENANCE",
+      "sha256": "TOKEN_VAZIO_SHA256",
+      "size_bytes": null
+    }
+  ],
+  "promotion_requirements": [
+    "ALL_FOUR_FILES_PRESENT",
+    "EXACT_FILENAME_MATCH",
+    "NONEMPTY_SOURCE_URI",
+    "IMMUTABLE_SOURCE_REF",
+    "LICENSE_OR_PROVENANCE_RECORDED",
+    "SHA256_MATCH",
+    "SIZE_MATCH",
+    "TAR_READABLE",
+    "NO_PATH_TRAVERSAL",
+    "EXPECTED_ABI_MARKER_OR_LAYOUT",
+    "ANDROID_BUILD_GATE_PASS",
+    "DEVICE_BOOTSTRAP_RECEIPT"
+  ],
+  "claims": {
+    "official_bootstrap_assets_present": false,
+    "beta_installable": false,
+    "apk_runtime_verified": false,
+    "device_bootstrap_verified": false,
+    "claim_allowed": false
+  }
+}
