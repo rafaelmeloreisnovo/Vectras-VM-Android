@@ -12,7 +12,7 @@ permissions:
 jobs:
   shell-loader-smoke:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 30
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -31,6 +31,12 @@ jobs:
         with:
           distribution: temurin
           java-version: ${{ steps.java.outputs.version }}
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install pinned Android native toolchain
+        run: bash tools/ci/install_android_native_toolchain.sh
 
       - name: Build shell-loader (debug, fast-path)
         shell: bash

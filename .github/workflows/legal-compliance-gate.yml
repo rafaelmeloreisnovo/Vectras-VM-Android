@@ -99,6 +99,7 @@ jobs:
 
       - name: Upload C06 provenance receipt
         if: always()
+        continue-on-error: true
         uses: actions/upload-artifact@v4
         with:
           name: c06-provenance-closure-${{ github.sha }}

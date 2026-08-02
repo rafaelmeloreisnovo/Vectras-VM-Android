@@ -21,12 +21,24 @@ jobs:
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Install host build deps
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends build-essential cmake ninja-build make pkg-config python3 ripgrep
 
       - name: Block sensitive artifacts and credential patterns
         run: |
           set -euo pipefail
           if [ "${{ github.event_name }}" = "pull_request" ]; then
-            export SENSITIVE_CHECK_RANGE="${{ github.event.pull_request.base.sha }}..${{ github.event.pull_request.head.sha }}"
+            base_sha="${{ github.event.pull_request.base.sha }}"
+            head_sha="${{ github.event.pull_request.head.sha }}"
+            git cat-file -e "${base_sha}^{commit}"
+            git cat-file -e "${head_sha}^{commit}"
+            export SENSITIVE_CHECK_RANGE="${base_sha}..${head_sha}"
           elif git rev-parse --verify HEAD~1 >/dev/null 2>&1; then
             export SENSITIVE_CHECK_RANGE="HEAD~1..HEAD"
           fi
@@ -47,11 +59,6 @@ jobs:
       - name: Validate docs reference commit consistency
         run: bash tools/check_docs_reference_commit.sh
 
-      - name: Install host build deps
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y --no-install-recommends build-essential cmake ninja-build make pkg-config python3 ripgrep
-
       - name: Validate incoming ingestion map contract
         run: ./tools/ci/check_incoming_ingestion.py
 
@@ -61,6 +68,8 @@ jobs:
             --root . \
             --batch configs/vectra_artifact_promotion_batch_001.json \
             --output reports/vectra-artifact-promotion/batch-001.json
+          python3 -m json.tool reports/vectra-artifact-promotion/batch-001.json >/dev/null
+          sha256sum reports/vectra-artifact-promotion/batch-001.json | tee reports/vectra-artifact-promotion/batch-001.sha256
 
       - name: Index compilerlowFala seeds without executing bodies
         run: |
@@ -137,28 +146,61 @@ jobs:
       - name: Verify link contracts (CMake)
         run: cmake --build build-cmake --target verify_contracts
 
-      - name: Collect host artifacts
+      - name: Collect and hash host evidence
         if: always()
         run: |
-          mkdir -p artifacts/bin bench-results
+          set -euo pipefail
+          mkdir -p artifacts/bin bench-results reports/host-ci
           find bench/results -type f \( -name '*.csv' -o -name '*.log' -o -name '*.txt' -o -name '*.json' \) -exec cp {} bench-results/ \; 2>/dev/null || true
-          find . -type f -executable -not -path './build-cmake/*' -not -path './.git/*' | head -20 | xargs -r -I {} cp {} artifacts/bin/
+          python3 - <<'PY'
+          from pathlib import Path
+          import shutil
+          out = Path('artifacts/bin')
+          count = 0
+          for path in Path('.').rglob('*'):
+              if count >= 20:
+                  break
+              if not path.is_file() or '.git' in path.parts or 'build-cmake' in path.parts:
+                  continue
+              try:
+                  executable = bool(path.stat().st_mode & 0o111)
+              except OSError:
+                  continue
+              if executable:
+                  shutil.copy2(path, out / path.name)
+                  count += 1
+          PY
           find . -name '*.so' -not -path './build-cmake/*' -exec cp {} artifacts/bin/ \; 2>/dev/null || true
           cp -r build-cmake/bin/* artifacts/bin/ 2>/dev/null || true
           cp -r build-cmake/lib/* artifacts/bin/ 2>/dev/null || true
           cp build-cmake/rmr_torus_flow_selftest artifacts/bin/ 2>/dev/null || true
           tar -czf host-engine-artifacts.tar.gz -C artifacts .
+          sha256sum host-engine-artifacts.tar.gz > reports/host-ci/host-engine-artifacts.sha256
+          find reports bench-results -type f -print0 | sort -z | xargs -0 -r sha256sum > reports/host-ci/evidence-sha256.txt
+          {
+            echo '## Host CI evidence'
+            echo
+            echo '- Computational gates execute before uploads.'
+            echo '- Evidence checksums are retained in the job log.'
+            echo '- Artifact storage is best-effort while quota is unavailable.'
+            echo
+            echo '```text'
+            cat reports/host-ci/host-engine-artifacts.sha256
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
 
-      - name: Upload host binaries
+      - name: Upload host binaries (best effort)
         if: always()
+        continue-on-error: true
         uses: actions/upload-artifact@v4
         with:
           name: host-engine-binaries-${{ github.run_id }}
           path: host-engine-artifacts.tar.gz
           if-no-files-found: warn
 
-      - name: Upload host reports
+      - name: Upload host reports (best effort)
         if: always()
+        continue-on-error: true
         uses: actions/upload-artifact@v4
         with:
           name: host-ci-results
@@ -172,12 +214,14 @@ jobs:
             reports/vectra-artifact-promotion/**
             reports/compilerlowfala_seed_index.json
             reports/vectra_capability_surface.json
+            reports/host-ci/**
             build-host/rmr_build_config.env
             build-cmake/rmr_build_config.env
           if-no-files-found: warn
 
-      - name: Upload host logs
+      - name: Upload host logs (best effort)
         if: always()
+        continue-on-error: true
         uses: actions/upload-artifact@v4
         with:
           name: host-logs-${{ github.run_id }}

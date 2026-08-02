@@ -1,0 +1,79 @@
+name: ZIPRAF Real Archive Binding
+
+on:
+  push:
+    paths:
+      - 'engine/rmr/include/rmr_zipraf_archive.h'
+      - 'engine/rmr/include/rmr_zipraf_binding.h'
+      - 'engine/rmr/src/rmr_zipraf_archive.c'
+      - 'engine/rmr/src/rmr_zipraf_binding.c'
+      - 'demo_cli/src/zipraf_archive_selftest.c'
+      - 'demo_cli/src/zipraf_host_mmap_probe.c'
+      - 'tools/zipraf/test_zipraf_archive_binding.sh'
+      - 'engine/rmr/ZIPRAF_REAL_ARCHIVE_BINDING_V2.md'
+      - '.github/workflows/zipraf-archive-binding.yml'
+  pull_request:
+    paths:
+      - 'engine/rmr/include/rmr_zipraf_archive.h'
+      - 'engine/rmr/include/rmr_zipraf_binding.h'
+      - 'engine/rmr/src/rmr_zipraf_archive.c'
+      - 'engine/rmr/src/rmr_zipraf_binding.c'
+      - 'demo_cli/src/zipraf_archive_selftest.c'
+      - 'demo_cli/src/zipraf_host_mmap_probe.c'
+      - 'tools/zipraf/test_zipraf_archive_binding.sh'
+      - 'engine/rmr/ZIPRAF_REAL_ARCHIVE_BINDING_V2.md'
+      - '.github/workflows/zipraf-archive-binding.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  real-archive-binding:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Compile KAT, inject faults and run mmap probe
+        env:
+          ZIPRAF_RECEIPT_PATH: zipraf-host-mmap-receipt.json
+        run: sh tools/zipraf/test_zipraf_archive_binding.sh
+
+      - name: Validate and hash receipt
+        run: |
+          set -euo pipefail
+          python -m json.tool zipraf-host-mmap-receipt.json >/dev/null
+          sha256sum zipraf-host-mmap-receipt.json | tee zipraf-host-mmap-receipt.sha256
+          {
+            echo '## ZIPRAF Real Archive Binding'
+            echo
+            echo '- KAT: PASS'
+            echo '- Receipt JSON: VALID'
+            echo "- Receipt SHA-256: \`$(cut -d' ' -f1 zipraf-host-mmap-receipt.sha256)\`"
+            echo '- Claim boundary: HOST_MMAP_LAYOUT_NOT_ANDROID_DMA_OR_EXECUTION'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload bounded host receipt (best effort)
+        id: upload_receipt
+        continue-on-error: true
+        uses: actions/upload-artifact@v4
+        with:
+          name: zipraf-host-mmap-receipt
+          path: |
+            zipraf-host-mmap-receipt.json
+            zipraf-host-mmap-receipt.sha256
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Record artifact storage state
+        if: always()
+        env:
+          UPLOAD_OUTCOME: ${{ steps.upload_receipt.outcome }}
+        run: |
+          if [ "$UPLOAD_OUTCOME" = success ]; then
+            state=ARTIFACT_STORED
+          else
+            state=ARTIFACT_STORAGE_UNAVAILABLE_RECEIPT_VALIDATED_IN_LOG
+          fi
+          echo "ARTIFACT_STATE=$state"
+          echo "- Artifact state: \`$state\`" >> "$GITHUB_STEP_SUMMARY"

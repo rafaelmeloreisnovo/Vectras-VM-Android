@@ -13,7 +13,7 @@ permissions:
 jobs:
   build-apk-wizard:
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 75
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -36,6 +36,12 @@ jobs:
           distribution: temurin
           java-version: ${{ steps.java.outputs.version }}
 
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install pinned Android native toolchain
+        run: bash tools/ci/install_android_native_toolchain.sh
+
       - name: Shell-loader smoke build
         shell: bash
         run: |
@@ -49,8 +55,9 @@ jobs:
         shell: bash
         run: ./tools/ci/build_apk_wizard.sh
 
-      - name: Upload APK wizard artifacts
+      - name: Upload APK wizard artifacts (best effort)
         if: always()
+        continue-on-error: true
         uses: actions/upload-artifact@v4
         with:
           name: apk-wizard
