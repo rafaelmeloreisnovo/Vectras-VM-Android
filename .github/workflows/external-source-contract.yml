@@ -1,0 +1,45 @@
+name: External Source Contract
+
+on:
+  pull_request:
+    branches: [master]
+    paths:
+      - 'tools/ci/external_sources.manifest'
+      - 'tools/ci/verify_external_sources.sh'
+      - 'tools/ci/test_verify_external_sources.sh'
+      - 'docs/QEMU_RAFAELIA_INTEGRATION_RESOLUTION.md'
+      - 'evidence/qemu/**'
+      - '.github/workflows/external-source-contract.yml'
+  push:
+    branches: [master]
+    paths:
+      - 'tools/ci/external_sources.manifest'
+      - 'tools/ci/verify_external_sources.sh'
+      - 'tools/ci/test_verify_external_sources.sh'
+      - 'evidence/qemu/**'
+      - '.github/workflows/external-source-contract.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: external-source-contract-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  deterministic-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Test parser and branch-head fast path
+        run: bash tools/ci/test_verify_external_sources.sh
+
+  remote-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify pinned external sources against remote branches
+        run: bash tools/ci/verify_external_sources.sh --check-remote

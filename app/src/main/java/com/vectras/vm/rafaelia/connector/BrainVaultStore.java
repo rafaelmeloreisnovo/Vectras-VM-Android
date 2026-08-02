@@ -3,7 +3,6 @@ package com.vectras.vm.rafaelia.connector;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -51,18 +50,24 @@ public final class BrainVaultStore {
 
     private static final ThreadLocal<CRC32C> CRC_POOL = ThreadLocal.withInitial(CRC32C::new);
 
-    private final Map<String, Entry>      hot;
-    private final File                    warmFile;
-    private final File                    coldFile;
-    private final AtomicLong              idSeq    = new AtomicLong(System.currentTimeMillis());
+    private final Map<String, Entry> hot;
+    private final File warmFile;
+    private final File coldFile;
+    private final AtomicLong idSeq = new AtomicLong(System.currentTimeMillis());
     private final ConcurrentHashMap<String, Entry> index = new ConcurrentHashMap<>();
 
     private BrainVaultStore(File dir) throws IOException {
-        dir.mkdirs();
+        if (!dir.exists() && !dir.mkdirs()) {
+            throw new IOException("Unable to create Brain Vault directory: " + dir);
+        }
+        if (!dir.isDirectory()) {
+            throw new IOException("Brain Vault path is not a directory: " + dir);
+        }
         warmFile = new File(dir, "brainvault.jsonl");
         coldFile = new File(dir, "brainvault.cold.jsonl");
         hot = Collections.synchronizedMap(new LinkedHashMap<>(HOT_CAPACITY, 0.75f, true) {
-            @Override protected boolean removeEldestEntry(Map.Entry<String, BrainVaultStore.Entry> eldest) {
+            @Override
+            protected boolean removeEldestEntry(Map.Entry<String, BrainVaultStore.Entry> eldest) {
                 return size() > HOT_CAPACITY;
             }
         });
@@ -75,15 +80,18 @@ public final class BrainVaultStore {
 
     // ─── Store ────────────────────────────────────────────────────────────────
 
-    /** Store a key-value pair in the vault. Overwrites existing entry for key. */
+    /**
+     * Store a key-value pair in the vault. Overwrites the current in-memory
+     * projection only after the append-only record has been persisted.
+     */
     public synchronized void store(@NonNull String key, @NonNull String value,
                                    @NonNull String category) throws IOException {
-        Entry e = new Entry(idSeq.incrementAndGet(), key, value, category,
+        Entry entry = new Entry(idSeq.incrementAndGet(), key, value, category,
                 0, false, System.currentTimeMillis());
-        hot.put(key, e);
-        index.put(key, e);
-        appendToWarm(e);
-        maybeRotate();
+        rotateBeforeAppendIfNeeded();
+        appendToWarm(entry);
+        hot.put(key, entry);
+        index.put(key, entry);
     }
 
     // ─── Recall ───────────────────────────────────────────────────────────────
@@ -91,18 +99,21 @@ public final class BrainVaultStore {
     /** Recall a value by key, incrementing hit count and applying auto-learn. */
     @Nullable
     public synchronized Entry recall(@NonNull String key) throws IOException {
-        Entry e = index.get(key);
-        if (e == null) return null;
-        e = e.withHit();
-        hot.put(key, e);
-        index.put(key, e);
-        if (e.hits >= LEARN_THRESHOLD && !e.learned) {
-            e = e.withLearned();
-            hot.put(key, e);
-            index.put(key, e);
+        Entry current = index.get(key);
+        if (current == null) {
+            return null;
         }
-        appendToWarm(e);
-        return e;
+
+        Entry updated = current.withHit();
+        if (updated.hits >= LEARN_THRESHOLD && !updated.learned) {
+            updated = updated.withLearned();
+        }
+
+        rotateBeforeAppendIfNeeded();
+        appendToWarm(updated);
+        hot.put(key, updated);
+        index.put(key, updated);
+        return updated;
     }
 
     // ─── Query ────────────────────────────────────────────────────────────────
@@ -111,10 +122,12 @@ public final class BrainVaultStore {
     @NonNull
     public List<Entry> queryByCategory(@NonNull String category) {
         List<Entry> result = new ArrayList<>();
-        for (Entry e : index.values()) {
-            if (category.equals(e.category)) result.add(e);
+        for (Entry entry : index.values()) {
+            if (category.equals(entry.category)) {
+                result.add(entry);
+            }
         }
-        result.sort((a, b) -> Long.compare(b.hits, a.hits)); // most-hit first
+        result.sort((left, right) -> Long.compare(right.hits, left.hits));
         return Collections.unmodifiableList(result);
     }
 
@@ -122,73 +135,117 @@ public final class BrainVaultStore {
     @NonNull
     public List<Entry> queryLearned() {
         List<Entry> result = new ArrayList<>();
-        for (Entry e : index.values()) {
-            if (e.learned) result.add(e);
+        for (Entry entry : index.values()) {
+            if (entry.learned) {
+                result.add(entry);
+            }
         }
         return Collections.unmodifiableList(result);
     }
 
-    public int totalEntries() { return index.size(); }
-    public int hotEntries()   { return hot.size(); }
+    public int totalEntries() {
+        return index.size();
+    }
+
+    public int hotEntries() {
+        return hot.size();
+    }
 
     // ─── Replay ───────────────────────────────────────────────────────────────
 
     private void replayWarm() throws IOException {
-        if (!warmFile.exists()) return;
+        if (!warmFile.exists()) {
+            return;
+        }
+        if (!warmFile.isFile()) {
+            throw new IOException("Brain Vault WARM path is not a regular file: " + warmFile);
+        }
+
         List<String> lines = Files.readAllLines(warmFile.toPath(), StandardCharsets.UTF_8);
         for (String line : lines) {
-            if (line.isBlank()) continue;
+            if (line.isBlank()) {
+                continue;
+            }
             try {
-                Entry e = Entry.fromJson(new JSONObject(line));
-                index.put(e.key, e);
-                hot.put(e.key, e);
-            } catch (JSONException ignored) { /* skip corrupt lines */ }
+                Entry entry = Entry.fromJson(new JSONObject(line));
+                index.put(entry.key, entry);
+                hot.put(entry.key, entry);
+                idSeq.accumulateAndGet(entry.id, Math::max);
+            } catch (JSONException ignored) {
+                // Fail closed for this record: malformed or CRC-invalid lines do not
+                // enter the current projection. The original append-only bytes remain.
+            }
         }
     }
 
     // ─── WARM file I/O ────────────────────────────────────────────────────────
 
-    private void appendToWarm(Entry e) throws IOException {
-        try (BufferedWriter bw = new BufferedWriter(
+    private void appendToWarm(@NonNull Entry entry) throws IOException {
+        final String jsonLine;
+        try {
+            // Serialize before opening the append stream. A serialization failure
+            // therefore cannot create an empty or partial JSONL record.
+            jsonLine = entry.toJsonLine();
+        } catch (JSONException exception) {
+            throw new IOException(
+                    "Unable to serialize Brain Vault entry id=" + entry.id,
+                    exception
+            );
+        }
+
+        try (BufferedWriter writer = new BufferedWriter(
                 new FileWriter(warmFile, StandardCharsets.UTF_8, true))) {
-            bw.write(e.toJsonLine());
-            bw.newLine();
+            writer.write(jsonLine);
+            writer.newLine();
         }
     }
 
-    private void maybeRotate() throws IOException {
-        if (warmFile.length() > WARM_MAX_BYTES) {
-            if (coldFile.exists()) coldFile.delete();
-            warmFile.renameTo(coldFile);
+    private void rotateBeforeAppendIfNeeded() throws IOException {
+        if (!warmFile.exists() || warmFile.length() <= WARM_MAX_BYTES) {
+            return;
+        }
+        if (!warmFile.isFile()) {
+            throw new IOException("Brain Vault WARM path is not a regular file: " + warmFile);
+        }
+        if (coldFile.exists() && !coldFile.delete()) {
+            throw new IOException("Unable to replace Brain Vault COLD archive: " + coldFile);
+        }
+        if (!warmFile.renameTo(coldFile)) {
+            throw new IOException("Unable to rotate Brain Vault WARM log to: " + coldFile);
         }
     }
 
     // ─── Data type ────────────────────────────────────────────────────────────
 
     public static final class Entry {
-        public final long   id;
+        public final long id;
         public final String key;
         public final String value;
         public final String category;
-        public final long   hits;
+        public final long hits;
         public final boolean learned;
-        public final long   tsMs;
-        public final long   crc32c;
+        public final long tsMs;
+        public final long crc32c;
 
         Entry(long id, String key, String value, String category,
               long hits, boolean learned, long tsMs) {
-            this.id       = id;
-            this.key      = key;
-            this.value    = value;
+            this.id = id;
+            this.key = key;
+            this.value = value;
             this.category = category;
-            this.hits     = hits;
-            this.learned  = learned;
-            this.tsMs     = tsMs;
-            this.crc32c   = computeCrc(key + value + category);
+            this.hits = hits;
+            this.learned = learned;
+            this.tsMs = tsMs;
+            this.crc32c = computeCrc(key + value + category);
         }
 
-        Entry withHit()    { return new Entry(id, key, value, category, hits + 1, learned, tsMs); }
-        Entry withLearned(){ return new Entry(id, key, value, category, hits, true, tsMs); }
+        Entry withHit() {
+            return new Entry(id, key, value, category, hits + 1, learned, tsMs);
+        }
+
+        Entry withLearned() {
+            return new Entry(id, key, value, category, hits, true, tsMs);
+        }
 
         @NonNull
         String toJsonLine() throws JSONException {
@@ -197,38 +254,48 @@ public final class BrainVaultStore {
 
         @NonNull
         JSONObject toJson() throws JSONException {
-            JSONObject o = new JSONObject();
-            o.put("id",       id);
-            o.put("key",      key);
-            o.put("value",    value);
-            o.put("category", category);
-            o.put("hits",     hits);
-            o.put("learned",  learned);
-            o.put("tsMs",     tsMs);
-            o.put("crc32c",   crc32c);
-            return o;
+            JSONObject object = new JSONObject();
+            object.put("id", id);
+            object.put("key", key);
+            object.put("value", value);
+            object.put("category", category);
+            object.put("hits", hits);
+            object.put("learned", learned);
+            object.put("tsMs", tsMs);
+            object.put("crc32c", crc32c);
+            return object;
         }
 
         @NonNull
-        static Entry fromJson(JSONObject o) throws JSONException {
-            return new Entry(
-                    o.getLong("id"),
-                    o.getString("key"),
-                    o.getString("value"),
-                    o.getString("category"),
-                    o.getLong("hits"),
-                    o.getBoolean("learned"),
-                    o.getLong("tsMs")
+        static Entry fromJson(JSONObject object) throws JSONException {
+            long persistedCrc = object.getLong("crc32c");
+            Entry entry = new Entry(
+                    object.getLong("id"),
+                    object.getString("key"),
+                    object.getString("value"),
+                    object.getString("category"),
+                    object.getLong("hits"),
+                    object.getBoolean("learned"),
+                    object.getLong("tsMs")
             );
+            if (entry.crc32c != persistedCrc) {
+                throw new JSONException(
+                        "CRC32C mismatch for Brain Vault entry id=" + entry.id
+                );
+            }
+            return entry;
         }
 
         private static long computeCrc(String text) {
-            CRC32C crc = new CRC32C();
+            CRC32C crc = CRC_POOL.get();
+            crc.reset();
             crc.update(text.getBytes(StandardCharsets.UTF_8));
             return crc.getValue();
         }
 
-        @NonNull @Override public String toString() {
+        @NonNull
+        @Override
+        public String toString() {
             return "Entry[" + id + "|" + key + "|cat=" + category
                     + "|hits=" + hits + "|learned=" + learned + "]";
         }

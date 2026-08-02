@@ -1,0 +1,74 @@
+{
+  "schema_version": "1.0.0",
+  "record_type": "bootstrap_asset_source_and_hash_resolution",
+  "observed_at": "2026-08-01T21:56:54Z",
+  "consumer_repository": "rafaelmeloreisnovo/Vectras-VM-Android",
+  "source": {
+    "repository": "ednadefatima1959-max/Vectra",
+    "branch": "master",
+    "commit": "b7f7f681147d7502bc63bd03ee02d95f4dbe8ee2",
+    "commit_relation_to_branch": "IDENTICAL_AT_OBSERVATION",
+    "transport": "git_partial_clone_sparse_checkout"
+  },
+  "assets": [
+    {
+      "abi": "arm64-v8a",
+      "path": "app/src/main/assets/bootstrap/arm64-v8a.tar",
+      "size_bytes": 758179,
+      "entries": 364,
+      "first_entry": ".",
+      "sha256": "376dd771cf5dbc865ab557e78dfce3927650dc9055e6bb9b831c0a03485912e1"
+    },
+    {
+      "abi": "armeabi-v7a",
+      "path": "app/src/main/assets/bootstrap/armeabi-v7a.tar",
+      "size_bytes": 721721,
+      "entries": 363,
+      "first_entry": ".",
+      "sha256": "f0f9b12658c04ef0b5f9357e3a3f0f519a5e36d130b90e75d956ad5c7224d4b5"
+    },
+    {
+      "abi": "x86",
+      "path": "app/src/main/assets/bootstrap/x86.tar",
+      "size_bytes": 741664,
+      "entries": 363,
+      "first_entry": ".",
+      "sha256": "12a7ee34608b68b7ee77126474445ba9af9e444bf572904e32d6ab79f7835dd6"
+    },
+    {
+      "abi": "x86_64",
+      "path": "app/src/main/assets/bootstrap/x86_64.tar",
+      "size_bytes": 749343,
+      "entries": 364,
+      "first_entry": ".",
+      "sha256": "eb11438635e39231af5bf7423923e73dcba9d5b26503aec8a4be3e41cc53168c"
+    }
+  ],
+  "observed_ci": {
+    "run_id": 30720092457,
+    "job_id": 91422379588,
+    "materialization": "PASS",
+    "strict_bootstrap_contract": "PASS",
+    "android_gradle_build": "PASS",
+    "lint": "PASS",
+    "apk_collection": "PASS",
+    "artifact_verification": "PASS",
+    "pipeline_artifact_collector": "FAILED_INDEPENDENT_QUOTING_DEFECT_NOW_PATCHED"
+  },
+  "integrity_transition": {
+    "before": "TOKEN_VAZIO",
+    "after": "SHA256_ENFORCED_PENDING_FINAL_CI",
+    "manifest": "tools/ci/bootstrap-assets.v1.json"
+  },
+  "claims": {
+    "source_commit_identified": "EVIDENCIADO",
+    "four_tar_assets_recovered": "EVIDENCIADO",
+    "tar_structure_and_safe_paths": "EVIDENCIADO",
+    "sha256_values_observed_twice_in_same_ci_run": "EVIDENCIADO",
+    "sha256_enforced_final_ci": "TOKEN_VAZIO",
+    "physical_device_runtime": "TOKEN_VAZIO"
+  },
+  "claim_allowed": false,
+  "append_only": true,
+  "next_gate": "final_ci_with_frozen_hashes_and_repaired_collector_then_physical_device_run"
+}

@@ -13,8 +13,8 @@ Usage: verify_external_sources.sh [--manifest <path>] [--check-remote] [--sync-c
 
 Validates external integration repositories required by Vectras contracts:
 - manifest format (required): name|url|branch|dest_dir|pinned_commit_sha
-- --check-remote: validates remote/branch reachability with git ls-remote
-- --sync-clone: shallow clone/fetch into dest_dir
+- --check-remote: validates remote branch and pinned commit reachability
+- --sync-clone: shallow clone/fetch into dest_dir and checkout the pinned commit
 USAGE
 }
 
@@ -90,36 +90,51 @@ while IFS='|' read -r name url branch dest pinned_sha extra; do
   fi
 
   dest_abs="${REPO_ROOT}/${dest}"
-  echo "[external] name=${name} branch=${branch} url=${url} dest=${dest_abs} pinned_sha=${pinned_sha:-none}"
+  echo "[external] name=${name} branch=${branch} url=${url} dest=${dest_abs} pinned_sha=${pinned_sha}"
 
   if [[ "${CHECK_REMOTE}" == "true" ]]; then
-    if ! git ls-remote --exit-code --heads "${url}" "${branch}" >/dev/null 2>&1; then
+    branch_ref="refs/heads/${branch}"
+    branch_head="$(git ls-remote --exit-code --heads "${url}" "${branch_ref}" 2>/dev/null | awk 'NR == 1 {print $1}')"
+
+    if [[ -z "${branch_head}" ]]; then
       echo "::error::Remote branch not reachable for ${name}: ${url}#${branch}" >&2
       status=1
       continue
     fi
-    if [[ -n "${pinned_sha}" ]]; then
-      if ! git ls-remote "${url}" | awk '{print $1}' | grep -qi "^${pinned_sha}$"; then
-        echo "::error::Pinned commit not found on remote for ${name}: ${pinned_sha}" >&2
-        status=1
-        continue
-      fi
+
+    if [[ "${pinned_sha,,}" == "${branch_head,,}" ]]; then
+      echo "[external] pin matches branch head for ${name}: ${branch_head}"
+    else
       tmp_repo="$(mktemp -d)"
+      remote_branch_ref="refs/remotes/origin/${branch}"
       git -C "${tmp_repo}" init -q
       git -C "${tmp_repo}" remote add origin "${url}"
-      if ! git -C "${tmp_repo}" fetch --depth=256 origin "${branch}" "${pinned_sha}" >/dev/null 2>&1; then
-        echo "::error::Failed to fetch branch/pinned SHA for ${name}: ${branch} ${pinned_sha}" >&2
+
+      if ! git -C "${tmp_repo}" fetch --quiet --no-tags --filter=blob:none --depth=256 \
+        origin "+${branch_ref}:${remote_branch_ref}"; then
+        echo "::error::Failed to fetch branch for ${name}: ${branch}" >&2
         rm -rf "${tmp_repo}"
         status=1
         continue
       fi
-      branch_head="$(git -C "${tmp_repo}" rev-parse FETCH_HEAD 2>/dev/null || true)"
-      if [[ -z "${branch_head}" ]] || ! git -C "${tmp_repo}" merge-base --is-ancestor "${pinned_sha}" "origin/${branch}"; then
+
+      if ! git -C "${tmp_repo}" cat-file -e "${pinned_sha}^{commit}" 2>/dev/null; then
+        if ! git -C "${tmp_repo}" fetch --quiet --no-tags --filter=blob:none --depth=1 origin "${pinned_sha}"; then
+          echo "::error::Pinned commit cannot be fetched for ${name}: ${pinned_sha}" >&2
+          rm -rf "${tmp_repo}"
+          status=1
+          continue
+        fi
+      fi
+
+      if ! git -C "${tmp_repo}" merge-base --is-ancestor "${pinned_sha}" "${remote_branch_ref}"; then
         echo "::error::Pinned SHA ${pinned_sha} is not contained in branch ${branch} for ${name}" >&2
         rm -rf "${tmp_repo}"
         status=1
         continue
       fi
+
+      echo "[external] pin is an ancestor of ${branch} for ${name}: ${pinned_sha}"
       rm -rf "${tmp_repo}"
     fi
   fi
@@ -133,12 +148,10 @@ while IFS='|' read -r name url branch dest pinned_sha extra; do
       rm -rf "${dest_abs}"
       git clone --depth=1 --branch "${branch}" "${url}" "${dest_abs}"
     fi
-    if [[ -n "${pinned_sha}" ]]; then
-      git -C "${dest_abs}" fetch --depth=1 origin "${pinned_sha}"
-      git -C "${dest_abs}" checkout -f "${pinned_sha}"
-    fi
-  fi
 
+    git -C "${dest_abs}" fetch --depth=1 origin "${pinned_sha}"
+    git -C "${dest_abs}" checkout -f "${pinned_sha}"
+  fi
 done < "${MANIFEST_PATH}"
 
 if [[ ${status} -ne 0 ]]; then
