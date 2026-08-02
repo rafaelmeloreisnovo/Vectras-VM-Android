@@ -1,0 +1,45 @@
+{
+  "schema_version": "1.0.0",
+  "record_type": "qemu_external_source_pin_resolution",
+  "observed_at": "2026-08-01T18:32:00-03:00",
+  "consumer_repository": "rafaelmeloreisnovo/Vectras-VM-Android",
+  "producer_repository": "rafaelmeloreisnovo/qemu_rafaelia",
+  "branch": "master",
+  "previous_pin": {
+    "sha": "2346c30c2ba77881c2930add83523ea903b173fe",
+    "state": "SUPERSEDED_INVALID_REMOTE",
+    "observed_result": "not_found_on_remote_before_android_compile"
+  },
+  "active_pin": {
+    "sha": "ae94fc60aabb0bbe82abb01038b33ecba790e4ce",
+    "state": "VERIFIED_BRANCH_HEAD",
+    "branch_comparison": "identical",
+    "ahead_by": 0,
+    "behind_by": 0
+  },
+  "required_feature_evidence": {
+    "source_path": "hw/core/connectors/rafaelia-connector-ipc.c",
+    "source_present": true,
+    "build_contract_path": "hw/core/Makefile.integration",
+    "build_contract_contains": "connectors/rafaelia-connector-ipc.c",
+    "build_inclusion_present": true
+  },
+  "consumer_contract": {
+    "manifest_path": "tools/ci/external_sources.manifest",
+    "verification_command": "./tools/ci/verify_external_sources.sh --check-remote",
+    "remote_gate_state": "PENDING_CI",
+    "android_compile_state": "TOKEN_VAZIO",
+    "android_device_runtime_state": "TOKEN_VAZIO"
+  },
+  "claims": {
+    "qemu_remote_reachable": "EVIDENCIADO",
+    "qemu_branch_head_identified": "EVIDENCIADO",
+    "ipc_source_and_build_inclusion": "EVIDENCIADO",
+    "android_compile": "TOKEN_VAZIO",
+    "android_device_runtime": "TOKEN_VAZIO",
+    "qemu_android_artifact": "TOKEN_VAZIO"
+  },
+  "claim_allowed": false,
+  "next_gate": "pull_request_ci_external_source_contract_then_android_compile",
+  "append_only": true
+}
