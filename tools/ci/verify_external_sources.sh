@@ -156,6 +156,9 @@ while IFS='|' read -r name url branch dest pinned_sha extra; do
     fi
   fi
 
+    git -C "${dest_abs}" fetch --depth=1 origin "${pinned_sha}"
+    git -C "${dest_abs}" checkout -f "${pinned_sha}"
+  fi
 done < "${MANIFEST_PATH}"
 
 if [[ ${status} -ne 0 ]]; then

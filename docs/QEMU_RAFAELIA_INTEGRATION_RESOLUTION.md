@@ -76,6 +76,20 @@ tools/qemu/import_qemu_rafaelia_artifact.sh --artifact qemu-rafaelia-artifact-<s
 - Não tratar docs antigas como prova de build atual.
 - Não declarar release estável sem CI/artifact/logcat/ledger do commit atual.
 
+## Estado de evidência após a correção do pin
+
+```yaml
+qemu_source_remote: VERIFIED
+qemu_branch_head: VERIFIED
+qemu_ipc_source_present: VERIFIED
+qemu_ipc_build_inclusion: VERIFIED
+external_source_contract_ci: PENDING
+android_compile: TOKEN_VAZIO
+android_device_runtime: TOKEN_VAZIO
+qemu_artifact_for_android: TOKEN_VAZIO
+claim_allowed: false
+```
+
 ## Próximo gate recomendado
 
 Adicionar ao runtime:
