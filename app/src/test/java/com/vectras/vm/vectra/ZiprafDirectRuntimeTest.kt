@@ -6,6 +6,10 @@ import org.junit.Assert.assertTrue
 import org.junit.Assert.fail
 import org.junit.Test
 import java.io.File
+import java.io.RandomAccessFile
+import java.nio.ByteBuffer
+import java.nio.ByteOrder
+import java.util.zip.CRC32
 import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
 
@@ -279,6 +283,60 @@ class ZiprafDirectRuntimeTest {
             file.writeBytes(ByteArray(64))
             expectFailure<IllegalArgumentException> {
                 ZiprafDirectRuntime(file, ZiprafStoredExtent(0, 64, 8)).close()
+            }
+        } finally {
+            file.delete()
+        }
+    }
+
+    @Test
+    fun zip64EntryCount_isRejected() {
+        val file = File.createTempFile("zipraf-zip64-count", ".zip")
+        try {
+            writeArchive(file, listOf(TestEntry("payload.bin", byteArrayOf(1, 2, 3))))
+            // Overwrite EOCD totalEntries field at offset +10 from EOCD start (little-endian 0xffff)
+            RandomAccessFile(file, "rw").use { ra ->
+                ra.seek(ra.length() - 22 + 10)
+                ra.write(0xff)
+                ra.write(0xff)
+            }
+            expectFailure<IllegalArgumentException> {
+                ZiprafArchiveValidator.parseStoredEntry(file, "payload.bin")
+            }
+        } finally {
+            file.delete()
+        }
+    }
+
+    @Test
+    fun zip64CentralDirSize_isRejected() {
+        val file = File.createTempFile("zipraf-zip64-size", ".zip")
+        try {
+            writeArchive(file, listOf(TestEntry("payload.bin", byteArrayOf(1, 2, 3))))
+            // Overwrite EOCD centralDirSize field at offset +12 from EOCD start (little-endian 0xffffffff)
+            RandomAccessFile(file, "rw").use { ra ->
+                ra.seek(ra.length() - 22 + 12)
+                ra.write(0xff); ra.write(0xff); ra.write(0xff); ra.write(0xff)
+            }
+            expectFailure<IllegalArgumentException> {
+                ZiprafArchiveValidator.parseStoredEntry(file, "payload.bin")
+            }
+        } finally {
+            file.delete()
+        }
+    }
+
+    @Test
+    fun multipleOpenClose_onSameFile_succeed() {
+        val file = File.createTempFile("zipraf-reopen", ".zip")
+        try {
+            val payload = byteArrayOf(10, 20, 30)
+            writeArchive(file, listOf(TestEntry("data.bin", payload)))
+            val entry = ZiprafArchiveValidator.parseStoredEntry(file, "data.bin")
+            repeat(3) {
+                ZiprafDirectRuntime(file, entry.extent).use { runtime ->
+                    assertTrue(runtime.verifyCrc32())
+                }
             }
         } finally {
             file.delete()
