@@ -2,6 +2,10 @@
 
 # Vectras VM Android
 
+**Estado:** `ACTIVE`  
+**Proprietário lógico:** `app-maintainer`  
+**Repositório:** [`rafaelmeloreisnovo/Vectras-VM-Android`](https://github.com/rafaelmeloreisnovo/Vectras-VM-Android)
+
 ## Metadados canônicos
 
 - Versão do documento: 2.1.
