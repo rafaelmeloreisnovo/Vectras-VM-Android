@@ -74,6 +74,7 @@ import com.vectras.vm.main.romstore.RomStoreFragment;
 import com.vectras.vm.main.vms.VmsFragment;
 import com.vectras.vm.logger.VectrasStatus;
 import com.vectras.vm.settings.UpdaterActivity;
+import com.vectras.vm.settings.VncDisplayConfig;
 import com.vectras.vm.utils.DeviceUtils;
 import com.vectras.vm.utils.DialogUtils;
 import com.vectras.vm.utils.FileUtils;
@@ -373,7 +374,7 @@ public class MainActivity extends AppCompatActivity implements RomStoreFragment.
 
         Config.ui = MainSettingsManager.getVmUi(this);
         Config.defaultVNCPort = Integer.parseInt(MainSettingsManager.getVncExternalDisplay(this));
-        Config.forceRefeshVNCDisplay = MainSettingsManager.getForceRefreshVNCDisplay(this);
+        Config.forceRefeshVNCDisplay = VncDisplayConfig.getForceRefresh(this);
 
         if (!MainSettingsManager.getVncExternal(this))
             NotificationUtils.clearAll(this);
