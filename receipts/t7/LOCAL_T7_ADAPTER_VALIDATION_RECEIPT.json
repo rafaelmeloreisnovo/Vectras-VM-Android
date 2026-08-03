@@ -1,0 +1,9 @@
+{
+  "state": "PASS_LIMITED",
+  "errors": [],
+  "boot_state": "TOKEN_VAZIO",
+  "claim_allowed": false,
+  "generated_at": "2026-08-03T04:10:00-03:00",
+  "script_sha256": "a93ad79604aaa8edcffb016c10f6f842d4723ddbca9c0648ae2c475c684e939b",
+  "contract_sha256": "8ecbc280efdc470d4ee72d435694b918cf2ab678d887ff2c5c5f878a156eff1d"
+}
