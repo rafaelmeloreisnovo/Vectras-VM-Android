@@ -771,9 +771,6 @@ class VectraCycle(
         state.setFlag(eventType.ordinal, true)
     }
 
-    private fun resolveEventType(typeOrdinal: Int): VectraEvent.EventType {
-        return VectraEvent.EventType.entries.getOrElse(typeOrdinal) { VectraEvent.EventType.SYSTEM_EVENT }
-    }
 }
 
 /**
@@ -826,7 +823,8 @@ class VectraBitStackLog(logFile: File) {
     companion object {
         private const val MAGIC = 0x56454354L // "VECT"
         private const val VERSION = 1
-        private const val RECORD_HEADER_SIZE = 32 // magic(4) + len(4) + meta(4) + tick(8) + wall(8) + crc(4) + reserved(4)
+        private const val RECORD_HEADER_SIZE = 36 // magic(4) + len(4) + meta(4) + tick(8) + wall(8) + crc(4) + reserved(4)
+        private const val CRC_OFFSET = 28 // byte offset of crc field within record header
         private const val MAX_LOG_SIZE = 10 * 1024 * 1024 // 10 MB
         private const val FLUSH_INTERVAL_MS = 1000L
         private const val FLUSH_RECORDS = 32
@@ -878,14 +876,14 @@ class VectraBitStackLog(logFile: File) {
             recordHeaderBuffer.putInt(meta)
             recordHeaderBuffer.putLong(deterministicTick)
             recordHeaderBuffer.putLong(wallClockMs)
-            recordHeaderBuffer.putInt(0)
-            recordHeaderBuffer.putInt(0)
+            recordHeaderBuffer.putInt(0) // crc placeholder at offset CRC_OFFSET (28)
+            recordHeaderBuffer.putInt(0) // reserved
             val recordHeader = recordHeaderBuffer.array()
 
-            // Compute CRC incrementally without concatenation
-            var crc = CRC32C.update(0, recordHeader, 0, 12)
+            // CRC covers all header bytes before the crc field, then payload
+            var crc = CRC32C.update(0, recordHeader, 0, CRC_OFFSET)
             crc = CRC32C.update(crc, payload, 0, len)
-            recordHeaderBuffer.putInt(24, crc)
+            recordHeaderBuffer.putInt(CRC_OFFSET, crc)
 
             file.write(recordHeader, 0, RECORD_HEADER_SIZE)
             file.write(payload, 0, len)
@@ -935,8 +933,7 @@ object VectraCore {
     private var cycle: VectraCycle? = null
     private var logger: VectraBitStackLog? = null
     private val initialized = AtomicBoolean(false)
-    private val timerTickCounter = java.util.concurrent.atomic.AtomicLong(0L)
-    private val timerPayloadBuffer = ThreadLocal.withInitial { ByteArray(8) }
+    private val timerPayloadBuffer = ThreadLocal.withInitial { ByteArray(Long.SIZE_BYTES) }
 
     private const val PREFS_NAME = "vectra_core"
     private const val PREF_SEED_KEY = "seed"
@@ -1052,7 +1049,7 @@ object VectraCore {
             while (initialized.get()) {
                 try {
                     val wallClockMs = System.currentTimeMillis()
-                    val payload = ByteArray(Long.SIZE_BYTES)
+                    val payload = timerPayloadBuffer.get()
                     putLongLE(payload, 0, wallClockMs)
                     eventBus?.post(
                         VectraEvent(
