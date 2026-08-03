@@ -1,0 +1,25 @@
+{
+  "schema": "RAFAELIA_T7_WORKSPACE_VM_GATE/v1",
+  "product_id": "T7-P05",
+  "owner_repository": "rafaelmeloreisnovo/Vectras-VM-Android",
+  "generated_at": "2026-08-03T04:10:00-03:00",
+  "claim_allowed": false,
+  "required_fields": ["workspace_id","image_ref","image_sha256","qemu_ref","qemu_revision","abi","resource_budget","bind_policy","boot_state","rollback_state"],
+  "allowed_abis": ["armeabi-v7a","arm64-v8a"],
+  "allowed_boot_states": ["TOKEN_VAZIO","PREFLIGHT_PASS","BOOT_PASS_LIMITED","FAIL"],
+  "allowed_rollback_states": ["TOKEN_VAZIO","TESTED","FAIL"],
+  "invariants": ["no_image_mutation_before_preflight","no_public_bind_by_default","snapshot_hash_before_and_after","runtime_claim_requires_boot_receipt"],
+  "gates": ["O6","O7","O9","O10","O12"],
+  "fixture": {
+    "workspace_id": "ws-token-vazio",
+    "image_ref": "TOKEN_VAZIO",
+    "image_sha256": "TOKEN_VAZIO",
+    "qemu_ref": "repo://qemu",
+    "qemu_revision": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "abi": "arm64-v8a",
+    "resource_budget": {"memory_mb":512,"cpus":1},
+    "bind_policy": "LOOPBACK_ONLY",
+    "boot_state": "TOKEN_VAZIO",
+    "rollback_state": "TOKEN_VAZIO"
+  }
+}
