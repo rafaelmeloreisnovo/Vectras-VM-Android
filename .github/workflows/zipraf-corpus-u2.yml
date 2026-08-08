@@ -1,0 +1,70 @@
+name: ZIPRAF Corpus U2
+
+on:
+  push:
+    paths:
+      - 'demo_cli/src/zipraf_corpus_scanner.c'
+      - 'tools/zipraf/generate_zipraf_corpus_u2_fixture.py'
+      - 'tools/zipraf/validate_zipraf_corpus_u2_manifest.py'
+      - 'tools/zipraf/test_zipraf_corpus_u2.sh'
+      - 'engine/rmr/ZIPRAF_CORPUS_U2_V1.md'
+      - '.github/workflows/zipraf-corpus-u2.yml'
+  pull_request:
+    paths:
+      - 'demo_cli/src/zipraf_corpus_scanner.c'
+      - 'tools/zipraf/generate_zipraf_corpus_u2_fixture.py'
+      - 'tools/zipraf/validate_zipraf_corpus_u2_manifest.py'
+      - 'tools/zipraf/test_zipraf_corpus_u2.sh'
+      - 'engine/rmr/ZIPRAF_CORPUS_U2_V1.md'
+      - '.github/workflows/zipraf-corpus-u2.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  corpus-u2-harness:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout ZIPRAF producer
+        uses: actions/checkout@v4
+
+      - name: Checkout pinned BLAKE3 provider
+        uses: actions/checkout@v4
+        with:
+          repository: rafaelmeloreisnovo/BLAKE3
+          ref: ff6991d8b13f5b4b16dc311b5acc9c63ae835152
+          path: _deps/blake3
+          persist-credentials: false
+
+      - name: Compile scanner and validate deterministic corpus manifest
+        env:
+          BLAKE3_ROOT: _deps/blake3
+          BLAKE3_COMMIT: ff6991d8b13f5b4b16dc311b5acc9c63ae835152
+        run: bash tools/zipraf/test_zipraf_corpus_u2.sh
+
+      - name: Record U2 harness evidence
+        run: |
+          set -euo pipefail
+          test "$(git -C _deps/blake3 rev-parse HEAD)" = ff6991d8b13f5b4b16dc311b5acc9c63ae835152
+          {
+            echo '## ZIPRAF Corpus U2'
+            echo
+            echo '- Harness: `PASS`'
+            echo '- Scanner extraction: `false`'
+            echo '- Scanner execution authorization: `false`'
+            echo '- External real corpus: `TOKEN_VAZIO`'
+            echo "- Manifest SHA-256: \`$(cut -d' ' -f1 build/zipraf-corpus-u2/manifest.json.sha256)\`"
+            echo '- BLAKE3 provider: `rafaelmeloreisnovo/BLAKE3@ff6991d8b13f5b4b16dc311b5acc9c63ae835152`'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload U2 manifest and fixture receipts (best effort)
+        continue-on-error: true
+        uses: actions/upload-artifact@v4
+        with:
+          name: zipraf-corpus-u2
+          path: |
+            build/zipraf-corpus-u2/manifest.json
+            build/zipraf-corpus-u2/manifest.json.sha256
+          if-no-files-found: error
+          retention-days: 30
