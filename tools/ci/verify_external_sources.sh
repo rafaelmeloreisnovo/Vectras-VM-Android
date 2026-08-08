@@ -23,6 +23,7 @@ USAGE
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --manifest)
+      [[ $# -ge 2 ]] || { echo "--manifest requires a path" >&2; exit 2; }
       MANIFEST_PATH="$2"
       shift 2
       ;;
@@ -66,13 +67,13 @@ while IFS='|' read -r name url branch dest pinned_sha extra; do
   [[ -n "${name}" ]] || continue
   [[ "${name}" =~ ^# ]] && continue
 
-  if [[ -z "${url}" || -z "${branch}" || -z "${dest}" || -n "${extra:-}" ]]; then
+  if [[ -z "${url}" || -z "${branch}" || -z "${dest}" || -z "${pinned_sha}" || -n "${extra:-}" ]]; then
     echo "::error file=${MANIFEST_PATH},line=${line_no}::Invalid manifest row; expected name|url|branch|dest_dir|pinned_commit_sha" >&2
     status=1
     continue
   fi
 
-  if [[ ! "${url}" =~ ^https://github\.com/.+/.+$ ]]; then
+  if [[ ! "${url}" =~ ^https://github\.com/[^/]+/[^/]+/?$ ]]; then
     echo "::error file=${MANIFEST_PATH},line=${line_no}::Unsupported URL format for ${name}: ${url}" >&2
     status=1
     continue
@@ -94,45 +95,56 @@ while IFS='|' read -r name url branch dest pinned_sha extra; do
   echo "[external] name=${name} branch=${branch} url=${url} dest=${dest_abs} pinned_sha=${pinned_sha}"
 
   if [[ "${CHECK_REMOTE}" == "true" ]]; then
-    tmp_repo="$(mktemp -d)"
-    cleanup_tmp() { rm -rf "${tmp_repo}"; }
-    trap cleanup_tmp RETURN
-
-    git -C "${tmp_repo}" init -q
-    git -C "${tmp_repo}" remote add origin "${url}"
-    if ! git -C "${tmp_repo}" fetch --no-tags --filter=blob:none --depth="${FETCH_DEPTH}" \
-      origin "refs/heads/${branch}:refs/remotes/origin/${branch}" >/dev/null 2>&1; then
+    branch_ref="refs/heads/${branch}"
+    if ! remote_line="$(git ls-remote --heads "${url}" "${branch_ref}")"; then
       echo "::error::Remote branch not reachable for ${name}: ${url}#${branch}" >&2
-      cleanup_tmp
-      trap - RETURN
       status=1
       continue
     fi
 
-    if ! git -C "${tmp_repo}" cat-file -e "${pinned_sha}^{commit}" 2>/dev/null; then
-      if ! git -C "${tmp_repo}" fetch --no-tags --filter=blob:none --depth=1 \
-        origin "${pinned_sha}" >/dev/null 2>&1; then
-        echo "::error::Pinned commit cannot be fetched for ${name}: ${pinned_sha}" >&2
-        cleanup_tmp
-        trap - RETURN
+    branch_head="$(awk -v ref="${branch_ref}" '$2 == ref {print $1; exit}' <<< "${remote_line}")"
+    if [[ ! "${branch_head}" =~ ^[0-9a-fA-F]{40}$ ]]; then
+      echo "::error::Remote branch not reachable for ${name}: ${url}#${branch}" >&2
+      status=1
+      continue
+    fi
+
+    if [[ "${pinned_sha,,}" == "${branch_head,,}" ]]; then
+      echo "[external] verified ${name}: pin matches branch head ${branch_head}"
+    else
+      tmp_repo="$(mktemp -d)"
+      git -C "${tmp_repo}" init -q
+      git -C "${tmp_repo}" remote add origin "${url}"
+
+      if ! git -C "${tmp_repo}" fetch --no-tags --filter=blob:none --depth="${FETCH_DEPTH}" \
+        origin "${branch_ref}:refs/remotes/origin/${branch}" >/dev/null 2>&1; then
+        echo "::error::Unable to fetch branch history for ${name}: ${url}#${branch}" >&2
+        rm -rf "${tmp_repo}"
         status=1
         continue
       fi
-    fi
 
-    if ! git -C "${tmp_repo}" merge-base --is-ancestor \
-      "${pinned_sha}" "refs/remotes/origin/${branch}"; then
-      echo "::error::Pinned SHA ${pinned_sha} is not contained in branch ${branch} for ${name}" >&2
-      cleanup_tmp
-      trap - RETURN
-      status=1
-      continue
-    fi
+      if ! git -C "${tmp_repo}" cat-file -e "${pinned_sha}^{commit}" 2>/dev/null; then
+        if ! git -C "${tmp_repo}" fetch --no-tags --filter=blob:none --depth=1 \
+          origin "${pinned_sha}" >/dev/null 2>&1; then
+          echo "::error::Pinned commit cannot be fetched for ${name}: ${pinned_sha}" >&2
+          rm -rf "${tmp_repo}"
+          status=1
+          continue
+        fi
+      fi
 
-    branch_head="$(git -C "${tmp_repo}" rev-parse "refs/remotes/origin/${branch}")"
-    echo "[external] verified ${name}: pinned=${pinned_sha} branch_head=${branch_head}"
-    cleanup_tmp
-    trap - RETURN
+      if ! git -C "${tmp_repo}" merge-base --is-ancestor \
+        "${pinned_sha}" "refs/remotes/origin/${branch}"; then
+        echo "::error::Pinned SHA ${pinned_sha} is not contained in branch ${branch} for ${name} within fetch depth ${FETCH_DEPTH}" >&2
+        rm -rf "${tmp_repo}"
+        status=1
+        continue
+      fi
+
+      echo "[external] verified ${name}: pinned=${pinned_sha} branch_head=${branch_head}"
+      rm -rf "${tmp_repo}"
+    fi
   fi
 
   if [[ "${SYNC_CLONE}" == "true" ]]; then
@@ -142,6 +154,7 @@ while IFS='|' read -r name url branch dest pinned_sha extra; do
       rm -rf "${dest_abs}"
       git -C "${REPO_ROOT}" clone --no-checkout --filter=blob:none "${url}" "${dest_abs}"
     fi
+
     git -C "${dest_abs}" fetch --no-tags --filter=blob:none --depth="${FETCH_DEPTH}" \
       origin "refs/heads/${branch}:refs/remotes/origin/${branch}"
     if ! git -C "${dest_abs}" cat-file -e "${pinned_sha}^{commit}" 2>/dev/null; then
@@ -149,7 +162,7 @@ while IFS='|' read -r name url branch dest pinned_sha extra; do
     fi
     git -C "${dest_abs}" checkout -f --detach "${pinned_sha}"
     actual_sha="$(git -C "${dest_abs}" rev-parse HEAD)"
-    if [[ "${actual_sha}" != "${pinned_sha}" ]]; then
+    if [[ "${actual_sha,,}" != "${pinned_sha,,}" ]]; then
       echo "::error::Pinned checkout mismatch for ${name}: expected=${pinned_sha} actual=${actual_sha}" >&2
       status=1
       continue
