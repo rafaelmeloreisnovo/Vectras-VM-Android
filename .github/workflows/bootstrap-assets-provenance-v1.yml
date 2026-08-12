@@ -30,31 +30,33 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Validate canonical blocked production state
+      - name: Validate canonical sourced production state
         run: |
           mkdir -p build/bootstrap-assets-provenance
           python3 tools/bootstrap/validate_bootstrap_assets_manifest.py \
             --manifest configs/bootstrap_assets.production.v1.json \
-            --expect blocked \
-            --write-report build/bootstrap-assets-provenance/blocked-report.json
-          python3 -m json.tool build/bootstrap-assets-provenance/blocked-report.json >/dev/null
+            --expect sourced \
+            --write-report build/bootstrap-assets-provenance/sourced-report.json
+          python3 -m json.tool build/bootstrap-assets-provenance/sourced-report.json >/dev/null
 
       - name: Run positive and adversarial provenance tests
         run: python3 -m unittest tests.test_bootstrap_assets_provenance -v
 
-      - name: Hash blocked-state evidence
+      - name: Hash sourced-state evidence
         run: |
           set -euo pipefail
           sha256sum \
             configs/bootstrap_assets.production.v1.json \
-            build/bootstrap-assets-provenance/blocked-report.json \
+            build/bootstrap-assets-provenance/sourced-report.json \
             | tee build/bootstrap-assets-provenance/SHA256SUMS
           {
             echo '## Bootstrap Assets Provenance V1'
             echo
-            echo '- Production state: `BETA_BLOCKED_MISSING_BOOTSTRAP_ASSETS`'
-            echo '- Required architecture TARs: `4`'
-            echo '- Canonical blocked-state validation: `PASS`'
+            echo '- Production state: `BOOTSTRAP_SOURCES_IDENTIFIED_NOT_MATERIALIZED`'
+            echo '- Upstream release assets identified: `4/4`'
+            echo '- Source asset IDs + archive SHA-256 + archive sizes: `BOUND`'
+            echo '- Target architecture TAR materialization: `TOKEN_VAZIO`'
+            echo '- Canonical sourced-state validation: `PASS`'
             echo '- Synthetic verified/tamper/path-traversal KATs: `PASS`'
             echo '- Android runtime: `TOKEN_VAZIO`'
             echo '- claim_allowed: `false`'
