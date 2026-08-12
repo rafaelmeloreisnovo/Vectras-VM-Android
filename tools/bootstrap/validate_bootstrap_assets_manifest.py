@@ -17,7 +17,11 @@ EXPECTED_FILES = {
 }
 TOKEN_PREFIX = "TOKEN_VAZIO"
 SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
+SOURCE_REF_DIGEST_RE = re.compile(r"(?:^|;)archive_sha256=([0-9a-f]{64})(?:;|$)")
+SOURCE_REF_SIZE_RE = re.compile(r"(?:^|;)archive_size=([1-9][0-9]*)(?:;|$)")
+SOURCE_REF_ASSET_RE = re.compile(r"(?:^|;)asset_id=([1-9][0-9]*)(?:;|$)")
 BLOCKED_STATE = "BETA_BLOCKED_MISSING_BOOTSTRAP_ASSETS"
+SOURCED_STATE = "BOOTSTRAP_SOURCES_IDENTIFIED_NOT_MATERIALIZED"
 VERIFIED_STATE = "BOOTSTRAP_ASSETS_VERIFIED_NOT_DEVICE_TESTED"
 DEVICE_STATE = "DEVICE_BOOTSTRAP_VERIFIED_LIMITED"
 
@@ -148,6 +152,52 @@ def validate_blocked(data: dict[str, Any], assets: list[dict[str, Any]], assets_
         "state": BLOCKED_STATE,
         "ready": False,
         "missing": missing,
+        "sourced": [],
+        "verified": [],
+    }
+
+
+def validate_sourced(data: dict[str, Any], assets: list[dict[str, Any]], assets_dir: Path | None) -> dict[str, Any]:
+    if data.get("state") != SOURCED_STATE:
+        fail(f"sourced manifest state must be {SOURCED_STATE}")
+    sourced: list[dict[str, Any]] = []
+    for asset in assets:
+        abi = asset["abi"]
+        if asset.get("state") != "SUPPLIED_UNVERIFIED":
+            fail(f"{abi}: sourced asset state must be SUPPLIED_UNVERIFIED")
+        for field in ("source_uri", "source_ref", "license_or_provenance"):
+            value = asset.get(field)
+            if not isinstance(value, str) or not value or is_token(value):
+                fail(f"{abi}: concrete {field} is required in sourced state")
+        if not str(asset["source_uri"]).startswith("https://github.com/"):
+            fail(f"{abi}: source_uri must use the recorded GitHub release source")
+        source_ref = str(asset["source_ref"])
+        digest_match = SOURCE_REF_DIGEST_RE.search(source_ref)
+        size_match = SOURCE_REF_SIZE_RE.search(source_ref)
+        asset_match = SOURCE_REF_ASSET_RE.search(source_ref)
+        if not digest_match or not size_match or not asset_match:
+            fail(f"{abi}: source_ref must bind asset_id, archive_sha256 and archive_size")
+        if not SHA256_RE.fullmatch(digest_match.group(1)):
+            fail(f"{abi}: invalid source archive SHA-256")
+        if not is_token(asset.get("sha256")):
+            fail(f"{abi}: target TAR sha256 must remain TOKEN_VAZIO until materialized")
+        if asset.get("size_bytes") is not None:
+            fail(f"{abi}: target TAR size_bytes must remain null until materialized")
+        if assets_dir is not None and (assets_dir / asset["filename"]).exists():
+            fail(f"{abi}: target TAR exists; run verified gate instead of keeping sourced state")
+        sourced.append({
+            "abi": abi,
+            "filename": asset["filename"],
+            "source_uri": asset["source_uri"],
+            "asset_id": int(asset_match.group(1)),
+            "archive_sha256": digest_match.group(1),
+            "archive_size": int(size_match.group(1)),
+        })
+    return {
+        "state": SOURCED_STATE,
+        "ready": False,
+        "missing": [],
+        "sourced": sourced,
         "verified": [],
     }
 
@@ -193,6 +243,7 @@ def validate_verified(data: dict[str, Any], assets: list[dict[str, Any]], assets
         "state": data["state"],
         "ready": True,
         "missing": [],
+        "sourced": [],
         "verified": verified,
     }
 
@@ -201,6 +252,8 @@ def validate(data: dict[str, Any], expected_state: str, assets_dir: Path | None)
     assets = validate_structure(data)
     if expected_state == "blocked":
         return validate_blocked(data, assets, assets_dir)
+    if expected_state == "sourced":
+        return validate_sourced(data, assets, assets_dir)
     if expected_state == "verified":
         return validate_verified(data, assets, assets_dir)
     fail(f"unknown expected state: {expected_state}")
@@ -214,7 +267,7 @@ def main() -> int:
         default=Path("configs/bootstrap_assets.production.v1.json"),
     )
     parser.add_argument("--assets-dir", type=Path)
-    parser.add_argument("--expect", choices=("blocked", "verified"), required=True)
+    parser.add_argument("--expect", choices=("blocked", "sourced", "verified"), required=True)
     parser.add_argument("--write-report", type=Path)
     args = parser.parse_args()
 
