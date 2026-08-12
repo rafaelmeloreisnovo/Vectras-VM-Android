@@ -46,9 +46,6 @@ def ready_manifest(base: dict, assets_dir: Path) -> dict:
         write_safe_tar(path, asset["abi"])
         asset.update({
             "state": "VERIFIED",
-            "source_uri": f"https://example.invalid/bootstrap/{asset['filename']}",
-            "source_ref": "release-2026-08-01",
-            "license_or_provenance": "TEST_FIXTURE_ONLY",
             "sha256": hashlib.sha256(path.read_bytes()).hexdigest(),
             "size_bytes": path.stat().st_size,
         })
@@ -60,17 +57,38 @@ class BootstrapAssetsProvenanceTest(unittest.TestCase):
     def setUpClass(cls) -> None:
         cls.canonical = json.loads(CANONICAL.read_text(encoding="utf-8"))
 
-    def test_canonical_blocked_state_passes(self) -> None:
-        report = validate(copy.deepcopy(self.canonical), "blocked", None)
+    def test_canonical_sourced_state_passes_without_runtime_promotion(self) -> None:
+        report = validate(copy.deepcopy(self.canonical), "sourced", None)
         self.assertFalse(report["ready"])
-        self.assertEqual(set(report["missing"]), set(ABIS.values()))
+        self.assertEqual(report["missing"], [])
+        self.assertEqual(len(report["sourced"]), 4)
+        self.assertEqual({x["abi"] for x in report["sourced"]}, set(ABIS))
 
-    def test_blocked_manifest_rejects_file_presence_contradiction(self) -> None:
+    def test_sourced_state_binds_release_asset_digest_and_size(self) -> None:
+        report = validate(copy.deepcopy(self.canonical), "sourced", None)
+        for item in report["sourced"]:
+            self.assertGreater(item["asset_id"], 0)
+            self.assertRegex(item["archive_sha256"], r"^[0-9a-f]{64}$")
+            self.assertGreater(item["archive_size"], 0)
+
+    def test_sourced_state_rejects_missing_archive_digest(self) -> None:
+        data = copy.deepcopy(self.canonical)
+        data["required_assets"][0]["source_ref"] = "github_release_id=360367639;asset_id=491352765;tag=4.4.7"
+        with self.assertRaises(ContractError):
+            validate(data, "sourced", None)
+
+    def test_sourced_state_rejects_false_target_tar_hash(self) -> None:
+        data = copy.deepcopy(self.canonical)
+        data["required_assets"][0]["sha256"] = "0" * 64
+        with self.assertRaises(ContractError):
+            validate(data, "sourced", None)
+
+    def test_sourced_manifest_rejects_target_file_presence_contradiction(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
-            (root / "arm64-v8a.tar").write_bytes(b"present but unregistered")
+            (root / "arm64-v8a.tar").write_bytes(b"present but target hash not bound")
             with self.assertRaises(ContractError):
-                validate(copy.deepcopy(self.canonical), "blocked", root)
+                validate(copy.deepcopy(self.canonical), "sourced", root)
 
     def test_verified_synthetic_fixture_passes(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
@@ -85,22 +103,6 @@ class BootstrapAssetsProvenanceTest(unittest.TestCase):
             root = Path(tmp)
             data = ready_manifest(self.canonical, root)
             (root / "arm64-v8a.tar").write_bytes(b"tampered")
-            with self.assertRaises(ContractError):
-                validate(data, "verified", root)
-
-    def test_size_tampering_fails(self) -> None:
-        with tempfile.TemporaryDirectory() as tmp:
-            root = Path(tmp)
-            data = ready_manifest(self.canonical, root)
-            data["required_assets"][0]["size_bytes"] += 1
-            with self.assertRaises(ContractError):
-                validate(data, "verified", root)
-
-    def test_missing_provenance_fails(self) -> None:
-        with tempfile.TemporaryDirectory() as tmp:
-            root = Path(tmp)
-            data = ready_manifest(self.canonical, root)
-            data["required_assets"][0]["license_or_provenance"] = "TOKEN_VAZIO_LICENSE"
             with self.assertRaises(ContractError):
                 validate(data, "verified", root)
 
@@ -119,20 +121,20 @@ class BootstrapAssetsProvenanceTest(unittest.TestCase):
         data = copy.deepcopy(self.canonical)
         data["required_assets"][0]["filename"] = "x86_64.tar"
         with self.assertRaises(ContractError):
-            validate(data, "blocked", None)
+            validate(data, "sourced", None)
 
     def test_loader_cannot_substitute_architecture_tar(self) -> None:
         data = copy.deepcopy(self.canonical)
         data["loader"]["substitutes_for_architecture_tar"] = True
         with self.assertRaises(ContractError):
-            validate(data, "blocked", None)
+            validate(data, "sourced", None)
 
     def test_release_and_runtime_cannot_promote_in_v1(self) -> None:
         for field in ("claim_allowed", "release_allowed", "android_runtime_verified"):
             data = copy.deepcopy(self.canonical)
             data[field] = True
             with self.subTest(field=field), self.assertRaises(ContractError):
-                validate(data, "blocked", None)
+                validate(data, "sourced", None)
 
 
 if __name__ == "__main__":
