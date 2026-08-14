@@ -1,0 +1,35 @@
+name: Professional Statistics Contract
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'app/src/main/java/com/vectras/vm/tools/ProfessionalToolsActivity.java'
+      - 'app/src/main/java/com/vectras/vm/benchmark/IndustrialStatistics.java'
+      - 'app/src/test/java/com/vectras/vm/benchmark/IndustrialStatisticsTest.java'
+      - 'docs/benchmark/INDUSTRIAL_BENCHMARK_METHODS_V1.md'
+      - 'tools/ci/validate_professional_tools_statistics_contract.py'
+      - '.github/workflows/professional-statistics-contract.yml'
+  push:
+    branches: [master]
+    paths:
+      - 'app/src/main/java/com/vectras/vm/tools/ProfessionalToolsActivity.java'
+      - 'app/src/main/java/com/vectras/vm/benchmark/IndustrialStatistics.java'
+      - 'docs/benchmark/INDUSTRIAL_BENCHMARK_METHODS_V1.md'
+      - 'tools/ci/validate_professional_tools_statistics_contract.py'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: professional-statistics-contract-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fail closed on heterogeneous reproducibility promotion
+        run: python3 tools/ci/validate_professional_tools_statistics_contract.py
