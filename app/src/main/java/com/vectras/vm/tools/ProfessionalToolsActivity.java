@@ -25,6 +25,7 @@ import com.google.android.material.progressindicator.LinearProgressIndicator;
 import com.vectras.vm.AppConfig;
 import com.vectras.vm.R;
 import com.vectras.vm.benchmark.BenchmarkManager;
+import com.vectras.vm.benchmark.IndustrialStatistics;
 import com.vectras.vm.benchmark.VectraBenchmark;
 import com.vectras.vm.core.ExecutionPolicyCenter;
 import com.vectras.vm.core.QualityStandardsCatalog;
@@ -33,7 +34,6 @@ import com.vectras.vm.utils.FileUtils;
 import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -41,38 +41,35 @@ import java.util.concurrent.ExecutorService;
 
 /**
  * ProfessionalToolsActivity - MEGA TOOLS Professional Engineering/Benchmark/Scientific System
- * 
- * This activity provides a comprehensive, professional-grade benchmarking and analysis system
+ *
+ * This activity provides a comprehensive benchmarking and evidence-reporting system
  * that integrates multiple technical methodologies and standards:
- * 
+ *
  * - ISO/IEC 25010 (Software Quality Model)
  * - IEEE 829/1012 (Test Documentation and Verification)
  * - ACM Standards
  * - NIST Benchmarking Principles
  * - SPEC Methodology
  * - MLPerf Philosophy
- * 
+ *
  * Features:
  * - Checklist-based category selection with estimated time tracking
- * - Multiple methodology standard compliance indicators
- * - Statistical analysis with confidence intervals
- * - Academic/Industry/Scientific grade validation
+ * - Multiple methodology standard indicators
+ * - Per-metric benchmark result preservation
+ * - Homogeneous repeated-series statistics only when such evidence exists
+ * - Evidence-gated grade indicators
  * - Professional report generation
- * - Reproducibility assessment
- * 
+ *
  * Design Principles:
- * - Technically rigorous
- * - Scientifically valid
- * - Reproducible
- * - Academically acceptable
+ * - Evidence first
+ * - Fail closed when repeated-series evidence is absent
+ * - No cross-metric statistical pooling
+ * - No certification or scientific-grade promotion from one-shot heterogeneous metrics
  * - Professionally documented
  */
 public class ProfessionalToolsActivity extends AppCompatActivity {
     private static final String TAG = "ProfessionalToolsActivity";
-    
-    // Statistical constants
-    private static final double Z_SCORE_95_PERCENT = 1.96;
-    
+
     // Time estimates in seconds for each category
     private static final int TIME_CPU_SINGLE = 15;
     private static final int TIME_CPU_MULTI = 20;
@@ -80,7 +77,7 @@ public class ProfessionalToolsActivity extends AppCompatActivity {
     private static final int TIME_STORAGE = 30;
     private static final int TIME_INTEGRITY = 20;
     private static final int TIME_EMULATION = 15;
-    
+
     // UI Elements - Category Checkboxes
     private CheckBox cbCpuSingle;
     private CheckBox cbCpuMulti;
@@ -88,7 +85,7 @@ public class ProfessionalToolsActivity extends AppCompatActivity {
     private CheckBox cbStorage;
     private CheckBox cbIntegrity;
     private CheckBox cbEmulation;
-    
+
     // UI Elements - Methodology Chips
     private Chip chipISO;
     private Chip chipIEEE;
@@ -96,7 +93,7 @@ public class ProfessionalToolsActivity extends AppCompatActivity {
     private Chip chipNIST;
     private Chip chipSPEC;
     private Chip chipMLPerf;
-    
+
     // UI Elements - Status and Progress
     private Chip chipValidationStatus;
     private TextView tvEstimatedTime;
@@ -110,7 +107,7 @@ public class ProfessionalToolsActivity extends AppCompatActivity {
     private LinearProgressIndicator progressIndicator;
     private TextView tvProgressText;
     private TextView tvProgressDetail;
-    
+
     // UI Elements - Results
     private LinearLayout layoutResults;
     private TextView tvExecutiveSummary;
@@ -123,7 +120,7 @@ public class ProfessionalToolsActivity extends AppCompatActivity {
     private TextView tvStatStdDev;
     private TextView tvStatConfidence;
     private TextView tvStatReproducibility;
-    
+
     // UI Elements - Buttons
     private MaterialButton btnRunAnalysis;
     private MaterialButton btnSelectAll;
@@ -131,7 +128,7 @@ public class ProfessionalToolsActivity extends AppCompatActivity {
     private LinearLayout btnViewFullReport;
     private LinearLayout btnExportReport;
     private LinearLayout btnShareReport;
-    
+
     // Data
     private VectraBenchmark.BenchmarkResult[] lastResults;
     private BenchmarkManager.BenchmarkResult lastBenchmarkResult;
@@ -139,13 +136,13 @@ public class ProfessionalToolsActivity extends AppCompatActivity {
     private final ExecutorService executor =
         ExecutionPolicyCenter.executor(ExecutionPolicyCenter.Channel.PROFESSIONAL);
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
-    
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_professional_tools);
-        
+
         setupToolbar();
         initViews();
         bindStaticEstimatedTimes();
@@ -153,7 +150,7 @@ public class ProfessionalToolsActivity extends AppCompatActivity {
         setupListeners();
         updateEstimatedTime();
     }
-    
+
     private void setupToolbar() {
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -164,7 +161,7 @@ public class ProfessionalToolsActivity extends AppCompatActivity {
         }
         toolbar.setTitle(getString(R.string.professional_tools));
     }
-    
+
     private void initViews() {
         // Category Checkboxes
         cbCpuSingle = findViewById(R.id.cbCpuSingle);
@@ -173,7 +170,7 @@ public class ProfessionalToolsActivity extends AppCompatActivity {
         cbStorage = findViewById(R.id.cbStorage);
         cbIntegrity = findViewById(R.id.cbIntegrity);
         cbEmulation = findViewById(R.id.cbEmulation);
-        
+
         // Methodology Chips
         chipISO = findViewById(R.id.chipISO);
         chipIEEE = findViewById(R.id.chipIEEE);
@@ -181,7 +178,7 @@ public class ProfessionalToolsActivity extends AppCompatActivity {
         chipNIST = findViewById(R.id.chipNIST);
         chipSPEC = findViewById(R.id.chipSPEC);
         chipMLPerf = findViewById(R.id.chipMLPerf);
-        
+
         // Status and Progress
         chipValidationStatus = findViewById(R.id.chipValidationStatus);
         tvEstimatedTime = findViewById(R.id.tvEstimatedTime);
@@ -195,7 +192,7 @@ public class ProfessionalToolsActivity extends AppCompatActivity {
         progressIndicator = findViewById(R.id.progressIndicator);
         tvProgressText = findViewById(R.id.tvProgressText);
         tvProgressDetail = findViewById(R.id.tvProgressDetail);
-        
+
         // Results
         layoutResults = findViewById(R.id.layoutResults);
         tvExecutiveSummary = findViewById(R.id.tvExecutiveSummary);
@@ -208,7 +205,7 @@ public class ProfessionalToolsActivity extends AppCompatActivity {
         tvStatStdDev = findViewById(R.id.tvStatStdDev);
         tvStatConfidence = findViewById(R.id.tvStatConfidence);
         tvStatReproducibility = findViewById(R.id.tvStatReproducibility);
-        
+
         // Buttons
         btnRunAnalysis = findViewById(R.id.btnRunAnalysis);
         btnSelectAll = findViewById(R.id.btnSelectAll);
@@ -217,7 +214,7 @@ public class ProfessionalToolsActivity extends AppCompatActivity {
         btnExportReport = findViewById(R.id.btnExportReport);
         btnShareReport = findViewById(R.id.btnShareReport);
     }
-    
+
     private void setupListeners() {
         // Category checkbox listeners - update estimated time
         View.OnClickListener checkboxListener = v -> updateEstimatedTime();
@@ -227,7 +224,7 @@ public class ProfessionalToolsActivity extends AppCompatActivity {
         cbStorage.setOnClickListener(checkboxListener);
         cbIntegrity.setOnClickListener(checkboxListener);
         cbEmulation.setOnClickListener(checkboxListener);
-        
+
         // Select/Deselect all
         btnSelectAll.setOnClickListener(v -> {
             cbCpuSingle.setChecked(true);
@@ -238,7 +235,7 @@ public class ProfessionalToolsActivity extends AppCompatActivity {
             cbEmulation.setChecked(true);
             updateEstimatedTime();
         });
-        
+
         btnDeselectAll.setOnClickListener(v -> {
             cbCpuSingle.setChecked(false);
             cbCpuMulti.setChecked(false);
@@ -248,16 +245,16 @@ public class ProfessionalToolsActivity extends AppCompatActivity {
             cbEmulation.setChecked(false);
             updateEstimatedTime();
         });
-        
+
         // Main action button
         btnRunAnalysis.setOnClickListener(v -> runAnalysis());
-        
+
         // Result action buttons
         btnViewFullReport.setOnClickListener(v -> showFullReport());
         btnExportReport.setOnClickListener(v -> exportReport());
         btnShareReport.setOnClickListener(v -> shareReport());
     }
-    
+
     private void bindStaticEstimatedTimes() {
         setCategoryEstimatedTime(tvCpuSingleTime, TIME_CPU_SINGLE);
         setCategoryEstimatedTime(tvCpuMultiTime, TIME_CPU_MULTI);
@@ -297,7 +294,7 @@ public class ProfessionalToolsActivity extends AppCompatActivity {
     private void updateEstimatedTime() {
         int totalSeconds = 0;
         int selectedCategories = 0;
-        
+
         if (cbCpuSingle.isChecked()) {
             totalSeconds += TIME_CPU_SINGLE;
             selectedCategories++;
@@ -322,7 +319,7 @@ public class ProfessionalToolsActivity extends AppCompatActivity {
             totalSeconds += TIME_EMULATION;
             selectedCategories++;
         }
-        
+
         if (totalSeconds == 0) {
             tvEstimatedTime.setText(getString(R.string.pro_tools_no_categories_selected));
             btnRunAnalysis.setEnabled(false);
@@ -339,7 +336,7 @@ public class ProfessionalToolsActivity extends AppCompatActivity {
             btnRunAnalysis.setEnabled(true);
         }
     }
-    
+
     private List<Integer> getSelectedCategories() {
         List<Integer> categories = new ArrayList<>();
         if (cbCpuSingle.isChecked()) categories.add(0);
@@ -350,7 +347,7 @@ public class ProfessionalToolsActivity extends AppCompatActivity {
         if (cbEmulation.isChecked()) categories.add(5);
         return categories;
     }
-    
+
     private List<String> getSelectedMethodologies() {
         List<String> methodologies = new ArrayList<>();
         if (chipISO.isChecked()) methodologies.add("ISO/IEC 25010");
@@ -361,21 +358,21 @@ public class ProfessionalToolsActivity extends AppCompatActivity {
         if (chipMLPerf.isChecked()) methodologies.add("MLPerf");
         return methodologies;
     }
-    
+
     private void runAnalysis() {
         List<Integer> selectedCategories = getSelectedCategories();
         if (selectedCategories.isEmpty()) {
             Toast.makeText(this, R.string.pro_tools_select_at_least_one, Toast.LENGTH_SHORT).show();
             return;
         }
-        
+
         // Update UI state
         layoutProgress.setVisibility(View.VISIBLE);
         layoutResults.setVisibility(View.GONE);
         btnRunAnalysis.setEnabled(false);
         chipValidationStatus.setText(R.string.pro_tools_status_running);
         progressIndicator.setProgress(0);
-        
+
         // Run in background
         executor.execute(() -> {
             try {
@@ -384,7 +381,7 @@ public class ProfessionalToolsActivity extends AppCompatActivity {
                     tvProgressText.setText(R.string.pro_tools_initializing);
                     tvProgressDetail.setText(R.string.pro_tools_warming_up);
                 });
-                
+
                 BenchmarkManager benchmarkManager = new BenchmarkManager(this);
                 BenchmarkManager.BenchmarkResult benchmarkResult = benchmarkManager.runBenchmark(
                     new BenchmarkManager.ProgressCallback() {
@@ -428,17 +425,17 @@ public class ProfessionalToolsActivity extends AppCompatActivity {
                 AnalysisReport report = generateAnalysisReport(
                     benchmarkResult, selectedCategories, getSelectedMethodologies());
                 lastReport = report;
-                
+
                 // Update progress - Finalizing
                 mainHandler.post(() -> {
                     progressIndicator.setProgress(90);
                     tvProgressText.setText(R.string.pro_tools_finalizing);
                     tvProgressDetail.setText(R.string.pro_tools_generating_report);
                 });
-                
+
                 // Small delay for visual feedback
                 Thread.sleep(500);
-                
+
                 // Update UI with results
                 mainHandler.post(() -> {
                     progressIndicator.setProgress(100);
@@ -448,7 +445,7 @@ public class ProfessionalToolsActivity extends AppCompatActivity {
                     btnRunAnalysis.setEnabled(true);
                     chipValidationStatus.setText(R.string.pro_tools_status_complete);
                 });
-                
+
             } catch (Exception e) {
                 mainHandler.post(() -> {
                     layoutProgress.setVisibility(View.GONE);
@@ -456,36 +453,36 @@ public class ProfessionalToolsActivity extends AppCompatActivity {
                     applyStatisticsCollectionError();
                     btnRunAnalysis.setEnabled(true);
                     chipValidationStatus.setText(R.string.pro_tools_status_error);
-                    Toast.makeText(this, getString(R.string.pro_tools_analysis_failed, e.getMessage()), 
+                    Toast.makeText(this, getString(R.string.pro_tools_analysis_failed, e.getMessage()),
                             Toast.LENGTH_LONG).show();
                 });
             }
         });
     }
-    
+
     private AnalysisReport generateAnalysisReport(BenchmarkManager.BenchmarkResult benchmarkResult,
                                                    List<Integer> selectedCategories,
                                                    List<String> methodologies) {
         VectraBenchmark.BenchmarkResult[] results = benchmarkResult.metrics;
         AnalysisReport report = new AnalysisReport();
-        
+
         // Get device specifications
         VectraBenchmark.DeviceSpecification deviceSpec = VectraBenchmark.getDeviceSpecification();
-        
-        // Calculate metrics count
+
+        // Calculate metrics count without treating different metrics as repeated samples.
         int totalMetrics = 0;
         for (VectraBenchmark.BenchmarkResult r : results) {
             if (r != null) totalMetrics++;
         }
-        
-        report.totalScore = totalMetrics; // Use metric count instead of arbitrary score
+
+        report.totalScore = totalMetrics; // metric count only; not a statistical score
         report.categoryScores = new int[6]; // Not used in new format
         report.methodologies = methodologies;
         report.selectedCategories = selectedCategories;
         report.complianceStandards = QualityStandardsCatalog.getDefaultStandards();
         report.integrationSources = buildIntegrationSources();
         report.governance = benchmarkResult.governance;
-        
+
         // Store device specifications
         report.deviceModel = deviceSpec.cpuModel;
         report.deviceManufacturer = Build.MANUFACTURER;
@@ -495,135 +492,71 @@ public class ProfessionalToolsActivity extends AppCompatActivity {
         report.cpuArchitecture = deviceSpec.cpuArchitecture;
         report.androidVersion = Build.VERSION.RELEASE;
         report.cpuAbi = Build.SUPPORTED_ABIS[0];
-        
-        // Statistical analysis using raw nanosecond values
-        long[] values = Arrays.stream(results)
-                .filter(r -> r != null)
-                .mapToLong(VectraBenchmark.BenchmarkResult::rawValue)
-                .toArray();
-        
-        report.mean = calculateMean(values);
-        report.median = calculateMedian(values);
-        report.stdDev = calculateStdDev(values, report.mean);
-        report.confidenceInterval95 = calculateConfidenceInterval(values, 0.95);
-        
-        // Reproducibility assessment
-        report.reproducibilityScore = assessReproducibility(results);
-        
-        // Validation grade assessment
-        report.isIndustryGrade = assessIndustryGrade(report);
-        report.isAcademicGrade = assessAcademicGrade(report);
-        report.isScientificGrade = assessScientificGrade(report);
-        
+
+        // BenchmarkManager currently exposes one result per metric, not repeated samples
+        // for the same metric/workload/input/unit identity. The only valid action is to
+        // preserve the individual metrics and fail closed for aggregate reproducibility.
+        markHomogeneousStatisticsNotMeasured(report);
+
         // Generate executive summary with device specs
         report.executiveSummary = generateExecutiveSummary(report, deviceSpec);
-        
+
         // Generate grade justification
         report.gradeJustification = generateGradeJustification(report);
-        
+
         report.timestamp = new Date();
-        
+
         return report;
     }
-    
-    private double calculateMean(long[] values) {
-        if (values.length == 0) return 0;
-        // Use double accumulation to prevent overflow
-        double sum = 0;
-        for (long v : values) sum += v;
-        return sum / values.length;
+
+    private void markHomogeneousStatisticsNotMeasured(AnalysisReport report) {
+        report.homogeneousStatisticsAvailable = false;
+        report.statisticsState = "NOT_MEASURED";
+        report.statisticsBoundary =
+                "Repeated samples for one metric/workload/input/unit were not captured by this run; "
+                + "heterogeneous metric results are preserved individually and are not pooled.";
+        report.mean = Double.NaN;
+        report.median = Double.NaN;
+        report.stdDev = Double.NaN;
+        report.confidenceInterval95 = null;
+        report.reproducibilityScore = Double.NaN;
+
+        // Grade-like promotion is fail-closed until a receipt carries the required
+        // homogeneous repeated-series evidence and provenance.
+        report.isIndustryGrade = false;
+        report.isAcademicGrade = false;
+        report.isScientificGrade = false;
     }
-    
-    private double calculateMedian(long[] values) {
-        if (values.length == 0) return 0;
-        long[] sorted = values.clone();
-        Arrays.sort(sorted);
-        int mid = sorted.length / 2;
-        if (sorted.length % 2 == 0) {
-            return (sorted[mid - 1] + sorted[mid]) / 2.0;
-        } else {
-            return sorted[mid];
-        }
+
+    /**
+     * Adapter for a future producer that supplies repeated samples of exactly one metric,
+     * workload, input and unit. This method deliberately does not create a grade or a
+     * synthetic "reproducibility percentage". It only summarizes the homogeneous series
+     * using the methodology-bound IndustrialStatistics implementation.
+     */
+    @SuppressWarnings("unused")
+    private void applyHomogeneousSeriesStatistics(AnalysisReport report, long[] homogeneousSamples) {
+        IndustrialStatistics.SeriesSummary summary = IndustrialStatistics.summarize(homogeneousSamples);
+        report.homogeneousStatisticsAvailable = summary.variabilityEstimable;
+        report.statisticsState = summary.variabilityEstimable ? "OBSERVED_LIMITED" : "NOT_MEASURED";
+        report.statisticsBoundary = summary.variabilityEstimable
+                ? "Homogeneous repeated series summarized; no certification or grade is implied."
+                : "One sample is an observation, not reproducibility evidence.";
+        report.mean = summary.mean;
+        report.median = summary.median;
+        report.stdDev = summary.sampleStdDev;
+        report.confidenceInterval95 = summary.confidenceIntervalEstimable
+                ? new double[] {summary.ci95Low, summary.ci95High}
+                : null;
+        report.reproducibilityScore = Double.NaN;
+        report.isIndustryGrade = false;
+        report.isAcademicGrade = false;
+        report.isScientificGrade = false;
     }
-    
-    private double calculateStdDev(long[] values, double mean) {
-        if (values.length == 0) return 0;
-        double sumSquaredDiff = 0;
-        for (long v : values) {
-            double diff = v - mean;
-            sumSquaredDiff += diff * diff;
-        }
-        return Math.sqrt(sumSquaredDiff / values.length);
-    }
-    
-    private double[] calculateConfidenceInterval(long[] values, double confidenceLevel) {
-        double mean = calculateMean(values);
-        double stdDev = calculateStdDev(values, mean);
-        double margin = Z_SCORE_95_PERCENT * (stdDev / Math.sqrt(values.length));
-        return new double[] { mean - margin, mean + margin };
-    }
-    
-    private double assessReproducibility(VectraBenchmark.BenchmarkResult[] results) {
-        // Calculate coefficient of variation as reproducibility metric
-        // Lower CV = higher reproducibility
-        // Use raw values in nanoseconds for consistent measurement
-        long[] rawValues = Arrays.stream(results)
-                .filter(r -> r != null)
-                .mapToLong(VectraBenchmark.BenchmarkResult::rawValue)
-                .toArray();
-        
-        if (rawValues.length == 0) return 0;
-        
-        double mean = calculateMean(rawValues);
-        double stdDev = calculateStdDev(rawValues, mean);
-        
-        if (mean == 0) return 100; // Perfect reproducibility if all zeros
-        double cv = (stdDev / mean) * 100;
-        
-        // Convert to reproducibility percentage (inverse of CV, capped at 100%)
-        // For typical benchmarks, CV < 5% is excellent
-        return Math.max(0, Math.min(100, 100 - Math.min(cv, 100)));
-    }
-    
-    private boolean assessIndustryGrade(AnalysisReport report) {
-        // Industry grade requires:
-        // - At least 3 categories measured
-        // - Reproducibility > 70%
-        // - At least 2 methodology standards applied
-        return report.selectedCategories.size() >= 3 
-                && report.reproducibilityScore >= 70 
-                && report.methodologies.size() >= 2;
-    }
-    
-    private boolean assessAcademicGrade(AnalysisReport report) {
-        // Academic grade requires:
-        // - At least 5 categories measured
-        // - Reproducibility > 85%
-        // - At least 3 methodology standards applied
-        // - Statistical analysis complete
-        return report.selectedCategories.size() >= 5 
-                && report.reproducibilityScore >= 85 
-                && report.methodologies.size() >= 3
-                && report.stdDev > 0;
-    }
-    
-    private boolean assessScientificGrade(AnalysisReport report) {
-        // Scientific grade requires:
-        // - All 6 categories measured
-        // - Reproducibility > 95%
-        // - At least 4 methodology standards applied
-        // - Full statistical analysis
-        // - Confidence interval within acceptable range
-        return report.selectedCategories.size() >= 6 
-                && report.reproducibilityScore >= 95 
-                && report.methodologies.size() >= 4
-                && report.stdDev > 0
-                && report.confidenceInterval95 != null;
-    }
-    
+
     private String generateExecutiveSummary(AnalysisReport report, VectraBenchmark.DeviceSpecification deviceSpec) {
         StringBuilder sb = new StringBuilder();
-        
+
         // Device specifications header
         sb.append("DEVICE UNDER TEST (DUT)\n");
         sb.append("───────────────────────────────────\n");
@@ -631,13 +564,13 @@ public class ProfessionalToolsActivity extends AppCompatActivity {
         sb.append("Cores: ").append(deviceSpec.cpuCores).append(" @ ").append(deviceSpec.getFormattedCpuFreq()).append("\n");
         sb.append("RAM: ").append(deviceSpec.getFormattedRam()).append("\n");
         sb.append("Architecture: ").append(deviceSpec.cpuArchitecture).append("\n\n");
-        
+
         // Metrics summary
         sb.append("BENCHMARK SUMMARY\n");
         sb.append("───────────────────────────────────\n");
         sb.append("Total Metrics Measured: ").append(report.totalScore).append(" / 79\n");
         sb.append("Categories Selected: ").append(report.selectedCategories.size()).append(" / 6\n\n");
-        
+
         // Methodologies applied
         sb.append("METHODOLOGIES APPLIED\n");
         sb.append("───────────────────────────────────\n");
@@ -648,87 +581,102 @@ public class ProfessionalToolsActivity extends AppCompatActivity {
 
         appendGovernanceSummary(sb, report.governance);
 
-        // Statistical summary
+        // Statistical summary: never manufacture a cross-metric series.
         sb.append("STATISTICAL SUMMARY\n");
         sb.append("───────────────────────────────────\n");
-        sb.append("Mean Execution Time: ").append(VectraBenchmark.formatTime((long) report.mean)).append("\n");
-        sb.append("Median Execution Time: ").append(VectraBenchmark.formatTime((long) report.median)).append("\n");
-        sb.append("Reproducibility: ").append(String.format(Locale.US, "%.1f%%", report.reproducibilityScore));
-        
+        sb.append("Repeated-series state: ").append(report.statisticsState).append("\n");
+        if (report.homogeneousStatisticsAvailable) {
+            sb.append("Mean Execution Time: ").append(formatStatValueOrMissing(report.mean)).append("\n");
+            sb.append("Median Execution Time: ").append(formatStatValueOrMissing(report.median)).append("\n");
+        } else {
+            sb.append("Mean Execution Time: NOT_MEASURED\n");
+            sb.append("Median Execution Time: NOT_MEASURED\n");
+        }
+        sb.append("Reproducibility: ").append(formatReproducibilityOrMissing(report.reproducibilityScore)).append("\n");
+        sb.append("Boundary: ").append(report.statisticsBoundary);
+
         return sb.toString();
     }
-    
+
     // Overload for backward compatibility
     private String generateExecutiveSummary(AnalysisReport report) {
         return generateExecutiveSummary(report, VectraBenchmark.getDeviceSpecification());
     }
-    
+
     private String generateGradeJustification(AnalysisReport report) {
-        StringBuilder sb = new StringBuilder();
-        
-        if (report.isScientificGrade) {
-            sb.append(getString(R.string.pro_tools_grade_scientific_justification));
-        } else if (report.isAcademicGrade) {
-            sb.append(getString(R.string.pro_tools_grade_academic_justification));
-        } else if (report.isIndustryGrade) {
-            sb.append(getString(R.string.pro_tools_grade_industry_justification));
-        } else {
-            sb.append(getString(R.string.pro_tools_grade_informal_justification));
+        if (!report.homogeneousStatisticsAvailable) {
+            return "NOT_MEASURED: Industry/Academic/Scientific grade promotion is blocked because "
+                    + "this execution did not capture a homogeneous repeated measurement series with receipt-bound provenance.";
         }
-        
-        return sb.toString();
+
+        // Even with a homogeneous series, this activity does not self-certify. External
+        // acceptance predicates and receipt-bound provenance are required before promotion.
+        return "OBSERVED_LIMITED: homogeneous series statistics may be reported, but no Industry/Academic/Scientific grade is asserted by this UI.";
     }
-    
+
     private void displayResults(AnalysisReport report) {
         // Executive Summary
         tvExecutiveSummary.setText(report.executiveSummary);
-        
-        // Validation Grades
+
+        // Validation Grades: remain fail-closed unless a future explicit promotion gate is added.
         chipGradeIndustry.setChecked(report.isIndustryGrade);
         chipGradeAcademic.setChecked(report.isAcademicGrade);
         chipGradeScientific.setChecked(report.isScientificGrade);
         tvGradeJustification.setText(report.gradeJustification);
-        
-        // Statistical Analysis - Display with proper SI units
+
+        // Statistical Analysis - only homogeneous repeated-series summaries are displayable.
         tvStatMean.setText(formatStatValueOrMissing(report.mean));
         tvStatMedian.setText(formatStatValueOrMissing(report.median));
         tvStatStdDev.setText(formatStatValueOrMissing(report.stdDev));
-        
+
         if (report.confidenceInterval95 != null) {
             String ciLow = VectraBenchmark.formatTime((long) report.confidenceInterval95[0]);
             String ciHigh = VectraBenchmark.formatTime((long) report.confidenceInterval95[1]);
-            tvStatConfidence.setText(getString(R.string.pro_tools_confidence_template, 95, String.format(Locale.US, "[%s, %s]", ciLow, ciHigh)));
+            tvStatConfidence.setText(getString(R.string.pro_tools_confidence_template, 95,
+                    String.format(Locale.US, "[%s, %s]", ciLow, ciHigh)));
         } else {
-            tvStatConfidence.setText(R.string.pro_tools_confidence_collection_error);
+            tvStatConfidence.setText(R.string.pro_tools_stat_no_data);
         }
 
-        if (report.reproducibilityScore > 0) {
-            tvStatReproducibility.setText(getString(R.string.pro_tools_reproducibility_template, report.reproducibilityScore));
+        if (isFinitePositive(report.reproducibilityScore)) {
+            tvStatReproducibility.setText(getString(R.string.pro_tools_reproducibility_template,
+                    report.reproducibilityScore));
         } else {
             tvStatReproducibility.setText(R.string.pro_tools_stat_no_data);
         }
     }
 
+    private boolean isFinitePositive(double value) {
+        return !Double.isNaN(value) && !Double.isInfinite(value) && value > 0.0;
+    }
+
     private String formatStatValueOrMissing(double value) {
-        if (value <= 0) {
+        if (!isFinitePositive(value)) {
             return getString(R.string.pro_tools_stat_no_data);
         }
         return VectraBenchmark.formatTime((long) value);
     }
-    
+
+    private String formatReproducibilityOrMissing(double value) {
+        if (!isFinitePositive(value)) {
+            return "NOT_MEASURED";
+        }
+        return String.format(Locale.US, "%.1f%%", value);
+    }
+
     private String formatNumber(double value) {
         // Use VectraBenchmark's formatTime for time-based values
         return VectraBenchmark.formatTime((long) value);
     }
-    
+
     private void showFullReport() {
         if (lastReport == null) {
             Toast.makeText(this, R.string.pro_tools_no_results, Toast.LENGTH_SHORT).show();
             return;
         }
-        
+
         String fullReport = generateFullReport(lastReport);
-        
+
         TextView messageView = new TextView(this);
         messageView.setText(fullReport);
         messageView.setTextIsSelectable(true);
@@ -736,32 +684,32 @@ public class ProfessionalToolsActivity extends AppCompatActivity {
         // Use 10sp for readability on various devices
         messageView.setTextSize(android.util.TypedValue.COMPLEX_UNIT_SP, 10);
         messageView.setPadding(16, 16, 16, 16);
-        
+
         android.widget.ScrollView scrollView = new android.widget.ScrollView(this);
         scrollView.addView(messageView);
-        
+
         new MaterialAlertDialogBuilder(this)
                 .setTitle(R.string.pro_tools_full_report_title)
                 .setView(scrollView)
                 .setPositiveButton(android.R.string.ok, null)
                 .show();
     }
-    
+
     private String generateFullReport(AnalysisReport report) {
         StringBuilder sb = new StringBuilder();
-        
+
         // Header
         sb.append("╔════════════════════════════════════════════════════════════════════════════════╗\n");
         sb.append("║         VECTRAS PROFESSIONAL ANALYSIS REPORT                                   ║\n");
-        sb.append("║         Engineering / Benchmark / Scientific System                            ║\n");
+        sb.append("║         Engineering / Benchmark / Evidence-Gated System                        ║\n");
         sb.append("║         (Formal Engineering Metrics - SI Units)                                ║\n");
         sb.append("╠════════════════════════════════════════════════════════════════════════════════╣\n");
-        
+
         // Metadata
-        sb.append(String.format("║ Report Generated: %-60s║\n", 
+        sb.append(String.format("║ Report Generated: %-60s║\n",
                 new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US).format(report.timestamp)));
         sb.append("╠════════════════════════════════════════════════════════════════════════════════╣\n");
-        
+
         // Section 0: Device Specifications
         sb.append("║ 0. DEVICE UNDER TEST (DUT) - TECHNICAL SPECIFICATIONS                         ║\n");
         sb.append("╠════════════════════════════════════════════════════════════════════════════════╣\n");
@@ -785,13 +733,13 @@ public class ProfessionalToolsActivity extends AppCompatActivity {
             sb.append("║  Telemetry unavailable for this execution.                                    ║\n");
         }
         sb.append("╠════════════════════════════════════════════════════════════════════════════════╣\n");
-        
+
         // Section 1: Executive Summary
         sb.append("║ 1. EXECUTIVE TECHNICAL SUMMARY                                                ║\n");
         sb.append("╠════════════════════════════════════════════════════════════════════════════════╣\n");
         sb.append(wrapText(report.executiveSummary, 78));
         sb.append("╠════════════════════════════════════════════════════════════════════════════════╣\n");
-        
+
         // Section 2: Methodology Standards
         sb.append("║ 2. METHODOLOGY STANDARDS APPLIED                                              ║\n");
         sb.append("╠════════════════════════════════════════════════════════════════════════════════╣\n");
@@ -822,32 +770,37 @@ public class ProfessionalToolsActivity extends AppCompatActivity {
         appendGovernanceTable(sb, report.governance);
         sb.append("╠════════════════════════════════════════════════════════════════════════════════╣\n");
 
-        // Section 3: Statistical Analysis with SI Units
-        sb.append("║ 3. STATISTICAL ROBUSTNESS (SI Units)                                          ║\n");
+        // Section 3: Statistical Analysis with explicit evidence state
+        sb.append("║ 3. STATISTICAL ROBUSTNESS (HOMOGENEOUS SERIES ONLY)                           ║\n");
         sb.append("╠════════════════════════════════════════════════════════════════════════════════╣\n");
-        sb.append(String.format("║  Mean Execution Time:     %-52s║\n", VectraBenchmark.formatTime((long) report.mean)));
-        sb.append(String.format("║  Median Execution Time:   %-52s║\n", VectraBenchmark.formatTime((long) report.median)));
-        sb.append(String.format("║  Standard Deviation:      %-52s║\n", VectraBenchmark.formatTime((long) report.stdDev)));
+        sb.append(String.format("║  Evidence State:          %-52s║\n", truncateStr(report.statisticsState, 52)));
+        sb.append(String.format("║  Mean Execution Time:     %-52s║\n", formatStatValueOrMissing(report.mean)));
+        sb.append(String.format("║  Median Execution Time:   %-52s║\n", formatStatValueOrMissing(report.median)));
+        sb.append(String.format("║  Standard Deviation:      %-52s║\n", formatStatValueOrMissing(report.stdDev)));
         if (report.confidenceInterval95 != null) {
             String ciLow = VectraBenchmark.formatTime((long) report.confidenceInterval95[0]);
             String ciHigh = VectraBenchmark.formatTime((long) report.confidenceInterval95[1]);
             sb.append(String.format("║  95%% Confidence Interval: [%s, %s]%-20s║\n", ciLow, ciHigh, ""));
+        } else {
+            sb.append(String.format("║  95%% Confidence Interval: %-52s║\n", "NOT_MEASURED"));
         }
-        sb.append(String.format("║  Reproducibility Score:   %-52s║\n", 
-                String.format(Locale.US, "%.1f%%", report.reproducibilityScore)));
+        sb.append(String.format("║  Reproducibility:         %-52s║\n",
+                formatReproducibilityOrMissing(report.reproducibilityScore)));
+        sb.append("║  Boundary:                                                                    ║\n");
+        sb.append(wrapText(report.statisticsBoundary, 78));
         sb.append("╠════════════════════════════════════════════════════════════════════════════════╣\n");
-        
+
         // Section 4: Validation Grade
         sb.append("║ 4. ALIGNMENT WITH ACADEMIC STANDARDS                                          ║\n");
         sb.append("╠════════════════════════════════════════════════════════════════════════════════╣\n");
-        sb.append(String.format("║  Industry-grade:        %-54s║\n", report.isIndustryGrade ? "✓ PASSED" : "✗ NOT MET"));
-        sb.append(String.format("║  Academic-grade:        %-54s║\n", report.isAcademicGrade ? "✓ PASSED" : "✗ NOT MET"));
-        sb.append(String.format("║  Scientific-grade:      %-54s║\n", report.isScientificGrade ? "✓ PASSED" : "✗ NOT MET"));
+        sb.append(String.format("║  Industry-grade:        %-54s║\n", report.isIndustryGrade ? "✓ PASSED" : "✗ NOT ASSERTED"));
+        sb.append(String.format("║  Academic-grade:        %-54s║\n", report.isAcademicGrade ? "✓ PASSED" : "✗ NOT ASSERTED"));
+        sb.append(String.format("║  Scientific-grade:      %-54s║\n", report.isScientificGrade ? "✓ PASSED" : "✗ NOT ASSERTED"));
         sb.append("╠════════════════════════════════════════════════════════════════════════════════╣\n");
         sb.append("║  Justification:                                                               ║\n");
         sb.append(wrapText(report.gradeJustification, 78));
         sb.append("╠════════════════════════════════════════════════════════════════════════════════╣\n");
-        
+
         // Section 5: Metrics Summary
         sb.append("║ 5. METRICS TAXONOMY SUMMARY                                                   ║\n");
         sb.append("╠════════════════════════════════════════════════════════════════════════════════╣\n");
@@ -856,39 +809,38 @@ public class ProfessionalToolsActivity extends AppCompatActivity {
         for (int i = 0; i < categoryNames.length; i++) {
             boolean selected = report.selectedCategories.contains(i);
             String status = selected ? "✓ Measured" : "○ Not selected";
-            sb.append(String.format("║  %-25s: %d metrics (%s)%-20s║\n", 
+            sb.append(String.format("║  %-25s: %d metrics (%s)%-20s║\n",
                     categoryNames[i], metricCounts[i], status, ""));
         }
         sb.append(String.format("║  %-25s: %d metrics total%-30s║\n", "TOTAL MEASURED", report.totalScore, ""));
         sb.append("╠════════════════════════════════════════════════════════════════════════════════╣\n");
-        
+
         // Section 6: Formal Technical Verdict
         sb.append("║ 6. FORMAL TECHNICAL VERDICT                                                   ║\n");
         sb.append("╠════════════════════════════════════════════════════════════════════════════════╣\n");
         String verdict;
         if (report.isScientificGrade) {
-            verdict = "This analysis meets SCIENTIFIC-GRADE standards and is suitable for peer-reviewed publications, technical audits, and expert testimony.";
+            verdict = "Scientific-grade promotion was explicitly authorized by an external evidence gate.";
         } else if (report.isAcademicGrade) {
-            verdict = "This analysis meets ACADEMIC-GRADE standards and is suitable for research reports, engineering documentation, and university submissions.";
+            verdict = "Academic-grade promotion was explicitly authorized by an external evidence gate.";
         } else if (report.isIndustryGrade) {
-            verdict = "This analysis meets INDUSTRY-GRADE standards and is suitable for engineering benchmarks, performance assessments, and technical documentation.";
+            verdict = "Industry-grade promotion was explicitly authorized by an external evidence gate.";
         } else {
-            verdict = "This analysis is INFORMAL engineering-grade. Additional metrics, methodologies, or reproducibility improvements are recommended.";
+            verdict = "No Industry/Academic/Scientific grade is asserted. Individual benchmark metrics are preserved, while repeated homogeneous-series evidence remains required for statistical reproducibility claims.";
         }
         sb.append(wrapText(verdict, 78));
-        
+
         // Footer
         sb.append("╚════════════════════════════════════════════════════════════════════════════════╝\n");
-        
+
         // Detailed Results (if available)
         if (lastResults != null) {
             sb.append("\n");
             sb.append(VectraBenchmark.formatReport(lastResults));
         }
-        
+
         return sb.toString();
     }
-    
 
     private void appendGovernanceSummary(StringBuilder sb, BenchmarkManager.ExecutionGovernance governance) {
         if (governance == null) {
@@ -928,7 +880,7 @@ public class ProfessionalToolsActivity extends AppCompatActivity {
         if (s == null) return "";
         return s.length() <= maxLen ? s : s.substring(0, maxLen - 3) + "...";
     }
-    
+
     private String wrapText(String text, int width) {
         StringBuilder result = new StringBuilder();
         String[] lines = text.split("\n");
@@ -939,7 +891,7 @@ public class ProfessionalToolsActivity extends AppCompatActivity {
             }
             String[] words = textLine.split(" ");
             StringBuilder line = new StringBuilder();
-            
+
             for (String word : words) {
                 if (line.length() + word.length() + 1 > width) {
                     result.append(String.format("║ %-" + width + "s║\n", line.toString().trim()));
@@ -960,13 +912,13 @@ public class ProfessionalToolsActivity extends AppCompatActivity {
         sources.add("androidx_RmR: " + AppConfig.rafaeliaAndroidxRepo);
         return sources;
     }
-    
+
     private void exportReport() {
         if (lastReport == null) {
             Toast.makeText(this, R.string.pro_tools_no_results, Toast.LENGTH_SHORT).show();
             return;
         }
-        
+
         executor.execute(() -> {
             try {
                 String timestamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(new Date());
@@ -976,40 +928,40 @@ public class ProfessionalToolsActivity extends AppCompatActivity {
                     exportDir.mkdirs();
                 }
                 File exportFile = new File(exportDir, fileName);
-                
+
                 String report = generateFullReport(lastReport);
                 FileUtils.writeToFile(exportDir.getAbsolutePath(), fileName, report);
-                
+
                 mainHandler.post(() -> {
-                    Toast.makeText(this, 
-                            getString(R.string.pro_tools_report_exported, exportFile.getAbsolutePath()), 
+                    Toast.makeText(this,
+                            getString(R.string.pro_tools_report_exported, exportFile.getAbsolutePath()),
                             Toast.LENGTH_LONG).show();
                 });
-                
+
             } catch (Exception e) {
                 mainHandler.post(() -> {
-                    Toast.makeText(this, getString(R.string.pro_tools_export_failed, e.getMessage()), 
+                    Toast.makeText(this, getString(R.string.pro_tools_export_failed, e.getMessage()),
                             Toast.LENGTH_LONG).show();
                 });
             }
         });
     }
-    
+
     private void shareReport() {
         if (lastReport == null) {
             Toast.makeText(this, R.string.pro_tools_no_results, Toast.LENGTH_SHORT).show();
             return;
         }
-        
+
         String report = generateFullReport(lastReport);
-        
+
         Intent shareIntent = new Intent(Intent.ACTION_SEND);
         shareIntent.setType("text/plain");
         shareIntent.putExtra(Intent.EXTRA_SUBJECT, "Vectras VM Professional Analysis Report");
         shareIntent.putExtra(Intent.EXTRA_TEXT, report);
         startActivity(Intent.createChooser(shareIntent, getString(R.string.pro_tools_share_report)));
     }
-    
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == android.R.id.home) {
@@ -1018,12 +970,12 @@ public class ProfessionalToolsActivity extends AppCompatActivity {
         }
         return super.onOptionsItemSelected(item);
     }
-    
+
     @Override
     protected void onDestroy() {
         super.onDestroy();
     }
-    
+
     /**
      * Internal class to hold analysis report data
      */
@@ -1035,23 +987,26 @@ public class ProfessionalToolsActivity extends AppCompatActivity {
         List<String> integrationSources;
         List<Integer> selectedCategories;
         BenchmarkManager.ExecutionGovernance governance;
-        
-        // Statistical analysis
+
+        // Statistical analysis: valid only for a homogeneous repeated series.
+        boolean homogeneousStatisticsAvailable;
+        String statisticsState;
+        String statisticsBoundary;
         double mean;
         double median;
         double stdDev;
         double[] confidenceInterval95;
         double reproducibilityScore;
-        
+
         // Validation grades
         boolean isIndustryGrade;
         boolean isAcademicGrade;
         boolean isScientificGrade;
-        
+
         // Text content
         String executiveSummary;
         String gradeJustification;
-        
+
         // Device specifications
         String deviceModel;
         String deviceManufacturer;
