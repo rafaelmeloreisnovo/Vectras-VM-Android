@@ -181,7 +181,7 @@ object CrossRepoIntegrationManager {
         val providerApk = normalizeSha256(prefs.getString(KEY_PROVIDER_APK_PREF, null))
         val binaryDigest = runCatching {
             val json = JSONObject(prefs.getString(KEY_PROVIDER_QEMU_PREF, "{}") ?: "{}")
-            normalizeSha256(json.optString(binaryName, null))
+            if (json.has(binaryName)) normalizeSha256(json.optString(binaryName)) else null
         }.getOrNull()
         return CachedProviderIdentity(
             providerApkSha256 = providerApk,
