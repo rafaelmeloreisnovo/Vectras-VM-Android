@@ -6,6 +6,8 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
+import java.io.File
+import java.security.MessageDigest
 import java.util.UUID
 
 /**
@@ -51,6 +53,7 @@ object VectrasTermuxBridge {
         val reason: String? = null,
         val requestSha256: String? = null,
         val argumentCount: Int? = null,
+        val provenanceBound: Boolean = false,
     )
 
     fun dispatchQemu(
@@ -99,6 +102,15 @@ object VectrasTermuxBridge {
         }
 
         val transactionId = "tx-vectras-termux-${UUID.randomUUID()}"
+        val providerIdentity = CrossRepoIntegrationManager.loadProviderIdentity(context, binaryName)
+        val producerApkSha256 = context.applicationInfo.sourceDir
+            ?.let(::File)
+            ?.takeIf { it.isFile }
+            ?.let(::sha256File)
+        val provenanceBound = producerApkSha256 != null &&
+            providerIdentity.providerApkSha256 != null &&
+            providerIdentity.providerBinarySha256Discovery != null
+
         val requestSha256 = VectrasTermuxIpcContract.sha256(
             VectrasTermuxIpcContract.canonicalRequest(
                 transactionId = transactionId,
@@ -112,6 +124,11 @@ object VectrasTermuxBridge {
                 binaryName = binaryName,
                 arguments = boundedArguments,
                 requestSha256 = requestSha256,
+                producerApkSha256 = producerApkSha256,
+                providerApkSha256Discovery = providerIdentity.providerApkSha256,
+                providerBinarySha256Discovery = providerIdentity.providerBinarySha256Discovery,
+                providerIdentityObservedAtEpochMs = providerIdentity.observedAtEpochMs,
+                providerVersionDiscovery = providerIdentity.termuxVersion,
             )
         ) {
             return DispatchResult(
@@ -122,6 +139,7 @@ object VectrasTermuxBridge {
                 reason = "pending_request_not_persisted",
                 requestSha256 = requestSha256,
                 argumentCount = boundedArguments.size,
+                provenanceBound = provenanceBound,
             )
         }
 
@@ -189,6 +207,7 @@ object VectrasTermuxBridge {
                     reason = "service_component_null",
                     requestSha256 = requestSha256,
                     argumentCount = boundedArguments.size,
+                    provenanceBound = provenanceBound,
                 )
             } else {
                 DispatchResult(
@@ -198,9 +217,14 @@ object VectrasTermuxBridge {
                     component = component.flattenToShortString(),
                     executionProven = false,
                     claimAllowed = false,
-                    reason = "dispatch_accepted_execution_receipt_pending",
+                    reason = if (provenanceBound) {
+                        "dispatch_accepted_discovery_identity_bound_execution_receipt_pending"
+                    } else {
+                        "dispatch_accepted_provenance_partial_execution_receipt_pending"
+                    },
                     requestSha256 = requestSha256,
                     argumentCount = boundedArguments.size,
+                    provenanceBound = provenanceBound,
                 )
             }
         } catch (exc: SecurityException) {
@@ -212,6 +236,7 @@ object VectrasTermuxBridge {
                 reason = exc.javaClass.simpleName,
                 requestSha256 = requestSha256,
                 argumentCount = boundedArguments.size,
+                provenanceBound = provenanceBound,
             )
         } catch (exc: RuntimeException) {
             DispatchResult(
@@ -222,6 +247,7 @@ object VectrasTermuxBridge {
                 reason = exc.javaClass.simpleName,
                 requestSha256 = requestSha256,
                 argumentCount = boundedArguments.size,
+                provenanceBound = provenanceBound,
             )
         }
     }
@@ -233,4 +259,17 @@ object VectrasTermuxBridge {
         return context.checkSelfPermission(VectrasTermuxIpcContract.RUN_COMMAND_PERMISSION) ==
             PackageManager.PERMISSION_GRANTED
     }
+
+    private fun sha256File(file: File): String? = runCatching {
+        val digest = MessageDigest.getInstance("SHA-256")
+        file.inputStream().buffered().use { input ->
+            val buffer = ByteArray(DEFAULT_BUFFER_SIZE)
+            while (true) {
+                val count = input.read(buffer)
+                if (count < 0) break
+                if (count > 0) digest.update(buffer, 0, count)
+            }
+        }
+        digest.digest().joinToString("") { "%02x".format(it) }
+    }.getOrNull()
 }

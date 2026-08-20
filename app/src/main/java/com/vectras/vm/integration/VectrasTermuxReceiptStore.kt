@@ -8,7 +8,7 @@ import java.io.File
 /** Internal append-only request/receipt store for the Termux bridge. */
 object VectrasTermuxReceiptStore {
 
-    private const val REQUEST_SCHEMA = "raf.vectras-termux-request.v3"
+    private const val REQUEST_SCHEMA = "raf.vectras-termux-request.v4"
     private const val REQUEST_DIRECTORY = "rafaelia-runtime-requests"
     private const val RECEIPT_DIRECTORY = "rafaelia-runtime-receipts"
 
@@ -18,6 +18,11 @@ object VectrasTermuxReceiptStore {
         val requestSha256: String,
         val argumentCount: Int,
         val argumentsSha256: String,
+        val producerApkSha256: String?,
+        val providerApkSha256Discovery: String?,
+        val providerBinarySha256Discovery: String?,
+        val providerIdentityObservedAtEpochMs: Long,
+        val providerVersionDiscovery: String?,
         val createdAtEpochMs: Long,
     )
 
@@ -27,6 +32,11 @@ object VectrasTermuxReceiptStore {
         binaryName: String,
         arguments: List<String>,
         requestSha256: String,
+        producerApkSha256: String?,
+        providerApkSha256Discovery: String?,
+        providerBinarySha256Discovery: String?,
+        providerIdentityObservedAtEpochMs: Long,
+        providerVersionDiscovery: String?,
     ): Boolean {
         val directory = requestDirectory(context) ?: return false
         val target = File(directory, "$transactionId.json")
@@ -44,12 +54,19 @@ object VectrasTermuxReceiptStore {
             put("transaction_id", transactionId)
             put("producer", "rafaelmeloreisnovo/Vectras-VM-Android")
             put("producer_commit", "TOKEN_VAZIO")
+            put("producer_apk_sha256", producerApkSha256 ?: "TOKEN_VAZIO")
             put("target_package", VectrasTermuxIpcContract.TERMUX_PACKAGE)
             put("service_class", VectrasTermuxIpcContract.SERVICE_CLASS)
             put("action", VectrasTermuxIpcContract.ACTION_RUN_COMMAND)
             put("permission", VectrasTermuxIpcContract.RUN_COMMAND_PERMISSION)
             put("binary_name", binaryName)
             put("command_path", VectrasTermuxIpcContract.commandPath(binaryName))
+            put("provider_apk_sha256_discovery", providerApkSha256Discovery ?: "TOKEN_VAZIO")
+            put("provider_binary_sha256_discovery", providerBinarySha256Discovery ?: "TOKEN_VAZIO")
+            put("provider_identity_observed_at_epoch_ms", providerIdentityObservedAtEpochMs)
+            put("provider_version_discovery", providerVersionDiscovery ?: "TOKEN_VAZIO")
+            put("provider_identity_scope", "DISCOVERY_NOT_EXECUTION")
+            put("executable_sha256_at_execution", "TOKEN_VAZIO")
             put("workdir", VectrasTermuxIpcContract.WORKDIR)
             put("runner", VectrasTermuxIpcContract.RUNNER_APP_SHELL)
             put("argument_count", arguments.size)
@@ -81,6 +98,19 @@ object VectrasTermuxReceiptStore {
                 requestSha256 = requestSha256,
                 argumentCount = value.optInt("argument_count", -1),
                 argumentsSha256 = argumentsSha256,
+                producerApkSha256 = optionalSha256(value.optString("producer_apk_sha256")),
+                providerApkSha256Discovery = optionalSha256(
+                    value.optString("provider_apk_sha256_discovery"),
+                ),
+                providerBinarySha256Discovery = optionalSha256(
+                    value.optString("provider_binary_sha256_discovery"),
+                ),
+                providerIdentityObservedAtEpochMs = value.optLong(
+                    "provider_identity_observed_at_epoch_ms",
+                    -1L,
+                ),
+                providerVersionDiscovery = value.optString("provider_version_discovery")
+                    .takeUnless { it.isBlank() || it == "TOKEN_VAZIO" },
                 createdAtEpochMs = value.optLong("created_at_epoch_ms", -1L),
             )
         } catch (_: Exception) {
@@ -124,6 +154,10 @@ object VectrasTermuxReceiptStore {
             false
         }
     }
+
+    private fun optionalSha256(value: String?): String? = value
+        ?.lowercase()
+        ?.takeIf { SHA256_PATTERN.matches(it) }
 
     private fun safeTransactionId(value: String): Boolean = TRANSACTION_PATTERN.matches(value)
 
