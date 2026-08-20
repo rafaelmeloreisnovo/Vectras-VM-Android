@@ -44,12 +44,17 @@ set(RMR_SOURCE_GROUP_OPTIONAL_POLICY
 )
 
 # Android JNI/library-only units. Intentionally excluded from hosted targets.
+# rmr_vectra_os_armv7.S self-guards with __arm__ and is listed here as well as
+# in the per-arch inventory so the APK CMake consumer receives the backend that
+# rmr_vectra_os.c references on armeabi-v7a. Non-ARM Android ABIs see an empty
+# assembly translation unit.
 set(RMR_SOURCE_GROUP_ANDROID_ONLY
   engine/rmr/src/rmr_tcg_cache.c
   engine/rmr/src/rmr_virtio_blk.c
   engine/rmr/src/rmr_attractor.c
   engine/rmr/src/rmr_vhw_model.c
   engine/rmr/src/rmr_ethica_loss.c
+  engine/rmr/interop/rmr_vectra_os_armv7.S
 )
 
 # Hosted/root-only units. Intentionally excluded from Android shared library.
