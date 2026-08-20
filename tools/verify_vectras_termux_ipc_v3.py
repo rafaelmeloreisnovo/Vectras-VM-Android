@@ -146,8 +146,12 @@ def main() -> int:
             'TERMUX_PACKAGE = "com.termux.rafacodephi"',
             'TERMUX_RUN_COMMAND_PERMISSION =',
             '"qemu_binary_names"',
+            '"qemu_binary_sha256"',
+            '"provider_apk_sha256"',
             '"protocol_version"',
             '"private_paths_exposed"',
+            'provenanceReady',
+            'persistProviderIdentity(',
             'Context.RECEIVER_EXPORTED',
             'UUID.randomUUID()',
         ],
@@ -166,6 +170,8 @@ def main() -> int:
         bridge,
         [
             'VectrasTermuxIpcContract.boundedArguments(arguments)',
+            'CrossRepoIntegrationManager.loadProviderIdentity(context, binaryName)',
+            'producerApkSha256',
             'VectrasTermuxReceiptStore.writePending(',
             'State.REQUEST_PERSISTENCE_FAILED',
             'VectrasTermuxIpcContract.EXTRA_RUNNER',
@@ -173,7 +179,9 @@ def main() -> int:
             'PendingIntent.FLAG_MUTABLE',
             'executionProven = false',
             'claimAllowed = false',
-            '"dispatch_accepted_execution_receipt_pending"',
+            'provenanceBound = provenanceBound',
+            '"dispatch_accepted_discovery_identity_bound_execution_receipt_pending"',
+            '"dispatch_accepted_provenance_partial_execution_receipt_pending"',
         ],
         "bridge",
         errors,
@@ -194,10 +202,15 @@ def main() -> int:
     require(
         store,
         [
-            'REQUEST_SCHEMA = "raf.vectras-termux-request.v3"',
+            'REQUEST_SCHEMA = "raf.vectras-termux-request.v4"',
             'state", "PENDING_DISPATCH_RESULT"',
             '"request_sha256"',
             '"arguments_sha256"',
+            '"producer_apk_sha256"',
+            '"provider_apk_sha256_discovery"',
+            '"provider_binary_sha256_discovery"',
+            '"provider_identity_scope", "DISCOVERY_NOT_EXECUTION"',
+            '"executable_sha256_at_execution", "TOKEN_VAZIO"',
             'writeAtomic(',
             'if (target.exists()) return false',
             '"claim_allowed", false',
@@ -215,12 +228,19 @@ def main() -> int:
             'RESULT_STDERR_ORIGINAL_LENGTH',
             'RESULT_ERRMSG',
             'RESULT_ERR',
-            '"raf.android-runtime-receipt.v2"',
+            '"raf.android-runtime-receipt.v3"',
             '"termux_error_code"',
             '"termux_error_message_sha256"',
             '"stdout_truncated"',
             '"stderr_truncated"',
             '"execution_receipt_present"',
+            '"producer_apk_sha256"',
+            '"provider_apk_sha256_discovery"',
+            '"provider_binary_sha256_discovery"',
+            '"provider_identity_scope", "DISCOVERY_NOT_EXECUTION"',
+            '"executable_sha256_at_execution", "TOKEN_VAZIO"',
+            '"provenance_chain_sha256"',
+            '"provenance_chain_complete", false',
             '"guest_boot_artifact_sha256"',
             '"claim_allowed", false',
             'VectrasTermuxReceiptStore.writeReceipt(',
@@ -228,7 +248,17 @@ def main() -> int:
         "receiver",
         errors,
     )
-    forbid(receiver, ['put("stdout", stdout)', 'put("stderr", stderr)', 'put("errmsg",'], "receiver", errors)
+    forbid(
+        receiver,
+        [
+            'put("stdout", stdout)',
+            'put("stderr", stderr)',
+            'put("errmsg",',
+            '"provenance_chain_complete", true',
+        ],
+        "receiver",
+        errors,
+    )
 
     for manifest in MANIFESTS:
         label = f"manifest:{manifest.parent.parent.name}"
@@ -257,6 +287,14 @@ def main() -> int:
             "bounded_arguments": not any("MAX_" in item for item in errors),
             "request_persisted_before_dispatch": "writePending(" in bridge,
             "result_bound_to_pending_request": "loadPending(context, transactionId)" in receiver,
+            "material_identity_discovery_bound": (
+                '"provider_apk_sha256_discovery"' in receiver
+                and '"provider_binary_sha256_discovery"' in receiver
+            ),
+            "execution_identity_not_promoted": (
+                '"executable_sha256_at_execution", "TOKEN_VAZIO"' in receiver
+                and '"provenance_chain_complete", false' in receiver
+            ),
             "termux_error_metadata_preserved": '"termux_error_code"' in receiver,
             "raw_output_not_persisted": not any(
                 forbidden in receiver
@@ -269,6 +307,7 @@ def main() -> int:
             "permission_grant": "TOKEN_VAZIO",
             "dispatch_execution": "TOKEN_VAZIO",
             "termux_exit_receipt": "TOKEN_VAZIO",
+            "executable_sha256_at_execution": "TOKEN_VAZIO",
             "qemu_guest_boot": "TOKEN_VAZIO",
         },
         "errors": errors,
@@ -280,6 +319,8 @@ def main() -> int:
             "termux_internal_error_ignored",
             "truncated_output_reported_as_complete",
             "raw_private_output_persisted",
+            "discovery_digest_promoted_to_execution_identity",
+            "provenance_chain_marked_complete_without_execution_identity",
             "exit_code_promoted_to_guest_boot",
         ],
     }
