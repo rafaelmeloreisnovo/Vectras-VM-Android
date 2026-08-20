@@ -30,7 +30,8 @@ RMR_SOURCE_GROUP_CORE := \
 	engine/rmr/src/rmr_lowlevel_portable.c \
 	engine/rmr/src/rmr_lowlevel_mix.c \
 	engine/rmr/src/rmr_lowlevel_reduce.c \
-	engine/rmr/src/rmr_vector_field.c
+	engine/rmr/src/rmr_vector_field.c \
+	engine/rmr/src/raf_b7_orchestrator.c
 
 RMR_SOURCE_GROUP_OPTIONAL_POLICY := \
 	engine/rmr/src/rmr_policy_kernel.c
@@ -40,7 +41,8 @@ RMR_SOURCE_GROUP_ANDROID_ONLY := \
 	engine/rmr/src/rmr_virtio_blk.c \
 	engine/rmr/src/rmr_attractor.c \
 	engine/rmr/src/rmr_vhw_model.c \
-	engine/rmr/src/rmr_ethica_loss.c
+	engine/rmr/src/rmr_ethica_loss.c \
+	engine/rmr/interop/rmr_vectra_os_armv7.S
 
 RMR_SOURCE_GROUP_HOST_ONLY := \
 	engine/rmr/src/rmr_baremetal_compat.c \
