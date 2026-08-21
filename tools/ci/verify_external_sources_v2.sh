@@ -43,7 +43,9 @@ log_error() {
   echo "[error] $*" >&2
 }
 
-generate_receipt() {
+declare -g RECEIPT_OBJECTS=()
+
+add_receipt() {
   local name="$1"
   local url="$2"
   local branch="$3"
@@ -52,16 +54,16 @@ generate_receipt() {
   local recovery_rank="$6"
   local status="$7"
 
-  mkdir -p "${REPO_ROOT}/reports"
-
   # Create timestamp in ISO 8601 format
   local timestamp
   timestamp=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+  local ts_epoch
+  ts_epoch=$(date +%s)
 
-  # Create or append to receipt file
-  cat >> "${RECEIPT_OUTPUT}" << EOF
+  local receipt_json
+  receipt_json=$(cat <<EOF
 {
-  "evidence_id": "EVID-EXTERNAL-SOURCE-${name}-$(date +%s)",
+  "evidence_id": "EVID-EXTERNAL-SOURCE-${name}-${ts_epoch}",
   "provider": "github",
   "kind": "external_source_resolution",
   "repository": "${url}",
@@ -79,6 +81,26 @@ generate_receipt() {
   }
 }
 EOF
+)
+  RECEIPT_OBJECTS+=("${receipt_json}")
+}
+
+write_receipt_file() {
+  if [[ ! -d "$(dirname "${RECEIPT_OUTPUT}")" ]]; then
+    mkdir -p "$(dirname "${RECEIPT_OUTPUT}")"
+  fi
+
+  # Write receipts as JSON array
+  {
+    echo "["
+    for i in "${!RECEIPT_OBJECTS[@]}"; do
+      echo "${RECEIPT_OBJECTS[$i]}"
+      if [[ $((i + 1)) -lt ${#RECEIPT_OBJECTS[@]} ]]; then
+        echo ","
+      fi
+    done
+    echo "]"
+  } > "${RECEIPT_OUTPUT}"
 }
 
 while [[ $# -gt 0 ]]; do
@@ -129,7 +151,9 @@ line_no=0
 
 # Initialize receipt file if generating receipts
 if [[ "${GENERATE_RECEIPT}" == "true" ]]; then
-  echo "[]" > "${RECEIPT_OUTPUT}"
+  # Initialize as empty JSON array; will be finalized after loop
+  mkdir -p "$(dirname "${RECEIPT_OUTPUT}")"
+  echo "" > "${RECEIPT_OUTPUT}"
 fi
 
 while IFS='|' read -r name url branch dest pinned_sha extra; do
@@ -175,7 +199,7 @@ while IFS='|' read -r name url branch dest pinned_sha extra; do
       log_error "Remote branch not reachable for ${name}: ${url}#${branch}"
       status=1
       if [[ "${GENERATE_RECEIPT}" == "true" ]]; then
-        generate_receipt "${name}" "${url}" "${branch}" "${pinned_sha}" "UNRESOLVED" "rank_1_fallback_required" "REMOTE_BRANCH_UNREACHABLE"
+        add_receipt "${name}" "${url}" "${branch}" "${pinned_sha}" "UNRESOLVED" "rank_1_fallback_required" "REMOTE_BRANCH_UNREACHABLE"
       fi
       continue
     fi
@@ -185,7 +209,7 @@ while IFS='|' read -r name url branch dest pinned_sha extra; do
       log_error "Remote branch not reachable for ${name}: ${url}#${branch}"
       status=1
       if [[ "${GENERATE_RECEIPT}" == "true" ]]; then
-        generate_receipt "${name}" "${url}" "${branch}" "${pinned_sha}" "UNRESOLVED" "rank_1_fallback_required" "INVALID_BRANCH_HEAD"
+        add_receipt "${name}" "${url}" "${branch}" "${pinned_sha}" "UNRESOLVED" "rank_1_fallback_required" "INVALID_BRANCH_HEAD"
       fi
       continue
     fi
@@ -251,7 +275,7 @@ while IFS='|' read -r name url branch dest pinned_sha extra; do
     fi
 
     if [[ "${GENERATE_RECEIPT}" == "true" ]]; then
-      generate_receipt "${name}" "${url}" "${branch}" "${pinned_sha}" "${resolved_sha}" "${recovery_rank}" "${validation_status}"
+      add_receipt "${name}" "${url}" "${branch}" "${pinned_sha}" "${resolved_sha}" "${recovery_rank}" "${validation_status}"
     fi
   fi
 
@@ -286,6 +310,11 @@ while IFS='|' read -r name url branch dest pinned_sha extra; do
     fi
   fi
 done < "${MANIFEST_PATH}"
+
+# Write receipt file if generating receipts
+if [[ "${GENERATE_RECEIPT}" == "true" ]]; then
+  write_receipt_file
+fi
 
 if [[ ${status} -ne 0 ]]; then
   log_error "External source validation completed with errors"

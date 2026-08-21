@@ -1,6 +1,6 @@
-[]
+[
 {
-  "evidence_id": "EVID-EXTERNAL-SOURCE-androidx_RmR-1787291726",
+  "evidence_id": "EVID-EXTERNAL-SOURCE-androidx_RmR-1787291843",
   "provider": "github",
   "kind": "external_source_resolution",
   "repository": "https://github.com/wojcikiewicz17/androidx_RmR",
@@ -9,7 +9,7 @@
   "resolved_sha": "e3c10c6ac1acff50774d14417d93eaa6b5f8169a",
   "recovery_rank": "rank_0_original_pin",
   "status": "VERIFIED_ORIGINAL_PIN",
-  "timestamp": "2026-08-21T05:55:26Z",
+  "timestamp": "2026-08-21T05:57:23Z",
   "scope": "android-ci-external-source-validation",
   "command": "verify_external_sources_v2.sh --check-remote --generate-receipt",
   "environment": {
@@ -17,8 +17,9 @@
     "ci_context": "false"
   }
 }
+,
 {
-  "evidence_id": "EVID-EXTERNAL-SOURCE-qemu_rafaelia-1787291728",
+  "evidence_id": "EVID-EXTERNAL-SOURCE-qemu_rafaelia-1787291845",
   "provider": "github",
   "kind": "external_source_resolution",
   "repository": "https://github.com/rafaelmeloreisnovo/qemu_rafaelia",
@@ -27,7 +28,7 @@
   "resolved_sha": "2346c30c2ba77881c2930add83523ea903b173fe",
   "recovery_rank": "rank_0_original_pin",
   "status": "VERIFIED_ORIGINAL_PIN",
-  "timestamp": "2026-08-21T05:55:28Z",
+  "timestamp": "2026-08-21T05:57:25Z",
   "scope": "android-ci-external-source-validation",
   "command": "verify_external_sources_v2.sh --check-remote --generate-receipt",
   "environment": {
@@ -35,3 +36,4 @@
     "ci_context": "false"
   }
 }
+]
