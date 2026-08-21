@@ -1,0 +1,99 @@
+{
+  "schema": "rafaelia.authority-pyramid-adapter.v1",
+  "repo": "rafaelmeloreisnovo/Vectras-VM-Android",
+  "authority_ref": "master",
+  "authority_sha": "152389cce37b0f02d4dd2d881e2b8b2779004de4",
+  "role": "VM_QEMU_CONSUMER",
+  "federated_authority": "rafaelmeloreisnovo/Mapa",
+  "provider_authority": "rafaelmeloreisnovo/termux-app-rafacodephi",
+  "central_contract": "data/control-plane/RAFAELIA_AUTHORITY_PYRAMID_FAIL_CLOSED_V1.json",
+  "claim_allowed": false,
+  "promotion_state": "HOLD_ON_P0_OR_GATING_TOKEN_VAZIO",
+  "evidence_state": "PARTIAL",
+  "attention_state": "URGENT",
+  "critical_data_classes": [
+    "vm_images_and_snapshots",
+    "guest_and_host_file_paths",
+    "runtime_and_crash_logs",
+    "guest_console_output",
+    "qemu_arguments",
+    "vnc_x11_configuration",
+    "imported_user_files",
+    "ipc_request_result_payload"
+  ],
+  "protected_subject": {
+    "state": "TOKEN_VAZIO_NOT_ESTABLISHED",
+    "context_integrity_invariants": [
+      "child_status_unknown != adult",
+      "age_threshold != cultural_context_resolved",
+      "group_label != cultural_meaning",
+      "cultural_reference_missing -> TOKEN_VAZIO_CONTEXT",
+      "guardian_role != automatically_valid_consent",
+      "best_interest_assessment != compliance_certificate"
+    ],
+    "no_inference": ["age","ethnicity","culture","religion","guardian_status","vulnerability"],
+    "p0_trigger": "child_or_vulnerable_subject_established_or_potential AND data_flow_purpose_retention_recipient_or_authority_unresolved"
+  },
+  "local_evidence_anchors": [
+    "AGENTS.md",
+    "PRIVACY.md",
+    "SECURITY.md",
+    "docs/PERMISSIONS_RATIONALE.md",
+    "app/src/main/java/com/vectras/vm/rafaelia/connector/PrivacyKernelZrf.java",
+    "docs/contracts/VECTRAS_TERMUX_IPC_V2.md"
+  ],
+  "gaps": [
+    {
+      "id": "VECTRAS_GUEST_DATA_MINIMIZATION_RUNTIME",
+      "category": "PRIVACY_RISK",
+      "evidence_state": "TOKEN_VAZIO",
+      "attention_state": "URGENT",
+      "priority": "P0",
+      "next_probe": "execute a redaction/minimization fixture proving receipts omit raw guest/user payload, paths and console contents",
+      "owner": "Vectras-VM-Android"
+    },
+    {
+      "id": "VECTRAS_IPC_PERMISSION_RESULT_INTEGRITY",
+      "category": "SECURITY_WEAKNESS",
+      "evidence_state": "PARTIAL",
+      "attention_state": "URGENT",
+      "priority": "P0",
+      "next_probe": "negative IPC tests for permission denial, protected-option rejection, replay, result digest mismatch and safe-state",
+      "owner": "Vectras-VM-Android"
+    },
+    {
+      "id": "VECTRAS_QEMU_EXECUTION_TIME_IDENTITY",
+      "category": "DEBUG_BLOCKER",
+      "evidence_state": "TOKEN_VAZIO",
+      "attention_state": "ACTIVE",
+      "priority": "P0",
+      "next_probe": "bind request digest to exact Termux provider result and QEMU executable digest at execution time",
+      "owner": "Vectras-VM-Android + termux-app-rafacodephi"
+    },
+    {
+      "id": "VECTRAS_PHYSICAL_ANDROID_E2E",
+      "category": "COMPLIANCE_GAP",
+      "evidence_state": "TOKEN_VAZIO",
+      "attention_state": "UNDERPRIORITIZED",
+      "priority": "P0",
+      "next_probe": "request_digest -> provider_result -> process/exit -> device/environment receipt; guest boot separate",
+      "owner": "Vectras-VM-Android + termux-app-rafacodephi"
+    },
+    {
+      "id": "VECTRAS_CHILD_OR_PROTECTED_SUBJECT_USE_CONTEXT",
+      "category": "PRIVACY_RISK",
+      "evidence_state": "TOKEN_VAZIO",
+      "attention_state": "DEFERRED_WITH_OWNER",
+      "priority": "P1",
+      "reason": "no child/vulnerable-subject use case is established by repository identity alone",
+      "next_probe": "if such a use case is introduced, resolve subject, purpose, jurisdiction, data flow, minimization, transparency, authority/consent and best-interest gate before release",
+      "owner": "distributor_or_feature_owner"
+    }
+  ],
+  "non_compensatory_gate": {
+    "dimensions": ["governance","privacy","security","protected_subject"],
+    "rule": "ANY_P0_OR_GATING_TOKEN_VAZIO_BLOCKS_PROMOTION",
+    "unknown_is_pass": false
+  },
+  "falsifier": "Raw guest/user data crossing a public receipt boundary, unsafe IPC promotion, or a protected-subject use without resolved P0 context invalidates this adapter."
+}
