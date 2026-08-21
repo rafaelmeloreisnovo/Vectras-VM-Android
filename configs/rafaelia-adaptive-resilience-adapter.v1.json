@@ -1,0 +1,20 @@
+{
+  "schema":"rafaelia.adaptive-resilience-adapter/v1",
+  "repo":"rafaelmeloreisnovo/Vectras-VM-Android",
+  "authority_ref":"master",
+  "authority_sha":"287b2a199c614b9da848571e9ddaef875519d181",
+  "federated_authority":"rafaelmeloreisnovo/Mapa",
+  "provider_authority":"rafaelmeloreisnovo/termux-app-rafacodephi",
+  "central_contract_pr":334,
+  "claim_allowed":false,
+  "state_machine":["OBSERVE","SCORE","HOLD_OR_ROUTE","SANDBOX_TEST","MITIGATE","VERIFY","CANARY","HOTSWAP_OR_FAILOVER","MONITOR","CLOSE_OR_ROLLBACK"],
+  "fail_closed":{"p0":"HOLD","unknown":"TOKEN_VAZIO","stale_watchdog":"HOLD","prediction_promotes_claim":false},
+  "local_scope":{"role":"VM_QEMU_CONSUMER","allowed_autonomous_actions":["observe","record","sandbox_negative_fixture","isolate_vm_route"],"requires_authority":["production_hotfix","guest_or_host_state_hotswap","provider_change","release"]},
+  "gaps":[
+    {"gap_id":"VECTRAS_GUEST_DATA_MINIMIZATION_RUNTIME","urgency":"P0","state":"TOKEN_VAZIO","next_probe":"redaction/minimization fixture","closure_gate":"receipt omits raw guest/user payload and private paths"},
+    {"gap_id":"VECTRAS_IPC_PERMISSION_RESULT_INTEGRITY","urgency":"P0","state":"PARTIAL","next_probe":"permission-denial/replay/result-digest negative fixtures","closure_gate":"all negative fixtures fail safe"},
+    {"gap_id":"VECTRAS_QEMU_EXECUTION_TIME_IDENTITY","urgency":"P0","state":"TOKEN_VAZIO","next_probe":"bind provider result to QEMU executable digest at execution time","closure_gate":"exact executable digest + request/result receipt"},
+    {"gap_id":"VECTRAS_PHYSICAL_ANDROID_E2E","urgency":"P0","state":"TOKEN_VAZIO","next_probe":"physical request→provider→process/exit→device receipt","closure_gate":"bounded device receipt"}
+  ],
+  "invariants":["prediction != evidence","sandbox_pass != production_pass","TOKEN_VAZIO != PASS","hotfix_candidate != hotfix_approved","failover_success != root_cause_resolved"]
+}
