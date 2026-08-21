@@ -118,14 +118,22 @@ coherence = sum(|v[i]|) / 7  [clamped to 1.0]
 
 ### Classification
 
-Based on coherence threshold:
+Coherence classification is a **quality/inspection signal only**. It does not grant federated claim authority, release authority, credential trust, or `claim_allowed` state.
 
-| Classification | Threshold | Governance |
+| Classification | Threshold | Quality interpretation |
 |---|---|---|
-| **FORTE** | ≥ 0.75 | Claim immediately allowed |
-| **MODERADO** | ≥ 0.50 | Claim allowed with conditions |
-| **FRACO** | ≥ 0.25 | Requires review before issuance |
-| **ABORTADO** | < 0.25 | Rejected; structural failure |
+| **FORTE** | ≥ 0.75 | High coherence; still requires the claim's independent authority/evidence gates |
+| **MODERADO** | ≥ 0.50 | Moderate coherence; review/evidence requirements remain unchanged |
+| **FRACO** | ≥ 0.25 | Low coherence; review recommended before use |
+| **ABORTADO** | < 0.25 | Structural/vectorization failure for this module |
+
+Governance invariant:
+
+```
+COHERENCE_SCORE != CLAIM_AUTHORITY
+CLASSIFICATION_FORTE != CLAIM_ALLOWED
+VECTOR_VALIDATION != FEDERATED_EVIDENCE
+```
 
 ### Evolution Chains
 
@@ -150,6 +158,8 @@ filler.withStrictMode(true);  // Throws exception if coherence below threshold
 filler.withStrictMode(false); // Logs warning but continues (default)
 ```
 
+Strict mode controls vectorization-quality validation only. It does not authorize a federated claim.
+
 ## Proof Metadata
 
 When building a VC, the filler automatically attaches quality metadata:
@@ -167,6 +177,8 @@ This enables:
 - Lineage tracking (which generation created this VC)
 - Quality auditing (average coherence across all claims)
 - Reproducibility (can re-vectorize using same engine generation)
+
+The metadata above is provenance/quality metadata; it is not cryptographic proof and does not imply claim approval.
 
 ## Testing
 
@@ -188,23 +200,27 @@ Comprehensive test suite in `VerifiableCredentialFillerTest.java`:
 
 ## Integration with Governance
 
-The VC module integrates with Mapa governance:
+The VC module may expose quality/provenance signals to Mapa governance, but authority remains external to the vectorization score:
 
 ```
 VC.proof.vectorization_generation
   → RafaeliaKernelV22.generation counter
   → TokenVectorizationEngine.evolve() cycles
-  → Mapa.governance.claim_allowed (yes/no/conditional)
+  → quality/provenance signal
+  → independent Mapa authority + falsifier + evidence + receipt gates
 ```
 
-See `MAPA/protocolos/VC_VECTORIZATION_FILLING_PROTOCOL.md` for full governance specification.
+The VC module MUST NOT infer `claim_allowed=true` solely from coherence, classification, strict-mode success, or proof metadata.
+
+See `MAPA/protocolos/VC_VECTORIZATION_FILLING_PROTOCOL.md` for full governance specification when that referenced authority is available and exact-ref verified.
 
 ## Limitations
 
 - **Vectorization is deterministic but not cryptographic:** Use additional JWS/JWZ signing for cryptographic proof
-- **Coherence is a quality indicator, not integrity proof:** Combine with cryptographic hashing for tamper-evidence
+- **Coherence is a quality indicator, not integrity proof or authority:** It cannot independently promote a claim
 - **Chain assignment can change across engine generations:** VCs are tied to their generation ID
 - **No revocation registry yet:** Implement DID-based revocation for full lifecycle management
+- **Cross-repository governance references require exact-ref verification:** documentation references alone are not execution/evidence
 
 ## Future Work
 
@@ -219,4 +235,4 @@ See `MAPA/protocolos/VC_VECTORIZATION_FILLING_PROTOCOL.md` for full governance s
 - W3C Verifiable Credentials Data Model 1.1
 - `TokenVectorizationEngine` — 7-direction semantic vectorization
 - `RafaeliaKernelV22` — Mathematical constants and helper functions
-- Mapa governance: `CADEIA_DE_CUSTODIA_DADOS.md`, `VC_VECTORIZATION_FILLING_PROTOCOL.md`
+- Mapa governance references require exact-ref validation before being treated as authoritative

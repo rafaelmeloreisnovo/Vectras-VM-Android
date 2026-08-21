@@ -1,0 +1,25 @@
+name: VC Coherence Claim Boundary
+on:
+  pull_request:
+    paths:
+      - 'app/src/main/java/com/vectras/vm/rafaelia/token/**'
+      - 'scripts/validate_vc_coherence_claim_boundary.py'
+      - '.github/workflows/vc-coherence-claim-boundary.yml'
+  push:
+    branches: [master]
+    paths:
+      - 'app/src/main/java/com/vectras/vm/rafaelia/token/**'
+      - 'scripts/validate_vc_coherence_claim_boundary.py'
+permissions:
+  contents: read
+jobs:
+  fail-closed-boundary:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+      - name: Validate VC coherence governance boundary
+        run: python scripts/validate_vc_coherence_claim_boundary.py
