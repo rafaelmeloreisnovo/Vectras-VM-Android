@@ -76,6 +76,10 @@ jobs:
         if: always()
         run: |
           set -euo pipefail
+          if [[ -z "${perf_runs:-}" ]]; then
+            echo "perf_runs unavailable because contract resolution did not complete; skipping downstream artifact consistency check"
+            exit 0
+          fi
           python3 tools/perf/validate_artifact_runs.py \
             --artifacts-root gate-artifacts \
             --expected-runs "$perf_runs"
