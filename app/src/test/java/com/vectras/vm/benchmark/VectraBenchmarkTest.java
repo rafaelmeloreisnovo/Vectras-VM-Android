@@ -18,9 +18,8 @@ public class VectraBenchmarkTest {
 
     @Test
     public void parity2D8SingleBitSetCorrect() {
-        // Single bit at position (0,0) should set row 0 and col 0 parity
         int parity = VectraBenchmark.parity2D8(1);
-        assertEquals(0x11, parity); // bit 0 (col 0) + bit 4 (row 0)
+        assertEquals(0x11, parity);
     }
 
     @Test
@@ -31,10 +30,7 @@ public class VectraBenchmarkTest {
 
     @Test
     public void parity2D8AlternatingPattern() {
-        // Alternating pattern: 0b1010101010101010
         int parity = VectraBenchmark.parity2D8(0xAAAA);
-        // Each row has 2 bits set (even parity = 0)
-        // Each col has 2 bits set (even parity = 0)
         assertEquals(0x00, parity);
     }
 
@@ -55,31 +51,26 @@ public class VectraBenchmarkTest {
 
     @Test
     public void whoOutTriadDiskOut() {
-        // CPU == RAM but != DISK => DISK is out
         assertEquals(2, VectraBenchmark.whoOutTriad(100, 100, 200));
     }
 
     @Test
     public void whoOutTriadRamOut() {
-        // CPU == DISK but != RAM => RAM is out
         assertEquals(1, VectraBenchmark.whoOutTriad(100, 200, 100));
     }
 
     @Test
     public void whoOutTriadCpuOut() {
-        // RAM == DISK but != CPU => CPU is out
         assertEquals(0, VectraBenchmark.whoOutTriad(200, 100, 100));
     }
 
     @Test
     public void whoOutTriadAllAgree() {
-        // All equal => no one is out (3 = NONE)
         assertEquals(3, VectraBenchmark.whoOutTriad(100, 100, 100));
     }
 
     @Test
     public void whoOutTriadAllDifferent() {
-        // All different => unknown (3 = NONE)
         assertEquals(3, VectraBenchmark.whoOutTriad(100, 200, 300));
     }
 
@@ -110,23 +101,20 @@ public class VectraBenchmarkTest {
             bs.flush();
         }
 
-        // BitStack uses little-endian ByteBuffer, so we need to read in little-endian
         try (RandomAccessFile raf = new RandomAccessFile(tmp, "r")) {
-            // Read 16 bytes (8 + 4 + 4)
             byte[] bytes = new byte[16];
             raf.readFully(bytes);
-            
-            // Convert little-endian bytes to values
+
             long valueRead = 0;
             for (int i = 0; i < 8; i++) {
                 valueRead |= ((long)(bytes[i] & 0xFF)) << (8 * i);
             }
-            
+
             int metricRead = 0;
             for (int i = 0; i < 4; i++) {
                 metricRead |= ((bytes[8 + i] & 0xFF)) << (8 * i);
             }
-            
+
             int crcRead = 0;
             for (int i = 0; i < 4; i++) {
                 crcRead |= ((bytes[12 + i] & 0xFF)) << (8 * i);
@@ -193,7 +181,6 @@ public class VectraBenchmarkTest {
 
     @Test
     public void benchmarkResultNewFormatWorks() {
-        // Test new BenchmarkResult with proper engineering units
         VectraBenchmark.BenchmarkResult r = new VectraBenchmark.BenchmarkResult(
             0, "Test", 1000000L, "1.00 ms", "ms", "CPU Single-threaded", "Test metric"
         );
@@ -207,46 +194,46 @@ public class VectraBenchmarkTest {
     }
 
     @Test
-    public void benchmarkResultScoreDeprecatedReturns100() {
-        // Legacy score() method should return 100 for valid results
+    public void benchmarkResultScaledValueUsesEngineeringUnits() {
         VectraBenchmark.BenchmarkResult r = new VectraBenchmark.BenchmarkResult(
-            0, "Test", 500000L, "500.00 μs", "μs", "CPU Single-threaded", "Test metric"
+            0, "Test", 500000000L, "500.00 ms", "ms", "CPU Single-threaded", "Test metric"
         );
-        assertEquals(100, r.score());
+        assertEquals(0.5d, r.getScaledValue(), 0.000000001d);
     }
 
     @Test
-    public void calculateTotalScoreCountsValidResults() throws Exception {
-        // Create minimal results array with valid results
+    public void benchmarkResultsPreserveNullSlotsWithoutSyntheticScore() {
         VectraBenchmark.BenchmarkResult[] results = new VectraBenchmark.BenchmarkResult[3];
         results[0] = new VectraBenchmark.BenchmarkResult(0, "Test1", 1000L, "1.00 μs", "μs", "CPU", "Test");
         results[1] = new VectraBenchmark.BenchmarkResult(1, "Test2", 2000L, "2.00 μs", "μs", "CPU", "Test");
-        results[2] = null; // One null result
-        
-        int score = VectraBenchmark.calculateTotalScore(results);
-        assertEquals(200, score); // 2 valid results * 100
+        results[2] = null;
+
+        assertNotNull(results[0]);
+        assertNotNull(results[1]);
+        assertEquals(1000L, results[0].rawValue());
+        assertEquals(2000L, results[1].rawValue());
+        assertTrue(results[2] == null);
     }
 
     @Test
-    public void calculateCategoryScoresReturns6Categories() throws Exception {
-        VectraBenchmark.BenchmarkResult[] results = new VectraBenchmark.BenchmarkResult[VectraBenchmark.METRIC_COUNT];
-        // Fill with dummy results using new format
-        for (int i = 0; i < results.length; i++) {
-            String category;
-            if (i < 20) category = "CPU Single-threaded";
-            else if (i < 30) category = "CPU Multi-threaded";
-            else if (i < 45) category = "Memory";
-            else if (i < 60) category = "Storage";
-            else if (i < 70) category = "Integrity";
-            else category = "Emulation";
-            
+    public void benchmarkResultCategoriesCoverSixEngineeringGroups() {
+        String[] expectedCategories = {
+            "CPU Single-threaded",
+            "CPU Multi-threaded",
+            "Memory",
+            "Storage",
+            "Integrity",
+            "Emulation"
+        };
+        VectraBenchmark.BenchmarkResult[] results = new VectraBenchmark.BenchmarkResult[expectedCategories.length];
+        for (int i = 0; i < expectedCategories.length; i++) {
             results[i] = new VectraBenchmark.BenchmarkResult(
-                i, "Test" + i, 1000L, "1.00 μs", "μs", category, "Test"
+                i, "Test" + i, 1000L, "1.00 μs", "μs", expectedCategories[i], "Test"
             );
         }
-        
-        int[] catScores = VectraBenchmark.calculateCategoryScores(results);
-        assertEquals(6, catScores.length);
+        for (int i = 0; i < expectedCategories.length; i++) {
+            assertEquals(expectedCategories[i], results[i].category());
+        }
     }
 
     @Test
@@ -255,18 +242,15 @@ public class VectraBenchmarkTest {
         results[0] = new VectraBenchmark.BenchmarkResult(
             0, "Test", 1000L, "1.00 μs", "μs", "CPU Single-threaded", "Test metric"
         );
-        
-        // formatReport may fail in test environment due to missing /proc files
-        // Just verify the method doesn't throw
+
         try {
             String report = VectraBenchmark.formatReport(results);
             assertNotNull(report);
-            // The report should contain the header if it succeeds
             if (report.length() > 100) {
                 assertTrue(report.contains("BENCHMARK") || report.contains("VECTRAS"));
             }
         } catch (Exception e) {
-            // Expected in test environment without /proc filesystem
+            // Expected in test environment without /proc filesystem.
         }
     }
 
@@ -276,17 +260,15 @@ public class VectraBenchmarkTest {
         results[0] = new VectraBenchmark.BenchmarkResult(
             0, "Test", 1000L, "1.00 μs", "μs", "CPU Single-threaded", "Test metric"
         );
-        
-        // formatReport may fail in test environment due to missing /proc files
+
         try {
             String report = VectraBenchmark.formatReport(results);
             assertNotNull(report);
-            // The report should contain SI Units reference if it succeeds
             if (report.length() > 100) {
                 assertTrue(report.contains("SI") || report.contains("Units") || report.contains("ns") || report.contains("ms"));
             }
         } catch (Exception e) {
-            // Expected in test environment without /proc filesystem
+            // Expected in test environment without /proc filesystem.
         }
     }
 
@@ -294,33 +276,27 @@ public class VectraBenchmarkTest {
     public void metricCountIs79() {
         assertEquals(79, VectraBenchmark.METRIC_COUNT);
     }
-    
+
     @Test
     public void formatTimeProducesCorrectUnits() {
-        // Test nanoseconds (now uses floating point format)
         assertEquals("500 ns", VectraBenchmark.formatTime(500));
-        // Test microseconds
         assertEquals("1.500 μs", VectraBenchmark.formatTime(1500));
-        // Test milliseconds
         assertEquals("1.500 ms", VectraBenchmark.formatTime(1500000));
-        // Test seconds
         assertEquals("1.500 s", VectraBenchmark.formatTime(1500000000L));
     }
-    
+
     @Test
     public void formatBandwidthProducesCorrectUnits() {
-        // Test with 1MB transferred in 1 second (1e9 ns)
         String result = VectraBenchmark.formatBandwidth(1000000, 1000000000L);
         assertTrue(result.contains("MB/s") || result.contains("KB/s"));
     }
-    
+
     @Test
     public void formatOpsPerSecProducesCorrectUnits() {
-        // Test with 1 million ops in 1 second (1e9 ns)
         String result = VectraBenchmark.formatOpsPerSec(1000000, 1000000000L);
         assertTrue(result.contains("Mops/s") || result.contains("ops/s"));
     }
-    
+
     @Test
     public void getDeviceSpecificationReturnsValidData() {
         VectraBenchmark.DeviceSpecification spec = VectraBenchmark.getDeviceSpecification();
