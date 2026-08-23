@@ -8,14 +8,7 @@
     {
       "id": "rmr-unified-jni",
       "state": "CONNECTED_RUNTIME_SOURCE_BUILD",
-      "required_paths": [
-        "engine/rmr/src/rmr_unified_jni_bridge.c",
-        "engine/rmr/sources_rmr_core.cmake",
-        "app/src/main/cpp/CMakeLists.txt",
-        "app/src/main/cpp/vectra_core_accel.c",
-        "app/src/main/java/com/vectras/vm/core/NativeFastPath.java",
-        "app/build.gradle"
-      ],
+      "required_paths": ["engine/rmr/src/rmr_unified_jni_bridge.c", "engine/rmr/sources_rmr_core.cmake", "app/src/main/cpp/CMakeLists.txt", "app/src/main/cpp/vectra_core_accel.c", "app/src/main/java/com/vectras/vm/core/NativeFastPath.java", "app/build.gradle"],
       "required_markers": {
         "engine/rmr/sources_rmr_core.cmake": ["rmr_unified_jni_bridge.c"],
         "app/src/main/cpp/CMakeLists.txt": ["add_library(vectra_core_accel SHARED", "VECTRA_ENGINE_CORE_SOURCES"],
@@ -29,11 +22,7 @@
     {
       "id": "rmr-stability-armv7",
       "state": "CONNECTED_RUNTIME_SOURCE_BUILD",
-      "required_paths": [
-        "engine/rmr/interop/rmr_stability_armv7.S",
-        "engine/rmr/sources_rmr_core.cmake",
-        "tools/build_stability_asm.sh"
-      ],
+      "required_paths": ["engine/rmr/interop/rmr_stability_armv7.S", "engine/rmr/sources_rmr_core.cmake", "tools/build_stability_asm.sh"],
       "required_markers": {
         "engine/rmr/sources_rmr_core.cmake": ["armeabi-v7a", "rmr_stability_armv7.S"],
         "tools/build_stability_asm.sh": ["--target=armv7a-linux-androideabi21", "role=arm32-primary"]
@@ -44,12 +33,7 @@
     {
       "id": "lowbasic-handoff",
       "state": "CONNECTED_RUNTIME_SOURCE_BUILD",
-      "required_paths": [
-        "tools/baremetal/rafcode_phi/include/rafcode_phi_lowbasic.h",
-        "app/src/main/cpp/termux_bootstrap_bridge.c",
-        "tools/ci/test_lowbasic_handoff_matrix.c",
-        "tools/ci/test_lowbasic_handoff_matrix.sh"
-      ],
+      "required_paths": ["tools/baremetal/rafcode_phi/include/rafcode_phi_lowbasic.h", "app/src/main/cpp/termux_bootstrap_bridge.c", "tools/ci/test_lowbasic_handoff_matrix.c", "tools/ci/test_lowbasic_handoff_matrix.sh"],
       "required_markers": {
         "app/src/main/cpp/termux_bootstrap_bridge.c": ["rafphi_boot_handoff_validate", "RAFPHI_ARCH_ARMV7"],
         "tools/ci/test_lowbasic_handoff_matrix.c": ["arm64-valid", "armv7-valid"]
@@ -60,31 +44,16 @@
     {
       "id": "lowbasic-hotstep",
       "state": "UNREFERENCED_TOKEN_VAZIO",
-      "required_paths": [
-        "tools/baremetal/rafcode_phi/include/rafcode_phi_lowbasic.h"
-      ],
-      "symbols": [
-        "RAFPHI_LOWBASIC_A64_STEP",
-        "RAFPHI_LOWBASIC_X64_STEP"
-      ],
-      "allowed_reference_prefixes": [
-        "tools/baremetal/rafcode_phi/include/",
-        "docs/",
-        "contracts/"
-      ],
+      "required_paths": ["tools/baremetal/rafcode_phi/include/rafcode_phi_lowbasic.h"],
+      "symbols": ["RAFPHI_LOWBASIC_A64_STEP", "RAFPHI_LOWBASIC_X64_STEP"],
+      "allowed_reference_prefixes": ["tools/baremetal/rafcode_phi/include/", "docs/", "contracts/"],
       "claim_allowed": false,
       "gap": "CALLER_AND_REGISTER_SETUP_TOKEN_VAZIO"
     },
     {
       "id": "rafcode-phi-toolchain",
       "state": "CONNECTED_BUILD_CI",
-      "required_paths": [
-        "tools/baremetal/rafcode_phi/build_rafcode_phi.sh",
-        "tools/baremetal/rafcode_phi/c/rafcode_phi_front_shell.c",
-        "tools/baremetal/rafcode_phi/asm/rafcode_phi_emit_word.S",
-        "tools/baremetal/rafcode_phi/test_regression_crc32c.sh",
-        "tools/ci/run_asm_compiler_refactor_gate.sh"
-      ],
+      "required_paths": ["tools/baremetal/rafcode_phi/build_rafcode_phi.sh", "tools/baremetal/rafcode_phi/c/rafcode_phi_front_shell.c", "tools/baremetal/rafcode_phi/asm/rafcode_phi_emit_word.S", "tools/baremetal/rafcode_phi/test_regression_crc32c.sh", "tools/ci/run_asm_compiler_refactor_gate.sh"],
       "required_markers": {
         "tools/baremetal/rafcode_phi/build_rafcode_phi.sh": ["armv7l|armv7*|armhf|armeabi-v7a", "BACKEND_KIND=\"asm\""],
         "tools/baremetal/rafcode_phi/test_regression_crc32c.sh": ["check_arch armv7", "0xE320F000", "0xE12FFF1E"],
@@ -96,12 +65,7 @@
     {
       "id": "arena-v2",
       "state": "STANDALONE_VALIDATION_IMPLEMENTED",
-      "required_paths": [
-        "tools/arena/raf_arena_format.h",
-        "tools/arena/raf_arena_append.py",
-        "tools/arena/raf_arena_tool.py",
-        "tools/arena/test_arena_schema.py"
-      ],
+      "required_paths": ["tools/arena/raf_arena_format.h", "tools/arena/raf_arena_append.py", "tools/arena/raf_arena_tool.py", "tools/arena/test_arena_schema.py"],
       "required_markers": {
         "tools/arena/raf_arena_format.h": ["RAF_RECORD_V1_SIZE 64U", "RAF_RECORD_V2_SIZE 80U", "domain_tag"],
         "tools/arena/raf_arena_append.py": ["VERSION_V2 = 2", "domain_tag = crc32c", "arena v1 legada é somente leitura"],
@@ -113,33 +77,21 @@
     {
       "id": "state-geometry-canonical",
       "state": "EXPERIMENTAL_IMPLEMENTED",
-      "required_paths": [
-        "tools/state_geometry_lab/state_geometry_lab.py",
-        "tools/state_geometry_lab/c/state_geometry_lab.c",
-        "tools/state_geometry_lab/asm/mod_cycle_aarch64.S"
-      ],
+      "required_paths": ["tools/state_geometry_lab/py/state_geometry_lab.py", "tools/state_geometry_lab/c/state_geometry_lab.c", "tools/state_geometry_lab/asm/mod_cycle_aarch64.S"],
       "claim_allowed": false,
       "gap": "CROSS_LANGUAGE_REFERENCE_VECTORS_TOKEN_VAZIO"
     },
     {
       "id": "state-geometry-numbered-modules",
       "state": "SCAFFOLDING",
-      "required_paths": [
-        "tools/state_geometry_lab/modules/classification.json",
-        "tools/state_geometry_lab/modules/cli_index.py",
-        "tools/state_geometry_lab/modules/c/method_001.c",
-        "tools/state_geometry_lab/modules/py/method_001.py"
-      ],
+      "required_paths": ["tools/state_geometry_lab/modules/classification.json", "tools/state_geometry_lab/modules/cli_index.py", "tools/state_geometry_lab/modules/c/method_001.c", "tools/state_geometry_lab/modules/py/method_001.py"],
       "claim_allowed": false,
       "gap": "ALGORITHM_PROMOTION_NOT_ALLOWED"
     },
     {
       "id": "apk-release-orchestrator",
       "state": "CONNECTED_BUILD",
-      "required_paths": [
-        "tools/apk/rmr_termux_release_orchestrator.sh",
-        "app/build.gradle"
-      ],
+      "required_paths": ["tools/apk/rmr_termux_release_orchestrator.sh", "app/build.gradle"],
       "required_markers": {
         "tools/apk/rmr_termux_release_orchestrator.sh": ["<REDACTED>", "VECTRAS_RELEASE_STORE_PASSWORD", "VECTRAS_RELEASE_KEY_PASSWORD", "chmod 0600"],
         "app/build.gradle": ["VECTRAS_RELEASE_STORE_PASSWORD", "VECTRAS_RELEASE_KEY_PASSWORD", "signingConfigs"]
