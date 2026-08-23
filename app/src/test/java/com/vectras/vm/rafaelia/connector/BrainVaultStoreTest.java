@@ -128,10 +128,10 @@ public class BrainVaultStoreTest {
         BrainVaultStore store = BrainVaultStore.open(directory);
         store.store("integrity-key", "original-value", "integrity-category");
         File warmFile = new File(directory, "brainvault.jsonl");
-        String original = Files.readString(warmFile.toPath(), StandardCharsets.UTF_8);
+        String original = new String(Files.readAllBytes(warmFile.toPath()), StandardCharsets.UTF_8);
         String tampered = original.replace("original-value", "tampered-value");
         assertFalse("test fixture must alter the persisted bytes", original.equals(tampered));
-        Files.writeString(warmFile.toPath(), tampered, StandardCharsets.UTF_8);
+        Files.write(warmFile.toPath(), tampered.getBytes(StandardCharsets.UTF_8));
         BrainVaultStore reopened = BrainVaultStore.open(directory);
         assertEquals(0, reopened.totalEntries());
         assertNull(reopened.recall("integrity-key"));
