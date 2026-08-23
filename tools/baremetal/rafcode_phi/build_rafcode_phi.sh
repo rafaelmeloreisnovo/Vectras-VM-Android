@@ -24,6 +24,11 @@ case "${HOST_ARCH}" in
     BACKEND_SRC="${ROOT_DIR}/asm/rafcode_phi_emit_word.S"
     BACKEND_ARCH="aarch64"
     ;;
+  armv7l|armv7*|armhf|armeabi-v7a)
+    BACKEND_KIND="asm"
+    BACKEND_SRC="${ROOT_DIR}/asm/rafcode_phi_emit_word.S"
+    BACKEND_ARCH="armv7"
+    ;;
   x86_64|amd64)
     BACKEND_KIND="asm"
     BACKEND_SRC="${ROOT_DIR}/asm/rafcode_phi_emit_word.S"
