@@ -69,7 +69,8 @@
       ],
       "allowed_reference_prefixes": [
         "tools/baremetal/rafcode_phi/include/",
-        "docs/"
+        "docs/",
+        "contracts/"
       ],
       "claim_allowed": false,
       "gap": "CALLER_AND_REGISTER_SETUP_TOKEN_VAZIO"
