@@ -141,8 +141,8 @@
         "app/build.gradle"
       ],
       "required_markers": {
-        "tools/apk/rmr_termux_release_orchestrator.sh": ["<REDACTED>", "ORG_GRADLE_PROJECT_android.injected.signing.store.password", "chmod 0600"],
-        "app/build.gradle": ["releaseStorePassword", "signingConfigs"]
+        "tools/apk/rmr_termux_release_orchestrator.sh": ["<REDACTED>", "VECTRAS_RELEASE_STORE_PASSWORD", "VECTRAS_RELEASE_KEY_PASSWORD", "chmod 0600"],
+        "app/build.gradle": ["VECTRAS_RELEASE_STORE_PASSWORD", "VECTRAS_RELEASE_KEY_PASSWORD", "signingConfigs"]
       },
       "forbidden_markers": {
         "tools/apk/rmr_termux_release_orchestrator.sh": ["-Pandroid.injected.signing.store.password=$STORE_PASS", "-Pandroid.injected.signing.key.password=$KEY_PASS"]
