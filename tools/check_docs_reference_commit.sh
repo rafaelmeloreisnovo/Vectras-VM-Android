@@ -17,6 +17,36 @@ if [[ ${#docs[@]} -eq 0 ]]; then
   exit 1
 fi
 
+extract_reference_markers() {
+  python3 - "$1" <<'PY'
+import re
+import sys
+from pathlib import Path
+
+path = Path(sys.argv[1])
+marker = re.compile(r'^\s*-\s+Commit de referência:\s+`([^`]+)`\.\s*$')
+in_fence = False
+fence = None
+
+for line in path.read_text(encoding='utf-8', errors='replace').splitlines():
+    stripped = line.lstrip()
+    if stripped.startswith('```') or stripped.startswith('~~~'):
+        current = stripped[:3]
+        if not in_fence:
+            in_fence = True
+            fence = current
+        elif current == fence:
+            in_fence = False
+            fence = None
+        continue
+    if in_fence:
+        continue
+    match = marker.match(line)
+    if match:
+        print(match.group(1))
+PY
+}
+
 changed_range=""
 if [[ -n "${DOCS_REFERENCE_RANGE:-}" ]]; then
   changed_range="${DOCS_REFERENCE_RANGE}"
@@ -44,17 +74,18 @@ head_count=0
 historical_count=0
 
 for file in "${docs[@]}"; do
-  count="$(grep -c "${MARKER}" "${file}" || true)"
+  mapfile -t markers < <(extract_reference_markers "${file}")
+  count="${#markers[@]}"
   if [[ "${count}" -eq 0 ]]; then
     continue
   fi
   if [[ "${count}" -ne 1 ]]; then
-    echo "ERROR: ${file} must contain exactly one '${MARKER}' marker (found ${count})" >&2
+    echo "ERROR: ${file} must contain exactly one canonical '${MARKER}' metadata line outside fenced examples (found ${count})" >&2
     errors=1
     continue
   fi
 
-  value="$(sed -nE 's/.*Commit de referência: `([^`]+)`.*/\1/p' "${file}")"
+  value="${markers[0]}"
   if [[ -z "${value}" ]]; then
     echo "ERROR: ${file} has an invalid reference marker format" >&2
     errors=1

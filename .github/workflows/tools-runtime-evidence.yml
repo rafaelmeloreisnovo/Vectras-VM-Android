@@ -1,0 +1,70 @@
+name: Tools Runtime Evidence
+
+on:
+  pull_request:
+    paths:
+      - 'tools/**'
+      - 'engine/rmr/**'
+      - 'app/src/main/cpp/**'
+      - 'app/src/main/java/com/vectras/vm/core/**'
+      - 'app/build.gradle'
+      - 'contracts/tools_runtime_connectivity.v1.json'
+      - '.github/workflows/tools-runtime-evidence.yml'
+  push:
+    branches:
+      - master
+    paths:
+      - 'tools/**'
+      - 'engine/rmr/**'
+      - 'app/src/main/cpp/**'
+      - 'app/src/main/java/com/vectras/vm/core/**'
+      - 'app/build.gradle'
+      - 'contracts/tools_runtime_connectivity.v1.json'
+
+permissions:
+  contents: read
+
+jobs:
+  host-evidence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Toolchain inventory
+        run: |
+          set -euo pipefail
+          python3 --version
+          cc --version | head -n 1
+          clang --version | head -n 1 || true
+
+      - name: Run fail-closed tools runtime evidence gate
+        run: bash tools/ci/run_tools_runtime_evidence_gate.sh
+
+      - name: Compile AArch64 geometry kernel syntax/ABI check
+        run: |
+          set -euo pipefail
+          mkdir -p build/tools-runtime-evidence
+          clang --target=aarch64-linux-gnu -c tools/state_geometry_lab/asm/mod_cycle_aarch64.S \
+            -o build/tools-runtime-evidence/mod_cycle_aarch64.o
+          file build/tools-runtime-evidence/mod_cycle_aarch64.o
+
+      - name: Compile ARMv7 RAFCODE Phi emitter syntax/ABI check
+        run: |
+          set -euo pipefail
+          mkdir -p build/tools-runtime-evidence
+          clang --target=armv7a-linux-gnueabihf -march=armv7-a -c \
+            tools/baremetal/rafcode_phi/asm/rafcode_phi_emit_word.S \
+            -o build/tools-runtime-evidence/rafcode_phi_emit_word_armv7.o
+          file build/tools-runtime-evidence/rafcode_phi_emit_word_armv7.o
+
+      - name: Upload host evidence receipt
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: tools-runtime-evidence
+          if-no-files-found: warn
+          path: |
+            reports/tools-runtime-evidence/**
+            reports/asm-compiler/**
+            build/tools-runtime-evidence/**

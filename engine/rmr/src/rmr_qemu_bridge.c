@@ -200,8 +200,8 @@ int RmR_QmpTelemetry_Parse(const char *qmp_json_line, RmR_QmpTelemetry *out) {
       out->running_count = out->vcpu_count - out->halted_count;
     }
   } else {
-    if (!parse_u32_after_key(qmp_json_line, "\"cpus\"", &out->vcpu_count)) {
-      out->vcpu_count = 1;
+    if (parse_u32_after_key(qmp_json_line, "\"cpus\"", &out->vcpu_count) != 0) {
+      out->vcpu_count = 1u;
     }
   }
 

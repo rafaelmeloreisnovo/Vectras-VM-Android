@@ -22,10 +22,19 @@ typedef enum {
 } rafphi_arch_t;
 
 typedef enum {
-  RAFPHI_OP_NOP     = 0xD503201Fu,
+  RAFPHI_OP_NOP_A64 = 0xD503201Fu,
   RAFPHI_OP_RET_A64 = 0xD65F03C0u,
   RAFPHI_OP_BRK_A64 = 0xD4200000u,
-  RAFPHI_OP_HLT_A64 = 0xD4400000u
+  RAFPHI_OP_HLT_A64 = 0xD4400000u,
+
+  /* ARM state / ARMv7-A encodings, emitted as little-endian 32-bit words. */
+  RAFPHI_OP_NOP_ARMV7 = 0xE320F000u,
+  RAFPHI_OP_RET_ARMV7 = 0xE12FFF1Eu, /* bx lr */
+  RAFPHI_OP_BRK_ARMV7 = 0xE1200070u, /* bkpt #0 */
+  RAFPHI_OP_HLT_ARMV7 = 0xE320F003u, /* wfi */
+
+  /* Compatibility alias retained for older callers. */
+  RAFPHI_OP_NOP = RAFPHI_OP_NOP_A64
 } rafphi_opcode_t;
 
 typedef struct {
@@ -58,7 +67,7 @@ typedef struct {
 #define RAFPHI_BIN_MAGIC 0x52414650u /* "RAFP" */
 #define RAFPHI_BIN_VERSION 0x00010000u
 
-/* Hook ASM: serializa uma palavra hex para buffer de saída. */
+/* Hook ASM/C: serializa uma palavra hex para buffer de saída. */
 extern raf_u32 rafphi_emit_word_abi(raf_u32, raf_u32 *, raf_u32, raf_u32);
 extern raf_u32 rafphi_emit_word_asm(raf_u32 opcode_hex, raf_u32 *out_words, raf_u32 cap_words, raf_u32 write_index);
 

@@ -129,22 +129,41 @@ check_environment
 export TERMUX_BUILD=1
 export GRADLE_USER_HOME=.gradle
 
-PLAN="$GRADLE_WRAPPER --no-daemon :app:clean :app:assembleRelease -Pvectras.universal=true -Pvectras.compliance.profile=IEEE_NIST_W3C_RFC_GDPR_LGPD -Pvectras.signing.ethical=true -Pandroid.injected.signing.store.file=$KEYSTORE -Pandroid.injected.signing.store.password=$STORE_PASS -Pandroid.injected.signing.key.alias=$ALIAS -Pandroid.injected.signing.key.password=$KEY_PASS"
-echo "$PLAN" > "$REPORT_DIR/build_plan.txt"
+# Nunca persista credenciais de assinatura no plano/receipt. app/build.gradle
+# já possui o contrato VECTRAS_RELEASE_*; usamos exatamente esse canal para
+# evitar senha em argv, build_plan ou histórico de processo.
+cat > "$REPORT_DIR/build_plan.txt" <<PLAN
+$GRADLE_WRAPPER --no-daemon :app:clean :app:assembleRelease \
+  -Pvectras.universal=true \
+  -Pvectras.compliance.profile=IEEE_NIST_W3C_RFC_GDPR_LGPD \
+  -Pvectras.signing.ethical=true
+signing.store.file=$KEYSTORE
+signing.store.password=<REDACTED>
+signing.key.alias=$ALIAS
+signing.key.password=<REDACTED>
+signing.transport=VECTRAS_RELEASE_* process environment
+PLAN
+chmod 0600 "$REPORT_DIR/build_plan.txt"
 
 TS0="$(date +%s)"
 log "executando build release"
-"$GRADLE_WRAPPER" --no-daemon :app:clean :app:assembleRelease \
-  -Pvectras.universal=true \
-  -Pvectras.compliance.profile=IEEE_NIST_W3C_RFC_GDPR_LGPD \
-  -Pvectras.signing.ethical=true \
-  -Pandroid.injected.signing.store.file="$KEYSTORE" \
-  -Pandroid.injected.signing.store.password="$STORE_PASS" \
-  -Pandroid.injected.signing.key.alias="$ALIAS" \
-  -Pandroid.injected.signing.key.password="$KEY_PASS" \
-  2>&1 | tee "$REPORT_DIR/gradle_build.log"
+env \
+  "VECTRAS_RELEASE_STORE_FILE=$KEYSTORE" \
+  "VECTRAS_RELEASE_STORE_PASSWORD=$STORE_PASS" \
+  "VECTRAS_RELEASE_KEY_ALIAS=$ALIAS" \
+  "VECTRAS_RELEASE_KEY_PASSWORD=$KEY_PASS" \
+  "$GRADLE_WRAPPER" --no-daemon :app:clean :app:assembleRelease \
+    -Pvectras.universal=true \
+    -Pvectras.compliance.profile=IEEE_NIST_W3C_RFC_GDPR_LGPD \
+    -Pvectras.signing.ethical=true \
+    2>&1 | tee "$REPORT_DIR/gradle_build.log"
 TS1="$(date +%s)"
 echo "build_elapsed_seconds=$((TS1-TS0))" | tee "$REPORT_DIR/build_timing.txt"
+
+# Reduz a janela de exposição no shell após o processo Gradle encerrar.
+STORE_PASS=""
+KEY_PASS=""
+unset STORE_PASS KEY_PASS
 
 if [ ! -f "$APK_PATH" ]; then
   warn "APK default não encontrado em $APK_PATH, tentando localizar"

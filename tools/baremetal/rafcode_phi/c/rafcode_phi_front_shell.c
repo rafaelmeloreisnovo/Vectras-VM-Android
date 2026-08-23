@@ -46,21 +46,20 @@ raf_u32 rafphi_encode_token_to_hex_arch(rafphi_arch_t arch, const char *token, r
     return 0u;
   }
 
-  if (rafphi_ascii_eq(token, token_len, "NOP")) {
-    *out_hex = RAFPHI_OP_NOP;
-    return 1u;
+  if (arch == RAFPHI_ARCH_ARMV7) {
+    if (rafphi_ascii_eq(token, token_len, "NOP")) { *out_hex = RAFPHI_OP_NOP_ARMV7; return 1u; }
+    if (rafphi_ascii_eq(token, token_len, "RET")) { *out_hex = RAFPHI_OP_RET_ARMV7; return 1u; }
+    if (rafphi_ascii_eq(token, token_len, "BRK")) { *out_hex = RAFPHI_OP_BRK_ARMV7; return 1u; }
+    if (rafphi_ascii_eq(token, token_len, "HLT")) { *out_hex = RAFPHI_OP_HLT_ARMV7; return 1u; }
+    return 0u;
   }
-  if (rafphi_ascii_eq(token, token_len, "RET")) {
-    *out_hex = RAFPHI_OP_RET_A64;
-    return 1u;
-  }
-  if (rafphi_ascii_eq(token, token_len, "BRK")) {
-    *out_hex = RAFPHI_OP_BRK_A64;
-    return 1u;
-  }
-  if (rafphi_ascii_eq(token, token_len, "HLT")) {
-    *out_hex = RAFPHI_OP_HLT_A64;
-    return 1u;
+
+  if (arch == RAFPHI_ARCH_AARCH64) {
+    if (rafphi_ascii_eq(token, token_len, "NOP")) { *out_hex = RAFPHI_OP_NOP_A64; return 1u; }
+    if (rafphi_ascii_eq(token, token_len, "RET")) { *out_hex = RAFPHI_OP_RET_A64; return 1u; }
+    if (rafphi_ascii_eq(token, token_len, "BRK")) { *out_hex = RAFPHI_OP_BRK_A64; return 1u; }
+    if (rafphi_ascii_eq(token, token_len, "HLT")) { *out_hex = RAFPHI_OP_HLT_A64; return 1u; }
+    return 0u;
   }
 
   return 0u;

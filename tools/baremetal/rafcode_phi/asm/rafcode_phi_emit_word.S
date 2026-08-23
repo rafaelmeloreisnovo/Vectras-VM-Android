@@ -27,6 +27,28 @@ rafphi_emit_word_asm:
     b       rafphi_emit_word_abi
 #endif
 
+#if defined(__arm__) && !defined(__aarch64__)
+    .syntax unified
+    .text
+    .align 2
+    .global rafphi_emit_word_abi
+    .type rafphi_emit_word_abi, %function
+rafphi_emit_word_abi:
+    cmp     r3, r2
+    bhs     1f
+    str     r0, [r1, r3, lsl #2]
+    mov     r0, #1
+    bx      lr
+1:
+    mov     r0, #0
+    bx      lr
+
+    .global rafphi_emit_word_asm
+    .type rafphi_emit_word_asm, %function
+rafphi_emit_word_asm:
+    b       rafphi_emit_word_abi
+#endif
+
 #if defined(__x86_64__)
     .text
     .global rafphi_emit_word_abi
@@ -48,5 +70,9 @@ rafphi_emit_word_asm:
 #endif
 
 #if defined(__ELF__)
+  #if defined(__arm__) || defined(__aarch64__)
+    .section .note.GNU-stack,"",%progbits
+  #else
     .section .note.GNU-stack,"",@progbits
+  #endif
 #endif

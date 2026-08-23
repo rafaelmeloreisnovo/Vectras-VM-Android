@@ -75,6 +75,7 @@ PY
 
 # Valores congelados de regressão (token table + CRC32C determinístico)
 check_arch aarch64 0x6E1F1BB8 0xD503201F 0xD65F03C0 0xD4200000 0xD4400000
+check_arch armv7   0xE5E01ADD 0xE320F000 0xE12FFF1E 0xE1200070 0xE320F003
 check_arch x86_64  0xA82E68BF 0x00000090 0x000000C3 0x000000CC 0x000000F4
 check_arch riscv64 0x8D5521D6 0x00000013 0x00008067 0x00100073 0x10500073
 check_layout_files

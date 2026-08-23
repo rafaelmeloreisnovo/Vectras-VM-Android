@@ -1,13 +1,18 @@
 // AArch64 modular cycle kernel
 // x0: pointer data
 // x1: length
-// x2: modulus
+// x2: modulus (0 is normalized to 1, matching C/Python contract)
 // returns x0 = accumulated xor hash
 
 .text
 .global mod_cycle_aarch64
 .type mod_cycle_aarch64, %function
 mod_cycle_aarch64:
+    // Keep the native hot path behavior equivalent to the higher-level
+    // implementations: modulus 0 means modulus 1, never a zero divisor.
+    cmp w2, #0
+    cinc w2, w2, eq
+
     mov x3, #0
     mov x4, #0x7C15
     movk x4, #0x7F4A, lsl #16

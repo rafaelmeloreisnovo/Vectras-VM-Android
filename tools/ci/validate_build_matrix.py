@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
 """Validate CI workflow matrix/profile consistency and canonical workflow ownership."""
+import json
 from pathlib import Path
 import sys
 
 ROOT = Path(__file__).resolve().parents[2]
 WORKFLOWS = ROOT / '.github' / 'workflows'
+ABI_PROFILE_CONTRACT = ROOT / 'tools' / 'ci' / 'abi_profiles_contract.json'
 
 required = [
     WORKFLOWS / 'pipeline-orchestrator.yml',
@@ -13,11 +15,12 @@ required = [
     WORKFLOWS / 'host-ci.yml',
     WORKFLOWS / 'quality-gates.yml',
     WORKFLOWS / 'compile-matrix.yml',
+    ABI_PROFILE_CONTRACT,
 ]
 
 missing = [str(p) for p in required if not p.exists()]
 if missing:
-    print('missing workflows:')
+    print('missing workflow/contract files:')
     for item in missing:
         print(f' - {item}')
     sys.exit(1)
@@ -46,13 +49,38 @@ for token in [
     'workflow_call',
     'official_arm64',
     'internal_arm32_arm64',
-    'internal_4abi',
     'native_matrix_profile',
     ':app:verifyDeliveredCompiledArtifacts',
 ]:
     if token not in android_ci:
         print(f'android-ci missing token: {token}')
         sys.exit(1)
+
+try:
+    abi_contract = json.loads(ABI_PROFILE_CONTRACT.read_text(encoding='utf-8'))
+except (OSError, json.JSONDecodeError) as exc:
+    print(f'cannot load canonical ABI profile contract: {exc}')
+    sys.exit(1)
+
+internal_4abi = abi_contract.get('profiles', {}).get('internal_4abi')
+if not isinstance(internal_4abi, dict):
+    print('canonical ABI profile contract missing profiles.internal_4abi')
+    sys.exit(1)
+
+expected_4abi = {'arm64-v8a', 'armeabi-v7a', 'x86', 'x86_64'}
+actual_4abi = set(internal_4abi.get('supported_abis', []))
+if actual_4abi != expected_4abi:
+    print(f'internal_4abi supported_abis mismatch: expected={sorted(expected_4abi)} actual={sorted(actual_4abi)}')
+    sys.exit(1)
+if internal_4abi.get('app_abi_policy') != 'internal-4abi':
+    print('internal_4abi app_abi_policy must be internal-4abi')
+    sys.exit(1)
+if internal_4abi.get('ci_internal_validation') is not True:
+    print('internal_4abi must keep ci_internal_validation=true')
+    sys.exit(1)
+if internal_4abi.get('channel') != 'internal':
+    print('internal_4abi channel must be internal')
+    sys.exit(1)
 
 android_wrapper = (WORKFLOWS / 'android.yml').read_text(encoding='utf-8')
 if './.github/workflows/android-ci.yml' not in android_wrapper:
