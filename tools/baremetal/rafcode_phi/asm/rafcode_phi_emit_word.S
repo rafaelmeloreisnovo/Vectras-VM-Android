@@ -70,5 +70,9 @@ rafphi_emit_word_asm:
 #endif
 
 #if defined(__ELF__)
+  #if defined(__arm__) || defined(__aarch64__)
+    .section .note.GNU-stack,"",%progbits
+  #else
     .section .note.GNU-stack,"",@progbits
+  #endif
 #endif
