@@ -1,0 +1,62 @@
+{
+  "schema_version": "state-geometry-module-classification.v1",
+  "scope": "tools/state_geometry_lab/modules",
+  "default_numbered_module_state": "SCAFFOLDING",
+  "claim_allowed": false,
+  "reason": "Numbered method_* modules currently provide dispatch/fixture shells and parameter echoing; they are not promoted as canonical mathematical implementations.",
+  "families": {
+    "c": {
+      "pattern": "tools/state_geometry_lab/modules/c/method_*.c",
+      "state": "SCAFFOLDING",
+      "execution_role": "fixture executable / seed-value JSON shell",
+      "promotion_gate": [
+        "algorithm_body_present",
+        "deterministic_reference_vector",
+        "native_build_pass",
+        "cross_check_against_canonical_algorithm"
+      ]
+    },
+    "py": {
+      "pattern": "tools/state_geometry_lab/modules/py/method_*.py",
+      "state": "SCAFFOLDING",
+      "execution_role": "fixture executable / seed-value JSON shell",
+      "promotion_gate": [
+        "algorithm_body_present",
+        "deterministic_reference_vector",
+        "cross_check_against_canonical_algorithm"
+      ]
+    },
+    "rs": {
+      "pattern": "tools/state_geometry_lab/modules/rs/method_*.rs",
+      "state": "SCAFFOLDING",
+      "execution_role": "fixture/catalogue shell until native algorithm evidence exists",
+      "promotion_gate": [
+        "algorithm_body_present",
+        "deterministic_reference_vector",
+        "rust_build_pass",
+        "cross_check_against_canonical_algorithm"
+      ]
+    },
+    "sh": {
+      "pattern": "tools/state_geometry_lab/modules/sh/method_*.sh",
+      "state": "SCAFFOLDING",
+      "execution_role": "orchestration fixture",
+      "promotion_gate": [
+        "routes_to_implemented_algorithm",
+        "deterministic_reference_vector"
+      ]
+    }
+  },
+  "canonical_algorithm_sources": [
+    "tools/state_geometry_lab/state_geometry_lab.py",
+    "tools/state_geometry_lab/c/state_geometry_lab.c",
+    "tools/state_geometry_lab/asm/mod_cycle_aarch64.S",
+    "tools/arena/raf_slice_registration.py"
+  ],
+  "invariants": [
+    "fixture != algorithm",
+    "catalogue != implementation",
+    "source existence != runtime evidence",
+    "claim_allowed remains false until the family-specific promotion gate is satisfied"
+  ]
+}
