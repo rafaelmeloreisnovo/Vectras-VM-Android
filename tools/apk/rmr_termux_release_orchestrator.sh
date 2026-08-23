@@ -129,22 +129,41 @@ check_environment
 export TERMUX_BUILD=1
 export GRADLE_USER_HOME=.gradle
 
-PLAN="$GRADLE_WRAPPER --no-daemon :app:clean :app:assembleRelease -Pvectras.universal=true -Pvectras.compliance.profile=IEEE_NIST_W3C_RFC_GDPR_LGPD -Pvectras.signing.ethical=true -Pandroid.injected.signing.store.file=$KEYSTORE -Pandroid.injected.signing.store.password=$STORE_PASS -Pandroid.injected.signing.key.alias=$ALIAS -Pandroid.injected.signing.key.password=$KEY_PASS"
-echo "$PLAN" > "$REPORT_DIR/build_plan.txt"
+# Nunca persista credenciais de assinatura no plano/receipt. Gradle recebe os
+# valores somente pelo ambiente do processo filho; o relatório registra apenas
+# a existência das propriedades e o caminho/alias não secretos.
+cat > "$REPORT_DIR/build_plan.txt" <<PLAN
+$GRADLE_WRAPPER --no-daemon :app:clean :app:assembleRelease \
+  -Pvectras.universal=true \
+  -Pvectras.compliance.profile=IEEE_NIST_W3C_RFC_GDPR_LGPD \
+  -Pvectras.signing.ethical=true
+signing.store.file=$KEYSTORE
+signing.store.password=<REDACTED>
+signing.key.alias=$ALIAS
+signing.key.password=<REDACTED>
+signing.transport=ORG_GRADLE_PROJECT_* process environment
+PLAN
+chmod 0600 "$REPORT_DIR/build_plan.txt"
 
 TS0="$(date +%s)"
 log "executando build release"
-"$GRADLE_WRAPPER" --no-daemon :app:clean :app:assembleRelease \
-  -Pvectras.universal=true \
-  -Pvectras.compliance.profile=IEEE_NIST_W3C_RFC_GDPR_LGPD \
-  -Pvectras.signing.ethical=true \
-  -Pandroid.injected.signing.store.file="$KEYSTORE" \
-  -Pandroid.injected.signing.store.password="$STORE_PASS" \
-  -Pandroid.injected.signing.key.alias="$ALIAS" \
-  -Pandroid.injected.signing.key.password="$KEY_PASS" \
-  2>&1 | tee "$REPORT_DIR/gradle_build.log"
+env \
+  "ORG_GRADLE_PROJECT_android.injected.signing.store.file=$KEYSTORE" \
+  "ORG_GRADLE_PROJECT_android.injected.signing.store.password=$STORE_PASS" \
+  "ORG_GRADLE_PROJECT_android.injected.signing.key.alias=$ALIAS" \
+  "ORG_GRADLE_PROJECT_android.injected.signing.key.password=$KEY_PASS" \
+  "$GRADLE_WRAPPER" --no-daemon :app:clean :app:assembleRelease \
+    -Pvectras.universal=true \
+    -Pvectras.compliance.profile=IEEE_NIST_W3C_RFC_GDPR_LGPD \
+    -Pvectras.signing.ethical=true \
+    2>&1 | tee "$REPORT_DIR/gradle_build.log"
 TS1="$(date +%s)"
 echo "build_elapsed_seconds=$((TS1-TS0))" | tee "$REPORT_DIR/build_timing.txt"
+
+# Reduz a janela de exposição no shell após o processo Gradle encerrar.
+STORE_PASS=""
+KEY_PASS=""
+unset STORE_PASS KEY_PASS
 
 if [ ! -f "$APK_PATH" ]; then
   warn "APK default não encontrado em $APK_PATH, tentando localizar"
