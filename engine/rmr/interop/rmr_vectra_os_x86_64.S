@@ -161,3 +161,7 @@ vos_phi_hash_x64:
     .size vos_phi_hash_x64, .-vos_phi_hash_x64
 
 #endif /* __x86_64__ */
+
+#if defined(__ELF__)
+    .section .note.GNU-stack,"",@progbits
+#endif
