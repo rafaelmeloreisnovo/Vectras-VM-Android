@@ -142,14 +142,21 @@ public class SetupWizard2Activity extends AppCompatActivity {
         new Thread(() -> {
             BootstrapExtractionReceipt.Session receiptSession = null;
             BootstrapExtractionReceipt.ExportResult receiptResult = null;
-            Exception unexpectedFailure = null;
+            Exception receiptBeginFailure = null;
+            Exception extractorFailure = null;
             boolean extracted = false;
 
             try {
                 receiptSession = BootstrapExtractionReceipt.begin(appContext);
+            } catch (Exception e) {
+                // Evidence capture must not hide whether the extractor itself works.
+                receiptBeginFailure = e;
+            }
+
+            try {
                 extracted = SetupFeatureCore.startExtractSystemFiles(appContext);
             } catch (Exception e) {
-                unexpectedFailure = e;
+                extractorFailure = e;
             }
 
             SetupFeatureCore.SetupPostCheckResult after = SetupFeatureCore.runSetupPostCheck(appContext);
@@ -157,17 +164,17 @@ public class SetupWizard2Activity extends AppCompatActivity {
             String receiptFailure = "";
             if (receiptSession != null) {
                 try {
-                    receiptResult = receiptSession.finish(extracted, lastError, unexpectedFailure);
+                    receiptResult = receiptSession.finish(extracted, lastError, extractorFailure);
                 } catch (Exception e) {
-                    receiptFailure = e.getClass().getSimpleName() + ":" + compact(e.getMessage());
+                    receiptFailure = "receipt-finish-failed:" + e.getClass().getSimpleName() + ":" + compact(e.getMessage());
                 }
-            } else if (unexpectedFailure != null) {
-                receiptFailure = "receipt-begin-failed:" + unexpectedFailure.getClass().getSimpleName()
-                        + ":" + compact(unexpectedFailure.getMessage());
+            } else if (receiptBeginFailure != null) {
+                receiptFailure = "receipt-begin-failed:" + receiptBeginFailure.getClass().getSimpleName()
+                        + ":" + compact(receiptBeginFailure.getMessage());
             }
 
             final boolean extractedResult = extracted;
-            final Exception unexpectedResult = unexpectedFailure;
+            final Exception extractorFailureResult = extractorFailure;
             final String lastErrorResult = lastError;
             final String receiptFailureResult = receiptFailure;
             final BootstrapExtractionReceipt.ExportResult receiptResultFinal = receiptResult;
@@ -183,11 +190,11 @@ public class SetupWizard2Activity extends AppCompatActivity {
                     lastRepairReceiptSummary = "TOKEN_VAZIO receipt-write=" + receiptFailureResult;
                 }
 
-                if (unexpectedResult != null) {
+                if (extractorFailureResult != null) {
                     body.setText("Falha inesperada durante o reparo do runtime base.\n\n"
                             + "Gate: " + after.technicalReason() + "\n\n"
-                            + "Exceção: " + unexpectedResult.getClass().getName() + ": "
-                            + compact(unexpectedResult.getMessage()) + "\n\n"
+                            + "Exceção: " + extractorFailureResult.getClass().getName() + ": "
+                            + compact(extractorFailureResult.getMessage()) + "\n\n"
                             + "Receipt: " + lastRepairReceiptSummary);
                     repairButton.setText("TENTAR REPARO NOVAMENTE");
                     repairButton.setEnabled(true);
