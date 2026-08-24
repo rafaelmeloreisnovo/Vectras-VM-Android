@@ -24,6 +24,16 @@
     </Preference>
 
     <Preference
+        android:key="evidencecatalog"
+        android:title="Catálogo de Evidências"
+        android:summary="Identidade, proveniência, hashes, instalação, runtime, dispositivo e lacunas auditáveis"
+        app:iconSpaceReserved="false">
+        <intent
+            android:targetPackage="com.rafacodephi.app"
+            android:targetClass="com.vectras.vm.evidence.EvidenceCatalogActivity" />
+    </Preference>
+
+    <Preference
         android:key="qemu"
         android:fragment="com.vectras.qemu.MainSettingsManager$QemuPreferencesFragment"
         android:title="@string/qemu"
