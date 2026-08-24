@@ -4,6 +4,7 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 SDK_ROOT="${ANDROID_SDK_ROOT:-${ANDROID_HOME:-/workspace/android-sdk}}"
 ASSET_ROOT="${ROOT}/app/build/generated/bootstrapAssets"
+JNI_ROOT="${ROOT}/app/src/main/jniLibs"
 OUT_DIR="${ROOT}/artifacts/omega-freestanding-armv7"
 SOURCE_COMMIT="${GITHUB_SHA:-$(git -C "${ROOT}" rev-parse HEAD 2>/dev/null || printf TOKEN_VAZIO)}"
 NDK_VERSION="27.2.12479018"
@@ -13,6 +14,7 @@ while [[ $# -gt 0 ]]; do
   case "$1" in
     --sdk-root) SDK_ROOT="$2"; shift 2 ;;
     --asset-root) ASSET_ROOT="$2"; shift 2 ;;
+    --jni-root) JNI_ROOT="$2"; shift 2 ;;
     --out-dir) OUT_DIR="$2"; shift 2 ;;
     --commit) SOURCE_COMMIT="$2"; shift 2 ;;
     *) echo "unknown argument: $1" >&2; exit 2 ;;
@@ -67,6 +69,7 @@ python3 "${ROOT}/tools/ci/stage_omega_freestanding_apk_asset.py" \
   --binary "${elf}" \
   --audit "${OUT_DIR}/elf-audit.json" \
   --asset-root "${ASSET_ROOT}" \
+  --jni-root "${JNI_ROOT}" \
   --commit "${SOURCE_COMMIT}"
 
 cp -f "${elf}" "${OUT_DIR}/omega-core-armv7.elf"
@@ -74,9 +77,12 @@ cp -f "${map_file}" "${OUT_DIR}/omega-core-armv7.map"
 
 printf '%s\n' \
   'OMEGA_FREESTANDING_ELF=BUILT_AND_AUDITED' \
-  'APK_ASSET=STAGED_NOT_YET_VERIFIED' \
+  'APK_NATIVE_CARRIER=STAGED_NOT_YET_VERIFIED' \
+  'WRITABLE_APP_HOME_EXEC=FORBIDDEN_BY_ANDROID_10_WX' \
+  'DEVICE_NATIVE_LIBRARY_DIR=TOKEN_VAZIO' \
   'DEVICE_EXECUTION=TOKEN_VAZIO' \
   'CLAIM_ALLOWED=false' \
   > "${OUT_DIR}/boundary.txt"
 
-echo "[omega-freestanding] staged ${ASSET_ROOT}/freestanding/armeabi-v7a/omega-core.elf"
+echo "[omega-freestanding] staged native carrier ${JNI_ROOT}/armeabi-v7a/libomega_core_exec.so"
+echo "[omega-freestanding] staged manifest ${ASSET_ROOT}/freestanding/armeabi-v7a/omega-core.manifest.json"
