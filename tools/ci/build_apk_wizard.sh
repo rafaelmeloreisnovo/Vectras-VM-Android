@@ -7,18 +7,35 @@ SDK_ROOT="${ANDROID_SDK_ROOT:-${ANDROID_HOME:-/workspace/android-sdk}}"
 GRADLEW="${REPO_ROOT}/gradlew"
 RUNTIME_SEED_MANIFEST="${REPO_ROOT}/configs/embedded_runtime_seed_assets.v1.json"
 RUNTIME_SEED_RECEIPT="${OUT_DIR}/runtime-seed-materialization.json"
+GENERATED_ASSETS_ROOT="${REPO_ROOT}/app/build/generated/bootstrapAssets"
 
 mkdir -p "${OUT_DIR}"
 
 echo "[wizard] bootstrap Android SDK root=${SDK_ROOT}"
 "${REPO_ROOT}/tools/ci/bootstrap_local_android_sdk.sh" --sdk-root "${SDK_ROOT}"
 
+# Clean once before generating provenance-bound assets. Do not clean per lane: the
+# generated assets are intentionally shared by both APK lanes and are verified
+# inside each resulting APK.
+echo "[wizard] clean app build tree before runtime seed materialization"
+"${GRADLEW}" --no-daemon :app:clean \
+  -PdevFastPath=true \
+  -PCI_INTERNAL_VALIDATION=false
+
 echo "[wizard] materialize pinned embedded runtime seed assets for ARM lanes"
 python3 "${REPO_ROOT}/tools/bootstrap/materialize_embedded_runtime_seed_assets.py" \
   --manifest "${RUNTIME_SEED_MANIFEST}" \
-  --target-root "${REPO_ROOT}/app/src/main/assets" \
+  --target-root "${GENERATED_ASSETS_ROOT}" \
   --abis "arm64-v8a,armeabi-v7a" \
   --receipt "${RUNTIME_SEED_RECEIPT}"
+
+# devFastPath deliberately skips the normal preBuild sync task, so materialize
+# loader.apk explicitly once after the clean. This task is run with the bypass
+# disabled and appends loader.apk beside the verified TARs without deleting them.
+echo "[wizard] materialize shell-loader into generated bootstrap assets"
+"${GRADLEW}" --no-daemon :app:syncShellLoaderBootstrap \
+  -PdevFastPath=false \
+  -PCI_INTERNAL_VALIDATION=false
 
 build_lane() {
   local lane_name="$1"
@@ -31,7 +48,7 @@ build_lane() {
   local payload_receipt="${OUT_DIR}/${lane_name}.runtime-payload.json"
 
   echo "[wizard] building lane=${lane_name} policy=${policy} abis=${abis}"
-  "${GRADLEW}" --no-daemon :app:clean :app:assembleDebug \
+  "${GRADLEW}" --no-daemon :app:assembleDebug \
     -PAPP_ABI_POLICY="${policy}" \
     -PSUPPORTED_ABIS="${abis}" \
     -PCI_INTERNAL_VALIDATION="${ci_internal}" \
