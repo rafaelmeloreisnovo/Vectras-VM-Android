@@ -1,0 +1,92 @@
+{
+  "schema_version": "vectras.embedded-runtime-seed-assets.v1",
+  "observed_at": "2026-08-24",
+  "state": "SOURCE_IDENTIFIED_PINNED_NOT_DEVICE_VERIFIED",
+  "source_repository": "xoureldeen/Vectras-VM-Android",
+  "source_commit": "e1faf376b4b034384cdab9a4ab1e608c61a83521",
+  "source_license": "GPL-2.0",
+  "purpose": "Embedded setup seed only: bootstrap/<abi>.tar supplies PRoot seed; alpine19/<abi>.tar supplies Alpine rootfs/userland. These assets do not by themselves prove QEMU installation or VM boot.",
+  "claim_allowed": false,
+  "release_allowed": false,
+  "device_runtime_verified": false,
+  "assets": [
+    {
+      "family": "bootstrap",
+      "abi": "arm64-v8a",
+      "source_path": "app/src/main/assets/bootstrap/arm64-v8a.tar",
+      "target_path": "bootstrap/arm64-v8a.tar",
+      "git_blob_sha1": "1ef257a0fe4191490002492792bbc27c56bdd94f",
+      "size_bytes": 731594
+    },
+    {
+      "family": "bootstrap",
+      "abi": "armeabi-v7a",
+      "source_path": "app/src/main/assets/bootstrap/armeabi-v7a.tar",
+      "target_path": "bootstrap/armeabi-v7a.tar",
+      "git_blob_sha1": "093ade0a86e7375770371a098ef1fdee39fdeec8",
+      "size_bytes": 693548
+    },
+    {
+      "family": "bootstrap",
+      "abi": "x86",
+      "source_path": "app/src/main/assets/bootstrap/x86.tar",
+      "target_path": "bootstrap/x86.tar",
+      "git_blob_sha1": "70da9a4bf607ba6cd93a2bbbf3c50ef67a4b5a63",
+      "size_bytes": 713113
+    },
+    {
+      "family": "bootstrap",
+      "abi": "x86_64",
+      "source_path": "app/src/main/assets/bootstrap/x86_64.tar",
+      "target_path": "bootstrap/x86_64.tar",
+      "git_blob_sha1": "4b66acdf38ff42e5d5b8338e3ebdf26f7aa99a53",
+      "size_bytes": 721832
+    },
+    {
+      "family": "alpine19",
+      "abi": "arm64-v8a",
+      "source_path": "app/src/main/assets/alpine19/arm64-v8a.tar",
+      "target_path": "alpine19/arm64-v8a.tar",
+      "git_blob_sha1": "def9c1d1dfb33229e8e1610ebc976fa91230b7e4",
+      "size_bytes": 3227138
+    },
+    {
+      "family": "alpine19",
+      "abi": "armeabi-v7a",
+      "source_path": "app/src/main/assets/alpine19/armeabi-v7a.tar",
+      "target_path": "alpine19/armeabi-v7a.tar",
+      "git_blob_sha1": "e5b6f039982efb7114886f04a22a3f3c4b064062",
+      "size_bytes": 3068308
+    },
+    {
+      "family": "alpine19",
+      "abi": "x86",
+      "source_path": "app/src/main/assets/alpine19/x86.tar",
+      "target_path": "alpine19/x86.tar",
+      "git_blob_sha1": "98a9e4d2299e18a0abed65cf2cdfe35997326316",
+      "size_bytes": 3142666
+    },
+    {
+      "family": "alpine19",
+      "abi": "x86_64",
+      "source_path": "app/src/main/assets/alpine19/x86_64.tar",
+      "target_path": "alpine19/x86_64.tar",
+      "git_blob_sha1": "8ec04583d946678db93c6cd63f6c166c60328130",
+      "size_bytes": 3299654
+    }
+  ],
+  "invariants": [
+    "SOURCE_COMMIT_PINNED",
+    "SIZE_MATCH",
+    "GIT_BLOB_SHA1_MATCH",
+    "TAR_READABLE",
+    "NO_ABSOLUTE_PATHS",
+    "NO_DOTDOT_TRAVERSAL",
+    "NO_DEVICE_NODES",
+    "SYMLINK_TARGET_STAYS_WITHIN_ARCHIVE_ROOT",
+    "FAMILY_MARKERS_PRESENT",
+    "SEED_PRESENT_NE_QEMU_INSTALLED",
+    "QEMU_INSTALLED_NE_VM_BOOT",
+    "CLAIM_ALLOWED_FALSE_UNTIL_DEVICE_RECEIPT"
+  ]
+}
