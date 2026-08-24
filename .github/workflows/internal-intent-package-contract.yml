@@ -1,0 +1,28 @@
+name: Internal Intent Package Contract
+
+on:
+  push:
+    branches: [ master, main, develop ]
+    paths:
+      - 'app/build.gradle'
+      - 'app/src/main/res/xml/**'
+      - 'tools/ci/validate_internal_intent_package_contract.py'
+      - '.github/workflows/internal-intent-package-contract.yml'
+  pull_request:
+    branches: [ master, main, develop ]
+    paths:
+      - 'app/build.gradle'
+      - 'app/src/main/res/xml/**'
+      - 'tools/ci/validate_internal_intent_package_contract.py'
+      - '.github/workflows/internal-intent-package-contract.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate explicit internal intent package
+        run: python3 tools/ci/validate_internal_intent_package_contract.py

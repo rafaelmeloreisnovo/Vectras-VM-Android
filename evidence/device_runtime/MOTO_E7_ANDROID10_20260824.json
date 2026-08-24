@@ -1,0 +1,79 @@
+{
+  "schema": "vectras.device_runtime.incident.v1",
+  "observed_at_local": "2026-08-23T23:32:00-03:00/2026-08-23T23:37:22-03:00",
+  "recorded_at": "2026-08-24",
+  "provenance": "USER_PROVIDED_DEVICE_SCREENSHOTS",
+  "privacy": {
+    "storage_volume_uuid": "REDACTED_FROM_REPOSITORY_RECORD",
+    "path_policy": "replace adopted-storage UUID with <adopted-storage-uuid>"
+  },
+  "device": {
+    "model_observed": "motorola, moto e(7) power",
+    "android_version": "10",
+    "api_level": 29,
+    "kernel_observed": "4.9.190+",
+    "supported_abis_observed": [
+      "armeabi-v7a",
+      "armeabi"
+    ]
+  },
+  "app": {
+    "version_observed": "3.6.6",
+    "version_code_observed": 70,
+    "installed_package_in_runtime_path": "com.rafacodephi.app",
+    "apk_sha256": "TOKEN_VAZIO",
+    "build_commit_of_installed_apk": "TOKEN_VAZIO",
+    "merged_manifest_of_installed_apk": "TOKEN_VAZIO"
+  },
+  "runtime_observations": {
+    "startup_guard": "Vectras runtime incompleto",
+    "post_check_reason": "POST_CHECK_FAIL:missing-proot,missing-distro-busybox,missing-qemu-binary",
+    "proot_execution_error": "Cannot run program <adopted-storage-uuid>/user/0/com.rafacodephi.app/files/usr/bin/proot: error=2, No such file or directory",
+    "qemu_status": "Stopped",
+    "vnc_status": "Stopped",
+    "qemu_arch_ui": "X86_64",
+    "missing_libraries_dialog_observed": true,
+    "crash": {
+      "exception": "android.content.ActivityNotFoundException",
+      "explicit_component": "com.vectras.vm/com.vectras.vm.settings.LanguageModulesActivity"
+    }
+  },
+  "source_cross_check_at_master_4d61525e119bc79bf4b53a4cb17614449336fe1d": {
+    "application_id": "com.rafacodephi.app",
+    "java_namespace": "com.vectras.vm",
+    "language_modules_activity_declared_in_source_manifest": true,
+    "preference_target_package_before_fix": "com.vectras.vm",
+    "preference_target_class": "com.vectras.vm.settings.LanguageModulesActivity",
+    "package_mismatch_root_cause": "CONFIRMED_SOURCE_DEVICE_CROSS_EVIDENCE",
+    "setup_requires_bootstrap_asset_family": true,
+    "setup_requires_alpine19_asset_family": true,
+    "setup_wizard_before_fix_called_startExtractSystemFiles": false,
+    "startExtractSystemFiles_call_sites_before_fix": "DEFINITION_ONLY",
+    "beta83_payload_verifier_before_fix_checked_alpine19": false,
+    "qemu_target_name_was_used_to_infer_host_bitness": true
+  },
+  "mitigations_on_branch": {
+    "branch": "hotfix/runtime-seed-provenance-package-20260824",
+    "internal_intent_package_contract": "IMPLEMENTED_CI_GATE",
+    "embedded_seed_source_pin": "xoureldeen/Vectras-VM-Android@e1faf376b4b034384cdab9a4ab1e608c61a83521",
+    "bootstrap_and_alpine19_materializer": "IMPLEMENTED_UNTESTED_CI",
+    "apk_payload_verifier_v2": "IMPLEMENTED_UNTESTED_CI",
+    "setup_wizard_local_base_repair_execution": "IMPLEMENTED_UNTESTED_DEVICE",
+    "qemu_host_elf_inspection": "IMPLEMENTED_UNTESTED_DEVICE"
+  },
+  "remaining_token_vazio": [
+    "APK_SHA256_INSTALLED_MOTO_E7",
+    "APK_BUILD_COMMIT_INSTALLED_MOTO_E7",
+    "INSTALLED_APK_MERGED_MANIFEST_RECEIPT",
+    "POST_FIX_APK_SHA256",
+    "POST_FIX_PROOT_EXECUTION_RECEIPT",
+    "POST_FIX_ALPINE_BUSYBOX_RECEIPT",
+    "QEMU_DISTRIBUTION_MATERIALIZATION_RECEIPT",
+    "QEMU_HOST_ELF_ABI_RECEIPT_ON_MOTO_E7",
+    "POST_FIX_POST_CHECK_RECEIPT",
+    "PHYSICAL_VM_LAUNCH_RECEIPT"
+  ],
+  "state": "MITIGATION_IMPLEMENTED_UNTESTED",
+  "claim_allowed": false,
+  "device_runtime_verified": false
+}

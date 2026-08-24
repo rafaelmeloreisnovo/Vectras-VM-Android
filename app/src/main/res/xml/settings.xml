@@ -96,7 +96,7 @@
             android:summary="@string/see_if_there_are_any_new_updates"
             app:icon="@drawable/system_update_24px">
             <intent
-                android:targetPackage="com.vectras.vm"
+                android:targetPackage="com.rafacodephi.app"
                 android:targetClass="com.vectras.vm.settings.UpdaterActivity" />
         </Preference>
 

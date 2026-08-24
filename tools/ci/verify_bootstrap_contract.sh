@@ -9,11 +9,18 @@ fi
 
 GRADLE_FLAGS=("$@")
 
-BOOTSTRAP_CONTRACT="official=pinned TAR assets + loader.apk ; fallback=JNI ZIP compatibility only"
+BOOTSTRAP_CONTRACT="official=pinned bootstrap TARs + pinned alpine19 rootfs TARs + loader.apk ; fallback=JNI ZIP compatibility only"
 echo "[verify_bootstrap_contract] Bootstrap contract => ${BOOTSTRAP_CONTRACT}"
 
-echo "[verify_bootstrap_contract] Materializing TAR assets from exact external Git commit..."
+echo "[verify_bootstrap_contract] Materializing PRoot bootstrap TAR assets from exact original-upstream Git commit..."
 python3 tools/ci/materialize_bootstrap_assets.py
+
+echo "[verify_bootstrap_contract] Materializing Alpine19 rootfs TAR assets from exact original-upstream Git commit..."
+python3 tools/bootstrap/materialize_embedded_runtime_seed_assets.py \
+  --target-root app/build/generated/bootstrapAssets \
+  --families alpine19 \
+  --abis arm64-v8a,armeabi-v7a,x86,x86_64 \
+  --receipt app/build/reports/bootstrap/alpine19-materialization.json
 
 echo "[verify_bootstrap_contract] Running :app:verifyShellLoaderArtifact (strict gate)..."
 ./tools/gradle_with_jdk21.sh :app:verifyShellLoaderArtifact "${GRADLE_FLAGS[@]}"
@@ -27,12 +34,17 @@ if [[ ! -s "${LOADER_PATH}" ]]; then
 fi
 
 RECEIPT_PATH="app/build/reports/bootstrap/bootstrap-materialization.json"
+ALPINE_RECEIPT_PATH="app/build/reports/bootstrap/alpine19-materialization.json"
 if [[ ! -s "${RECEIPT_PATH}" ]]; then
   echo "::error::Bootstrap provenance receipt ausente: ${RECEIPT_PATH}" >&2
   exit 1
 fi
+if [[ ! -s "${ALPINE_RECEIPT_PATH}" ]]; then
+  echo "::error::Alpine19 provenance receipt ausente: ${ALPINE_RECEIPT_PATH}" >&2
+  exit 1
+fi
 
-echo "[verify_bootstrap_contract] Validating official contract via tools/verify_bootstrap_assets.py --strict-generated-assets"
+echo "[verify_bootstrap_contract] Validating official bootstrap contract via tools/verify_bootstrap_assets.py --strict-generated-assets"
 python3 tools/verify_bootstrap_assets.py --strict-generated-assets
 if [[ "${STRICT_MODE}" == "1" ]]; then
   echo "[verify_bootstrap_contract] Strict mode enabled: Gradle verifyBootstrapAssets is mandatory."
