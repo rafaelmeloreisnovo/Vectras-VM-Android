@@ -6,19 +6,15 @@ import sys
 import zipfile
 from pathlib import Path
 
-REQUIRED_BOOTSTRAP_TARS = {
-    "arm64-v8a": "assets/bootstrap/arm64-v8a.tar",
-    "armeabi-v7a": "assets/bootstrap/armeabi-v7a.tar",
-}
-REQUIRED_NATIVE = {
-    "arm64-v8a": [
-        "lib/arm64-v8a/libtermux-bootstrap.so",
-        "lib/arm64-v8a/libtermux_terminal_jni.so",
-    ],
-    "armeabi-v7a": [
-        "lib/armeabi-v7a/libtermux-bootstrap.so",
-        "lib/armeabi-v7a/libtermux_terminal_jni.so",
-    ],
+SUPPORTED_RUNTIME_ABIS = ("arm64-v8a", "armeabi-v7a", "x86", "x86_64")
+DEFAULT_REQUIRED_ABIS = ("arm64-v8a", "armeabi-v7a")
+
+REQUIRED_NATIVE_BY_ABI = {
+    abi: [
+        f"lib/{abi}/libtermux-bootstrap.so",
+        f"lib/{abi}/libtermux_terminal_jni.so",
+    ]
+    for abi in SUPPORTED_RUNTIME_ABIS
 }
 
 
@@ -30,38 +26,95 @@ def sha256(path: Path) -> str:
     return h.hexdigest()
 
 
-def inspect(apk: Path) -> dict:
+def required_runtime_tars(abis: tuple[str, ...]) -> dict[str, dict[str, str]]:
+    return {
+        abi: {
+            "bootstrap": f"assets/bootstrap/{abi}.tar",
+            "rootfs": f"assets/alpine19/{abi}.tar",
+        }
+        for abi in abis
+    }
+
+
+def inspect(apk: Path, abis: tuple[str, ...]) -> dict:
     with zipfile.ZipFile(apk) as zf:
         names = set(zf.namelist())
-    missing_tars = {
-        abi: path for abi, path in REQUIRED_BOOTSTRAP_TARS.items() if path not in names
+
+    runtime_tars = required_runtime_tars(abis)
+    missing_bootstrap = {
+        abi: paths["bootstrap"]
+        for abi, paths in runtime_tars.items()
+        if paths["bootstrap"] not in names
     }
+    missing_rootfs = {
+        abi: paths["rootfs"]
+        for abi, paths in runtime_tars.items()
+        if paths["rootfs"] not in names
+    }
+    missing_runtime_tars = {
+        abi: {
+            family: path
+            for family, path in paths.items()
+            if path not in names
+        }
+        for abi, paths in runtime_tars.items()
+    }
+    missing_runtime_tars = {
+        abi: paths for abi, paths in missing_runtime_tars.items() if paths
+    }
+
     missing_native = {
-        abi: [p for p in paths if p not in names]
-        for abi, paths in REQUIRED_NATIVE.items()
+        abi: [p for p in REQUIRED_NATIVE_BY_ABI[abi] if p not in names]
+        for abi in abis
     }
     missing_native = {abi: items for abi, items in missing_native.items() if items}
+
     has_loader = "assets/bootstrap/loader.apk" in names
-    suspicious_shell_only = has_loader and bool(missing_tars)
+    shell_only_risk = has_loader and bool(missing_runtime_tars)
+    runtime_payload_complete = (
+        has_loader and not missing_runtime_tars and not missing_native
+    )
+
     return {
-        "schema": "vectras.device_runtime.apk_payload.v1",
+        "schema": "vectras.device_runtime.apk_payload.v2",
         "apk": str(apk),
         "sha256": sha256(apk),
         "size_bytes": apk.stat().st_size,
+        "required_abis": list(abis),
         "loader_apk_present": has_loader,
-        "required_bootstrap_tars": REQUIRED_BOOTSTRAP_TARS,
-        "missing_bootstrap_tars": missing_tars,
+        "required_runtime_tars": runtime_tars,
+        # Compatibility field retained for v1 readers.
+        "missing_bootstrap_tars": missing_bootstrap,
+        "missing_rootfs_tars": missing_rootfs,
+        "missing_runtime_tars": missing_runtime_tars,
         "missing_native_runtime": missing_native,
-        "shell_only_risk": suspicious_shell_only,
-        "runtime_payload_complete": has_loader and not missing_tars and not missing_native,
+        "shell_only_risk": shell_only_risk,
+        "runtime_payload_complete": runtime_payload_complete,
+        "runtime_contract": "bootstrap-seed + alpine19-rootfs + JNI surface",
+        "qemu_runtime_verified": False,
         "claim_allowed": False,
         "device_runtime_verified": False,
     }
 
 
+def parse_abis(raw: str) -> tuple[str, ...]:
+    values = tuple(dict.fromkeys(v.strip() for v in raw.split(",") if v.strip()))
+    if not values:
+        raise ValueError("at least one ABI is required")
+    unsupported = [abi for abi in values if abi not in SUPPORTED_RUNTIME_ABIS]
+    if unsupported:
+        raise ValueError(f"unsupported ABI(s): {', '.join(unsupported)}")
+    return values
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("apk", type=Path)
+    ap.add_argument(
+        "--abis",
+        default=",".join(DEFAULT_REQUIRED_ABIS),
+        help="comma-separated runtime ABIs that must be complete",
+    )
     ap.add_argument("--json-out", type=Path)
     ap.add_argument("--allow-incomplete", action="store_true")
     args = ap.parse_args()
@@ -70,7 +123,11 @@ def main() -> int:
         print(f"APK not found: {args.apk}", file=sys.stderr)
         return 2
     try:
-        result = inspect(args.apk)
+        abis = parse_abis(args.abis)
+        result = inspect(args.apk, abis)
+    except ValueError as exc:
+        print(f"Invalid ABI contract: {exc}", file=sys.stderr)
+        return 2
     except zipfile.BadZipFile:
         print(f"Not a valid APK/ZIP: {args.apk}", file=sys.stderr)
         return 2
@@ -84,8 +141,10 @@ def main() -> int:
     if result["runtime_payload_complete"] or args.allow_incomplete:
         return 0
     print(
-        "FAIL: APK has terminal/bootstrap JNI surface but lacks required ABI rootfs payloads; "
-        "do not promote this artifact as a functional PRoot/userland runtime.",
+        "FAIL: APK lacks the complete runtime seed contract for the requested ABI(s): "
+        "bootstrap/<abi>.tar (PRoot seed), alpine19/<abi>.tar (rootfs/userland), "
+        "and the JNI bootstrap surface must all be present. Do not promote this APK "
+        "as a functional PRoot/rootfs runtime.",
         file=sys.stderr,
     )
     return 1
