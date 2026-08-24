@@ -112,20 +112,22 @@ build_lane "app-debug-arm64-v8a" "arm64-only" "arm64-v8a" "false" "arm64-v8a"
 
 # Layer 2: compile/link the existing canonical freestanding ABI core into a
 # self-contained ELF32/ARM deployment image. It is audited twice for deterministic
-# identity, PT_INTERP/DT_NEEDED/undefined-symbol absence, then staged as an APK
-# asset. This does not execute the ELF and does not certify VM boot.
+# identity, PT_INTERP/DT_NEEDED/undefined-symbol absence, then staged through the
+# debug APK's native executable carrier. This does not execute the ELF.
 echo "[wizard] build + audit + stage Omega freestanding ARMv7 deployment ELF"
-"${REPO_ROOT}/tools/ci/materialize_omega_freestanding_asset.sh" \
+bash "${REPO_ROOT}/tools/ci/materialize_omega_freestanding_asset.sh" \
   --sdk-root "${SDK_ROOT}" \
   --asset-root "${GENERATED_ASSETS_ROOT}" \
+  --jni-root "${REPO_ROOT}/app/src/debug/jniLibs" \
   --out-dir "${OMEGA_OUT_DIR}" \
   --commit "$(git -C "${REPO_ROOT}" rev-parse HEAD)"
 
 build_lane "app-debug-arm32-arm64" "arm32-arm64" "arm64-v8a,armeabi-v7a" "true" "arm64-v8a,armeabi-v7a"
 
-# Close the build->APK materialization edge by comparing the ELF bytes inside
-# the APK against the audited standalone ELF and generated asset manifest.
-echo "[wizard] verify Omega ELF byte identity inside dual-ARM APK"
+# Close the build->APK materialization edge by comparing the ELF bytes in
+# lib/armeabi-v7a/libomega_core_exec.so against the audited standalone ELF and
+# generated manifest. Physical nativeLibraryDir extraction remains a device gate.
+echo "[wizard] verify Omega native carrier byte identity inside dual-ARM APK"
 python3 "${REPO_ROOT}/tools/ci/verify_omega_freestanding_apk.py" \
   --apk "${OUT_DIR}/app-debug-arm32-arm64.apk" \
   --audit "${OMEGA_AUDIT}" \
@@ -140,10 +142,11 @@ source_commit="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1], 
   echo
   echo "Bootstrap TARs: exact SHA-256 enforced by tools/ci/bootstrap-assets.v1.json."
   echo "Alpine19 TARs: exact size + Git blob SHA-1 enforced; SHA-256 emitted in receipt."
-  echo "Omega ARMv7: direct ld.lld freestanding ELF, deterministic rebuild audit, then byte-identity verification inside the dual-ARM APK."
+  echo "Omega ARMv7: direct ld.lld freestanding ELF; deterministic rebuild audit; APK native-carrier byte identity verified."
+  echo "Android 10 W^X: executable code is kept APK/install-owned, not copied into writable app home."
   echo "Build evidence: each lane embeds assets/evidence/build-context.json and emits a post-build *.build-evidence.json."
   echo
-  echo "Boundary: APK materialization != device filesDir materialization != physical execution != VM boot. claim_allowed=false until physical receipts close those gates."
+  echo "Boundary: APK carrier != PackageManager extraction/nativeLibraryDir receipt != physical execution != VM boot. claim_allowed=false until physical receipts close those gates."
   echo
   echo "| lane | policy | abis | apk_size_bytes |"
   echo "|---|---|---|---:|"
