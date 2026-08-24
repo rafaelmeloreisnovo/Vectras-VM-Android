@@ -136,7 +136,9 @@ public final class ExpandedRuntimePreflight {
 
         QemuBinaryResolver.Resolution resolution = QemuBinaryResolver.resolveForArch(context, arch, "ExpandedRuntimePreflight");
         if (resolution.found) {
-            checkExecutable(items, "qemu_binary", new File(resolution.fullPath), true, true);
+            File qemuBinary = new File(resolution.fullPath);
+            checkExecutable(items, "qemu_binary", qemuBinary, true, true);
+            checkHostExecutableAbi(items, qemuBinary, hostAbi);
         } else {
             items.add(new Item("qemu_binary", "(resolver)", Severity.BLOCKER, "missing: " + resolution.reason + " checked=" + resolution.checkedPaths, 0L, ""));
         }
@@ -166,13 +168,45 @@ public final class ExpandedRuntimePreflight {
     }
 
     private static void checkAbiCompatibility(ArrayList<Item> items, String arch, String hostAbi, boolean host64) {
-        boolean requires64 = "ARM64".equals(arch) || "X86_64".equals(arch);
-        if (requires64 && !host64) {
-            items.add(new Item("abi", hostAbi, Severity.BLOCKER,
-                    "guest arch " + arch + " requires 64-bit QEMU but host primary ABI is 32-bit", 0L, ""));
-            return;
+        // Guest/system target and host executable ABI are orthogonal. A filename
+        // such as qemu-system-x86_64 says which machine is emulated, not whether
+        // the Android binary itself is 32-bit or 64-bit. Actual ELF inspection
+        // is performed only after the resolver locates the executable.
+        items.add(new Item(
+                "abi_mapping",
+                hostAbi,
+                Severity.PASS,
+                "guest target=" + arch + " does not determine host ELF ABI; host64Bit=" + host64,
+                0L,
+                ""
+        ));
+    }
+
+    private static void checkHostExecutableAbi(ArrayList<Item> items, File qemuBinary, String hostAbi) {
+        HostExecutableAbiInspector.Result result = HostExecutableAbiInspector.inspect(qemuBinary, hostAbi);
+        Severity severity;
+        switch (result.status) {
+            case MATCH:
+                severity = Severity.PASS;
+                break;
+            case MISMATCH:
+                severity = Severity.BLOCKER;
+                break;
+            case NOT_ELF:
+            case UNKNOWN_HOST_ABI:
+            case UNREADABLE:
+            default:
+                severity = Severity.WARN;
+                break;
         }
-        items.add(new Item("abi", hostAbi, Severity.PASS, "host ABI compatible with arch=" + arch, 0L, ""));
+        items.add(new Item(
+                "qemu_host_elf_abi",
+                qemuBinary == null ? "" : qemuBinary.getAbsolutePath(),
+                severity,
+                result.status.name() + ": " + result.detail,
+                qemuBinary != null && qemuBinary.isFile() ? qemuBinary.length() : 0L,
+                ""
+        ));
     }
 
     private static void checkFirmwareAssets(ArrayList<Item> items, String arch) {
