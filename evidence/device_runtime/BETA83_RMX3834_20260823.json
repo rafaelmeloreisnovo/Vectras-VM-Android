@@ -1,0 +1,54 @@
+{
+  "schema": "vectras.device_runtime.observation.v1",
+  "date": "2026-08-23",
+  "artifact": {
+    "name": "vectras-beta-arm32-arm64-debug-20260823-2c6a71e.apk",
+    "source": "user-provided workflow artifact ZIP",
+    "sha256": "d497ee5cfb45f7e737c57fb0a3ed95b34cfaa50dd3105f36cde9456d24c1fb80",
+    "size_bytes": 32921900,
+    "merge_commit": "2c6a71e5e3a8e6d87c4eb07ab6cedf3d67992d9d"
+  },
+  "apk_inventory_observed": {
+    "assets/bootstrap/loader.apk": true,
+    "assets/bootstrap/arm64-v8a.tar": false,
+    "assets/bootstrap/armeabi-v7a.tar": false,
+    "proot_entry_in_apk": false,
+    "busybox_entry_in_apk": false,
+    "toybox_entry_in_apk": false,
+    "lib/arm64-v8a/libtermux-bootstrap.so": true,
+    "lib/arm64-v8a/libtermux_terminal_jni.so": true,
+    "lib/armeabi-v7a/libtermux-bootstrap.so": true,
+    "lib/armeabi-v7a/libtermux_terminal_jni.so": true,
+    "lib/arm64-v8a/libvectra_core_accel.so": true,
+    "lib/armeabi-v7a/libvectra_core_accel.so": true
+  },
+  "device_observation": {
+    "provenance": "USER_REPORTED_DEVICE_EXECUTION",
+    "device_family": "RMX3834",
+    "android": "14",
+    "terminal_prompt_visible": true,
+    "terminal_user_label": "root",
+    "commands_missing": ["ls", "mkdir"],
+    "package_installation_unavailable": true,
+    "proot_installation_or_resolution_failed": true,
+    "benchmark_progress_symptom": "first visible progress increment then no further visible progress",
+    "menus_continue_to_work": true
+  },
+  "source_analysis": {
+    "terminal_uses_proot_command_builder": true,
+    "proot_expected_path": "<filesDir>/usr/bin/proot",
+    "rootfs_expected_path": "<filesDir>/distro",
+    "guest_shell_expected": "/bin/sh",
+    "benchmark_manager_progress_stages": [8, 18, 24, 86, 94],
+    "benchmark_internal_metric_progress_callback": false,
+    "interpretation": "Terminal/PTY surface is present, but the architectural rootfs/userland payload is not packaged in the inspected APK. BenchmarkManager blocks inside VectraBenchmark.runAllBenchmarks() between stage 24 and 86 without per-metric progress callbacks."
+  },
+  "state": {
+    "apk_build": "PASS_OBSERVED_ARTIFACT",
+    "terminal_ui": "PASS_USER_OBSERVED",
+    "proot_userland": "FAIL_USER_OBSERVED_AND_APK_PAYLOAD_INCOMPLETE",
+    "benchmark_completion": "TOKEN_VAZIO",
+    "device_runtime_verified": false,
+    "claim_allowed": false
+  }
+}
