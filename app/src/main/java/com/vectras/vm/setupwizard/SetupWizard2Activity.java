@@ -10,6 +10,7 @@ import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.vectras.vm.evidence.BootstrapExtractionReceipt;
 import com.vectras.vm.evidence.EvidenceCatalogActivity;
 import com.vectras.vm.main.MainActivity;
 
@@ -28,6 +29,7 @@ public class SetupWizard2Activity extends AppCompatActivity {
     public static final int ACTION_SYSTEM_UPDATE = 1;
 
     private volatile boolean repairRunning;
+    private volatile String lastRepairReceiptSummary = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,10 +64,14 @@ public class SetupWizard2Activity extends AppCompatActivity {
         ));
 
         TextView body = new TextView(this);
+        String receiptNote = lastRepairReceiptSummary.isEmpty()
+                ? ""
+                : "\n\nReceipt da última tentativa: " + lastRepairReceiptSummary;
         body.setText("O app foi iniciado, mas o runtime ainda não está pronto.\n\n"
                 + "Motivo técnico: " + postCheck.technicalReason() + "\n\n"
                 + "PRoot e rootfs podem ser reparados localmente a partir dos assets verificados do APK. "
-                + "QEMU permanece um gate separado e só é considerado pronto depois de existir e passar o preflight.");
+                + "QEMU permanece um gate separado e só é considerado pronto depois de existir e passar o preflight."
+                + receiptNote);
         body.setTextSize(15f);
         body.setPadding(0, dp(18), 0, dp(18));
         root.addView(body, new LinearLayout.LayoutParams(
@@ -129,20 +135,70 @@ public class SetupWizard2Activity extends AppCompatActivity {
         repairButton.setEnabled(false);
         repairButton.setText("REPARANDO RUNTIME BASE...");
         body.setText("Extraindo bootstrap PRoot + rootfs Alpine do próprio APK.\n\n"
-                + "Nenhum download QEMU é feito nesta etapa. O resultado será verificado antes de avançar.");
+                + "Esta tentativa gera receipt antes/depois com SHA-256, destino, modo, bit executável e post-check. "
+                + "Nenhum download QEMU é feito nesta etapa.");
 
         final android.content.Context appContext = getApplicationContext();
         new Thread(() -> {
-            boolean extracted = SetupFeatureCore.startExtractSystemFiles(appContext);
+            BootstrapExtractionReceipt.Session receiptSession = null;
+            BootstrapExtractionReceipt.ExportResult receiptResult = null;
+            Exception unexpectedFailure = null;
+            boolean extracted = false;
+
+            try {
+                receiptSession = BootstrapExtractionReceipt.begin(appContext);
+                extracted = SetupFeatureCore.startExtractSystemFiles(appContext);
+            } catch (Exception e) {
+                unexpectedFailure = e;
+            }
+
             SetupFeatureCore.SetupPostCheckResult after = SetupFeatureCore.runSetupPostCheck(appContext);
             String lastError = SetupFeatureCore.lastErrorLog == null ? "" : SetupFeatureCore.lastErrorLog.trim();
+            String receiptFailure = "";
+            if (receiptSession != null) {
+                try {
+                    receiptResult = receiptSession.finish(extracted, lastError, unexpectedFailure);
+                } catch (Exception e) {
+                    receiptFailure = e.getClass().getSimpleName() + ":" + compact(e.getMessage());
+                }
+            } else if (unexpectedFailure != null) {
+                receiptFailure = "receipt-begin-failed:" + unexpectedFailure.getClass().getSimpleName()
+                        + ":" + compact(unexpectedFailure.getMessage());
+            }
+
+            final boolean extractedResult = extracted;
+            final Exception unexpectedResult = unexpectedFailure;
+            final String lastErrorResult = lastError;
+            final String receiptFailureResult = receiptFailure;
+            final BootstrapExtractionReceipt.ExportResult receiptResultFinal = receiptResult;
+
             runOnUiThread(() -> {
                 repairRunning = false;
                 if (isFinishing() || isDestroyed()) return;
-                if (!extracted && !lastError.isEmpty()) {
+
+                if (receiptResultFinal != null) {
+                    lastRepairReceiptSummary = receiptResultFinal.jsonFile.getName()
+                            + " sha256=" + receiptResultFinal.sha256;
+                } else if (!receiptFailureResult.isEmpty()) {
+                    lastRepairReceiptSummary = "TOKEN_VAZIO receipt-write=" + receiptFailureResult;
+                }
+
+                if (unexpectedResult != null) {
+                    body.setText("Falha inesperada durante o reparo do runtime base.\n\n"
+                            + "Gate: " + after.technicalReason() + "\n\n"
+                            + "Exceção: " + unexpectedResult.getClass().getName() + ": "
+                            + compact(unexpectedResult.getMessage()) + "\n\n"
+                            + "Receipt: " + lastRepairReceiptSummary);
+                    repairButton.setText("TENTAR REPARO NOVAMENTE");
+                    repairButton.setEnabled(true);
+                    return;
+                }
+
+                if (!extractedResult) {
                     body.setText("Falha ao reparar runtime base.\n\n"
                             + "Gate: " + after.technicalReason() + "\n\n"
-                            + "Detalhe: " + compact(lastError));
+                            + "Detalhe: " + compact(lastErrorResult) + "\n\n"
+                            + "Receipt: " + lastRepairReceiptSummary);
                     repairButton.setText("TENTAR REPARO NOVAMENTE");
                     repairButton.setEnabled(true);
                     return;
