@@ -4,7 +4,14 @@
     <queries>
         <package android:name="com.termux.rafacodephi" />
     </queries>
-    <application>
+    <!--
+      Android 10 W^X boundary: targetSdk 29+ cannot execve code copied into the
+      writable app home. APK Wizard debug builds therefore let PackageManager
+      extract lib/<abi>/lib*.so entries into ApplicationInfo.nativeLibraryDir.
+      The Omega carrier is audited as ET_EXEC/no-DT_NEEDED; the .so suffix is a
+      package-manager carrier convention, not a shared-library dependency.
+    -->
+    <application android:extractNativeLibs="true">
         <receiver
             android:name="com.vectras.vm.integration.VectrasTermuxResultReceiver"
             android:exported="false" />
