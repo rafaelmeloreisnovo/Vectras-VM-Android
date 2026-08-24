@@ -8,9 +8,11 @@ on:
       - 'app/src/main/cpp/lowlevel_abi.c'
       - 'app/src/main/cpp/lowlevel_abi.h'
       - 'app/src/main/cpp/vectra_ll_base.h'
+      - 'app/src/debug/AndroidManifest.xml'
       - 'tools/ci/audit_omega_freestanding_deploy.py'
       - 'tools/ci/stage_omega_freestanding_apk_asset.py'
       - 'tools/ci/verify_omega_freestanding_apk.py'
+      - 'tools/ci/materialize_omega_freestanding_asset.sh'
       - 'tools/ci/resolve_abi_profile.py'
       - 'tools/ci/abi_profiles_contract.json'
       - '.github/workflows/omega-freestanding-deployment.yml'
@@ -42,17 +44,15 @@ jobs:
           distribution: temurin
           java-version: '17'
 
-      - name: Python syntax and ABI drift contract
+      - name: Static contract checks
         run: |
+          set -euo pipefail
           python3 -m py_compile \
             tools/ci/audit_omega_freestanding_deploy.py \
             tools/ci/stage_omega_freestanding_apk_asset.py \
             tools/ci/verify_omega_freestanding_apk.py
+          bash -n tools/ci/materialize_omega_freestanding_asset.sh
           python3 tools/ci/check_abi_contract_drift.py
-
-      - name: Resolve canonical internal ARM32+ARM64 profile
-        run: |
-          set -euo pipefail
           python3 tools/ci/resolve_abi_profile.py --profile internal_arm32_arm64 --format json
 
       - name: Install Android NDK and CMake
@@ -64,62 +64,14 @@ jobs:
             "ndk;${ANDROID_NDK_VERSION}" \
             "cmake;${ANDROID_CMAKE_VERSION}"
 
-      - name: Configure dedicated ARMv7 freestanding deployment
+      - name: Build, audit and stage ARMv7 freestanding carrier
         run: |
           set -euo pipefail
-          cmake_dir="${ANDROID_SDK_ROOT}/cmake/${ANDROID_CMAKE_VERSION}"
-          ndk_dir="${ANDROID_SDK_ROOT}/ndk/${ANDROID_NDK_VERSION}"
-          "${cmake_dir}/bin/cmake" \
-            -S deployment/freestanding \
-            -B build/omega-armv7 \
-            -G Ninja \
-            -DCMAKE_BUILD_TYPE=Release \
-            -DCMAKE_MAKE_PROGRAM="${cmake_dir}/bin/ninja" \
-            -DCMAKE_TOOLCHAIN_FILE="${ndk_dir}/build/cmake/android.toolchain.cmake" \
-            -DANDROID_ABI=armeabi-v7a \
-            -DANDROID_PLATFORM=android-29 \
-            -DANDROID_STL=none
-
-      - name: Build twice and audit freestanding ELF
-        run: |
-          set -euo pipefail
-          cmake_dir="${ANDROID_SDK_ROOT}/cmake/${ANDROID_CMAKE_VERSION}"
-          ndk_bin="${ANDROID_SDK_ROOT}/ndk/${ANDROID_NDK_VERSION}/toolchains/llvm/prebuilt/linux-x86_64/bin"
-          build_dir="build/omega-armv7"
-          out_dir="${build_dir}/out"
-          evidence_dir="artifacts/omega-freestanding-armv7"
-          elf="${out_dir}/omega-core-armv7.elf"
-          map="${out_dir}/omega-core-armv7.map"
-          mkdir -p "${evidence_dir}"
-
-          "${cmake_dir}/bin/cmake" --build "${build_dir}" \
-            --target omega_freestanding_deploy_armv7 \
-            --verbose 2>&1 | tee "${evidence_dir}/build-first.log"
-          test -f "${elf}"
-          cp "${elf}" "${evidence_dir}/reference.elf"
-
-          rm -f "${elf}" "${map}"
-          "${cmake_dir}/bin/cmake" --build "${build_dir}" \
-            --target omega_freestanding_deploy_armv7 \
-            --verbose 2>&1 | tee "${evidence_dir}/build-second.log"
-          test -f "${elf}"
-
-          python3 tools/ci/audit_omega_freestanding_deploy.py \
-            --binary "${elf}" \
-            --reference-binary "${evidence_dir}/reference.elf" \
-            --readelf "${ndk_bin}/llvm-readelf" \
-            --output "${evidence_dir}/elf-audit.json" \
-            --commit "${SOURCE_COMMIT}"
-
-          cp "${elf}" "${evidence_dir}/omega-core-armv7.elf"
-          cp "${map}" "${evidence_dir}/omega-core-armv7.map"
-
-      - name: Stage audited ELF into generated APK assets
-        run: |
-          python3 tools/ci/stage_omega_freestanding_apk_asset.py \
-            --binary build/omega-armv7/out/omega-core-armv7.elf \
-            --audit artifacts/omega-freestanding-armv7/elf-audit.json \
+          bash tools/ci/materialize_omega_freestanding_asset.sh \
+            --sdk-root "${ANDROID_SDK_ROOT}" \
             --asset-root app/build/generated/bootstrapAssets \
+            --jni-root app/src/debug/jniLibs \
+            --out-dir artifacts/omega-freestanding-armv7 \
             --commit "${SOURCE_COMMIT}"
 
       - name: Build debug APK with canonical ABI profile
@@ -132,7 +84,7 @@ jobs:
             -PAPP_ABI_POLICY="${app_abi_policy}" \
             -PSUPPORTED_ABIS="${supported_abis}"
 
-      - name: Verify ELF identity inside APK
+      - name: Verify native carrier identity inside APK
         run: |
           set -euo pipefail
           apk="$(find app/build/outputs/apk/debug -type f -name '*.apk' -print -quit)"
@@ -146,10 +98,10 @@ jobs:
 
       - name: Preserve evidence boundary
         run: |
-          cat <<'EOF' | tee artifacts/omega-freestanding-armv7/boundary.txt
-          FREESTANDING_ELF_BUILD=GATED_BY_ELF_AUDIT
-          APK_MATERIALIZATION=GATED_BY_BYTE_IDENTITY
-          DEVICE_INSTALL=TOKEN_VAZIO
+          cat <<'EOF' >> artifacts/omega-freestanding-armv7/boundary.txt
+          APK_NATIVE_CARRIER=GATED_BY_BYTE_IDENTITY
+          ANDROID10_WX=EXECUTABLE_CODE_APK_INSTALL_OWNED
+          DEVICE_NATIVE_LIBRARY_DIR=TOKEN_VAZIO
           DEVICE_EXECUTION=TOKEN_VAZIO
           PHYSICAL_EXIT=TOKEN_VAZIO
           VM_BOOT=TOKEN_VAZIO
