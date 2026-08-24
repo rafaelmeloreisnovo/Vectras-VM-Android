@@ -15,27 +15,27 @@
       "abi": "arm64-v8a",
       "source_path": "app/src/main/assets/bootstrap/arm64-v8a.tar",
       "output_name": "arm64-v8a.tar",
-      "expected_sha256": "376dd771cf5dbc865ab557e78dfce3927650dc9055e6bb9b831c0a03485912e1"
+      "expected_sha256": "TOKEN_VAZIO"
     },
     {
       "abi": "armeabi-v7a",
       "source_path": "app/src/main/assets/bootstrap/armeabi-v7a.tar",
       "output_name": "armeabi-v7a.tar",
-      "expected_sha256": "f0f9b12658c04ef0b5f9357e3a3f0f519a5e36d130b90e75d956ad5c7224d4b5"
+      "expected_sha256": "TOKEN_VAZIO"
     },
     {
       "abi": "x86",
       "source_path": "app/src/main/assets/bootstrap/x86.tar",
       "output_name": "x86.tar",
-      "expected_sha256": "12a7ee34608b68b7ee77126474445ba9af9e444bf572904e32d6ab79f7835dd6"
+      "expected_sha256": "TOKEN_VAZIO"
     },
     {
       "abi": "x86_64",
       "source_path": "app/src/main/assets/bootstrap/x86_64.tar",
       "output_name": "x86_64.tar",
-      "expected_sha256": "eb11438635e39231af5bf7423923e73dcba9d5b26503aec8a4be3e41cc53168c"
+      "expected_sha256": "TOKEN_VAZIO"
     }
   ],
   "claim_allowed": false,
-  "next_gate": "rerun_android_ci_with_sha256_enforced_then_execute_on_physical_device"
+  "next_gate": "discover_sha256_from_original_upstream_then_freeze_and_rerun"
 }
