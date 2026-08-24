@@ -4,7 +4,7 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 SDK_ROOT="${ANDROID_SDK_ROOT:-${ANDROID_HOME:-/workspace/android-sdk}}"
 ASSET_ROOT="${ROOT}/app/build/generated/bootstrapAssets"
-JNI_ROOT="${ROOT}/app/src/main/jniLibs"
+JNI_ROOT="${ROOT}/app/src/debug/jniLibs"
 OUT_DIR="${ROOT}/artifacts/omega-freestanding-armv7"
 SOURCE_COMMIT="${GITHUB_SHA:-$(git -C "${ROOT}" rev-parse HEAD 2>/dev/null || printf TOKEN_VAZIO)}"
 NDK_VERSION="27.2.12479018"
