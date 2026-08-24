@@ -12,6 +12,9 @@ BOOTSTRAP_RECEIPT_DST="${OUT_DIR}/bootstrap-materialization.json"
 GENERATED_ASSETS_ROOT="${REPO_ROOT}/app/build/generated/bootstrapAssets"
 BUILD_EVIDENCE_TOOL="${REPO_ROOT}/tools/ci/generate_build_evidence_catalog.py"
 EMBEDDED_BUILD_CONTEXT="${GENERATED_ASSETS_ROOT}/evidence/build-context.json"
+OMEGA_OUT_DIR="${OUT_DIR}/omega-freestanding-armv7"
+OMEGA_AUDIT="${OMEGA_OUT_DIR}/elf-audit.json"
+OMEGA_APK_RECEIPT="${OUT_DIR}/app-debug-arm32-arm64.omega-materialization.json"
 
 mkdir -p "${OUT_DIR}"
 
@@ -19,8 +22,8 @@ echo "[wizard] bootstrap Android SDK root=${SDK_ROOT}"
 "${REPO_ROOT}/tools/ci/bootstrap_local_android_sdk.sh" --sdk-root "${SDK_ROOT}"
 
 # Clean once before generating provenance-bound assets. Do not clean per lane:
-# generated bootstrap/alpine/loader assets are intentionally shared by both APK
-# lanes and then independently verified inside each resulting APK.
+# generated bootstrap/alpine/loader/Omega assets are intentionally retained until
+# the APK that consumes them has been independently verified.
 echo "[wizard] clean app build tree before runtime seed materialization"
 "${GRADLEW}" --no-daemon :app:clean \
   -PdevFastPath=true \
@@ -103,8 +106,31 @@ build_lane() {
 }
 
 rm -f "${OUT_DIR}/sizes.tsv"
+
+# Keep the arm64-only compatibility artifact free of the ARM32-only Omega asset.
 build_lane "app-debug-arm64-v8a" "arm64-only" "arm64-v8a" "false" "arm64-v8a"
+
+# Layer 2: compile/link the existing canonical freestanding ABI core into a
+# self-contained ELF32/ARM deployment image. It is audited twice for deterministic
+# identity, PT_INTERP/DT_NEEDED/undefined-symbol absence, then staged as an APK
+# asset. This does not execute the ELF and does not certify VM boot.
+echo "[wizard] build + audit + stage Omega freestanding ARMv7 deployment ELF"
+"${REPO_ROOT}/tools/ci/materialize_omega_freestanding_asset.sh" \
+  --sdk-root "${SDK_ROOT}" \
+  --asset-root "${GENERATED_ASSETS_ROOT}" \
+  --out-dir "${OMEGA_OUT_DIR}" \
+  --commit "$(git -C "${REPO_ROOT}" rev-parse HEAD)"
+
 build_lane "app-debug-arm32-arm64" "arm32-arm64" "arm64-v8a,armeabi-v7a" "true" "arm64-v8a,armeabi-v7a"
+
+# Close the build->APK materialization edge by comparing the ELF bytes inside
+# the APK against the audited standalone ELF and generated asset manifest.
+echo "[wizard] verify Omega ELF byte identity inside dual-ARM APK"
+python3 "${REPO_ROOT}/tools/ci/verify_omega_freestanding_apk.py" \
+  --apk "${OUT_DIR}/app-debug-arm32-arm64.apk" \
+  --audit "${OMEGA_AUDIT}" \
+  --output "${OMEGA_APK_RECEIPT}" \
+  --commit "$(git -C "${REPO_ROOT}" rev-parse HEAD)"
 
 source_commit="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1], encoding="utf-8"))["source_commit"])' "${RUNTIME_SEED_MANIFEST}")"
 {
@@ -114,9 +140,10 @@ source_commit="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1], 
   echo
   echo "Bootstrap TARs: exact SHA-256 enforced by tools/ci/bootstrap-assets.v1.json."
   echo "Alpine19 TARs: exact size + Git blob SHA-1 enforced; SHA-256 emitted in receipt."
+  echo "Omega ARMv7: direct ld.lld freestanding ELF, deterministic rebuild audit, then byte-identity verification inside the dual-ARM APK."
   echo "Build evidence: each lane embeds assets/evidence/build-context.json and emits a post-build *.build-evidence.json."
   echo
-  echo "Boundary: embedded PRoot+Alpine seed verified in APK != seed extracted on device != QEMU distribution installed != physical VM boot."
+  echo "Boundary: APK materialization != device filesDir materialization != physical execution != VM boot. claim_allowed=false until physical receipts close those gates."
   echo
   echo "| lane | policy | abis | apk_size_bytes |"
   echo "|---|---|---|---:|"
