@@ -42,22 +42,18 @@ jobs:
           distribution: temurin
           java-version: '17'
 
-      - name: Python syntax
+      - name: Python syntax and ABI drift contract
         run: |
           python3 -m py_compile \
             tools/ci/audit_omega_freestanding_deploy.py \
             tools/ci/stage_omega_freestanding_apk_asset.py \
             tools/ci/verify_omega_freestanding_apk.py
+          python3 tools/ci/check_abi_contract_drift.py
 
       - name: Resolve canonical internal ARM32+ARM64 profile
         run: |
           set -euo pipefail
-          eval "$(python3 tools/ci/resolve_abi_profile.py --profile internal_arm32_arm64)"
-          {
-            echo "APP_ABI_POLICY_RESOLVED=${app_abi_policy}"
-            echo "SUPPORTED_ABIS_RESOLVED=${supported_abis}"
-            echo "CI_INTERNAL_VALIDATION_RESOLVED=${ci_internal_validation}"
-          } >> "$GITHUB_ENV"
+          python3 tools/ci/resolve_abi_profile.py --profile internal_arm32_arm64 --format json
 
       - name: Install Android NDK and CMake
         run: |
@@ -129,11 +125,12 @@ jobs:
       - name: Build debug APK with canonical ABI profile
         run: |
           set -euo pipefail
+          eval "$(python3 tools/ci/resolve_abi_profile.py --profile internal_arm32_arm64)"
           ./tools/gradle_with_jdk21.sh :app:assembleDebug \
             -POFFICIAL_CI=false \
-            -PCI_INTERNAL_VALIDATION="${CI_INTERNAL_VALIDATION_RESOLVED}" \
-            -PAPP_ABI_POLICY="${APP_ABI_POLICY_RESOLVED}" \
-            -PSUPPORTED_ABIS="${SUPPORTED_ABIS_RESOLVED}"
+            -PCI_INTERNAL_VALIDATION="${ci_internal_validation}" \
+            -PAPP_ABI_POLICY="${app_abi_policy}" \
+            -PSUPPORTED_ABIS="${supported_abis}"
 
       - name: Verify ELF identity inside APK
         run: |
