@@ -6,6 +6,8 @@ on:
     paths:
       - 'tools/ci/bootstrap-assets.v1.json'
       - 'tools/ci/materialize_bootstrap_assets.py'
+      - 'tools/bootstrap/materialize_embedded_runtime_seed_assets.py'
+      - 'configs/embedded_runtime_seed_assets.v1.json'
       - 'tools/ci/external_sources.manifest'
       - 'tools/verify_bootstrap_assets.py'
       - 'tools/ci/verify_bootstrap_contract.sh'
@@ -16,7 +18,10 @@ on:
     paths:
       - 'tools/ci/bootstrap-assets.v1.json'
       - 'tools/ci/materialize_bootstrap_assets.py'
+      - 'tools/bootstrap/materialize_embedded_runtime_seed_assets.py'
+      - 'configs/embedded_runtime_seed_assets.v1.json'
       - 'tools/ci/external_sources.manifest'
+      - 'tools/ci/verify_bootstrap_contract.sh'
       - 'evidence/bootstrap/**'
       - '.github/workflows/bootstrap-assets-contract.yml'
   workflow_dispatch:
@@ -45,7 +50,15 @@ jobs:
       - name: Materialize four bootstrap TARs from exact commit
         run: python3 tools/ci/materialize_bootstrap_assets.py
 
-      - name: Gate receipt and frozen SHA-256 enforcement
+      - name: Materialize four Alpine19 rootfs TARs from exact commit
+        run: |
+          python3 tools/bootstrap/materialize_embedded_runtime_seed_assets.py \
+            --target-root app/build/generated/bootstrapAssets \
+            --families alpine19 \
+            --abis arm64-v8a,armeabi-v7a,x86,x86_64 \
+            --receipt app/build/reports/bootstrap/alpine19-materialization.json
+
+      - name: Gate receipts and frozen bootstrap SHA-256 enforcement
         shell: bash
         run: |
           set -euo pipefail
@@ -53,28 +66,45 @@ jobs:
           import json
           from pathlib import Path
 
-          receipt_path = Path('app/build/reports/bootstrap/bootstrap-materialization.json')
-          receipt = json.loads(receipt_path.read_text(encoding='utf-8'))
-          assets = receipt.get('assets', [])
-          assert receipt['source']['commit'] == 'b7f7f681147d7502bc63bd03ee02d95f4dbe8ee2'
-          assert receipt['source']['commit_verified'] is True
-          assert receipt['all_assets_valid_tar'] is True
-          assert receipt['all_paths_safe'] is True
-          assert len(assets) == 4
-          assert {asset['abi'] for asset in assets} == {'arm64-v8a', 'armeabi-v7a', 'x86', 'x86_64'}
-          assert all(asset['sha256_enforced'] is True for asset in assets)
-          assert all(asset['sha256'] == asset['expected_sha256'] for asset in assets)
-          assert all(asset['entries'] > 0 and asset['size_bytes'] > 0 for asset in assets)
-          print('bootstrap receipt gate: PASS')
+          bootstrap_manifest = json.loads(Path('tools/ci/bootstrap-assets.v1.json').read_text(encoding='utf-8'))
+          runtime_manifest = json.loads(Path('configs/embedded_runtime_seed_assets.v1.json').read_text(encoding='utf-8'))
+          bootstrap = json.loads(Path('app/build/reports/bootstrap/bootstrap-materialization.json').read_text(encoding='utf-8'))
+          alpine = json.loads(Path('app/build/reports/bootstrap/alpine19-materialization.json').read_text(encoding='utf-8'))
+
+          expected_commit = bootstrap_manifest['source']['commit']
+          assert expected_commit == runtime_manifest['source_commit']
+          assert bootstrap['source']['commit'] == expected_commit
+          assert bootstrap['source']['commit_verified'] is True
+          assert bootstrap['all_assets_valid_tar'] is True
+          assert bootstrap['all_paths_safe'] is True
+          bootstrap_assets = bootstrap.get('assets', [])
+          assert len(bootstrap_assets) == 4
+          assert {asset['abi'] for asset in bootstrap_assets} == {'arm64-v8a', 'armeabi-v7a', 'x86', 'x86_64'}
+          assert all(asset['sha256_enforced'] is True for asset in bootstrap_assets)
+          assert all(asset['sha256'] == asset['expected_sha256'] for asset in bootstrap_assets)
+          assert all(asset['entries'] > 0 and asset['size_bytes'] > 0 for asset in bootstrap_assets)
+
+          assert alpine['source_commit'] == expected_commit
+          assert alpine['selected_families'] == ['alpine19']
+          alpine_assets = alpine.get('assets', [])
+          assert len(alpine_assets) == 4
+          assert {asset['abi'] for asset in alpine_assets} == {'arm64-v8a', 'armeabi-v7a', 'x86', 'x86_64'}
+          assert all(asset['family'] == 'alpine19' for asset in alpine_assets)
+          assert all(len(asset['sha256']) == 64 for asset in alpine_assets)
+          assert all(asset['tar_members'] > 0 and asset['size_bytes'] > 0 for asset in alpine_assets)
+          assert alpine['claim_allowed'] is False
+          print('bootstrap + alpine19 receipt gate: PASS source_commit=' + expected_commit)
           PY
 
-      - name: Upload bootstrap provenance receipt
+      - name: Upload runtime seed provenance receipts
         id: receipt_upload
         continue-on-error: true
         uses: actions/upload-artifact@v4
         with:
-          name: bootstrap-assets-receipt-${{ github.sha }}
-          path: app/build/reports/bootstrap/bootstrap-materialization.json
+          name: bootstrap-assets-receipts-${{ github.sha }}
+          path: |
+            app/build/reports/bootstrap/bootstrap-materialization.json
+            app/build/reports/bootstrap/alpine19-materialization.json
           if-no-files-found: error
           retention-days: 30
 
@@ -84,16 +114,18 @@ jobs:
         run: |
           set -euo pipefail
           upload_outcome='${{ steps.receipt_upload.outcome }}'
+          source_commit="$(python3 -c 'import json; print(json.load(open("tools/ci/bootstrap-assets.v1.json", encoding="utf-8"))["source"]["commit"])')"
           {
             echo '## Bootstrap Assets Contract'
             echo
-            echo '- Integrity gate: `PASS`'
-            echo '- Source commit: `b7f7f681147d7502bc63bd03ee02d95f4dbe8ee2`'
-            echo '- SHA-256 enforcement: `PASS`'
+            echo '- Integrity gate: bootstrap + alpine19'
+            echo "- Source commit: \`${source_commit}\`"
+            echo '- Bootstrap SHA-256 enforcement: strict'
+            echo '- Alpine19 SHA-256: emitted in provenance receipt'
             if [[ "${upload_outcome}" == "success" ]]; then
               echo '- Receipt publication: `PASS`'
             else
               echo '- Receipt publication: `BLOCKED_EXTERNAL` (GitHub Actions artifact storage/quota)'
-              echo '- The publication failure does not change the integrity result; the receipt was generated and validated inside the job.'
+              echo '- Publication failure does not change the in-job integrity result.'
             fi
           } >> "$GITHUB_STEP_SUMMARY"
