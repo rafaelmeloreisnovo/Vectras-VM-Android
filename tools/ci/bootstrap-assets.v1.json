@@ -3,10 +3,10 @@
   "contract": "pinned_git_sparse_materialization",
   "source": {
     "external_manifest_name": "bootstrap_assets_source",
-    "repository": "ednadefatima1959-max/Vectra",
-    "url": "https://github.com/ednadefatima1959-max/Vectra",
+    "repository": "xoureldeen/Vectras-VM-Android",
+    "url": "https://github.com/xoureldeen/Vectras-VM-Android",
     "branch": "master",
-    "commit": "b7f7f681147d7502bc63bd03ee02d95f4dbe8ee2"
+    "commit": "e1faf376b4b034384cdab9a4ab1e608c61a83521"
   },
   "output_directory": "app/build/generated/bootstrapAssets/bootstrap",
   "receipt": "app/build/reports/bootstrap/bootstrap-materialization.json",
