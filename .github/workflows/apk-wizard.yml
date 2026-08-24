@@ -64,6 +64,7 @@ jobs:
           path: |
             artifacts/apk-wizard/*.apk
             artifacts/apk-wizard/*.json
+            artifacts/apk-wizard/*.sha256
             artifacts/apk-wizard/REPORT.md
             artifacts/apk-wizard/sizes.tsv
           if-no-files-found: warn
