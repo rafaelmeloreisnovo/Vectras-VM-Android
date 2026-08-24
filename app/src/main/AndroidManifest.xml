@@ -107,6 +107,11 @@
             android:exported="false"
             android:label="@string/rafaelia_logs_title" />
         <activity
+            android:name=".evidence.EvidenceCatalogActivity"
+            android:configChanges="orientation|screenSize|keyboardHidden|smallestScreenSize|screenLayout"
+            android:exported="false"
+            android:label="Catálogo de Evidências" />
+        <activity
             android:name=".RomReceiverActivity"
             android:exported="false"
             android:label="@string/importRom" />

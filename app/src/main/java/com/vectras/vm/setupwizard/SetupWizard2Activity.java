@@ -10,6 +10,7 @@ import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.vectras.vm.evidence.EvidenceCatalogActivity;
 import com.vectras.vm.main.MainActivity;
 
 /**
@@ -90,6 +91,15 @@ public class SetupWizard2Activity extends AppCompatActivity {
         retry.setEnabled(!repairRunning);
         retry.setOnClickListener(v -> renderCurrentState());
         root.addView(retry, new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+        ));
+
+        Button evidence = new Button(this);
+        evidence.setText("CATÁLOGO DE EVIDÊNCIAS");
+        evidence.setEnabled(!repairRunning);
+        evidence.setOnClickListener(v -> startActivity(new Intent(this, EvidenceCatalogActivity.class)));
+        root.addView(evidence, new LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT
         ));

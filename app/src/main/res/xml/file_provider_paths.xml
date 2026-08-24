@@ -2,4 +2,7 @@
     <external-path
         name="external_files"
         path="." />
+    <files-path
+        name="installation_evidence"
+        path="evidence/" />
 </paths>
