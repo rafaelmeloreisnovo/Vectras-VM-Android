@@ -19,7 +19,7 @@
         android:summary="@string/lang_modules_description"
         app:iconSpaceReserved="false">
         <intent
-            android:targetPackage="com.vectras.vm"
+            android:targetPackage="com.rafacodephi.app"
             android:targetClass="com.vectras.vm.settings.LanguageModulesActivity" />
     </Preference>
 
@@ -35,7 +35,7 @@
         android:summary="@string/settings_for_vnc"
         app:iconSpaceReserved="false">
         <intent
-            android:targetPackage="com.vectras.vm"
+            android:targetPackage="com.rafacodephi.app"
             android:targetClass="com.vectras.vm.settings.VNCSettingsActivity" />
     </Preference>
     <Preference
@@ -44,7 +44,7 @@
         android:summary="@string/settings_for_X11_display"
         app:iconSpaceReserved="false">
         <intent
-            android:targetPackage="com.vectras.vm"
+            android:targetPackage="com.rafacodephi.app"
             android:targetClass="com.vectras.vm.settings.X11DisplaySettingsActivity" />
     </Preference>
 <!--    <Preference-->
@@ -59,7 +59,7 @@
         android:summary="@string/import_and_export_description"
         app:iconSpaceReserved="false">
         <intent
-            android:targetPackage="com.vectras.vm"
+            android:targetPackage="com.rafacodephi.app"
             android:targetClass="com.vectras.vm.settings.ImportExportSettingsActivity" />
     </Preference>
 </PreferenceScreen>
