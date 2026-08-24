@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Materialize the small embedded PRoot + Alpine seed assets from a pinned upstream commit.
+"""Materialize small embedded PRoot/Alpine seed assets from a pinned upstream commit.
 
 This tool intentionally does NOT download the large QEMU distribution bootstrap.
 It closes only the APK embedded setup-seed layer used by SetupFeatureCore:
@@ -97,14 +97,14 @@ def load_manifest(path: Path) -> dict:
     return data
 
 
-def parse_abis(raw: str) -> set[str]:
-    abis = {item.strip() for item in raw.split(",") if item.strip()}
-    if not abis:
-        raise ValueError("at least one ABI is required")
-    unknown = sorted(abis - ALLOWED_ABIS)
+def parse_subset(raw: str, allowed: set[str], label: str) -> set[str]:
+    values = {item.strip() for item in raw.split(",") if item.strip()}
+    if not values:
+        raise ValueError(f"at least one {label} is required")
+    unknown = sorted(values - allowed)
     if unknown:
-        raise ValueError(f"unsupported ABI(s): {unknown}")
-    return abis
+        raise ValueError(f"unsupported {label}(s): {unknown}")
+    return values
 
 
 def source_url(repository: str, commit: str, path: str) -> str:
@@ -168,19 +168,28 @@ def main() -> int:
     parser.add_argument(
         "--abis",
         default="arm64-v8a,armeabi-v7a,x86,x86_64",
-        help="comma-separated subset to materialize",
+        help="comma-separated ABI subset to materialize",
+    )
+    parser.add_argument(
+        "--families",
+        default="bootstrap,alpine19",
+        help="comma-separated family subset: bootstrap,alpine19",
     )
     parser.add_argument("--receipt", type=Path)
     parser.add_argument("--timeout", type=int, default=120)
     args = parser.parse_args()
 
     manifest = load_manifest(args.manifest)
-    selected_abis = parse_abis(args.abis)
+    selected_abis = parse_subset(args.abis, ALLOWED_ABIS, "ABI")
+    selected_families = parse_subset(args.families, ALLOWED_FAMILIES, "family")
     repository = manifest["source_repository"]
     commit = manifest["source_commit"]
-    selected = [a for a in manifest.get("assets", []) if a.get("abi") in selected_abis]
+    selected = [
+        a for a in manifest.get("assets", [])
+        if a.get("abi") in selected_abis and a.get("family") in selected_families
+    ]
 
-    expected_pairs = {(family, abi) for family in ALLOWED_FAMILIES for abi in selected_abis}
+    expected_pairs = {(family, abi) for family in selected_families for abi in selected_abis}
     actual_pairs = {(a.get("family"), a.get("abi")) for a in selected}
     if actual_pairs != expected_pairs:
         missing = sorted(expected_pairs - actual_pairs)
@@ -236,6 +245,7 @@ def main() -> int:
         "source_commit": commit,
         "source_license": manifest.get("source_license", "TOKEN_VAZIO"),
         "selected_abis": sorted(selected_abis),
+        "selected_families": sorted(selected_families),
         "assets": receipt_assets,
         "qemu_distribution_materialized": False,
         "device_runtime_verified": False,
