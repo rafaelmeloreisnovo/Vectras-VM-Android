@@ -22,6 +22,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_EMBEDDED = ROOT / "app" / "build" / "generated" / "bootstrapAssets" / "evidence" / "build-context.json"
+EMBEDDED_CONTEXT_ENTRY = "assets/evidence/build-context.json"
 
 CONTRACT_FILES = [
     "app/build.gradle",
@@ -42,6 +43,10 @@ def sha256_file(path: Path) -> str:
         for chunk in iter(lambda: handle.read(1024 * 1024), b""):
             digest.update(chunk)
     return digest.hexdigest()
+
+
+def sha256_bytes(data: bytes) -> str:
+    return hashlib.sha256(data).hexdigest()
 
 
 def git(*args: str) -> str:
@@ -172,10 +177,33 @@ def read_json(path: Path | None):
 def zip_inventory(apk: Path) -> dict:
     with zipfile.ZipFile(apk) as archive:
         names = archive.namelist()
+        build_context = None
+        if EMBEDDED_CONTEXT_ENTRY in names:
+            raw = archive.read(EMBEDDED_CONTEXT_ENTRY)
+            try:
+                parsed = json.loads(raw.decode("utf-8"))
+                build_context = {
+                    "entry": EMBEDDED_CONTEXT_ENTRY,
+                    "size_bytes": len(raw),
+                    "sha256": sha256_bytes(raw),
+                    "schema_version": parsed.get("schema_version", "TOKEN_VAZIO"),
+                    "record_kind": parsed.get("record_kind", "TOKEN_VAZIO"),
+                    "lane": parsed.get("lane", {}),
+                    "source": parsed.get("source", {}),
+                }
+            except Exception as exc:
+                build_context = {
+                    "entry": EMBEDDED_CONTEXT_ENTRY,
+                    "size_bytes": len(raw),
+                    "sha256": sha256_bytes(raw),
+                    "status": "UNREADABLE_JSON",
+                    "error": type(exc).__name__,
+                }
     return {
         "entries": len(names),
         "native_libraries": sorted(name for name in names if name.startswith("lib/") and name.endswith(".so")),
         "embedded_evidence": sorted(name for name in names if name.startswith("assets/evidence/")),
+        "embedded_build_context": build_context,
         "runtime_seed_entries": sorted(
             name
             for name in names
@@ -209,13 +237,26 @@ def main() -> int:
         if not apk.is_file():
             raise SystemExit(f"APK not found: {apk}")
 
+        inventory = zip_inventory(apk)
+        embedded_context = inventory.get("embedded_build_context")
+        if not embedded_context:
+            raise SystemExit(f"required build evidence missing from APK: {EMBEDDED_CONTEXT_ENTRY}")
+        if embedded_context.get("status") == "UNREADABLE_JSON":
+            raise SystemExit(f"embedded build evidence is unreadable JSON: {EMBEDDED_CONTEXT_ENTRY}")
+        embedded_lane = embedded_context.get("lane", {})
+        if embedded_lane.get("name") != args.lane or embedded_lane.get("abi_policy") != args.policy:
+            raise SystemExit(
+                "embedded build context lane mismatch: "
+                f"expected=({args.lane},{args.policy}) actual=({embedded_lane.get('name')},{embedded_lane.get('abi_policy')})"
+            )
+
         output = dict(record)
         output["record_kind"] = "BUILD_OUTPUT_EVIDENCE"
         output["apk"] = {
             "path": str(apk.relative_to(ROOT)) if ROOT in apk.parents else apk.name,
             "size_bytes": apk.stat().st_size,
             "sha256": sha256_file(apk),
-            "zip_inventory": zip_inventory(apk),
+            "zip_inventory": inventory,
         }
         output["receipts"] = {
             "runtime_payload": read_json(args.payload_receipt),
@@ -234,6 +275,7 @@ def main() -> int:
         output["claims"] = {
             "apk_built": True,
             "apk_payload_statically_verified": bool(args.payload_receipt and args.payload_receipt.is_file()),
+            "embedded_build_context_verified": True,
             "device_installed": False,
             "device_runtime_verified": False,
             "physical_vm_launch_verified": False,
@@ -244,7 +286,13 @@ def main() -> int:
             raise SystemExit("--out required when --apk is supplied")
         args.out.parent.mkdir(parents=True, exist_ok=True)
         args.out.write_text(json.dumps(output, indent=2, sort_keys=True) + "\n", encoding="utf-8")
-        print(f"[build-evidence] output={args.out} sha256={sha256_file(args.out)}")
+        artifact_digest = sha256_file(args.out)
+        checksum_path = Path(str(args.out) + ".sha256")
+        checksum_path.write_text(f"{artifact_digest}  {args.out.name}\n", encoding="utf-8")
+        print(
+            f"[build-evidence] output={args.out} sha256={artifact_digest} "
+            f"checksum={checksum_path} embedded_context_sha256={embedded_context['sha256']}"
+        )
 
     return 0
 
