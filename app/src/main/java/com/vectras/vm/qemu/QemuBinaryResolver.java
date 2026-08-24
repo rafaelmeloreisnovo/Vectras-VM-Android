@@ -46,22 +46,12 @@ public final class QemuBinaryResolver {
     }
 
     public static String primaryBinaryForArch(String arch) {
+        // qemu-system-<target> names the emulated system target, not the ELF ABI
+        // of the host executable. Never infer host bitness from this filename.
         String normalized = normalizeArch(arch);
         if ("I386".equals(normalized)) return "qemu-system-i386";
-        if ("ARM64".equals(normalized)) {
-            if (!isHost64Bit()) {
-                Log.w(DEFAULT_LOG_TAG,
-                        "qemu-system-aarch64 is a 64-bit binary but host ABI is 32-bit ("
-                                + (Build.SUPPORTED_ABIS.length > 0 ? Build.SUPPORTED_ABIS[0] : "unknown")
-                                + "). QEMU will fail to launch.");
-            }
-            return "qemu-system-aarch64";
-        }
+        if ("ARM64".equals(normalized)) return "qemu-system-aarch64";
         if ("PPC".equals(normalized)) return "qemu-system-ppc";
-        if (!isHost64Bit()) {
-            Log.w(DEFAULT_LOG_TAG,
-                    "qemu-system-x86_64 is a 64-bit binary but host ABI is 32-bit. QEMU will fail to launch.");
-        }
         return "qemu-system-x86_64";
     }
 
