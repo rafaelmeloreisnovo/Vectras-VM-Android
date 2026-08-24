@@ -10,6 +10,8 @@ RUNTIME_SEED_RECEIPT="${OUT_DIR}/alpine19-materialization.json"
 BOOTSTRAP_RECEIPT_SRC="${REPO_ROOT}/app/build/reports/bootstrap/bootstrap-materialization.json"
 BOOTSTRAP_RECEIPT_DST="${OUT_DIR}/bootstrap-materialization.json"
 GENERATED_ASSETS_ROOT="${REPO_ROOT}/app/build/generated/bootstrapAssets"
+BUILD_EVIDENCE_TOOL="${REPO_ROOT}/tools/ci/generate_build_evidence_catalog.py"
+EMBEDDED_BUILD_CONTEXT="${GENERATED_ASSETS_ROOT}/evidence/build-context.json"
 
 mkdir -p "${OUT_DIR}"
 
@@ -57,6 +59,14 @@ build_lane() {
   local apk_src="${REPO_ROOT}/app/build/outputs/apk/debug/app-debug.apk"
   local apk_dst="${OUT_DIR}/${lane_name}.apk"
   local payload_receipt="${OUT_DIR}/${lane_name}.runtime-payload.json"
+  local build_evidence="${OUT_DIR}/${lane_name}.build-evidence.json"
+
+  echo "[wizard] build evidence context lane=${lane_name} policy=${policy} abis=${abis}"
+  python3 "${BUILD_EVIDENCE_TOOL}" \
+    --lane "${lane_name}" \
+    --policy "${policy}" \
+    --abis "${abis}" \
+    --embedded-out "${EMBEDDED_BUILD_CONTEXT}"
 
   echo "[wizard] building lane=${lane_name} policy=${policy} abis=${abis}"
   "${GRADLEW}" --no-daemon :app:assembleDebug \
@@ -76,6 +86,17 @@ build_lane() {
     --abis "${payload_abis}" \
     --json-out "${payload_receipt}"
 
+  python3 "${BUILD_EVIDENCE_TOOL}" \
+    --lane "${lane_name}" \
+    --policy "${policy}" \
+    --abis "${abis}" \
+    --embedded-out "${EMBEDDED_BUILD_CONTEXT}" \
+    --apk "${apk_dst}" \
+    --payload-receipt "${payload_receipt}" \
+    --bootstrap-receipt "${BOOTSTRAP_RECEIPT_DST}" \
+    --runtime-seed-receipt "${RUNTIME_SEED_RECEIPT}" \
+    --out "${build_evidence}"
+
   local apk_size
   apk_size="$(stat -c '%s' "${apk_dst}")"
   echo "${lane_name}|${policy}|${abis}|${apk_size}" >> "${OUT_DIR}/sizes.tsv"
@@ -93,6 +114,7 @@ source_commit="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1], 
   echo
   echo "Bootstrap TARs: exact SHA-256 enforced by tools/ci/bootstrap-assets.v1.json."
   echo "Alpine19 TARs: exact size + Git blob SHA-1 enforced; SHA-256 emitted in receipt."
+  echo "Build evidence: each lane embeds assets/evidence/build-context.json and emits a post-build *.build-evidence.json."
   echo
   echo "Boundary: embedded PRoot+Alpine seed verified in APK != seed extracted on device != QEMU distribution installed != physical VM boot."
   echo
