@@ -72,13 +72,16 @@ The materializer constructs raw GitHub URLs from that fixed repository, commit, 
 - no escaping links;
 - required family markers.
 
-Execution:
+APK Wizard execution uses the generated asset tree so no downloaded binary is committed to Git:
 
 ```bash
 python3 tools/bootstrap/materialize_embedded_runtime_seed_assets.py \
+  --target-root app/build/generated/bootstrapAssets \
   --abis arm64-v8a,armeabi-v7a \
   --receipt artifacts/apk-wizard/runtime-seed-materialization.json
 ```
+
+The wizard cleans first, materializes these assets, materializes `loader.apk`, then builds both lanes without another clean. Each resulting APK is independently inspected by `verify_beta_apk_runtime_payload.py`.
 
 ## Layer 2 — QEMU distribution/runtime package
 
