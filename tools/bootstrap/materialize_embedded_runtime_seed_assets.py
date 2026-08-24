@@ -8,7 +8,14 @@ It closes only the APK embedded setup-seed layer used by SetupFeatureCore:
 
 The source URL is constructed from repository + pinned commit + source_path in the
 manifest. Arbitrary download URLs are not accepted. Every object is checked by
-exact size, Git blob SHA-1, TAR safety, and family markers before atomic publish.
+exact size, Git blob SHA-1, optional frozen SHA-256, TAR member safety, and family
+markers before atomic publish.
+
+Alpine rootfs archives legitimately contain absolute *symlink targets* such as
+/usr/bin/yes -> /bin/busybox. These are virtual-root links and do not cause tar to
+write outside the extraction directory. They are allowed only for the pinned
+`alpine19` family and are recorded in the receipt. Absolute member names and
+absolute hard-link targets remain rejected.
 """
 from __future__ import annotations
 
@@ -52,8 +59,17 @@ def normalize_member_name(name: str) -> str:
     return normalized
 
 
+def validate_relative_link(member_name: str, link: str, *, hardlink: bool) -> None:
+    base = "" if hardlink else posixpath.dirname(member_name)
+    resolved = posixpath.normpath(posixpath.join(base, link))
+    if resolved.startswith("../") or resolved == "..":
+        kind = "hardlink" if hardlink else "symlink"
+        raise ValueError(f"escaping {kind} target rejected: {member_name} -> {link}")
+
+
 def validate_tar(data: bytes, family: str) -> dict:
     names: set[str] = set()
+    absolute_symlinks: list[dict[str, str]] = []
     try:
         with tarfile.open(fileobj=io.BytesIO(data), mode="r:*") as tf:
             members = tf.getmembers()
@@ -67,14 +83,26 @@ def validate_tar(data: bytes, family: str) -> dict:
                     raise ValueError(f"unsafe member path: {member.name}")
                 if member.isdev():
                     raise ValueError(f"device node rejected: {member.name}")
-                if member.issym() or member.islnk():
+
+                if member.issym():
                     link = member.linkname.replace("\\", "/")
                     if PurePosixPath(link).is_absolute():
-                        raise ValueError(f"absolute link target rejected: {member.name} -> {member.linkname}")
-                    base = posixpath.dirname(normalized) if member.issym() else ""
-                    resolved = posixpath.normpath(posixpath.join(base, link))
-                    if resolved.startswith("../") or resolved == "..":
-                        raise ValueError(f"escaping link target rejected: {member.name} -> {member.linkname}")
+                        if family != "alpine19":
+                            raise ValueError(
+                                f"absolute symlink target rejected outside alpine19: "
+                                f"{member.name} -> {member.linkname}"
+                            )
+                        absolute_symlinks.append({"name": normalized, "target": link})
+                    else:
+                        validate_relative_link(normalized, link, hardlink=False)
+                elif member.islnk():
+                    link = member.linkname.replace("\\", "/")
+                    if PurePosixPath(link).is_absolute():
+                        raise ValueError(
+                            f"absolute hardlink target rejected: {member.name} -> {member.linkname}"
+                        )
+                    validate_relative_link(normalized, link, hardlink=True)
+
                 names.add(normalized)
     except tarfile.TarError as exc:
         raise ValueError(f"unreadable TAR: {exc}") from exc
@@ -82,7 +110,12 @@ def validate_tar(data: bytes, family: str) -> dict:
     missing_markers = sorted(FAMILY_MARKERS[family] - names)
     if missing_markers:
         raise ValueError(f"family={family} missing marker(s): {missing_markers}")
-    return {"members": len(names), "markers": sorted(FAMILY_MARKERS[family])}
+    return {
+        "members": len(names),
+        "markers": sorted(FAMILY_MARKERS[family]),
+        "absolute_symlink_targets": len(absolute_symlinks),
+        "absolute_symlink_samples": absolute_symlinks[:12],
+    }
 
 
 def load_manifest(path: Path) -> dict:
@@ -159,6 +192,11 @@ def validate_asset_record(asset: dict) -> None:
         raise ValueError(f"invalid git_blob_sha1 for {family}/{abi}")
     if not isinstance(asset.get("size_bytes"), int) or asset["size_bytes"] <= 0:
         raise ValueError(f"invalid size_bytes for {family}/{abi}")
+    expected_sha256 = asset.get("sha256")
+    if expected_sha256 is not None:
+        value = str(expected_sha256).lower()
+        if len(value) != 64 or any(c not in "0123456789abcdef" for c in value):
+            raise ValueError(f"invalid sha256 for {family}/{abi}")
 
 
 def main() -> int:
@@ -212,6 +250,13 @@ def main() -> int:
                 f"Git blob SHA-1 mismatch {asset['family']}/{asset['abi']}: "
                 f"expected={asset['git_blob_sha1']} actual={blob}"
             )
+        actual_sha256 = sha256(data)
+        expected_sha256 = asset.get("sha256")
+        if expected_sha256 is not None and actual_sha256 != str(expected_sha256).lower():
+            raise ValueError(
+                f"SHA-256 mismatch {asset['family']}/{asset['abi']}: "
+                f"expected={expected_sha256} actual={actual_sha256}"
+            )
         tar_report = validate_tar(data, asset["family"])
         destination = (args.target_root / asset["target_path"]).resolve()
         target_root = args.target_root.resolve()
@@ -226,16 +271,20 @@ def main() -> int:
                 "source_commit": commit,
                 "source_path": asset["source_path"],
                 "git_blob_sha1": blob,
-                "sha256": sha256(data),
+                "sha256": actual_sha256,
+                "sha256_enforced": expected_sha256 is not None,
                 "size_bytes": len(data),
                 "target_path": str(destination.relative_to(target_root)),
                 "tar_members": tar_report["members"],
                 "markers_verified": tar_report["markers"],
+                "absolute_symlink_targets": tar_report["absolute_symlink_targets"],
+                "absolute_symlink_samples": tar_report["absolute_symlink_samples"],
             }
         )
         print(
             f"MATERIALIZED family={asset['family']} abi={asset['abi']} "
-            f"bytes={len(data)} git_blob={blob}"
+            f"bytes={len(data)} git_blob={blob} sha256={actual_sha256} "
+            f"abs_symlinks={tar_report['absolute_symlink_targets']}"
         )
 
     receipt = {
@@ -247,6 +296,7 @@ def main() -> int:
         "selected_abis": sorted(selected_abis),
         "selected_families": sorted(selected_families),
         "assets": receipt_assets,
+        "absolute_symlink_policy": "allowed_only_for_pinned_alpine19_symlink_targets; absolute_members_and_absolute_hardlinks_rejected",
         "qemu_distribution_materialized": False,
         "device_runtime_verified": False,
         "claim_allowed": False,
