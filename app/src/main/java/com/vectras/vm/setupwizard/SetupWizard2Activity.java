@@ -14,6 +14,8 @@ import com.vectras.vm.evidence.BootstrapExtractionReceipt;
 import com.vectras.vm.evidence.EvidenceCatalogActivity;
 import com.vectras.vm.main.MainActivity;
 
+import java.io.File;
+
 /**
  * Runtime bootstrap/repair gate.
  *
@@ -146,6 +148,11 @@ public class SetupWizard2Activity extends AppCompatActivity {
             Exception extractorFailure = null;
             boolean extracted = false;
 
+            // SetupFeatureCore currently has an explicit early-abort contract when
+            // <filesDir>/distro/bin already exists. Observe that precondition before
+            // invoking the extractor so a silent `return false` remains diagnosable.
+            boolean distroBinExistedBefore = new File(appContext.getFilesDir(), "distro/bin").exists();
+
             try {
                 receiptSession = BootstrapExtractionReceipt.begin(appContext);
             } catch (Exception e) {
@@ -160,11 +167,17 @@ public class SetupWizard2Activity extends AppCompatActivity {
             }
 
             SetupFeatureCore.SetupPostCheckResult after = SetupFeatureCore.runSetupPostCheck(appContext);
-            String lastError = SetupFeatureCore.lastErrorLog == null ? "" : SetupFeatureCore.lastErrorLog.trim();
+            String rawLastError = SetupFeatureCore.lastErrorLog == null ? "" : SetupFeatureCore.lastErrorLog.trim();
+            String evidenceError = rawLastError;
+            if (!extracted && extractorFailure == null && evidenceError.isEmpty() && distroBinExistedBefore) {
+                evidenceError = "PRECONDITION_OBSERVED:distro/bin-exists; "
+                        + "source-contract=SetupFlowOrchestrator.shouldAbortWhenBinDirExists(true)";
+            }
+
             String receiptFailure = "";
             if (receiptSession != null) {
                 try {
-                    receiptResult = receiptSession.finish(extracted, lastError, extractorFailure);
+                    receiptResult = receiptSession.finish(extracted, evidenceError, extractorFailure);
                 } catch (Exception e) {
                     receiptFailure = "receipt-finish-failed:" + e.getClass().getSimpleName() + ":" + compact(e.getMessage());
                 }
@@ -175,7 +188,7 @@ public class SetupWizard2Activity extends AppCompatActivity {
 
             final boolean extractedResult = extracted;
             final Exception extractorFailureResult = extractorFailure;
-            final String lastErrorResult = lastError;
+            final String evidenceErrorResult = evidenceError;
             final String receiptFailureResult = receiptFailure;
             final BootstrapExtractionReceipt.ExportResult receiptResultFinal = receiptResult;
 
@@ -204,7 +217,7 @@ public class SetupWizard2Activity extends AppCompatActivity {
                 if (!extractedResult) {
                     body.setText("Falha ao reparar runtime base.\n\n"
                             + "Gate: " + after.technicalReason() + "\n\n"
-                            + "Detalhe: " + compact(lastErrorResult) + "\n\n"
+                            + "Detalhe: " + compact(evidenceErrorResult) + "\n\n"
                             + "Receipt: " + lastRepairReceiptSummary);
                     repairButton.setText("TENTAR REPARO NOVAMENTE");
                     repairButton.setEnabled(true);
