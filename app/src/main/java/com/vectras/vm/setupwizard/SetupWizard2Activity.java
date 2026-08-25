@@ -14,6 +14,8 @@ import com.vectras.vm.evidence.BootstrapExtractionReceipt;
 import com.vectras.vm.evidence.EvidenceCatalogActivity;
 import com.vectras.vm.main.MainActivity;
 
+import java.io.File;
+
 /**
  * Runtime bootstrap/repair gate.
  *
@@ -133,10 +135,24 @@ public class SetupWizard2Activity extends AppCompatActivity {
             }
 
             try {
+                // A historical setup path aborts when distro/bin exists even if the
+                // base is incomplete. Preserve the pre-state in the receipt above,
+                // then remove only the inconsistent distro so extraction can rebuild it.
+                if (!SetupFeatureCore.isInstalledSystemFiles(appContext)) {
+                    File partialDistro = new File(appContext.getFilesDir(), "distro");
+                    if (partialDistro.exists()) {
+                        SetupFeatureCore.deleteRecursively(partialDistro);
+                    }
+                }
+
                 baseReady = SetupFeatureCore.startExtractSystemFiles(appContext);
                 if (baseReady) {
-                    qemuReady = SetupFeatureCore.isInstalledQemu(appContext)
-                            || SetupFeatureCore.extractSystemFiles(appContext, "qemu19", "distro");
+                    if (SetupFeatureCore.isInstalledQemu(appContext)) {
+                        qemuReady = true;
+                    } else {
+                        boolean qemuExtracted = SetupFeatureCore.extractSystemFiles(appContext, "qemu19", "distro");
+                        qemuReady = qemuExtracted && SetupFeatureCore.isInstalledQemu(appContext);
+                    }
                 }
             } catch (Exception e) {
                 extractorFailure = e;
