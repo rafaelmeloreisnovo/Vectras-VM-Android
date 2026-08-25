@@ -22,14 +22,14 @@ import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Professional Benchmark Manager with Interference Detection and Mitigation.
- * 
+ *
  * This class provides:
  * - Interference detection (thermal, background processes, GC, etc.)
  * - Statistical validation of results
  * - Progress callbacks for UI updates
  * - Result consistency checking
  * - Professional error handling
- * 
+ *
  * Design Philosophy:
  * - Real measurements only (no simulated data)
  * - Low-level timing where critical
@@ -37,9 +37,9 @@ import java.util.concurrent.atomic.AtomicReference;
  * - Professional reporting with confidence intervals
  */
 public class BenchmarkManager {
-    
+
     private static final String TAG = "BenchmarkManager";
-    
+
     // Interference thresholds
     private static final long MAX_GC_TIME_MS = 100;
     private static final double MAX_CPU_TEMP_C = 85.0;
@@ -76,6 +76,7 @@ public class BenchmarkManager {
     private static final int STAGE_EXECUTION_START = 24;
     private static final int STAGE_EXECUTION_END = 86;
     private static final int STAGE_VALIDATION = 94;
+    private static final long BENCHMARK_SUITE_TIMEOUT_MS = 20L * 60L * 1000L;
     private static final String[] DIAGNOSTIC_NAMES = {
         "Timer Drift",
         "Timer Jitter",
@@ -97,7 +98,7 @@ public class BenchmarkManager {
         "Fingerprint and CPU info inspection",
         "ABI and cpuinfo consistency check"
     };
-    
+
     // Progress callback interface
     public interface ProgressCallback {
         void onProgress(int metricIndex, int totalMetrics, String currentMetric);
@@ -266,7 +267,7 @@ public class BenchmarkManager {
             this.label = label;
         }
     }
-    
+
     // Comprehensive benchmark result with validation
     public static class BenchmarkResult {
         public final VectraBenchmark.BenchmarkResult[] metrics;
@@ -276,7 +277,7 @@ public class BenchmarkManager {
         public final ExecutionGovernance governance;
         public final long durationMs;
         public final boolean isValid;
-        
+
         public BenchmarkResult(VectraBenchmark.BenchmarkResult[] metrics,
                              ValidationReport validation,
                              EnvironmentSnapshot environment,
@@ -476,7 +477,7 @@ public class BenchmarkManager {
             this.abiMismatch = abiMismatch;
         }
     }
-    
+
     // Environmental factors that may affect benchmarks
     public static class EnvironmentSnapshot {
         public final long timestampMs;
@@ -496,7 +497,7 @@ public class BenchmarkManager {
         public final String buildProduct;
         public final double timeSourceDriftPercent;
         public final double timerJitterPercent;
-        
+
         public EnvironmentSnapshot(long timestampMs, double cpuTempC, long freeMemoryMb,
                                  int runningProcesses, boolean thermalThrottling,
                                  boolean lowBattery, boolean powerSaveMode,
@@ -524,7 +525,7 @@ public class BenchmarkManager {
             this.timerJitterPercent = timerJitterPercent;
         }
     }
-    
+
     // Validation report with detected issues
     public static class ValidationReport {
         public final List<String> warnings;
@@ -535,7 +536,7 @@ public class BenchmarkManager {
         public final boolean memoryPressure;
         public final double resultVariance;
         public final int interferenceCount;
-        
+
         public ValidationReport(List<String> warnings, List<String> errors,
                               double confidenceScore, boolean gcDetected,
                               boolean thermalDetected, boolean memoryPressure,
@@ -550,7 +551,7 @@ public class BenchmarkManager {
             this.interferenceCount = interferenceCount;
         }
     }
-    
+
     private final Context context;
     private final AtomicInteger progressMetric = new AtomicInteger(0);
     private final AtomicReference<ProgressCallback> callback = new AtomicReference<>();
@@ -563,11 +564,11 @@ public class BenchmarkManager {
             new double[DIAGNOSTIC_COUNT],
             DIAGNOSTIC_UNITS,
             DIAGNOSTIC_DESCRIPTIONS));
-    
+
     public BenchmarkManager(Context context) {
         this.context = context.getApplicationContext();
     }
-    
+
     /**
      * Run comprehensive benchmark with interference detection.
      * This is the main entry point for professional benchmarking.
@@ -607,18 +608,18 @@ public class BenchmarkManager {
             // Step 3: Run benchmarks with progress tracking
             notifyProgress(STAGE_EXECUTION_START, PROGRESS_SCALE, "Running benchmarks...");
             VectraBenchmark.BenchmarkResult[] results = runBenchmarksWithProgress(tuningProfile);
-            
+
             // Step 4: Capture post-benchmark environment
             EnvironmentSnapshot envAfter = captureEnvironment();
-            
+
             // Step 5: Validate results
             notifyProgress(STAGE_VALIDATION, PROGRESS_SCALE,
                          "Validating results...");
             ValidationReport validation = validateResults(results, envBefore, envAfter);
-            
+
             // Step 6: Create final result
             long duration = System.currentTimeMillis() - startTime;
-            boolean isValid = validation.errors.isEmpty() && 
+            boolean isValid = validation.errors.isEmpty() &&
                             validation.confidenceScore >= MIN_CONFIDENCE_THRESHOLD;
 
             DiagnosticMetrics diagnostics = buildDiagnostics(envBefore, preflight);
@@ -626,10 +627,10 @@ public class BenchmarkManager {
             BenchmarkResult result = new BenchmarkResult(
                 results, validation, envAfter, diagnostics, governance, duration, isValid);
             notifyProgress(PROGRESS_SCALE, PROGRESS_SCALE, "Benchmark complete");
-            
+
             notifyComplete(result);
             return result;
-            
+
         } catch (Exception e) {
             notifyError("Benchmark failed: " + e.getMessage());
             throw new RuntimeException("Benchmark execution failed", e);
@@ -653,22 +654,31 @@ public class BenchmarkManager {
             environmentSnapshot == null ? -1 : environmentSnapshot.runningProcesses
         );
     }
-    
+
     /**
-     * Run benchmarks with real-time progress updates.
+     * Run benchmarks with truthful phase-level progress updates. VectraBenchmark
+     * still exposes one monolithic runAllBenchmarks() call, so the watchdog
+     * observes the actual worker stack and reports the active benchmark family.
      */
     private VectraBenchmark.BenchmarkResult[] runBenchmarksWithProgress(TuningProfile profile) throws Exception {
-        // Use the existing benchmark runner but with progress tracking
-        // We'll intercept the benchmark execution to provide progress
         progressMetric.set(0);
-        
-        // Note: Ideally we'd modify VectraBenchmark.runAllBenchmarks() to accept
-        // a progress callback, but for minimal changes, we run it as-is
         VectraBenchmark.setCopyStripeBytes(profile.copyStripeBytes);
-        notifyProgress(STAGE_EXECUTION_START, PROGRESS_SCALE, "Executing metric suite...");
-        VectraBenchmark.BenchmarkResult[] results = VectraBenchmark.runAllBenchmarks();
+        notifyProgress(STAGE_EXECUTION_START, PROGRESS_SCALE, "Executing 79-metric suite...");
+
+        VectraBenchmark.BenchmarkResult[] results = BenchmarkSuiteProgressWatchdog.run(
+                VectraBenchmark::runAllBenchmarks,
+                BENCHMARK_SUITE_TIMEOUT_MS,
+                (phaseProgress, label, elapsedMs) -> {
+                    int monotonic = progressMetric.updateAndGet(previous -> Math.max(previous, phaseProgress));
+                    notifyProgress(
+                            monotonic,
+                            PROGRESS_SCALE,
+                            label + " · " + (elapsedMs / 1000L) + "s"
+                    );
+                }
+        );
+
         notifyProgress(STAGE_EXECUTION_END, PROGRESS_SCALE, "Collecting benchmark outputs...");
-        
         return results;
     }
 
@@ -720,7 +730,7 @@ public class BenchmarkManager {
 
         return new TuningProfile(mode, stripe, uiProfile.threadPriority, warmupDelay, label);
     }
-    
+
     /**
      * Perform 30+ pre-flight checks for interference detection.
      */
@@ -884,7 +894,7 @@ public class BenchmarkManager {
         values[DIAGNOSTIC_INDEX_ABI_CPU_MISMATCH] = preflight.abiMismatch ? 1.0 : 0.0;
         return diagnostics;
     }
-    
+
     /**
      * Validate benchmark results for consistency and detect interference.
      */
@@ -900,26 +910,26 @@ public class BenchmarkManager {
             return new ValidationReport(warnings, errors, 0.0,
                 false, false, false, 100.0, 1);
         }
-        
+
         // Check for thermal changes
         boolean thermalDetected = false;
         if (envAfter.cpuTempC > envBefore.cpuTempC + 10) {
-            warnings.add("CPU temperature increased by " + 
+            warnings.add("CPU temperature increased by " +
                         (envAfter.cpuTempC - envBefore.cpuTempC) + "°C during benchmark");
             thermalDetected = true;
             interferenceCount++;
         }
-        
+
         // Check for GC activity (track memory delta as proxy for GC)
         boolean gcDetected = false;
         long memoryDelta = envBefore.freeMemoryMb - envAfter.freeMemoryMb;
         if (memoryDelta > 512) { // More than 512MB change suggests GC or memory pressure
-            warnings.add("Significant memory change detected during benchmark (" + 
+            warnings.add("Significant memory change detected during benchmark (" +
                         memoryDelta + " MB)");
             gcDetected = true;
             interferenceCount++;
         }
-        
+
         // Check for memory pressure
         boolean memoryPressure = false;
         if (envBefore.freeMemoryMb > 0 && envAfter.freeMemoryMb < envBefore.freeMemoryMb * 0.7) {
@@ -927,14 +937,14 @@ public class BenchmarkManager {
             memoryPressure = true;
             interferenceCount++;
         }
-        
+
         // Validate result consistency
         double variance = calculateResultVariance(results);
         if (variance > MAX_VARIANCE_PERCENT) {
             warnings.add("High result variance: " + String.format("%.1f%%", variance));
             interferenceCount++;
         }
-        
+
         // Check for null results
         int nullCount = 0;
         for (VectraBenchmark.BenchmarkResult r : results) {
@@ -964,54 +974,54 @@ public class BenchmarkManager {
                 }
             }
         }
-        
+
         // Calculate confidence score (0.0 - 1.0)
         double confidenceScore = 1.0;
         confidenceScore -= (variance / 100.0) * 0.3; // Variance impact
         confidenceScore -= interferenceCount * 0.1; // Each interference reduces confidence
         confidenceScore = Math.max(0.0, Math.min(1.0, confidenceScore));
-        
+
         return new ValidationReport(warnings, errors, confidenceScore,
                                   gcDetected, thermalDetected, memoryPressure,
                                   variance, interferenceCount);
     }
-    
+
     /**
      * Calculate variance in benchmark results as a quality metric.
      */
     private double calculateResultVariance(VectraBenchmark.BenchmarkResult[] results) {
         if (results == null || results.length == 0) return 100.0;
-        
+
         // For simplicity, calculate variance across similar metrics
         // In a full implementation, we'd group by category and calculate per-category variance
         long sum = 0;
         int count = 0;
-        
+
         for (VectraBenchmark.BenchmarkResult r : results) {
             if (r != null && r.rawValue() > 0) {
                 sum += r.rawValue();
                 count++;
             }
         }
-        
+
         if (count == 0) return 100.0;
-        
+
         double mean = (double) sum / count;
         double sumSquaredDiff = 0;
-        
+
         for (VectraBenchmark.BenchmarkResult r : results) {
             if (r != null && r.rawValue() > 0) {
                 double diff = r.rawValue() - mean;
                 sumSquaredDiff += diff * diff;
             }
         }
-        
+
         double variance = Math.sqrt(sumSquaredDiff / count);
         return (variance / mean) * 100.0; // Coefficient of variation as percentage
     }
-    
+
     // ========== Low-Level System Information Methods ==========
-    
+
     private double getCpuTemperature() {
         // Try multiple thermal zone paths
         String[] thermalPaths = {
@@ -1019,20 +1029,20 @@ public class BenchmarkManager {
             "/sys/class/thermal/thermal_zone1/temp",
             "/sys/devices/virtual/thermal/thermal_zone0/temp"
         };
-        
+
         for (String path : thermalPaths) {
             try (BufferedReader reader = new BufferedReader(new FileReader(path))) {
                 String line = reader.readLine();
                 if (line != null) {
                     double temp = Double.parseDouble(line.trim());
-                    
+
                     // Auto-detect scale based on reasonable temperature range
                     // If value is > 200, assume it's in millidegrees
                     // Otherwise, assume it's already in degrees
                     if (temp > 200) {
                         temp = temp / 1000.0; // Convert millidegrees to degrees
                     }
-                    
+
                     // Sanity check: CPU temp should be between 20°C and 120°C
                     if (temp >= 20 && temp <= 120) {
                         return temp;
@@ -1044,7 +1054,7 @@ public class BenchmarkManager {
         }
         return 0.0; // Unknown
     }
-    
+
     private long getFreeMemoryMb() {
         ActivityManager am = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
         ActivityManager.MemoryInfo mi = new ActivityManager.MemoryInfo();
@@ -1054,7 +1064,7 @@ public class BenchmarkManager {
         }
         return 0;
     }
-    
+
     private int getRunningProcessCount() {
         ActivityManager am = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
         if (am != null) {
@@ -1063,7 +1073,7 @@ public class BenchmarkManager {
         }
         return 0;
     }
-    
+
     private boolean isThermalThrottling() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             // On Android 10+, we could use ThermalService
@@ -1072,12 +1082,12 @@ public class BenchmarkManager {
         }
         return false;
     }
-    
+
     private boolean isLowBattery() {
         // Check battery level using BatteryManager
         try {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                android.os.BatteryManager bm = (android.os.BatteryManager) 
+                android.os.BatteryManager bm = (android.os.BatteryManager)
                     context.getSystemService(Context.BATTERY_SERVICE);
                 if (bm != null) {
                     int level = bm.getIntProperty(android.os.BatteryManager.BATTERY_PROPERTY_CAPACITY);
@@ -1089,10 +1099,10 @@ public class BenchmarkManager {
         }
         return false; // Assume OK if we can't determine
     }
-    
+
     private boolean isPowerSaveMode() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            android.os.PowerManager pm = 
+            android.os.PowerManager pm =
                 (android.os.PowerManager) context.getSystemService(Context.POWER_SERVICE);
             return pm != null && pm.isPowerSaveMode();
         }
@@ -1306,7 +1316,7 @@ public class BenchmarkManager {
             }
         }
     }
-    
+
     private String getCpuGovernor() {
         try (BufferedReader reader = new BufferedReader(
                 new FileReader("/sys/devices/system/cpu/cpu0/cpufreq/scaling_governor"))) {
@@ -1316,14 +1326,14 @@ public class BenchmarkManager {
             return "unknown";
         }
     }
-    
+
     private long[] getCpuFrequencies() {
         int cpuCount = Runtime.getRuntime().availableProcessors();
         long[] freqs = new long[cpuCount];
-        
+
         for (int i = 0; i < cpuCount; i++) {
             try (BufferedReader reader = new BufferedReader(
-                    new FileReader("/sys/devices/system/cpu/cpu" + i + 
+                    new FileReader("/sys/devices/system/cpu/cpu" + i +
                                  "/cpufreq/scaling_cur_freq"))) {
                 String line = reader.readLine();
                 if (line != null) {
@@ -1333,50 +1343,50 @@ public class BenchmarkManager {
                 freqs[i] = 0;
             }
         }
-        
+
         return freqs;
     }
-    
+
     // ========== Progress Notification Methods ==========
-    
+
     private void notifyProgress(int current, int total, String metric) {
         ProgressCallback cb = callback.get();
         if (cb != null) {
             cb.onProgress(current, total, metric);
         }
     }
-    
+
     private void notifyWarning(String warning) {
         ProgressCallback cb = callback.get();
         if (cb != null) {
             cb.onWarning(warning);
         }
     }
-    
+
     private void notifyComplete(BenchmarkResult result) {
         ProgressCallback cb = callback.get();
         if (cb != null) {
             cb.onComplete(result);
         }
     }
-    
+
     private void notifyError(String error) {
         ProgressCallback cb = callback.get();
         if (cb != null) {
             cb.onError(error);
         }
     }
-    
+
     /**
      * Generate a professional validation report.
      */
     public static String formatValidationReport(ValidationReport validation) {
         StringBuilder sb = new StringBuilder();
-        
+
         sb.append("╔════════════════════════════════════════════════════════════╗\n");
         sb.append("║           BENCHMARK VALIDATION REPORT                      ║\n");
         sb.append("╠════════════════════════════════════════════════════════════╣\n");
-        
+
         // Confidence score with visual indicator
         sb.append(String.format("║ Confidence Score: %.1f%% ", validation.confidenceScore * 100));
         if (validation.confidenceScore >= 0.9) {
@@ -1388,22 +1398,22 @@ public class BenchmarkManager {
         } else {
             sb.append("✗ POOR               ║\n");
         }
-        
-        sb.append(String.format("║ Result Variance: %.1f%%                              ║\n", 
+
+        sb.append(String.format("║ Result Variance: %.1f%%                              ║\n",
                                 validation.resultVariance));
-        sb.append(String.format("║ Interference Count: %d                                ║\n", 
+        sb.append(String.format("║ Interference Count: %d                                ║\n",
                                 validation.interferenceCount));
-        
+
         sb.append("╠════════════════════════════════════════════════════════════╣\n");
         sb.append("║ Detected Conditions:                                       ║\n");
         sb.append("╠════════════════════════════════════════════════════════════╣\n");
-        sb.append(String.format("║  GC Activity: %-42s║\n", 
+        sb.append(String.format("║  GC Activity: %-42s║\n",
                                 validation.gcDetected ? "YES ⚠" : "NO ✓"));
-        sb.append(String.format("║  Thermal Throttling: %-35s║\n", 
+        sb.append(String.format("║  Thermal Throttling: %-35s║\n",
                                 validation.thermalDetected ? "YES ⚠" : "NO ✓"));
-        sb.append(String.format("║  Memory Pressure: %-38s║\n", 
+        sb.append(String.format("║  Memory Pressure: %-38s║\n",
                                 validation.memoryPressure ? "YES ⚠" : "NO ✓"));
-        
+
         if (!validation.warnings.isEmpty()) {
             sb.append("╠════════════════════════════════════════════════════════════╣\n");
             sb.append("║ Warnings:                                                  ║\n");
@@ -1412,7 +1422,7 @@ public class BenchmarkManager {
                 sb.append(String.format("║  • %-55s║\n", truncate(warning, 55)));
             }
         }
-        
+
         if (!validation.errors.isEmpty()) {
             sb.append("╠════════════════════════════════════════════════════════════╣\n");
             sb.append("║ Errors:                                                    ║\n");
@@ -1421,12 +1431,12 @@ public class BenchmarkManager {
                 sb.append(String.format("║  • %-55s║\n", truncate(error, 55)));
             }
         }
-        
+
         sb.append("╚════════════════════════════════════════════════════════════╝\n");
-        
+
         return sb.toString();
     }
-    
+
     private static String truncate(String s, int maxLen) {
         if (s == null) return "";
         return s.length() <= maxLen ? s : s.substring(0, maxLen - 3) + "...";
