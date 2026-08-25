@@ -242,7 +242,7 @@ public class SetupWizard2Activity extends AppCompatActivity {
             throw new IllegalStateException("QEMU distro directory is missing");
         }
         for (String relativePath : REQUIRED_QEMU_EXECUTABLES) {
-            File executable = new File(distroDir, relativePath.substring("usr/".length()));
+            File executable = new File(distroDir, relativePath);
             if (!executable.isFile()) {
                 throw new IllegalStateException("Missing embedded QEMU executable: " + relativePath);
             }
