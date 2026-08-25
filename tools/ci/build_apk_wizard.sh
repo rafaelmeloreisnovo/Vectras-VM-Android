@@ -13,6 +13,7 @@ GENERATED_ASSETS_ROOT="${REPO_ROOT}/app/build/generated/bootstrapAssets"
 BUILD_EVIDENCE_TOOL="${REPO_ROOT}/tools/ci/generate_build_evidence_catalog.py"
 EMBEDDED_BUILD_CONTEXT="${GENERATED_ASSETS_ROOT}/evidence/build-context.json"
 OMEGA_OUT_DIR="${OUT_DIR}/omega-freestanding-armv7"
+OMEGA_BINARY="${OMEGA_OUT_DIR}/omega-core-armv7.elf"
 OMEGA_AUDIT="${OMEGA_OUT_DIR}/elf-audit.json"
 OMEGA_APK_RECEIPT="${OUT_DIR}/app-debug-arm32-arm64.omega-materialization.json"
 
@@ -130,6 +131,7 @@ build_lane "app-debug-arm32-arm64" "arm32-arm64" "arm64-v8a,armeabi-v7a" "true" 
 echo "[wizard] verify Omega native carrier byte identity inside dual-ARM APK"
 python3 "${REPO_ROOT}/tools/ci/verify_omega_freestanding_apk.py" \
   --apk "${OUT_DIR}/app-debug-arm32-arm64.apk" \
+  --binary "${OMEGA_BINARY}" \
   --audit "${OMEGA_AUDIT}" \
   --output "${OMEGA_APK_RECEIPT}" \
   --commit "$(git -C "${REPO_ROOT}" rev-parse HEAD)"
