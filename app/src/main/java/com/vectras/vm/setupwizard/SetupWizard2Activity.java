@@ -19,11 +19,10 @@ import java.io.File;
 /**
  * Runtime bootstrap/repair gate.
  *
- * <p>The gate does not silently enter MainActivity while PRoot/rootfs/QEMU are
- * incomplete. When the embedded PRoot/Alpine seed is missing from app data, it
- * offers an explicit local repair action. That action performs only extraction
- * of APK-bundled assets on a worker thread; it does not download QEMU or promote
- * device-runtime claims.</p>
+ * <p>The gate enters MainActivity only after PRoot, Alpine rootfs and QEMU are
+ * present. Repair is APK-local: bootstrap/<abi>.tar, alpine19/<abi>.tar and
+ * qemu19/<abi>.tar are extracted on a worker thread. No runtime download is
+ * required by this flow.</p>
  */
 public class SetupWizard2Activity extends AppCompatActivity {
     public static final String ACTION_DEBUG_PROOT_SELF_CHECK = "com.vectras.vm.action.DEBUG_PROOT_SELF_CHECK";
@@ -69,10 +68,10 @@ public class SetupWizard2Activity extends AppCompatActivity {
         String receiptNote = lastRepairReceiptSummary.isEmpty()
                 ? ""
                 : "\n\nReceipt da última tentativa: " + lastRepairReceiptSummary;
-        body.setText("O app foi iniciado, mas o runtime ainda não está pronto.\n\n"
+        body.setText("O runtime ainda não passou o gate.\n\n"
                 + "Motivo técnico: " + postCheck.technicalReason() + "\n\n"
-                + "PRoot e rootfs podem ser reparados localmente a partir dos assets verificados do APK. "
-                + "QEMU permanece um gate separado e só é considerado pronto depois de existir e passar o preflight."
+                + "O reparo instala PRoot + Alpine + QEMU usando somente os assets embutidos no APK. "
+                + "A Home só é liberada quando o post-check encontra os três componentes."
                 + receiptNote);
         body.setTextSize(15f);
         body.setPadding(0, dp(18), 0, dp(18));
@@ -81,18 +80,14 @@ public class SetupWizard2Activity extends AppCompatActivity {
                 ViewGroup.LayoutParams.WRAP_CONTENT
         ));
 
-        boolean needsBaseRepair = postCheck.failedItems.contains("missing-proot")
-                || postCheck.failedItems.contains("missing-distro-busybox");
-        if (needsBaseRepair) {
-            Button repair = new Button(this);
-            repair.setText(repairRunning ? "REPARANDO RUNTIME BASE..." : "INSTALAR / REPARAR RUNTIME BASE");
-            repair.setEnabled(!repairRunning);
-            repair.setOnClickListener(v -> runBaseRepair(repair, body));
-            root.addView(repair, new LinearLayout.LayoutParams(
-                    ViewGroup.LayoutParams.MATCH_PARENT,
-                    ViewGroup.LayoutParams.WRAP_CONTENT
-            ));
-        }
+        Button repair = new Button(this);
+        repair.setText(repairRunning ? "REPARANDO RUNTIME COMPLETO..." : "INSTALAR / REPARAR RUNTIME COMPLETO");
+        repair.setEnabled(!repairRunning);
+        repair.setOnClickListener(v -> runFullRuntimeRepair(repair, body));
+        root.addView(repair, new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+        ));
 
         Button retry = new Button(this);
         retry.setText("VERIFICAR NOVAMENTE");
@@ -112,33 +107,17 @@ public class SetupWizard2Activity extends AppCompatActivity {
                 ViewGroup.LayoutParams.WRAP_CONTENT
         ));
 
-        Button continueAnyway = new Button(this);
-        boolean onlyQemuMissing = postCheck.failedItems.size() == 1
-                && postCheck.failedItems.contains("missing-qemu-binary");
-        continueAnyway.setText(onlyQemuMissing
-                ? "ABRIR HOME PARA COMPLETAR QEMU"
-                : "ABRIR HOME MESMO ASSIM");
-        continueAnyway.setEnabled(!repairRunning);
-        continueAnyway.setOnClickListener(v -> {
-            startActivity(new Intent(this, MainActivity.class));
-            finish();
-        });
-        root.addView(continueAnyway, new LinearLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT
-        ));
-
         setContentView(root);
     }
 
-    private void runBaseRepair(Button repairButton, TextView body) {
+    private void runFullRuntimeRepair(Button repairButton, TextView body) {
         if (repairRunning) return;
         repairRunning = true;
         repairButton.setEnabled(false);
-        repairButton.setText("REPARANDO RUNTIME BASE...");
-        body.setText("Extraindo bootstrap PRoot + rootfs Alpine do próprio APK.\n\n"
-                + "Esta tentativa gera receipt antes/depois com SHA-256, destino, modo, bit executável e post-check. "
-                + "Nenhum download QEMU é feito nesta etapa.");
+        repairButton.setText("REPARANDO RUNTIME COMPLETO...");
+        body.setText("Instalando bootstrap PRoot + Alpine + QEMU do próprio APK.\n\n"
+                + "O estágio QEMU substitui a rootfs por uma imagem Alpine equivalente já contendo os binários "
+                + "qemu-system-* e suas dependências. Nenhum download é feito no aparelho.");
 
         final android.content.Context appContext = getApplicationContext();
         new Thread(() -> {
@@ -146,38 +125,56 @@ public class SetupWizard2Activity extends AppCompatActivity {
             BootstrapExtractionReceipt.ExportResult receiptResult = null;
             Exception receiptBeginFailure = null;
             Exception extractorFailure = null;
-            boolean extracted = false;
-
-            // SetupFeatureCore currently has an explicit early-abort contract when
-            // <filesDir>/distro/bin already exists. Observe that precondition before
-            // invoking the extractor so a silent `return false` remains diagnosable.
-            boolean distroBinExistedBefore = new File(appContext.getFilesDir(), "distro/bin").exists();
+            boolean baseReady = false;
+            boolean qemuReady = false;
 
             try {
                 receiptSession = BootstrapExtractionReceipt.begin(appContext);
             } catch (Exception e) {
-                // Evidence capture must not hide whether the extractor itself works.
                 receiptBeginFailure = e;
             }
 
             try {
-                extracted = SetupFeatureCore.startExtractSystemFiles(appContext);
+                // A historical setup path aborts when distro/bin exists even if the
+                // base is incomplete. Preserve the pre-state in the receipt above,
+                // then remove only the inconsistent distro so extraction can rebuild it.
+                if (!SetupFeatureCore.isInstalledSystemFiles(appContext)) {
+                    File partialDistro = new File(appContext.getFilesDir(), "distro");
+                    if (partialDistro.exists()) {
+                        SetupFeatureCore.deleteRecursively(partialDistro);
+                    }
+                }
+
+                baseReady = SetupFeatureCore.startExtractSystemFiles(appContext);
+                if (baseReady) {
+                    if (!SetupFeatureCore.isInstalledQemu(appContext)) {
+                        boolean qemuExtracted = SetupFeatureCore.extractSystemFiles(appContext, "qemu19", "distro");
+                        if (qemuExtracted) {
+                            String distroPath = new File(appContext.getFilesDir(), "distro").getAbsolutePath();
+                            SetupFeatureCore.fixPermissions(distroPath);
+                            SetupFeatureCore.setDNS(appContext);
+                        }
+                    }
+                    qemuReady = SetupFeatureCore.isInstalledQemu(appContext);
+                }
             } catch (Exception e) {
                 extractorFailure = e;
             }
 
             SetupFeatureCore.SetupPostCheckResult after = SetupFeatureCore.runSetupPostCheck(appContext);
+            boolean repaired = baseReady && qemuReady && after.ok;
             String rawLastError = SetupFeatureCore.lastErrorLog == null ? "" : SetupFeatureCore.lastErrorLog.trim();
-            String evidenceError = rawLastError;
-            if (!extracted && extractorFailure == null && evidenceError.isEmpty() && distroBinExistedBefore) {
-                evidenceError = "PRECONDITION_OBSERVED:distro/bin-exists; "
-                        + "source-contract=SetupFlowOrchestrator.shouldAbortWhenBinDirExists(true)";
+            String evidenceError = repaired ? "" : rawLastError;
+            if (!repaired && extractorFailure == null && evidenceError.isEmpty()) {
+                evidenceError = "POST_CHECK:" + after.technicalReason()
+                        + ";baseReady=" + baseReady
+                        + ";qemuReady=" + qemuReady;
             }
 
             String receiptFailure = "";
             if (receiptSession != null) {
                 try {
-                    receiptResult = receiptSession.finish(extracted, evidenceError, extractorFailure);
+                    receiptResult = receiptSession.finish(repaired, evidenceError, extractorFailure);
                 } catch (Exception e) {
                     receiptFailure = "receipt-finish-failed:" + e.getClass().getSimpleName() + ":" + compact(e.getMessage());
                 }
@@ -186,7 +183,9 @@ public class SetupWizard2Activity extends AppCompatActivity {
                         + ":" + compact(receiptBeginFailure.getMessage());
             }
 
-            final boolean extractedResult = extracted;
+            final boolean repairedResult = repaired;
+            final boolean baseReadyResult = baseReady;
+            final boolean qemuReadyResult = qemuReady;
             final Exception extractorFailureResult = extractorFailure;
             final String evidenceErrorResult = evidenceError;
             final String receiptFailureResult = receiptFailure;
@@ -204,7 +203,7 @@ public class SetupWizard2Activity extends AppCompatActivity {
                 }
 
                 if (extractorFailureResult != null) {
-                    body.setText("Falha inesperada durante o reparo do runtime base.\n\n"
+                    body.setText("Falha durante o reparo do runtime completo.\n\n"
                             + "Gate: " + after.technicalReason() + "\n\n"
                             + "Exceção: " + extractorFailureResult.getClass().getName() + ": "
                             + compact(extractorFailureResult.getMessage()) + "\n\n"
@@ -214,9 +213,10 @@ public class SetupWizard2Activity extends AppCompatActivity {
                     return;
                 }
 
-                if (!extractedResult) {
-                    body.setText("Falha ao reparar runtime base.\n\n"
+                if (!repairedResult) {
+                    body.setText("Runtime ainda incompleto após o reparo.\n\n"
                             + "Gate: " + after.technicalReason() + "\n\n"
+                            + "baseReady=" + baseReadyResult + " qemuReady=" + qemuReadyResult + "\n\n"
                             + "Detalhe: " + compact(evidenceErrorResult) + "\n\n"
                             + "Receipt: " + lastRepairReceiptSummary);
                     repairButton.setText("TENTAR REPARO NOVAMENTE");
@@ -225,7 +225,7 @@ public class SetupWizard2Activity extends AppCompatActivity {
                 }
                 renderCurrentState();
             });
-        }, "vectras-runtime-base-repair").start();
+        }, "vectras-runtime-full-repair").start();
     }
 
     private static String compact(String value) {
