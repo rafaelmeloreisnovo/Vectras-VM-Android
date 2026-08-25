@@ -91,6 +91,7 @@ jobs:
           test -n "${apk}"
           python3 tools/ci/verify_omega_freestanding_apk.py \
             --apk "${apk}" \
+            --binary artifacts/omega-freestanding-armv7/omega-core-armv7.elf \
             --audit artifacts/omega-freestanding-armv7/elf-audit.json \
             --output artifacts/omega-freestanding-armv7/apk-materialization-receipt.json \
             --commit "${SOURCE_COMMIT}"
