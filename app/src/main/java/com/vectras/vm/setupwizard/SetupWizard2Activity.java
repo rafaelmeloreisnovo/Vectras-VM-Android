@@ -147,12 +147,15 @@ public class SetupWizard2Activity extends AppCompatActivity {
 
                 baseReady = SetupFeatureCore.startExtractSystemFiles(appContext);
                 if (baseReady) {
-                    if (SetupFeatureCore.isInstalledQemu(appContext)) {
-                        qemuReady = true;
-                    } else {
+                    if (!SetupFeatureCore.isInstalledQemu(appContext)) {
                         boolean qemuExtracted = SetupFeatureCore.extractSystemFiles(appContext, "qemu19", "distro");
-                        qemuReady = qemuExtracted && SetupFeatureCore.isInstalledQemu(appContext);
+                        if (qemuExtracted) {
+                            String distroPath = new File(appContext.getFilesDir(), "distro").getAbsolutePath();
+                            SetupFeatureCore.fixPermissions(distroPath);
+                            SetupFeatureCore.setDNS(appContext);
+                        }
                     }
+                    qemuReady = SetupFeatureCore.isInstalledQemu(appContext);
                 }
             } catch (Exception e) {
                 extractorFailure = e;
