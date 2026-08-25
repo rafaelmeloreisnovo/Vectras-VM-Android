@@ -1,7 +1,5 @@
 package com.vectras.vm.benchmark;
 
-import android.os.SystemClock;
-
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;
@@ -40,7 +38,7 @@ final class BenchmarkSuiteProgressWatchdog {
         FutureTask<T> task = new FutureTask<>(operation);
         Thread worker = new Thread(task, "vectras-benchmark-suite");
         worker.setDaemon(true);
-        long started = SystemClock.elapsedRealtime();
+        long startedNs = System.nanoTime();
         int highestProgress = PROGRESS_INITIALIZING;
         String lastLabel = "Initializing 79-metric suite";
         worker.start();
@@ -50,7 +48,7 @@ final class BenchmarkSuiteProgressWatchdog {
                 try {
                     return task.get(POLL_MS, TimeUnit.MILLISECONDS);
                 } catch (TimeoutException stillRunning) {
-                    long elapsed = SystemClock.elapsedRealtime() - started;
+                    long elapsed = Math.max(0L, (System.nanoTime() - startedNs) / 1_000_000L);
                     if (elapsed >= effectiveTimeoutMs) {
                         task.cancel(true);
                         worker.interrupt();
