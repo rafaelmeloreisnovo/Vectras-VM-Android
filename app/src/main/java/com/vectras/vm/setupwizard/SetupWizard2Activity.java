@@ -29,6 +29,15 @@ public class SetupWizard2Activity extends AppCompatActivity {
     public static final String EXTRA_DEBUG_PROOT_SELF_CHECK = "debug_proot_self_check";
     public static final int ACTION_SYSTEM_UPDATE = 1;
 
+    private static final String[] REQUIRED_QEMU_EXECUTABLES = {
+            "usr/bin/qemu-system-x86_64",
+            "usr/bin/qemu-system-i386",
+            "usr/bin/qemu-system-arm",
+            "usr/bin/qemu-system-aarch64",
+            "usr/bin/qemu-system-ppc",
+            "usr/bin/qemu-img"
+    };
+
     private volatile boolean repairRunning;
     private volatile String lastRepairReceiptSummary = "";
 
@@ -150,8 +159,8 @@ public class SetupWizard2Activity extends AppCompatActivity {
                     if (!SetupFeatureCore.isInstalledQemu(appContext)) {
                         boolean qemuExtracted = SetupFeatureCore.extractSystemFiles(appContext, "qemu19", "distro");
                         if (qemuExtracted) {
-                            String distroPath = new File(appContext.getFilesDir(), "distro").getAbsolutePath();
-                            SetupFeatureCore.fixPermissions(distroPath);
+                            File distroDir = new File(appContext.getFilesDir(), "distro");
+                            ensureQemuExecutables(distroDir);
                             SetupFeatureCore.setDNS(appContext);
                         }
                     }
@@ -226,6 +235,24 @@ public class SetupWizard2Activity extends AppCompatActivity {
                 renderCurrentState();
             });
         }, "vectras-runtime-full-repair").start();
+    }
+
+    private static void ensureQemuExecutables(File distroDir) {
+        if (distroDir == null || !distroDir.isDirectory()) {
+            throw new IllegalStateException("QEMU distro directory is missing");
+        }
+        for (String relativePath : REQUIRED_QEMU_EXECUTABLES) {
+            File executable = new File(distroDir, relativePath);
+            if (!executable.isFile()) {
+                throw new IllegalStateException("Missing embedded QEMU executable: " + relativePath);
+            }
+            if (!executable.canExecute() && !executable.setExecutable(true, false)) {
+                throw new IllegalStateException("Unable to mark QEMU executable: " + relativePath);
+            }
+            if (!executable.canExecute()) {
+                throw new IllegalStateException("QEMU executable bit not effective: " + relativePath);
+            }
+        }
     }
 
     private static String compact(String value) {

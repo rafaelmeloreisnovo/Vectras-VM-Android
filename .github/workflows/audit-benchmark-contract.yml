@@ -17,10 +17,12 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y ripgrep
       - name: Validate audit claims
         run: ./scripts/validate_audit_claims.sh
-      - name: Collect vectra-grade benchmarks
-        run: ./scripts/collect_vectra_grade_benchmarks.sh
+      - name: Validate benchmark 24-percent regression contract
+        run: python3 ./scripts/validate_benchmark_progress_contract.py
       - name: Validate RMR equivalence
         run: ./scripts/rmr_equivalence_check.sh
+      - name: Collect vectra-grade benchmarks
+        run: ./scripts/collect_vectra_grade_benchmarks.sh
       - name: Upload reports
         uses: actions/upload-artifact@v4
         with:
