@@ -1,0 +1,43 @@
+name: Vectras Consumer Assurance
+
+on:
+  push:
+    paths:
+      - 'docs/assurance/vectras-consumer-assurance.v1.json'
+      - 'tools/validate_vectras_consumer_assurance.py'
+      - '.github/workflows/vectras-consumer-assurance.yml'
+  pull_request:
+    paths:
+      - 'docs/assurance/vectras-consumer-assurance.v1.json'
+      - 'tools/validate_vectras_consumer_assurance.py'
+      - '.github/workflows/vectras-consumer-assurance.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  assurance:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate execution-chain boundaries
+        run: python3 tools/validate_vectras_consumer_assurance.py
+      - name: Negative gate — DISPATCHED cannot imply guest boot
+        run: |
+          cp docs/assurance/vectras-consumer-assurance.v1.json /tmp/vectras-assurance.json
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          p = Path('docs/assurance/vectras-consumer-assurance.v1.json')
+          d = json.loads(p.read_text())
+          d['execution_chain']['dispatch_is_qemu_process'] = True
+          d['execution_chain']['qemu_process_is_guest_boot'] = True
+          d['claim_allowed'] = True
+          p.write_text(json.dumps(d))
+          PY
+          if python3 tools/validate_vectras_consumer_assurance.py; then
+            echo 'FAIL: dispatch was accepted as process/guest evidence' >&2
+            exit 1
+          fi
+          mv /tmp/vectras-assurance.json docs/assurance/vectras-consumer-assurance.v1.json
+          python3 tools/validate_vectras_consumer_assurance.py
