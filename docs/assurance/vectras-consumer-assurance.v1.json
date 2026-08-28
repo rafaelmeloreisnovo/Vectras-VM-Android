@@ -1,0 +1,116 @@
+{
+  "schema": "rafaelia.vectras-consumer-assurance.v1",
+  "repository": "rafaelmeloreisnovo/Vectras-VM-Android",
+  "observed_commit": "38b9faacf09eee998487f8f08674bc5305697a52",
+  "role": "vm_qemu_consumer",
+  "authority": {
+    "local": "vm_request_consumer_and_guest_evidence",
+    "provider": "rafaelmeloreisnovo/termux-app-rafacodephi",
+    "federated_router": "rafaelmeloreisnovo/Mapa",
+    "executor": "rafaelmeloreisnovo/RafGitTools"
+  },
+  "license": {
+    "state": "OBSERVED_GPL2_FORK_ATTRIBUTION",
+    "anchor": "LICENSE@7af071d115add5c858c2373891459a9af711e73b",
+    "original_project": "xoureldeen/Vectras-VM-Android",
+    "original_author_preserved": true,
+    "fork_delta_provenance_state": "TOKEN_VAZIO_CURRENT_UPSTREAM_DIFF_RECONCILIATION",
+    "relicense_upstream_allowed_by_this_manifest": false
+  },
+  "execution_chain": {
+    "states": [
+      "REQUEST_CONSTRUCTED",
+      "DISCOVERY_ACCEPTED",
+      "DISPATCHED",
+      "PROVIDER_RESULT_RECEIVED",
+      "QEMU_PROCESS_OBSERVED",
+      "EXIT_OBSERVED",
+      "GUEST_BOOT_OBSERVED"
+    ],
+    "discovery_is_execution": false,
+    "dispatch_is_qemu_process": false,
+    "qemu_process_is_guest_boot": false,
+    "guest_boot_is_performance_claim": false,
+    "promotion_requires_monotonic_evidence_chain": true
+  },
+  "cross_repo": {
+    "producer_consumer_evidence_required": true,
+    "termux_provider_commit": "TOKEN_VAZIO_EXACT_PROVIDER_COMMIT_FOR_TRANSACTION",
+    "termux_apk_digest": "TOKEN_VAZIO",
+    "vectras_apk_digest": "TOKEN_VAZIO",
+    "request_digest": "TOKEN_VAZIO",
+    "provider_result_digest": "TOKEN_VAZIO",
+    "qemu_executable_digest": "TOKEN_VAZIO",
+    "transaction_id": "TOKEN_VAZIO"
+  },
+  "image_guest": {
+    "image_digest": "TOKEN_VAZIO_FOR_MUTATING_E2E",
+    "snapshot_or_rollback_reference": "TOKEN_VAZIO_FOR_MUTATING_E2E",
+    "raw_guest_payload_in_public_receipt": false,
+    "console_payload_in_public_receipt": false
+  },
+  "security_privacy": {
+    "state": "FAIL_CLOSED",
+    "critical_surfaces": [
+      "qemu arguments",
+      "protected options",
+      "disk/image mutation",
+      "IPC permissions/actions",
+      "result integrity",
+      "executable identity",
+      "guest/user data"
+    ],
+    "public_receipt_rule": "transaction ids, digests, bounded status and redacted metadata only"
+  },
+  "gates": [
+    {
+      "id": "UPSTREAM_LICENSE_BOUND",
+      "state": "IMPLEMENTED",
+      "falsifier": "GPLv2 fork attribution anchor is missing or contradicted"
+    },
+    {
+      "id": "FORK_DELTA_PROVENANCE",
+      "state": "TOKEN_VAZIO",
+      "falsifier": "changed path lacks exact upstream baseline/origin classification"
+    },
+    {
+      "id": "TERMUX_PROVIDER_TRANSACTION",
+      "state": "TOKEN_VAZIO",
+      "falsifier": "consumer claim lacks exact provider commit/APK/request/result linkage"
+    },
+    {
+      "id": "QEMU_PROCESS_EXIT",
+      "state": "TOKEN_VAZIO",
+      "falsifier": "DISPATCHED exists but no process identity and terminal exit/result evidence"
+    },
+    {
+      "id": "GUEST_BOOT",
+      "state": "TOKEN_VAZIO",
+      "falsifier": "process started but no bounded guest-boot observation tied to image/executable/request"
+    }
+  ],
+  "gaps": [
+    {"id":"TV-VECTRAS-DELTA","state":"TOKEN_VAZIO","urgency":"P0","owner":"repository_maintainer","closure":"bind original/upstream baseline and current changed-path provenance"},
+    {"id":"TV-TERMUX-TRANSACTION","state":"TOKEN_VAZIO","urgency":"P0","owner":"vectras_and_termux","closure":"one receipt links request digest -> provider result -> exact consumer transaction"},
+    {"id":"TV-QEMU-EXIT","state":"TOKEN_VAZIO","urgency":"P0","owner":"physical_runtime_evidence_producer","closure":"observe exact QEMU executable/process and terminal exit/result on target device"},
+    {"id":"TV-GUEST-BOOT","state":"TOKEN_VAZIO","urgency":"P0","owner":"vm_evidence_producer","closure":"bounded guest boot receipt linked to image digest and transaction"},
+    {"id":"TV-IMAGE-ROLLBACK","state":"TOKEN_VAZIO","urgency":"P0","owner":"vm_mutation_owner","closure":"bind pre-mutation image/snapshot digest and tested rollback before destructive E2E"}
+  ],
+  "risk": {
+    "severity": "CRITICAL",
+    "summary": "cross-repository VM dispatch can appear successful while QEMU never executes, exits incorrectly, mutates an image unsafely, or never boots the guest",
+    "mitigations": [
+      "separate each execution state",
+      "require producer and consumer evidence",
+      "bind executable/request/result/image identities",
+      "require rollback before image mutation",
+      "minimize guest/user data in public receipts",
+      "keep performance claims outside guest-boot evidence"
+    ]
+  },
+  "rollback": {
+    "available": true,
+    "procedure": "assurance-only changes are reverted independently; mutating VM tests require an exact snapshot/image rollback reference before execution"
+  },
+  "claim_allowed": false
+}
