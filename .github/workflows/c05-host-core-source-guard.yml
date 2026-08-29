@@ -1,0 +1,98 @@
+name: C05 Host Core Source Guard
+
+on:
+  pull_request:
+    paths:
+      - 'app/src/main/cpp/**'
+      - 'tools/ci/audit_freestanding_link_probe.py'
+      - '.github/workflows/c05-host-core-source-guard.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: c05-host-core-source-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  SOURCE_COMMIT: ${{ github.event.pull_request.head.sha || github.sha }}
+
+jobs:
+  host-freestanding-core:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Java for JNI configure boundary
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Install deterministic probe tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes b3sum ninja-build
+
+      - name: Configure host freestanding probe
+        run: |
+          cmake \
+            -S app/src/main/cpp \
+            -B build/c05-host-core \
+            -G Ninja \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
+            -DRMR_ASM_CORE_EXPERIMENTAL=OFF \
+            -DVECTRA_BUILD_FREESTANDING_LINK_PROBE=ON
+
+      - name: Build twice and audit deterministic ELF
+        run: |
+          set -euo pipefail
+          build_dir='build/c05-host-core'
+          artifact_dir='artifacts/c05-host-core'
+          mkdir -p "${artifact_dir}"
+
+          cmake --build "${build_dir}" \
+            --target freestanding_link_probe \
+            --verbose 2>&1 | tee "${artifact_dir}/build-first.log"
+
+          probe="$(find "${build_dir}" -maxdepth 1 -type f \
+            -name 'vectra_freestanding_link_probe_*' -print -quit)"
+          test -n "${probe}"
+          cp "${probe}" "${artifact_dir}/reference.elf"
+
+          cmake --build "${build_dir}" --target clean
+          cmake --build "${build_dir}" \
+            --target freestanding_link_probe \
+            --verbose 2>&1 | tee "${artifact_dir}/build.log"
+
+          probe="$(find "${build_dir}" -maxdepth 1 -type f \
+            -name 'vectra_freestanding_link_probe_*' -print -quit)"
+          test -n "${probe}"
+
+          python3 tools/ci/audit_freestanding_link_probe.py \
+            --binary "${probe}" \
+            --map "${build_dir}/vectra_freestanding_link_probe.map" \
+            --build-log "${artifact_dir}/build.log" \
+            --reference-binary "${artifact_dir}/reference.elf" \
+            --output "${artifact_dir}/manifest.json" \
+            --abi "host-$(uname -m)" \
+            --commit "${SOURCE_COMMIT}" \
+            --compiler "$(command -v cc)" \
+            --linker "$(command -v ld)" \
+            --require-blake3
+
+          cp "${probe}" "${artifact_dir}/probe.elf"
+          cp "${build_dir}/vectra_freestanding_link_probe.map" \
+            "${artifact_dir}/probe.map"
+
+      - name: Upload host core proof
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: c05-host-core-${{ github.sha }}
+          path: artifacts/c05-host-core
+          if-no-files-found: error
