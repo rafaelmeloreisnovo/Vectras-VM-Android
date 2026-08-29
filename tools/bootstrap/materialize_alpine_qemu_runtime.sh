@@ -8,6 +8,12 @@ ABIS="arm64-v8a,armeabi-v7a"
 ALPINE_VERSION="3.19"
 QEMU_VERSION="8.1.5-r0"
 
+# Bit-for-bit witnesses promoted from a successful APK Wizard build.
+# Any transitive Alpine/Docker/repository drift that changes the final runtime
+# must fail closed instead of silently producing a different embedded QEMU.
+QEMU19_SHA256_ARM64_V8A="415f2a1bbe434707a8c4841a16019bd05bc8b68d2ba6bd0b6736376a4842eec5"
+QEMU19_SHA256_ARMEABI_V7A="fb35e9481de32a8534413744c2479068b5252cfa715dea5f42e5f9325f20909a"
+
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --target-root) TARGET_ROOT="$2"; shift 2 ;;
@@ -30,8 +36,14 @@ JSONL="${TMP}/assets.jsonl"
 IFS=',' read -r -a ABI_LIST <<< "${ABIS}"
 for ABI in "${ABI_LIST[@]}"; do
   case "${ABI}" in
-    arm64-v8a) APK_ARCH="aarch64" ;;
-    armeabi-v7a) APK_ARCH="armv7" ;;
+    arm64-v8a)
+      APK_ARCH="aarch64"
+      EXPECTED_SHA="${QEMU19_SHA256_ARM64_V8A}"
+      ;;
+    armeabi-v7a)
+      APK_ARCH="armv7"
+      EXPECTED_SHA="${QEMU19_SHA256_ARMEABI_V7A}"
+      ;;
     *) echo "unsupported qemu19 ABI: ${ABI}" >&2; exit 2 ;;
   esac
 
@@ -81,20 +93,28 @@ for ABI in "${ABI_LIST[@]}"; do
 
   SHA="$(sha256sum "${OUT_TAR}" | awk '{print $1}')"
   SIZE="$(stat -c '%s' "${OUT_TAR}")"
+  if [[ "${SHA}" != "${EXPECTED_SHA}" ]]; then
+    echo "[qemu19] HASH_MISMATCH abi=${ABI} expected=${EXPECTED_SHA} actual=${SHA}" >&2
+    echo "[qemu19] refusing non-reproducible runtime; update witness only from independently audited evidence" >&2
+    exit 1
+  fi
+
   PKG_DB="${ROOTFS}/lib/apk/db/installed"
   PKG_COUNT="0"
   if [[ -f "${PKG_DB}" ]]; then
     PKG_COUNT="$(grep -c '^P:' "${PKG_DB}" || true)"
   fi
 
-  python3 - "${ABI}" "${APK_ARCH}" "${OUT_TAR}" "${SHA}" "${SIZE}" "${PKG_COUNT}" "${QEMU_VERSION}" >> "${JSONL}" <<'PY'
+  python3 - "${ABI}" "${APK_ARCH}" "${OUT_TAR}" "${SHA}" "${EXPECTED_SHA}" "${SIZE}" "${PKG_COUNT}" "${QEMU_VERSION}" >> "${JSONL}" <<'PY'
 import json, os, sys
-abi, apk_arch, path, sha, size, pkg_count, qemu_version = sys.argv[1:]
+abi, apk_arch, path, sha, expected_sha, size, pkg_count, qemu_version = sys.argv[1:]
 print(json.dumps({
     "abi": abi,
     "alpine_arch": apk_arch,
     "target_path": f"qemu19/{abi}.tar",
     "sha256": sha,
+    "expected_sha256": expected_sha,
+    "sha256_enforced": True,
     "size_bytes": int(size),
     "package_count": int(pkg_count),
     "qemu_version": qemu_version,
@@ -108,7 +128,7 @@ print(json.dumps({
     ],
 }, sort_keys=True))
 PY
-  echo "[qemu19] MATERIALIZED abi=${ABI} arch=${APK_ARCH} bytes=${SIZE} sha256=${SHA}"
+  echo "[qemu19] MATERIALIZED_VERIFIED abi=${ABI} arch=${APK_ARCH} bytes=${SIZE} sha256=${SHA}"
 done
 
 python3 - "${JSONL}" "${OUT_RECEIPT}" "${ALPINE_VERSION}" "${QEMU_VERSION}" <<'PY'
@@ -116,14 +136,19 @@ import json, pathlib, sys
 jsonl, output, alpine_version, qemu_version = sys.argv[1:]
 assets = [json.loads(line) for line in pathlib.Path(jsonl).read_text().splitlines() if line.strip()]
 receipt = {
-    "schema_version": "vectras.embedded-qemu19-materialization.v1",
-    "status": "MATERIALIZED_VERIFIED_BUILD_TIME_NOT_DEVICE_TESTED",
+    "schema_version": "vectras.embedded-qemu19-materialization.v2",
+    "status": "MATERIALIZED_SHA256_ENFORCED_BUILD_TIME_NOT_DEVICE_TESTED",
     "alpine_branch": f"v{alpine_version}",
     "qemu_version": qemu_version,
     "source_repositories": [
         "https://dl-cdn.alpinelinux.org/alpine/v3.19/main",
         "https://dl-cdn.alpinelinux.org/alpine/v3.19/community",
     ],
+    "determinism_contract": {
+        "archive_normalization": "tar_sort_name_mtime_epoch_owner_group_zero",
+        "final_sha256_fail_closed": True,
+        "all_asset_hashes_enforced": all(asset.get("sha256_enforced") for asset in assets),
+    },
     "assets": assets,
     "device_runtime_verified": False,
     "vm_boot_verified": False,
