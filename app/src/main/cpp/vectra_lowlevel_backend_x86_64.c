@@ -8,6 +8,12 @@
 
 #include "rmr_lowlevel.h"
 
+#if defined(__x86_64__) && (defined(__GNUC__) || defined(__clang__))
+#define VECTRA_TARGET_SSE42 __attribute__((target("sse4.2")))
+#else
+#define VECTRA_TARGET_SSE42
+#endif
+
 static uint32_t vectra_crc32c_software(uint32_t initial, const uint8_t* data, size_t len) {
     uint32_t crc = initial;
     for (size_t i = 0; i < len; ++i) {
@@ -33,7 +39,7 @@ static uint32_t vectra_reduce_xor_x86_64(const uint8_t* data, size_t len) {
 }
 
 #if defined(__x86_64__)
-static uint32_t vectra_crc32c_x86_64(uint32_t initial, const uint8_t* data, size_t len) {
+static VECTRA_TARGET_SSE42 uint32_t vectra_crc32c_x86_64(uint32_t initial, const uint8_t* data, size_t len) {
     uint64_t crc = initial;
     size_t i = 0;
     for (; i + 8u <= len; i += 8u) {
@@ -64,3 +70,5 @@ void vectra_backend_bind_x86_64(vectra_lowlevel_backend_vtable_t* out) {
     out->crc32c = vectra_crc32c_software;
 #endif
 }
+
+#undef VECTRA_TARGET_SSE42
