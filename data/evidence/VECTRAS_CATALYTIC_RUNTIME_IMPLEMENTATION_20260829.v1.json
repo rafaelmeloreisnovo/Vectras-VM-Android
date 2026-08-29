@@ -1,0 +1,88 @@
+{
+  "schema_version": "vectras.catalytic-runtime-implementation-receipt.v1",
+  "generated_at_utc": "2026-08-29T08:20:09Z",
+  "branch": "feat/vectras-catalytic-proot-freestanding-v1",
+  "source_device_evidence": {
+    "catalog_sha256": "fdb2b03f6af3c3c0c9b3b700ea3390313fa3fc29a355e8db29d2d79a81ff53c0",
+    "observed_post_check": "POST_CHECK_FAIL:missing-proot,missing-distro-busybox,missing-qemu-binary",
+    "claim_allowed": false
+  },
+  "implementation": {
+    "name": "VCAT",
+    "state": "IMPLEMENTED_SOURCE",
+    "integration": "amalgamated_into_abi_core_freestanding",
+    "max_deterministic_lanes": 16,
+    "lane_formula": "lane(i)=(a*i+b) mod 16; a=(mix(seed)|1) mod 16; gcd(a,16)=1",
+    "collision_free_for_16_inputs": true,
+    "runtime_name_lookup": false,
+    "heap": false,
+    "libc": false,
+    "syscalls": false,
+    "threads_or_process_creation": false,
+    "atomics": false,
+    "recursion": false,
+    "loop_statements_in_vcat_core": false,
+    "tail_call_optimization": "disabled_on_catalytic_entry_points",
+    "shadow_policy": "-Wshadow promoted to error in specialist module",
+    "classifiers": [
+      "ELF",
+      "DEX",
+      "ZIP",
+      "TAR",
+      "OAT",
+      "VDEX",
+      "QCOW2",
+      "ANDROID_SPARSE"
+    ],
+    "scope_note": "No-libc/no-syscall applies to VCAT pure computation only; filesystem installation and actual process execution require a kernel/host boundary."
+  },
+  "commits_before_receipt": [
+    "928f6f6c02d5d37c445dc6e69a887edfedb26fd5",
+    "f6ab913c8add391c3e0fbff956b1dcc7e97174c7",
+    "e5f6f78d8fb328b1fa32d1356a1b22425327b4e3",
+    "f517a447003474b6e0881680526fc52e63e29d94",
+    "0a55f8d54be45f98e0d0dfa4315f0fc4a445a1dc"
+  ],
+  "model_workspace_probe": {
+    "state": "PASS_NOT_CI_NOT_DEVICE",
+    "target": "armv7a-none-eabi",
+    "compiler": "clang 17.0.0",
+    "linker": "LLD 17.0.0",
+    "link_mode": "-nostdlib --no-undefined --gc-sections --build-id=none",
+    "elf_class": "ELF32",
+    "machine": "ARM",
+    "undefined_symbol_count": 0,
+    "forbidden_symbol_matches": [],
+    "checked_for": [
+      "memcpy",
+      "memset",
+      "malloc",
+      "free",
+      "printf",
+      "syscall",
+      "__aeabi",
+      "__stack_chk"
+    ],
+    "probe_size_bytes": 2368,
+    "deterministic_lane_samples": "5 seeds x 16 lanes => 16 unique lanes in every sample"
+  },
+  "open_gates": {
+    "PROOT_EXECUTABLE_RUNTIME": "TOKEN_VAZIO",
+    "DISTRO_ROOTFS_PAYLOAD": "TOKEN_VAZIO",
+    "FILESYSTEM_INSTALL_RECEIPT": "TOKEN_VAZIO",
+    "KERNEL_PROCESS_EXECUTION_RECEIPT": "TOKEN_VAZIO",
+    "QEMU_EXECUTABLE_RUNTIME": "TOKEN_VAZIO",
+    "QEMU_HOST_ELF_ABI_RECEIPT": "TOKEN_VAZIO",
+    "PHYSICAL_VM_LAUNCH_RECEIPT": "TOKEN_VAZIO",
+    "END_TO_END_VM_BOOT_EVIDENCE": "TOKEN_VAZIO"
+  },
+  "epistemic_state": {
+    "source_implemented": true,
+    "freestanding_equivalent_probe_observed": true,
+    "repository_ci_verified": false,
+    "android_build_verified": false,
+    "device_runtime_verified": false,
+    "physical_vm_launch_verified": false,
+    "claim_allowed": false
+  }
+}
