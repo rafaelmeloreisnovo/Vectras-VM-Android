@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
 """Materializa TARs de bootstrap a partir de um commit Git exato.
 
-O script usa clone parcial + sparse checkout, valida o HEAD pinado, inspeciona os
-TARs e grava receipt JSON. Nenhum asset é aceito a partir de branch flutuante.
+O script busca o SHA pinado diretamente, faz sparse checkout, valida que o objeto
+materializado é exatamente o commit esperado, inspeciona os TARs e grava receipt
+JSON. O HEAD da branch remota é apenas uma observação de drift: branches podem
+avançar; o SHA imutável é a autoridade de reprodutibilidade.
 """
 
 from __future__ import annotations
@@ -164,6 +166,52 @@ def atomic_copy(source: Path, destination: Path) -> None:
     os.replace(temp, destination)
 
 
+def observe_branch_head(source: dict[str, Any]) -> str:
+    """Observa drift da branch sem transformar branch mutável em autoridade."""
+    ref = f"refs/heads/{source['branch']}"
+    listing = run(["git", "ls-remote", "--heads", source["url"], ref])
+    if not listing:
+        return TOKEN_VAZIO
+    first = listing.splitlines()[0].split()
+    if not first:
+        return TOKEN_VAZIO
+    value = first[0].lower()
+    if len(value) != 40 or any(char not in "0123456789abcdef" for char in value):
+        return TOKEN_VAZIO
+    return value
+
+
+def fetch_pinned_commit(checkout: Path, source: dict[str, Any]) -> tuple[str, str]:
+    """Busca o objeto exato; falha apenas se o SHA pinado não puder ser provado."""
+    run(["git", "init", "--quiet", str(checkout)])
+    run(["git", "-C", str(checkout), "remote", "add", "origin", source["url"]])
+
+    branch_head = observe_branch_head(source)
+    if branch_head != TOKEN_VAZIO and branch_head != source["commit"].lower():
+        print(
+            "[bootstrap-materialize] OBSERVED branch-head-drift "
+            f"branch={source['branch']} pinned={source['commit']} observed={branch_head}"
+        )
+
+    run(
+        [
+            "git",
+            "-C",
+            str(checkout),
+            "fetch",
+            "--quiet",
+            "--depth=1",
+            "--filter=blob:none",
+            "origin",
+            source["commit"],
+        ]
+    )
+    fetched = run(["git", "-C", str(checkout), "rev-parse", "FETCH_HEAD^{commit}"]).lower()
+    if fetched != source["commit"].lower():
+        raise ContractError(f"FETCH_HEAD divergente: esperado {source['commit']}, obtido {fetched}")
+    return fetched, branch_head
+
+
 def materialize(manifest_path: Path) -> dict[str, Any]:
     manifest = load_json(manifest_path)
     source, assets = validate_manifest(manifest)
@@ -172,26 +220,10 @@ def materialize(manifest_path: Path) -> dict[str, Any]:
     receipt_path = ROOT / manifest.get("receipt", "app/build/reports/bootstrap/bootstrap-materialization.json")
     output_dir.mkdir(parents=True, exist_ok=True)
 
+    branch_head_observed = TOKEN_VAZIO
     with tempfile.TemporaryDirectory(prefix="vectras-bootstrap-source-") as tmp:
         checkout = Path(tmp) / "source"
-        run(
-            [
-                "git",
-                "clone",
-                "--quiet",
-                "--filter=blob:none",
-                "--no-checkout",
-                "--depth=1",
-                "--branch",
-                source["branch"],
-                source["url"],
-                str(checkout),
-            ]
-        )
-
-        head = run(["git", "-C", str(checkout), "rev-parse", "HEAD"]).lower()
-        if head != source["commit"].lower():
-            raise ContractError(f"HEAD remoto divergente: esperado {source['commit']}, obtido {head}")
+        _, branch_head_observed = fetch_pinned_commit(checkout, source)
 
         run(["git", "-C", str(checkout), "sparse-checkout", "init", "--no-cone"])
         sparse_paths = "".join(f"/{asset['source_path']}\n" for asset in assets)
@@ -201,7 +233,7 @@ def materialize(manifest_path: Path) -> dict[str, Any]:
         )
         run(["git", "-C", str(checkout), "checkout", "--quiet", "--detach", source["commit"]])
 
-        resolved_head = run(["git", "-C", str(checkout), "rev-parse", "HEAD"]).lower()
+        resolved_head = run(["git", "-C", str(checkout), "rev-parse", "HEAD^{commit}"]).lower()
         if resolved_head != source["commit"].lower():
             raise ContractError(f"checkout não permaneceu no pin: {resolved_head}")
 
@@ -241,16 +273,19 @@ def materialize(manifest_path: Path) -> dict[str, Any]:
             )
 
     receipt = {
-        "schema_version": "1.0.0",
+        "schema_version": "1.1.0",
         "record_type": "bootstrap_asset_materialization",
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "source": {
             "repository": source.get("repository"),
             "url": source["url"],
             "branch": source["branch"],
+            "branch_head_observed": branch_head_observed,
+            "branch_head_matches_pin": branch_head_observed == source["commit"].lower(),
+            "branch_head_authoritative": False,
             "commit": source["commit"],
             "commit_verified": True,
-            "transport": "git_partial_clone_sparse_checkout",
+            "transport": "git_exact_sha_fetch_partial_sparse_checkout",
         },
         "output_directory": str(output_dir.relative_to(ROOT)),
         "assets": receipt_assets,
