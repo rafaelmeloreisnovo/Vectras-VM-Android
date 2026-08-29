@@ -384,6 +384,7 @@ if(VECTRA_BUILD_FREESTANDING_LINK_PROBE)
         abi_core_freestanding)
     target_link_options(vectra_freestanding_link_probe PRIVATE
         -nostdlib
+        -Wl,--as-needed
         -Wl,--gc-sections
         -Wl,--build-id=none
         -Wl,--no-undefined
