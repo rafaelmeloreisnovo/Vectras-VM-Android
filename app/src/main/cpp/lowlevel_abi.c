@@ -166,3 +166,10 @@ int abi_entry_validate_interop(uint16_t producer_major,
         consumer_minor,
         adaptive_bridge_enabled);
 }
+
+/*
+ * VCAT is intentionally amalgamated into the existing freestanding archive.
+ * This adds no hosted runtime target and keeps its libc/syscall boundary equal
+ * to abi_core_freestanding. The specialist module itself contains no loops.
+ */
+#include "catalytic/vcat_core.inc"
