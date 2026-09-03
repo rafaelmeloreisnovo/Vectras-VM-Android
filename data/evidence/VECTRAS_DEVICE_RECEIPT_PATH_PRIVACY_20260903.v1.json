@@ -49,10 +49,18 @@
       "<installedApk>",
       "<nativeLibDir>"
     ],
-    "fallback": "<redacted-external-or-unknown-path>"
+    "fallback": "<redacted-external-or-unknown-path>",
+    "approved_filesdir_prefixes": [
+      "usr/bin/",
+      "bin/",
+      "distro/bin/",
+      "distro/usr/bin/",
+      "distro/usr/local/bin/",
+      "evidence/catalog/"
+    ]
   },
-  "falsifier": "A serialized device-evidence path contains an adopted-storage UUID, a raw external or guest path, or a fallback to File.getPath().",
-  "exit_criterion": "Focused JVM test proves normal roots remain logical and adopted-storage/unknown/sibling paths fail closed.",
+  "falsifier": "A serialized device-evidence path contains an adopted-storage UUID, a raw external or guest path, an unapproved filesDir child, or a fallback to File.getPath().",
+  "exit_criterion": "Focused JVM test proves approved roots remain logical and adopted-storage/unknown/guest/sibling paths fail closed.",
   "rollback_ref": "d7ebbfcd169ac392e50eb78d954246bc496e678d",
   "state": {
     "source_implementation": "IMPLEMENTED_PENDING_CI",
