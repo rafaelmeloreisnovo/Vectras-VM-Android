@@ -10,6 +10,15 @@ public final class EvidencePathRedactor {
     public static final String TOKEN_VAZIO = "TOKEN_VAZIO";
     public static final String REDACTED_PATH = "<redacted-external-or-unknown-path>";
 
+    private static final String[] SAFE_FILES_DIR_PREFIXES = new String[] {
+            "usr/bin/",
+            "bin/",
+            "distro/bin/",
+            "distro/usr/bin/",
+            "distro/usr/local/bin/",
+            "evidence/catalog/"
+    };
+
     private EvidencePathRedactor() {
         throw new AssertionError("utility class");
     }
@@ -27,7 +36,10 @@ public final class EvidencePathRedactor {
 
         String filesDir = normalize(canonicalFilesDir);
         if (isSameOrChild(path, filesDir)) {
-            return logicalPath("<filesDir>", path, filesDir);
+            String relative = relativePath(path, filesDir);
+            return isSafeFilesDirRelative(relative)
+                    ? logicalPath("<filesDir>", path, filesDir)
+                    : REDACTED_PATH;
         }
 
         String installedApk = normalize(canonicalInstalledApk);
@@ -56,6 +68,22 @@ public final class EvidencePathRedactor {
 
     private static boolean isSameOrChild(String path, String root) {
         return !root.isEmpty() && (path.equals(root) || path.startsWith(root + "/"));
+    }
+
+    private static String relativePath(String path, String root) {
+        return path.equals(root) ? "" : path.substring(root.length() + 1);
+    }
+
+    private static boolean isSafeFilesDirRelative(String relative) {
+        if (relative.isEmpty()) {
+            return true;
+        }
+        for (String prefix : SAFE_FILES_DIR_PREFIXES) {
+            if (relative.startsWith(prefix)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private static String logicalPath(String token, String path, String root) {
