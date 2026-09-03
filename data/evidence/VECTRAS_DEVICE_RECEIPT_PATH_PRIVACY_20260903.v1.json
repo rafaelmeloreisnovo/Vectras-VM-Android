@@ -1,0 +1,79 @@
+{
+  "schema_version": "vectras.device-receipt-path-privacy-implementation.v1",
+  "recorded_at_utc": "2026-09-03T17:12:57Z",
+  "record_kind": "CANDIDATE_IMPLEMENTATION_PENDING_CI",
+  "parent": {
+    "repository": "rafaelmeloreisnovo/Vectras-VM-Android",
+    "base_ref": "master",
+    "base_commit": "d7ebbfcd169ac392e50eb78d954246bc496e678d",
+    "branch": "codex/device-receipt-path-redaction-gate"
+  },
+  "authority": {
+    "owner": "Vectras-VM-Android VM/QEMU consumer",
+    "write_scope": "local receipt serialization and focused JVM regression gate",
+    "excluded_authority": [
+      "Termux provider execution claim",
+      "physical Android execution claim",
+      "guest boot claim",
+      "performance claim"
+    ]
+  },
+  "goal": {
+    "gap_id": "VECTRAS_GUEST_DATA_MINIMIZATION_RUNTIME",
+    "urgency": "P0",
+    "baseline_evidence": [
+      {
+        "path": "evidence/device_runtime/MOTO_E7_ANDROID10_20260824.json",
+        "blob_sha": "2d91b83d4d042ed75337caf584dd4f06ddb716cd",
+        "observation": "repository evidence already redacts an adopted-storage UUID"
+      },
+      {
+        "path": "app/src/main/java/com/vectras/vm/evidence/EvidenceCatalogCollector.java",
+        "observation": "previous fallback could emit File.getPath() for a non-app canonicalization failure"
+      }
+    ]
+  },
+  "classification": {
+    "governance": "local consumer implementation",
+    "data": "runtime and filesystem metadata",
+    "privacy": "P0; raw external, guest, or adopted-storage paths are unnecessary in shareable receipts",
+    "security": "fail closed on unknown path roots"
+  },
+  "implementation": {
+    "redactor": "app/src/main/java/com/vectras/vm/evidence/EvidencePathRedactor.java",
+    "integration": "EvidenceCatalogCollector.normalizePath",
+    "test": "app/src/test/java/com/vectras/vm/evidence/EvidencePathRedactorTest.java",
+    "gate": ".github/workflows/runtime-evidence-contracts.yml",
+    "allowed_logical_roots": [
+      "<filesDir>",
+      "<installedApk>",
+      "<nativeLibDir>"
+    ],
+    "fallback": "<redacted-external-or-unknown-path>"
+  },
+  "falsifier": "A serialized device-evidence path contains an adopted-storage UUID, a raw external or guest path, or a fallback to File.getPath().",
+  "exit_criterion": "Focused JVM test proves normal roots remain logical and adopted-storage/unknown/sibling paths fail closed.",
+  "rollback_ref": "d7ebbfcd169ac392e50eb78d954246bc496e678d",
+  "state": {
+    "source_implementation": "IMPLEMENTED_PENDING_CI",
+    "ci_receipt": "TOKEN_VAZIO",
+    "exported_device_receipt": "TOKEN_VAZIO",
+    "device_runtime_verified": false,
+    "physical_vm_launch_verified": false,
+    "claim_allowed": false
+  },
+  "F_ok": [
+    "A bounded source-level remediation and falsifier are defined.",
+    "The historical device-receipt redaction policy is converted into executable test cases."
+  ],
+  "F_gap": [
+    "Focused CI execution and its JUnit receipt.",
+    "Physical Android export from an installed APK.",
+    "Termux provider/process/exit and guest-boot evidence remain separate."
+  ],
+  "F_next": [
+    "Run the focused Runtime Evidence Contracts workflow.",
+    "Inspect the generated JUnit receipt without promoting device execution.",
+    "Export a real device catalog after installation and verify it contains only the allowed logical roots."
+  ]
+}
