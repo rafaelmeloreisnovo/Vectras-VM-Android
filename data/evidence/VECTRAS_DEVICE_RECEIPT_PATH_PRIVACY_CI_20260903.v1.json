@@ -1,0 +1,68 @@
+{
+  "schema_version": "vectras.device-receipt-path-privacy-ci-result.v1",
+  "recorded_at_utc": "2026-09-03T17:24:24Z",
+  "record_kind": "CI_GATE_RECEIPT",
+  "parent": {
+    "implementation_receipt": "data/evidence/VECTRAS_DEVICE_RECEIPT_PATH_PRIVACY_20260903.v1.json",
+    "source_commit": "e95a68e804a9de02b330024346b3a78a599c5ea6",
+    "source_branch": "codex/device-receipt-path-redaction-gate"
+  },
+  "provenance": {
+    "repository": "rafaelmeloreisnovo/Vectras-VM-Android",
+    "workflow_name": "Runtime Evidence Contracts",
+    "workflow_run_id": 33784061891,
+    "workflow_run_url": "https://github.com/rafaelmeloreisnovo/Vectras-VM-Android/actions/runs/33784061891",
+    "job_id": 100744458292,
+    "job_name": "brainvault-append-only-contract",
+    "artifact": {
+      "id": 9904816224,
+      "name": "runtime-evidence-receipts-36de9b41ff0f3d762518ea8cb45fa71bcb117ff7",
+      "digest": "sha256:4a5f7e8224ecf6350e5e18b79277977496643b5380858b0f2417b3d3f96bc572",
+      "expires_at": "2026-12-02T17:21:25Z"
+    }
+  },
+  "gate": {
+    "id": "DEVICE_RECEIPT_PATH_PRIVACY",
+    "result": "PASS",
+    "scope": "focused JVM serialization boundary",
+    "tests": [
+      {
+        "class_name": "com.vectras.vm.evidence.EvidencePathRedactorTest",
+        "tests": 4,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "junit_sha256": "7fdcd23c245b660ed0d6c21acdcc3a9467cdc1489ddf9f196d208e56efdf347d"
+      },
+      {
+        "class_name": "com.vectras.vm.rafaelia.connector.BrainVaultStoreTest",
+        "tests": 11,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "junit_sha256": "3b7d613573823ef5ceb49669a9d80d947c4d016311377223051ce2b5696e190c"
+      }
+    ],
+    "falsifier": "A raw adopted-storage, guest, external, unknown, sibling, or unapproved filesDir path escapes the logical receipt roots."
+  },
+  "status": {
+    "VECTRAS_GUEST_DATA_MINIMIZATION_RUNTIME": "SOURCE_CI_GATE_PASS",
+    "exported_device_receipt": "TOKEN_VAZIO",
+    "device_runtime_verified": false,
+    "physical_vm_launch_verified": false,
+    "claim_allowed": false
+  },
+  "F_ok": [
+    "The P0 source-level path-minimization gate passed on the exact source commit.",
+    "The CI receipt binds JUnit digests, source commit, artifact digest, and workflow provenance."
+  ],
+  "F_gap": [
+    "A physical Android catalog export from an installed APK.",
+    "Provider/process/exit evidence and guest boot evidence."
+  ],
+  "F_next": [
+    "Install a build of this source on a physical Android device.",
+    "Export the catalog and verify it uses only approved logical paths or the redaction token.",
+    "Keep physical runtime and guest boot claims blocked until their own receipts exist."
+  ]
+}
