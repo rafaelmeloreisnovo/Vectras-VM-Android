@@ -199,6 +199,28 @@ adopted-storage UUID
 user documents
 ```
 
+### Receipt path privacy gate
+
+Filesystem identity in an exported receipt is limited to these logical roots:
+
+```text
+<filesDir>/...
+<installedApk>/base.apk
+<nativeLibDir>/...
+```
+
+Any external, unknown, sibling, or canonicalization-failure path is emitted as:
+
+```text
+<redacted-external-or-unknown-path>
+```
+
+The collector never falls back to a raw absolute path. This prevents an adopted-storage
+volume UUID, a guest path, or a user-controlled external location from entering the
+shareable receipt. The focused JVM gate is
+`EvidencePathRedactorTest`; it proves this serialization boundary only. It does
+not prove APK installation, provider dispatch, QEMU execution, or guest boot.
+
 That boundary keeps the artifact useful for reproducibility without turning it into an unnecessary identity dossier.
 
 ## 6. Artifact export and integrity
