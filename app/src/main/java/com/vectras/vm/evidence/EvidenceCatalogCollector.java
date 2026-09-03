@@ -357,6 +357,7 @@ public final class EvidenceCatalogCollector {
                 .put("accounts")
                 .put("MAC_addresses")
                 .put("adopted_storage_UUID")
+                .put("absolute_external_or_unknown_paths")
                 .put("user_documents");
     }
 
@@ -417,19 +418,23 @@ public final class EvidenceCatalogCollector {
         }
     }
 
+    /**
+     * Serializes only logical application roots. Unknown paths are redacted
+     * rather than falling back to an absolute filesystem location, which may
+     * carry guest data or an adopted-storage volume UUID.
+     */
     private static String normalizePath(Context context, File file) {
         try {
-            String filesRoot = context.getFilesDir().getCanonicalPath();
-            String path = file.getCanonicalPath();
-            if (path.equals(filesRoot)) return "<filesDir>";
-            if (path.startsWith(filesRoot + File.separator)) {
-                return "<filesDir>/" + path.substring(filesRoot.length() + 1).replace(File.separatorChar, '/');
-            }
-            String apkPath = context.getApplicationInfo().sourceDir;
-            if (path.equals(new File(apkPath).getCanonicalPath())) return "<installedApk>/" + file.getName();
-            return path;
-        } catch (IOException e) {
-            return file.getPath();
+            ApplicationInfo appInfo = context.getApplicationInfo();
+            return EvidencePathRedactor.normalizeForReceipt(
+                    file == null ? null : file.getCanonicalPath(),
+                    context.getFilesDir() == null ? null : context.getFilesDir().getCanonicalPath(),
+                    appInfo.sourceDir == null ? null : new File(appInfo.sourceDir).getCanonicalPath(),
+                    appInfo.nativeLibraryDir == null
+                            ? null
+                            : new File(appInfo.nativeLibraryDir).getCanonicalPath());
+        } catch (Exception e) {
+            return EvidencePathRedactor.REDACTED_PATH;
         }
     }
 
