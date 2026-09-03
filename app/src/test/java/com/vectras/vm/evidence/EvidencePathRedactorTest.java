@@ -34,6 +34,12 @@ public class EvidencePathRedactorTest {
         assertEquals(EvidencePathRedactor.REDACTED_PATH, receiptPath);
         assertFalse(receiptPath.contains("7F3A-19BC"));
         assertFalse(receiptPath.contains("qemu-system-x86_64"));
+
+        String guestPath = FILES_DIR + "/distro/home/alice/private-disk.qcow2";
+        String guestReceiptPath = EvidencePathRedactor.normalizeForReceipt(
+                guestPath, FILES_DIR, INSTALLED_APK, NATIVE_LIBRARY_DIR);
+        assertEquals(EvidencePathRedactor.REDACTED_PATH, guestReceiptPath);
+        assertFalse(guestReceiptPath.contains("alice"));
     }
 
     @Test
