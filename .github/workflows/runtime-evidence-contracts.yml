@@ -9,6 +9,10 @@ on:
       - 'tools/ci/test_apk_report_contracts.py'
       - 'app/src/main/java/com/vectras/vm/rafaelia/connector/BrainVaultStore.java'
       - 'app/src/test/java/com/vectras/vm/rafaelia/connector/BrainVaultStoreTest.java'
+      - 'app/src/main/java/com/vectras/vm/evidence/EvidenceCatalogCollector.java'
+      - 'app/src/main/java/com/vectras/vm/evidence/EvidencePathRedactor.java'
+      - 'app/src/test/java/com/vectras/vm/evidence/EvidencePathRedactorTest.java'
+      - 'data/evidence/VECTRAS_DEVICE_RECEIPT_PATH_PRIVACY_20260903.v1.json'
       - '.github/workflows/runtime-evidence-contracts.yml'
   push:
     branches: [master]
@@ -18,6 +22,10 @@ on:
       - 'tools/ci/test_apk_report_contracts.py'
       - 'app/src/main/java/com/vectras/vm/rafaelia/connector/BrainVaultStore.java'
       - 'app/src/test/java/com/vectras/vm/rafaelia/connector/BrainVaultStoreTest.java'
+      - 'app/src/main/java/com/vectras/vm/evidence/EvidenceCatalogCollector.java'
+      - 'app/src/main/java/com/vectras/vm/evidence/EvidencePathRedactor.java'
+      - 'app/src/test/java/com/vectras/vm/evidence/EvidencePathRedactorTest.java'
+      - 'data/evidence/VECTRAS_DEVICE_RECEIPT_PATH_PRIVACY_20260903.v1.json'
       - '.github/workflows/runtime-evidence-contracts.yml'
   workflow_dispatch:
 
@@ -27,6 +35,9 @@ permissions:
 concurrency:
   group: runtime-evidence-contracts-${{ github.ref }}
   cancel-in-progress: true
+
+env:
+  SOURCE_COMMIT: ${{ github.event.pull_request.head.sha || github.sha }}
 
 jobs:
   apk-report-contracts:
@@ -88,27 +99,114 @@ jobs:
           ./tools/gradle_with_jdk21.sh \
             :app:testDebugUnitTest \
             --tests 'com.vectras.vm.rafaelia.connector.BrainVaultStoreTest' \
+            --tests 'com.vectras.vm.evidence.EvidencePathRedactorTest' \
             -PAPP_ABI_POLICY=arm64-only \
             -PSUPPORTED_ABIS=arm64-v8a \
             -PCI_INTERNAL_VALIDATION=false
 
-      - name: Assert focused JUnit result exists
+      - name: Assert focused JUnit receipts and write privacy gate receipt
         shell: bash
         run: |
           set -euo pipefail
-          result='app/build/test-results/testDebugUnitTest/TEST-com.vectras.vm.rafaelia.connector.BrainVaultStoreTest.xml'
-          [[ -s "$result" ]] || { echo "JUnit result missing: $result" >&2; exit 1; }
-          python3 - "$result" <<'PY'
-          import sys
+          python3 - <<'PY'
+          import datetime
+          import hashlib
+          import json
+          import os
+          from pathlib import Path
           import xml.etree.ElementTree as ET
-          root = ET.parse(sys.argv[1]).getroot()
-          tests = int(root.attrib.get('tests', '0'))
-          failures = int(root.attrib.get('failures', '0'))
-          errors = int(root.attrib.get('errors', '0'))
-          skipped = int(root.attrib.get('skipped', '0'))
-          assert tests >= 10, tests
-          assert failures == 0, failures
-          assert errors == 0, errors
-          assert skipped == 0, skipped
-          print(f'BrainVault focused contract: PASS tests={tests}')
+
+          reports = {
+              "brainvault_append_only": {
+                  "path": Path("app/build/test-results/testDebugUnitTest/TEST-com.vectras.vm.rafaelia.connector.BrainVaultStoreTest.xml"),
+                  "minimum_tests": 10,
+              },
+              "device_receipt_path_privacy": {
+                  "path": Path("app/build/test-results/testDebugUnitTest/TEST-com.vectras.vm.evidence.EvidencePathRedactorTest.xml"),
+                  "minimum_tests": 4,
+              },
+          }
+          checked = {}
+          for name, spec in reports.items():
+              report = spec["path"]
+              if not report.is_file() or report.stat().st_size == 0:
+                  raise SystemExit(f"missing JUnit receipt: {report}")
+              root = ET.parse(report).getroot()
+              summary = {
+                  "path": str(report),
+                  "sha256": hashlib.sha256(report.read_bytes()).hexdigest(),
+                  "tests": int(root.attrib.get("tests", "0")),
+                  "failures": int(root.attrib.get("failures", "0")),
+                  "errors": int(root.attrib.get("errors", "0")),
+                  "skipped": int(root.attrib.get("skipped", "0")),
+              }
+              if summary["tests"] < spec["minimum_tests"]:
+                  raise SystemExit(f"{name}: expected at least {spec['minimum_tests']} tests, got {summary['tests']}")
+              if summary["failures"] or summary["errors"] or summary["skipped"]:
+                  raise SystemExit(f"{name}: non-passing JUnit summary: {summary}")
+              checked[name] = summary
+              print(f"{name}: PASS tests={summary['tests']} sha256={summary['sha256']}")
+
+          source_paths = [
+              Path("app/src/main/java/com/vectras/vm/evidence/EvidenceCatalogCollector.java"),
+              Path("app/src/main/java/com/vectras/vm/evidence/EvidencePathRedactor.java"),
+              Path("app/src/test/java/com/vectras/vm/evidence/EvidencePathRedactorTest.java"),
+          ]
+          source_inputs = []
+          for source in source_paths:
+              if not source.is_file():
+                  raise SystemExit(f"missing gate input: {source}")
+              source_inputs.append({
+                  "path": str(source),
+                  "sha256": hashlib.sha256(source.read_bytes()).hexdigest(),
+              })
+
+          receipt = {
+              "schema_version": "vectras.device-receipt-path-privacy-ci-receipt.v1",
+              "generated_at_utc": datetime.datetime.now(datetime.timezone.utc).replace(
+                  microsecond=0).isoformat().replace("+00:00", "Z"),
+              "source_commit": os.environ["SOURCE_COMMIT"],
+              "gate": {
+                  "name": "DEVICE_RECEIPT_PATH_PRIVACY",
+                  "result": "PASS",
+                  "scope": "focused JVM serialization boundary",
+                  "falsifier": "a raw adopted-storage, guest, external, unknown, or sibling path escapes the logical receipt roots",
+              },
+              "source_inputs": source_inputs,
+              "junit_receipts": checked,
+              "claim_boundary": {
+                  "claim_allowed": False,
+                  "device_runtime_verified": False,
+                  "physical_vm_launch_verified": False,
+                  "scope_note": "CI validates redaction behavior; it does not prove a physical Android export or VM execution.",
+              },
+              "F_ok": [
+                  "Known application roots are emitted as logical receipt paths.",
+                  "Adopted-storage, unknown, and sibling paths fail closed.",
+              ],
+              "F_gap": [
+                  "Physical Android export receipt.",
+                  "Termux provider/process/exit evidence.",
+                  "Guest boot evidence.",
+              ],
+              "F_next": [
+                  "Install a built APK on a physical Android device.",
+                  "Export the device catalog and verify its receipt against this source boundary.",
+              ],
+          }
+          output = Path("artifacts/runtime-evidence/device-receipt-path-privacy-gate.json")
+          output.parent.mkdir(parents=True, exist_ok=True)
+          output.write_text(json.dumps(receipt, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+          print(f"wrote {output}")
           PY
+
+      - name: Upload runtime evidence receipts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: runtime-evidence-receipts-${{ github.sha }}
+          path: |
+            artifacts/runtime-evidence/device-receipt-path-privacy-gate.json
+            app/build/test-results/testDebugUnitTest/TEST-com.vectras.vm.rafaelia.connector.BrainVaultStoreTest.xml
+            app/build/test-results/testDebugUnitTest/TEST-com.vectras.vm.evidence.EvidencePathRedactorTest.xml
+          if-no-files-found: warn
