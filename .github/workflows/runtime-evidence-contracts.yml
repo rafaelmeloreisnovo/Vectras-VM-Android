@@ -12,7 +12,7 @@ on:
       - 'app/src/main/java/com/vectras/vm/evidence/EvidenceCatalogCollector.java'
       - 'app/src/main/java/com/vectras/vm/evidence/EvidencePathRedactor.java'
       - 'app/src/test/java/com/vectras/vm/evidence/EvidencePathRedactorTest.java'
-      - 'data/evidence/VECTRAS_DEVICE_RECEIPT_PATH_PRIVACY_20260903.v1.json'
+      - 'data/evidence/VECTRAS_DEVICE_RECEIPT_PATH_PRIVACY*.json'
       - '.github/workflows/runtime-evidence-contracts.yml'
   push:
     branches: [master]
@@ -25,7 +25,7 @@ on:
       - 'app/src/main/java/com/vectras/vm/evidence/EvidenceCatalogCollector.java'
       - 'app/src/main/java/com/vectras/vm/evidence/EvidencePathRedactor.java'
       - 'app/src/test/java/com/vectras/vm/evidence/EvidencePathRedactorTest.java'
-      - 'data/evidence/VECTRAS_DEVICE_RECEIPT_PATH_PRIVACY_20260903.v1.json'
+      - 'data/evidence/VECTRAS_DEVICE_RECEIPT_PATH_PRIVACY*.json'
       - '.github/workflows/runtime-evidence-contracts.yml'
   workflow_dispatch:
 
