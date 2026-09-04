@@ -1,0 +1,118 @@
+{
+  "schema": "rafaelia.governance.receipt.v1",
+  "event_id": "GOV-AUTH-PROV-20260904-001",
+  "parent_event": "TOKEN_VAZIO",
+  "timestamp": "2026-09-04",
+  "repository": "rafaelmeloreisnovo/Vectras-VM-Android",
+  "branch": "governance/authorship-compliance-agents-v1",
+  "base_branch": "master",
+  "branch_head_before_receipt": "e2a844535cae6e6a8c13e8f23990401791a9eeb9",
+  "intent": "Preserve upstream origin under transformation, establish auditable authorship/provenance policy, bind About disclosure to canonical records, and version current standards applicability/evidence without claiming certification.",
+  "authority": {
+    "write_scope": "governance/docs/provenance/compliance records on isolated branch",
+    "master_modified": false,
+    "release_claim_promoted": false
+  },
+  "observations": [
+    {
+      "id": "OBS-001",
+      "fact": "Current repository metadata reports fork=false, so GitHub does not provide automatic parent/source genealogy for this repository.",
+      "evidence": "GitHub repository metadata observed 2026-09-04"
+    },
+    {
+      "id": "OBS-002",
+      "fact": "xoureldeen/Vectras-VM-Android exposes GNU GPL Version 2 in LICENSE.",
+      "evidence": "upstream LICENSE observed via GitHub"
+    },
+    {
+      "id": "OBS-003",
+      "fact": "Current AboutActivity.java preserves substantial structure/content from xoureldeen/Vectras-VM-Android AboutActivity.java and is conservatively classified UPSTREAM_MODIFIED.",
+      "evidence": "current git blob a2aa44474765ebd21956c5bf5b53fc9e89c95cd2 compared with upstream path at commit 74230ebfc0fadb8a06485bda2db30fc6bc0bb7bb"
+    },
+    {
+      "id": "OBS-004",
+      "fact": "ISO/IEC/IEEE 12207:2026 is the current published edition and supersedes 12207:2017; IEEE 730-2026 is active and published 2026-08-21.",
+      "evidence": "authoritative ISO and IEEE metadata verified 2026-09-04"
+    }
+  ],
+  "changes": [
+    "app/AGENTS.md",
+    "docs/AGENTS.md",
+    "docs/compliance/AGENTS.md",
+    "docs/compliance/STANDARDS_APPLICABILITY_MATRIX.md",
+    "docs/provenance/AGENTS.md",
+    "docs/provenance/ABOUT_PROVENANCE_CONTRACT.md",
+    "AUTHORSHIP_CLEANROOM_PLAN.md",
+    "LICENSES_REGISTER.md",
+    "THIRD_PARTY_NOTICES.md",
+    "resources/compliance/PROVENANCE_TRANSFORM_REGISTER.jsonl"
+  ],
+  "invariants_added_or_reinforced": [
+    "origin is never erased by transformation",
+    "modified_by_us != authored_entirely_by_us",
+    "unknown origin => pro-official/pro-upstream for attribution and claim_allowed=false",
+    "reference != implementation != verification != certification",
+    "About must project canonical provenance/licensing/build identity rather than override it",
+    "historical lineage is append-only and superseded, not deleted"
+  ],
+  "standards_baseline": [
+    "ISO/IEC/IEEE 12207:2026",
+    "ISO/IEC/IEEE 15288:2023",
+    "IEEE 730-2026",
+    "ISO/IEC 25010:2023",
+    "ISO/IEC 27001:2022 + Amd 1:2024",
+    "ISO/IEC 27002:2022",
+    "ISO/IEC 27701:2025",
+    "ISO/IEC 38500:2024",
+    "ISO 8000-61:2016",
+    "ISO 13053-1:2011",
+    "ISO 13053-2:2011",
+    "NIST CSF 2.0",
+    "NIST SP 800-207",
+    "NIST SP 800-218 SSDF v1.1",
+    "BCP 14 / RFC 2119 + RFC 8174"
+  ],
+  "evidence_state": {
+    "governance_policy": "IMPLEMENTED_ON_BRANCH",
+    "standards_metadata": "AUTHORITATIVE_METADATA_VERIFIED",
+    "aboutactivity_upstream_lineage": "PARTIAL_VERIFIED_WHOLE_FILE_CONSERVATIVE",
+    "full_file_provenance_inventory": "TOKEN_VAZIO",
+    "exact_fork_or_import_base": "TOKEN_VAZIO",
+    "span_level_authorship": "TOKEN_VAZIO",
+    "about_ui_runtime_implementation": "NOT_CHANGED_IN_THIS_ROUND",
+    "ci_provenance_gate": "TOKEN_VAZIO",
+    "external_certification": "NONE_ASSERTED"
+  },
+  "F_ok": [
+    "dual-path licensed-upstream vs clean-room policy established",
+    "transformation-lineage agent established",
+    "standards version/applicability matrix refreshed",
+    "About disclosure contract established",
+    "first concrete upstream-modified lineage entry recorded",
+    "LICENSES_REGISTER and THIRD_PARTY_NOTICES reconciled toward non-erasure of origin",
+    "all writes isolated from master"
+  ],
+  "F_gap": [
+    "exact historical fork/import base against xoureldeen upstream not reconstructed",
+    "no repository-wide automated source/span provenance inventory yet",
+    "no machine-readable generated About manifest yet",
+    "AboutActivity UI still contains inherited hard-coded identity/link structures",
+    "GPL modified-file notices/date obligations not audited repository-wide",
+    "binary/firmware/rootfs/assets provenance gaps remain",
+    "CI/build/runtime tests were not executed in this governance-only round"
+  ],
+  "F_next": [
+    "reconstruct common history/merge-base or earliest imported snapshot against upstream",
+    "generate repository-wide provenance candidate inventory using hashes/diffs/blame and conservative fallback",
+    "define machine-readable About manifest sourced from canonical registries",
+    "refactor AboutActivity to render current project + upstream + local modifications + third parties + build/provenance state",
+    "add CI reconciliation gate for packaged components vs provenance/license/NOTICE/About",
+    "audit GPL modified-file notices and source-availability obligations for the release path",
+    "continue binary/asset provenance closure"
+  ],
+  "risk": "LOW_FOR_BRANCH_GOVERNANCE; RELEASE_RISK_REMAINS_BLOCKED_BY_OPEN_PROVENANCE_GAPS",
+  "claim_allowed": false,
+  "certified": false,
+  "rollback": "delete/close branch or revert branch commits; master remains unchanged",
+  "receipt_policy": "append-only; successor receipts supersede findings without deleting this record"
+}
