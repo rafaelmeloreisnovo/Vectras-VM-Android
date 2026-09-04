@@ -1,54 +1,123 @@
-# AUTHORSHIP_CLEANROOM_PLAN
+# AUTHORSHIP_CLEANROOM_PLAN — autoria, upstream licenciado e clean-room
 
 ## Objetivo
-Este plano define a retirada completa de qualquer dependência intelectual de Vectras e de qualquer conteúdo não autoral, com reconstrução em regime **clean-room**, rastreável e legalmente auditável.
 
-## Princípios obrigatórios
-1. **Zero reaproveitamento textual/estrutural**: não copiar código, comentários, nomes, imagens, fluxos, tabelas, algoritmos ou estruturas de dados de origem externa.
-2. **Especificação primeiro**: tudo nasce de requisitos funcionais escritos do zero, sem consulta ao código legado durante implementação.
-3. **Separação de papéis**:
-   - Time A (Análise): só produz especificações abstratas e testes de aceitação.
-   - Time B (Implementação): só lê as especificações abstratas, sem acesso ao legado.
-4. **Prova de originalidade**: todo módulo novo deve ter diário de decisão técnica, fontes permitidas e justificativa algorítmica independente.
-5. **Conformidade legal por padrão**: cada artefato recebe licença explícita, proveniência, e créditos de inspiração sem derivação textual.
+Garantir que o projeto seja **autoral onde há criação independente comprovável** e **transparentemente derivado/terceiro onde existe upstream legítimo**, sem apagar história, licença ou autoria alheia.
 
-## Escopo de remoção
-- Remover marca e nomenclatura "Vectra" de código, pacotes, docs, assets e artefatos de build.
-- Isolar/arquivar código legado sob diretório não distribuído até conclusão da substituição autoral.
-- Eliminar quaisquer binários sem cadeia de proveniência e licença verificável.
+Este plano substitui a interpretação anterior de “clean-room para tudo”. Clean-room é uma ferramenta específica, não um requisito universal.
 
-## Pipeline sistemático (8 fases)
-1. **Inventário forense**: catalogar todos os arquivos por tipo, origem, licença e risco de derivação.
-2. **Classificação jurídica**:
-   - A: autoral comprovado (pode permanecer)
-   - B: terceiro com licença compatível (manter com NOTICE)
-   - C: terceiro sem comprovação (bloquear distribuição)
-   - D: suspeita de derivação/plágio (substituição obrigatória)
-3. **Congelamento**: bloquear merges em módulos C/D até substituição.
-4. **Especificação clean-room**: redigir contratos funcionais, testes, invariantes e critérios de falha.
-5. **Reimplementação original**: codificar do zero com trilha de autoria.
-6. **Validação antiparáfrase**: revisar similaridade semântica/estrutural e nomenclatura.
-7. **Consolidação de licenças**: atualizar `THIRD_PARTY_NOTICES.md` e `LICENSES_REGISTER.md`.
-8. **Gate de release legal**: release só com 100% de proveniência fechada.
+## Princípio central
 
-## Esqueleto do que está faltando (backlog mínimo obrigatório)
-- [ ] Matriz de proveniência por arquivo (`path`, `owner`, `source`, `license`, `risk`, `status`).
-- [ ] Política de nomenclatura limpa (banlist de nomes herdados).
-- [ ] Registro de inspiração (conceitos apenas, sem cópia de expressão).
-- [ ] Script de bloqueio CI para arquivos sem cabeçalho de licença.
-- [ ] Script CI de varredura de marca legada (tokens banidos).
-- [ ] Procedimento de quarentena para assets sem cadeia de direitos.
-- [ ] Template de declaração de autoria por commit.
-- [ ] Checklist jurídico pré-release com assinatura dos responsáveis.
+> A menor unidade prática de origem pertence à origem que a evidência demonstra.
 
-## Créditos por inspiração (sem derivação)
-- Créditos devem reconhecer ideias de alto nível (ex.: "virtualização Android", "emulação", "terminal") sem copiar código/arquitetura/nomes.
-- Formulação recomendada: "Inspirado por domínio técnico X; implementação atual escrita integralmente do zero neste repositório." 
+Se um arquivo, função, patch, asset, algoritmo implementado, texto ou binário vem de upstream/terceiro, ele permanece classificado como tal mesmo quando o produto maior é mantido pela RAFAELIA. Modificações locais são nossas modificações; não transformam retrospectivamente o upstream em autoria local.
 
-## Critério de aceitação final
-Um módulo só é considerado "autoral limpo" quando:
-- possui especificação independente,
-- implementação independente,
-- testes independentes,
-- licença definida,
-- e evidência auditável de não-derivação.
+Na dúvida: **pró-upstream / pró-oficial para fins de atribuição, nunca pró-autoria local**. Registrar `PRO_OFFICIAL_PENDING` ou `TOKEN_VAZIO`, `claim_allowed=false`, e executar o próximo gate de proveniência.
+
+## Duas vias legítimas
+
+### Via A — upstream/terceiro licenciado
+
+Usar quando origem e licença permitem o uso pretendido.
+
+Obrigatório:
+
+- preservar copyright, licença, NOTICE e atribuição exigidos;
+- registrar fonte canônica e ref/versão quando possível;
+- distinguir `UPSTREAM_VERIFIED` de `DERIVATIVE_MODIFIED`;
+- descrever modificações locais sem insinuar autoria do original;
+- verificar compatibilidade entre licenças e o modo de distribuição;
+- refletir a proveniência no About/Notices do produto quando aplicável.
+
+Licença permissiva não significa “sem autoria” nem “sem atribuição”: cumprir exatamente suas condições.
+
+### Via B — clean-room independente
+
+Usar quando houver motivo técnico/jurídico/estratégico para não reutilizar a expressão do upstream, especialmente quando:
+
+- licença/origem é incompatível ou não verificável;
+- o componente não pode ser redistribuído de forma segura;
+- deseja-se substituição independente com fronteira auditável;
+- há risco real de derivação indevida.
+
+Nesse caso:
+
+1. produzir requisitos/contratos funcionais independentes;
+2. separar, quando necessário, análise de legado e implementação;
+3. implementar sem copiar expressão protegida;
+4. criar testes independentes e diário de decisão;
+5. manter evidência de fontes permitidas e de não-derivação.
+
+Não chamar algo de clean-room se implementadores consultaram/copiaram o material que a alegação de independência pretende excluir.
+
+## Classes de origem
+
+| Estado | Significado | Distribuição/claim |
+|---|---|---|
+| `ORIGINAL_VERIFIED` | autoria local com cadeia auditável | autoria local pode ser afirmada no escopo evidenciado |
+| `UPSTREAM_VERIFIED` | upstream preservado e origem/licença verificadas | manter atribuição/licença |
+| `DERIVATIVE_MODIFIED` | upstream + modificações locais | atribuir upstream + declarar modificações locais |
+| `THIRD_PARTY_VERIFIED` | terceiro com direitos/licença verificados | cumprir licença/NOTICE |
+| `PRO_OFFICIAL_PENDING` | origem ambígua; presume-se não-local para claims | não afirmar autoria; abrir gate |
+| `TOKEN_VAZIO` | evidência insuficiente | não promover claim |
+| `QUARANTINED` | risco jurídico/proveniência/segurança bloqueante | excluir de distribuição até resolução |
+
+## Pipeline sistemático
+
+1. **Inventário forense** — catalogar arquivos/componentes distribuídos por tipo, origem provável, licença, hash e risco.
+2. **Granularização** — atribuir na menor unidade prática que evita misturar upstream e modificação local.
+3. **Verificação de origem** — fonte canônica, histórico, ref/tag/commit e autores quando aplicável.
+4. **Verificação de licença** — SPDX somente quando confirmado; registrar texto/NOTICE necessário.
+5. **Escolha da via** — A (licensed-upstream) ou B (clean-room); justificar a decisão.
+6. **Implementação/modificação** — respeitar fronteira e registrar decisão técnica.
+7. **Validação** — testes funcionais, regressão, proveniência, segurança e empacotamento.
+8. **About/Notices** — gerar disclosure consistente com o conjunto realmente distribuído.
+9. **Gate de release** — nenhuma lacuna bloqueante de origem/licença no artefato distribuído.
+10. **Receipt** — ligar source commit → build → artifact digest → registros de licença/proveniência → claim permitido.
+
+## Registro mínimo por unidade
+
+```text
+path/component
+origin_class
+canonical_source
+upstream_ref/version
+license/SPDX
+copyright/notice obligations
+local_author/maintainer
+local_modification_summary
+source_digest/artifact_digest
+evidence_refs
+about_required
+distribution_allowed
+claim_allowed
+next_gate
+```
+
+## About / transparência pública
+
+O produto deve possuir um ponto central de disclosure em About, com:
+
+- identidade do projeto atual;
+- upstream/base e fontes canônicas;
+- modificações locais;
+- terceiros e licenças;
+- versão/build/source identity;
+- estado de proveniência/compliance sem marketing de certificação não demonstrada.
+
+Não é necessário poluir cada tela com créditos repetidos quando a licença não exige isso. Porém qualquer tela/asset/componente distribuído deve ser rastreável até o registro canônico, e atribuições específicas devem aparecer onde a licença exigir.
+
+## Backlog bloqueante já conhecido
+
+- [ ] completar matriz de proveniência por arquivo/componente distribuído;
+- [ ] verificar headers/licença do fork histórico Vectras por unidade relevante;
+- [ ] fechar proveniência dos `.so`, firmware, BIOS/OVMF, rootfs/tarballs e assets distribuídos;
+- [ ] reconciliar `THIRD_PARTY_NOTICES.md`, `LICENSES_REGISTER.md` e registro de assets;
+- [ ] substituir listas/links hard-coded da tela About por manifesto canônico verificado;
+- [ ] gerar/validar SBOM do artefato de release quando tecnicamente suportado;
+- [ ] gate CI para impedir componente sem proveniência/licença no pacote final;
+- [ ] receipt de release ligando fonte, build, hashes, notices e escopo de claim.
+
+## Critério de aceitação
+
+Um componente só pode ser chamado **autoral** quando existe evidência de autoria independente. Um componente upstream/terceiro só pode ser distribuído quando origem, direitos/licença e obrigações aplicáveis estão suficientemente fechados. Quando nenhum dos dois é demonstrado, o estado verdadeiro é `TOKEN_VAZIO`/`PRO_OFFICIAL_PENDING`/`QUARANTINED`, nunca uma conclusão inventada.
