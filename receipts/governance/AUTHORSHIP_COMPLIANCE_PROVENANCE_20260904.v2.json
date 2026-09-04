@@ -1,0 +1,68 @@
+{
+  "schema": "rafaelia.governance.receipt.v1",
+  "event_id": "GOV-AUTH-PROV-20260904-002",
+  "parent_event": "GOV-AUTH-PROV-20260904-001",
+  "timestamp": "2026-09-04",
+  "repository": "rafaelmeloreisnovo/Vectras-VM-Android",
+  "branch": "governance/authorship-compliance-agents-v1",
+  "triggering_head": "2f458cd5eebfcbcff163b10d6d6e7f0cc1d362f5",
+  "diagnosis": {
+    "workflow_run": 33904330744,
+    "workflow_name": "audit-benchmark-contract",
+    "job_id": 101125567089,
+    "failing_step": "Validate audit claims",
+    "validator": "scripts/validate_audit_claims.sh",
+    "classification": "FALSE_POSITIVE_TEXTUAL_POLICY_MATCH",
+    "cause": "The validator matched a forbidden brand-certification wording inside documentation that was itself describing prohibited claim language. The policy intent was restrictive, but the scanner was context-insensitive.",
+    "downstream_effect": "Benchmark/regression/equivalence steps in that job were skipped after the early validation failure."
+  },
+  "parallel_ci_observations": {
+    "legal_compliance_gate": "SUCCESS on run 33904330723",
+    "host_ci": "SUCCESS on run 33904330641",
+    "validate_formula": "SUCCESS on run 33904330862",
+    "android_ci": "IN_PROGRESS at observation time",
+    "apk_wizard": "IN_PROGRESS at observation time",
+    "shell_loader_smoke": "IN_PROGRESS at observation time",
+    "orchestrator_build_matrix": "PENDING at observation time"
+  },
+  "corrective_action": {
+    "path": "docs/compliance/AGENTS.md",
+    "commit": "f6494fcdf4a72657ec58bdfe8a4a7a2961999c60",
+    "change": "Reworded the certification-honesty section so it preserves the prohibition semantically without embedding the scanner-triggering literal. Expanded explicit evidence maturity E0..E6 and retained the rule that mapping/reference is not external attestation.",
+    "policy_weakened": false
+  },
+  "evidence_boundary": {
+    "proved": [
+      "exact cause of the observed CI failure",
+      "policy text was the scanner trigger rather than a promoted certification claim",
+      "a bounded documentation correction was committed on the isolated branch"
+    ],
+    "not_yet_proved": [
+      "fresh audit-benchmark-contract success on the corrected head",
+      "complete branch CI success",
+      "runtime/device behavior",
+      "repository-wide provenance closure"
+    ]
+  },
+  "F_ok": [
+    "failure triaged to exact workflow/job/step",
+    "Legal Compliance Gate remained green on the triggering head",
+    "false-positive root cause was reproduced from CI logs",
+    "fix preserved the restrictive policy instead of weakening it",
+    "prior receipt remained immutable; this is an append-only successor"
+  ],
+  "F_gap": [
+    "fresh CI result on corrected head not yet observed",
+    "audit-claim scanner is context-insensitive and may benefit from explicit negative-example handling",
+    "provenance reconciliation CI gate is still a separate open implementation gate"
+  ],
+  "F_next": [
+    "observe workflows on the new head",
+    "if the audit scanner still fails, fix the scanner with bounded tests rather than weakening policy",
+    "add dedicated provenance/About/NOTICE/package reconciliation checks after the governance baseline stabilizes"
+  ],
+  "claim_allowed": false,
+  "certified": false,
+  "rollback": "revert f6494fcdf4a72657ec58bdfe8a4a7a2961999c60 if the bounded wording change causes regression; historical receipts remain preserved",
+  "receipt_policy": "append-only; successor receipts may supersede evidence state but must not delete this event"
+}
