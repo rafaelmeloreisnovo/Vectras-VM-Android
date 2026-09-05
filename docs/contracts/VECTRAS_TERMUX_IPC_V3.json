@@ -14,6 +14,12 @@
     "permission": "com.termux.rafacodephi.permission.RUN_COMMAND",
     "action": "com.termux.rafacodephi.RUN_COMMAND"
   },
+  "provenance": {
+    "pair_state": "PINNED_HISTORICAL_BASELINE",
+    "refresh_required": true,
+    "refresh_rule": "Do not replace either base_commit independently. Re-verify both repositories, update the mirrored provider/consumer contracts together, and preserve the prior pair in history.",
+    "current_runtime_claim": "TOKEN_VAZIO"
+  },
   "request": {
     "command_path_key": "com.termux.rafacodephi.RUN_COMMAND_PATH",
     "arguments_key": "com.termux.rafacodephi.RUN_COMMAND_ARGUMENTS",
