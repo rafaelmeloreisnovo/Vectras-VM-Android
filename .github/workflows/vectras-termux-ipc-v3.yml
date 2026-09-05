@@ -12,6 +12,7 @@ on:
       - 'app/src/*/AndroidManifest.xml'
       - 'tools/verify_vectras_termux_ipc_v3.py'
       - 'tools/verify_vectras_termux_ipc_v3_manifests.py'
+      - 'tools/verify_vectras_termux_cross_repo_v3.py'
       - 'docs/contracts/VECTRAS_TERMUX_IPC_V3.json'
       - 'docs/contracts/VECTRAS_TERMUX_IPC_V3.md'
       - '.github/workflows/vectras-termux-ipc-v3.yml'
@@ -28,14 +29,65 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - name: Checkout exact revision
+      - name: Checkout exact revision with lineage
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
 
       - name: Python syntax
         run: |
           python3 -m py_compile \
             tools/verify_vectras_termux_ipc_v3.py \
-            tools/verify_vectras_termux_ipc_v3_manifests.py
+            tools/verify_vectras_termux_ipc_v3_manifests.py \
+            tools/verify_vectras_termux_cross_repo_v3.py
+
+      - name: Resolve pinned Termux provenance chain
+        id: provider-provenance
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY' >> "$GITHUB_OUTPUT"
+          import json
+          import re
+          from pathlib import Path
+
+          contract = json.loads(Path('docs/contracts/VECTRAS_TERMUX_IPC_V3.json').read_text())
+          provider = contract['provider']
+          provenance = contract['provenance']
+          repo = provider['repository']
+          source_ref = provider['base_commit']
+          authority_ref = provenance['provider_contract_authority_commit']
+          expected = 'rafaelmeloreisnovo/termux-app-rafacodephi'
+          if repo != expected:
+              raise SystemExit(f'provider repository must remain {expected}, got {repo!r}')
+          for label, ref in [('source_ref', source_ref), ('authority_ref', authority_ref)]:
+              if not re.fullmatch(r'[0-9a-f]{40}', ref):
+                  raise SystemExit(f'{label} is not a lowercase 40-hex SHA: {ref!r}')
+          if provenance.get('provider_contract_source_relation') != 'DIRECT_PARENT_DECLARATION':
+              raise SystemExit('provider_contract_source_relation must be DIRECT_PARENT_DECLARATION')
+          print(f'repository={repo}')
+          print(f'source_ref={source_ref}')
+          print(f'authority_ref={authority_ref}')
+          PY
+
+      - name: Checkout pinned Termux source baseline
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ steps.provider-provenance.outputs.repository }}
+          ref: ${{ steps.provider-provenance.outputs.source_ref }}
+          path: .provider/source
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Checkout Termux contract authority commit
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ steps.provider-provenance.outputs.repository }}
+          ref: ${{ steps.provider-provenance.outputs.authority_ref }}
+          path: .provider/authority
+          fetch-depth: 2
+          persist-credentials: false
 
       - name: Verify consumer contract and receipt boundary
         run: |
@@ -45,6 +97,13 @@ jobs:
       - name: Verify every manifest variant
         run: python3 tools/verify_vectras_termux_ipc_v3_manifests.py
 
+      - name: Verify pinned cross-repo provenance chain
+        run: |
+          python3 tools/verify_vectras_termux_cross_repo_v3.py \
+            --provider-source-root .provider/source \
+            --provider-contract-root .provider/authority \
+            --output artifacts/c07/vectras-termux-cross-repo-v3.json
+
       - name: Verify machine contract claim boundary
         run: |
           python3 - <<'PY'
@@ -53,6 +112,7 @@ jobs:
 
           contract = json.loads(Path('docs/contracts/VECTRAS_TERMUX_IPC_V3.json').read_text())
           report = json.loads(Path('artifacts/c07/vectras-termux-ipc-v3.json').read_text())
+          cross = json.loads(Path('artifacts/c07/vectras-termux-cross-repo-v3.json').read_text())
           assert contract['schema'] == 'raf.vectras-termux-ipc-contract.v3'
           assert contract['claim_allowed'] is False
           assert contract['request']['max_total_arguments'] == 32
@@ -62,10 +122,17 @@ jobs:
           assert report['state'] == 'PASS_STATIC_CONTRACT'
           assert report['claim_allowed'] is False
           assert report['runtime_boundary']['qemu_guest_boot'] == 'TOKEN_VAZIO'
-          print('PASS Vectras Termux IPC v3 static boundary')
+          assert cross['state'] == 'PASS_PINNED_CONTRACT_CHAIN'
+          assert cross['claim_allowed'] is False
+          assert cross['provider']['source_checkout_head'] == contract['provider']['base_commit']
+          assert cross['provider']['contract_authority_commit'] == contract['provenance']['provider_contract_authority_commit']
+          assert cross['provider']['contract_authority_parent'] == contract['provider']['base_commit']
+          assert cross['consumer']['pin_relation'] in ('EXACT', 'DESCENDANT_OF_PINNED_BASELINE')
+          assert cross['runtime_boundary']['guest_boot'] == 'TOKEN_VAZIO'
+          print('PASS Vectras Termux IPC v3 static + pinned source→contract provenance chain')
           PY
 
-      - name: Upload C07 static receipt
+      - name: Upload C07 static receipts
         if: always()
         uses: actions/upload-artifact@v4
         with:
