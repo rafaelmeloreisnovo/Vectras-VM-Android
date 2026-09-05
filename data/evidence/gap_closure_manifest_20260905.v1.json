@@ -1,0 +1,34 @@
+{
+  "schema": "rafaelia.vectras-gap-closure/v1",
+  "repository": "rafaelmeloreisnovo/Vectras-VM-Android",
+  "wave_id": "GAP-CLOSURE-20260905",
+  "claim_allowed": false,
+  "observed_source_gates": [
+    "tools/ci/run_tools_runtime_evidence_gate.sh",
+    "docs/ci/FINAL_GATE_PROBE_20260808.md"
+  ],
+  "gaps": [
+    {
+      "id": "TV-VECTRAS-SOURCE-WIRING",
+      "class": "code",
+      "state": "WIRED",
+      "producer": "repository_source",
+      "next_gate": "run canonical source/build/runtime-evidence harness"
+    },
+    {
+      "id": "TV-VECTRAS-CI-FRESH-RECEIPT",
+      "class": "ci",
+      "state": "TOKEN_VAZIO",
+      "producer": "github_actions_or_reproducible_local_harness",
+      "next_gate": "emit fresh commit-bound receipt"
+    },
+    {
+      "id": "TV-VECTRAS-PHYSICAL-VM-LAUNCH",
+      "class": "physical_runtime",
+      "state": "TOKEN_VAZIO",
+      "producer": "physical_android_device",
+      "required_evidence": ["device fingerprint", "apk digest", "qemu/proot/busybox dependency receipt", "VM launch transcript", "exit/result status"]
+    }
+  ],
+  "invariant": "host/source evidence MUST NOT promote TV-VECTRAS-PHYSICAL-VM-LAUNCH"
+}
