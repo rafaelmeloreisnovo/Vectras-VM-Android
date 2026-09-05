@@ -16,8 +16,11 @@
   },
   "provenance": {
     "pair_state": "PINNED_HISTORICAL_BASELINE",
+    "provider_source_commit": "508efb3d01594cc20d51b7fb01d5f2a790169bf2",
+    "provider_contract_authority_commit": "54fb16d976faa334341fa39157f0da41aed85918",
+    "provider_contract_source_relation": "DIRECT_PARENT_DECLARATION",
     "refresh_required": true,
-    "refresh_rule": "Do not replace either base_commit independently. Re-verify both repositories, update the mirrored provider/consumer contracts together, and preserve the prior pair in history.",
+    "refresh_rule": "Do not replace source, authority, or consumer pins independently. Re-verify both repositories, update the mirrored contracts together, and preserve the prior chain in history.",
     "current_runtime_claim": "TOKEN_VAZIO"
   },
   "request": {

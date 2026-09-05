@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
-"""Verify the pinned Vectras <-> Termux RAFCODE-Phi IPC v3 contract pair.
+"""Verify the pinned Vectras <-> Termux RAFCODE-Phi IPC v3 provenance chain.
 
-This gate is provenance-oriented. It does not promote static compatibility to
-Android execution, QEMU execution, guest boot, or VM correctness.
+The historical provider source commit and the commit that *declared* the provider
+contract are intentionally distinct. This verifier binds both objects without
+promoting static provenance to Android/QEMU/guest execution evidence.
 """
 
 from __future__ import annotations
@@ -17,7 +18,7 @@ from typing import Any
 ROOT = Path(__file__).resolve().parents[1]
 CONSUMER_CONTRACT = ROOT / "docs/contracts/VECTRAS_TERMUX_IPC_V3.json"
 PROVIDER_CONTRACT_REL = Path("docs/contracts/VECTRAS_TERMUX_PROVIDER_V3.json")
-SCHEMA = "raf.vectras-termux-cross-repo-provenance.v1"
+SCHEMA = "raf.vectras-termux-cross-repo-provenance.v2"
 SHA40 = re.compile(r"^[0-9a-f]{40}$")
 EXPECTED_PROVIDER_REPO = "rafaelmeloreisnovo/termux-app-rafacodephi"
 EXPECTED_CONSUMER_REPO = "rafaelmeloreisnovo/Vectras-VM-Android"
@@ -25,7 +26,8 @@ EXPECTED_CONSUMER_REPO = "rafaelmeloreisnovo/Vectras-VM-Android"
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--provider-root", type=Path, required=True)
+    parser.add_argument("--provider-source-root", type=Path, required=True)
+    parser.add_argument("--provider-contract-root", type=Path, required=True)
     parser.add_argument("--output", type=Path)
     return parser.parse_args()
 
@@ -93,13 +95,22 @@ def result_key_map(consumer: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def checkout_head(root: Path, label: str, errors: list[str]) -> str:
+    rc, value = git(root, "rev-parse", "HEAD")
+    if rc != 0 or not SHA40.fullmatch(value):
+        errors.append(f"cannot resolve {label} checkout HEAD: {value}")
+        return ""
+    return value
+
+
 def main() -> int:
     args = parse_args()
     errors: list[str] = []
-    provider_root = args.provider_root.resolve()
+    provider_source_root = args.provider_source_root.resolve()
+    provider_contract_root = args.provider_contract_root.resolve()
 
     consumer = read_json(CONSUMER_CONTRACT, "consumer contract", errors)
-    provider = read_json(provider_root / PROVIDER_CONTRACT_REL, "provider contract", errors)
+    provider = read_json(provider_contract_root / PROVIDER_CONTRACT_REL, "provider contract", errors)
 
     if consumer.get("schema") != "raf.vectras-termux-ipc-contract.v3":
         errors.append("consumer contract schema mismatch")
@@ -112,6 +123,7 @@ def main() -> int:
 
     c_consumer = consumer.get("consumer", {})
     c_provider = consumer.get("provider", {})
+    c_provenance = consumer.get("provenance", {})
     p_consumer = provider.get("consumer", {})
     p_provider = provider.get("provider", {})
 
@@ -121,24 +133,55 @@ def main() -> int:
     require_equal(errors, "consumer mirror repository", p_consumer.get("repository"), EXPECTED_CONSUMER_REPO)
 
     consumer_pin = valid_sha("consumer.base_commit", c_consumer.get("base_commit"), errors)
-    provider_pin = valid_sha("provider.base_commit", c_provider.get("base_commit"), errors)
-    provider_self_pin = valid_sha("provider-contract provider.base_commit", p_provider.get("base_commit"), errors)
-    provider_consumer_pin = valid_sha("provider-contract consumer.base_commit", p_consumer.get("base_commit"), errors)
+    provider_source_pin = valid_sha("provider.base_commit", c_provider.get("base_commit"), errors)
+    authority_pin = valid_sha(
+        "provenance.provider_contract_authority_commit",
+        c_provenance.get("provider_contract_authority_commit"),
+        errors,
+    )
+    provider_contract_source_pin = valid_sha(
+        "provider-contract provider.base_commit", p_provider.get("base_commit"), errors
+    )
+    provider_contract_consumer_pin = valid_sha(
+        "provider-contract consumer.base_commit", p_consumer.get("base_commit"), errors
+    )
 
-    require_equal(errors, "provider base commit mirror", provider_pin, provider_self_pin)
-    require_equal(errors, "consumer base commit mirror", consumer_pin, provider_consumer_pin)
+    require_equal(errors, "provider source pin mirror", provider_source_pin, provider_contract_source_pin)
+    require_equal(errors, "consumer base pin mirror", consumer_pin, provider_contract_consumer_pin)
 
-    consumer_head_rc, consumer_head = git(ROOT, "rev-parse", "HEAD")
-    if consumer_head_rc != 0 or not SHA40.fullmatch(consumer_head):
-        errors.append(f"cannot resolve consumer checkout HEAD: {consumer_head}")
-    provider_head_rc, provider_head = git(provider_root, "rev-parse", "HEAD")
-    if provider_head_rc != 0 or not SHA40.fullmatch(provider_head):
-        errors.append(f"cannot resolve provider checkout HEAD: {provider_head}")
-    elif provider_pin and provider_head != provider_pin:
-        errors.append(f"provider checkout does not equal pinned commit: {provider_head} != {provider_pin}")
+    consumer_head = checkout_head(ROOT, "consumer", errors)
+    provider_source_head = checkout_head(provider_source_root, "provider source", errors)
+    provider_contract_head = checkout_head(provider_contract_root, "provider contract authority", errors)
+
+    if provider_source_pin and provider_source_head != provider_source_pin:
+        errors.append(
+            f"provider source checkout does not equal pinned source: {provider_source_head} != {provider_source_pin}"
+        )
+    if authority_pin and provider_contract_head != authority_pin:
+        errors.append(
+            f"provider contract checkout does not equal authority commit: {provider_contract_head} != {authority_pin}"
+        )
+
+    authority_parent = ""
+    if provider_contract_head:
+        parent_rc, authority_parent = git(provider_contract_root, "rev-parse", "HEAD^")
+        if parent_rc != 0 or not SHA40.fullmatch(authority_parent):
+            errors.append(f"cannot resolve provider contract authority parent: {authority_parent}")
+            authority_parent = ""
+        elif authority_parent != provider_source_pin:
+            errors.append(
+                "provider contract authority must directly declare the pinned source baseline: "
+                f"parent={authority_parent} source_pin={provider_source_pin}"
+            )
+
+    expected_relation = c_provenance.get("provider_contract_source_relation")
+    if expected_relation != "DIRECT_PARENT_DECLARATION":
+        errors.append(
+            "provenance.provider_contract_source_relation must be DIRECT_PARENT_DECLARATION"
+        )
 
     consumer_relation = "TOKEN_VAZIO"
-    if consumer_pin and consumer_head_rc == 0:
+    if consumer_pin and consumer_head:
         if consumer_head == consumer_pin:
             consumer_relation = "EXACT"
         else:
@@ -156,7 +199,12 @@ def main() -> int:
 
     require_equal(errors, "request keys", request_key_map(consumer), provider.get("request_keys", {}))
     require_equal(errors, "result keys", result_key_map(consumer), provider.get("result_keys", {}))
-    require_equal(errors, "runner app-shell", consumer.get("request", {}).get("runner"), provider.get("runner", {}).get("app_shell"))
+    require_equal(
+        errors,
+        "runner app-shell",
+        consumer.get("request", {}).get("runner"),
+        provider.get("runner", {}).get("app_shell"),
+    )
 
     if consumer.get("claim_boundary", {}).get("claim_allowed") is not False:
         errors.append("consumer claim boundary must remain false")
@@ -164,24 +212,24 @@ def main() -> int:
         errors.append("provider claim boundary must remain false")
 
     pair_currentness = "PINNED_HISTORICAL_BASELINE"
-    if consumer_relation == "EXACT" and provider_head == provider_pin:
-        pair_currentness = "PINNED_EXACT_PAIR"
-
     report = {
         "schema": SCHEMA,
-        "state": "FAIL" if errors else "PASS_PINNED_CONTRACT_PAIR",
+        "state": "FAIL" if errors else "PASS_PINNED_CONTRACT_CHAIN",
         "claim_allowed": False,
         "consumer": {
             "repository": EXPECTED_CONSUMER_REPO,
-            "contract_pin": consumer_pin or "TOKEN_VAZIO",
-            "checkout_head": consumer_head if consumer_head_rc == 0 else "TOKEN_VAZIO",
+            "contract_source_pin": consumer_pin or "TOKEN_VAZIO",
+            "checkout_head": consumer_head or "TOKEN_VAZIO",
             "pin_relation": consumer_relation,
         },
         "provider": {
             "repository": EXPECTED_PROVIDER_REPO,
-            "contract_pin": provider_pin or "TOKEN_VAZIO",
-            "checkout_head": provider_head if provider_head_rc == 0 else "TOKEN_VAZIO",
-            "pin_relation": "EXACT" if provider_head == provider_pin and provider_pin else "MISMATCH",
+            "source_pin": provider_source_pin or "TOKEN_VAZIO",
+            "source_checkout_head": provider_source_head or "TOKEN_VAZIO",
+            "contract_authority_commit": authority_pin or "TOKEN_VAZIO",
+            "contract_checkout_head": provider_contract_head or "TOKEN_VAZIO",
+            "contract_authority_parent": authority_parent or "TOKEN_VAZIO",
+            "source_to_contract_relation": expected_relation or "TOKEN_VAZIO",
         },
         "pair_currentness": pair_currentness,
         "semantic_pair": {
@@ -202,19 +250,30 @@ def main() -> int:
         },
         "errors": errors,
         "falsifiers": [
-            "consumer_and_provider_contract_pins_disagree",
-            "provider_checkout_not_exactly_pinned",
+            "provider_source_checkout_not_exactly_pinned",
+            "provider_contract_authority_checkout_not_exactly_pinned",
+            "provider_contract_authority_parent_not_equal_source_pin",
+            "consumer_and_provider_mirrored_pins_disagree",
             "consumer_pin_not_in_checked_out_lineage",
             "package_service_permission_or_action_disagree",
             "request_or_result_keys_disagree",
-            "static_pair_promoted_to_runtime_evidence",
+            "static_provenance_promoted_to_runtime_evidence",
         ],
     }
 
     if args.output:
         args.output.parent.mkdir(parents=True, exist_ok=True)
         args.output.write_text(json.dumps(report, indent=2, sort_keys=True) + "\n", encoding="utf-8")
-    print(json.dumps({"state": report["state"], "pair_currentness": pair_currentness, "error_count": len(errors)}, sort_keys=True))
+    print(
+        json.dumps(
+            {
+                "state": report["state"],
+                "pair_currentness": pair_currentness,
+                "error_count": len(errors),
+            },
+            sort_keys=True,
+        )
+    )
     for error in errors:
         print(f"FAIL: {error}")
     return 1 if errors else 0
