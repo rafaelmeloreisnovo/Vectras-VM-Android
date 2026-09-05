@@ -1,0 +1,25 @@
+name: Gap Closure Wave
+
+on:
+  pull_request:
+    paths:
+      - 'data/evidence/gap_closure_manifest_20260905.v1.json'
+      - 'tools/ci/validate_gap_closure_manifest.py'
+      - '.github/workflows/gap-closure-wave.yml'
+  push:
+    paths:
+      - 'data/evidence/gap_closure_manifest_20260905.v1.json'
+      - 'tools/ci/validate_gap_closure_manifest.py'
+
+permissions:
+  contents: read
+
+jobs:
+  validate-gap-closure:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python3 tools/ci/validate_gap_closure_manifest.py data/evidence/gap_closure_manifest_20260905.v1.json
