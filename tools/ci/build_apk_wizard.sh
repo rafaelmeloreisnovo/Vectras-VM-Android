@@ -8,6 +8,7 @@ GRADLEW="${REPO_ROOT}/gradlew"
 RUNTIME_SEED_MANIFEST="${REPO_ROOT}/configs/embedded_runtime_seed_assets.v1.json"
 RUNTIME_SEED_RECEIPT="${OUT_DIR}/alpine19-materialization.json"
 QEMU_RUNTIME_RECEIPT="${OUT_DIR}/qemu19-materialization.json"
+ROOTFS_NORMALIZATION_RECEIPT="${OUT_DIR}/rootfs-symlink-normalization.json"
 BOOTSTRAP_RECEIPT_SRC="${REPO_ROOT}/app/build/reports/bootstrap/bootstrap-materialization.json"
 BOOTSTRAP_RECEIPT_DST="${OUT_DIR}/bootstrap-materialization.json"
 GENERATED_ASSETS_ROOT="${REPO_ROOT}/app/build/generated/bootstrapAssets"
@@ -47,6 +48,18 @@ bash "${REPO_ROOT}/tools/bootstrap/materialize_alpine_qemu_runtime.sh" \
   --target-root "${GENERATED_ASSETS_ROOT}" \
   --abis "arm64-v8a,armeabi-v7a" \
   --receipt "${QEMU_RUNTIME_RECEIPT}"
+
+# Android host-side Java checks resolve absolute symlinks outside the extracted rootfs.
+# Convert Alpine/QEMU links such as bin/sh -> /bin/busybox into equivalent relative
+# rootfs-local links before packaging. Source materialization receipts remain the
+# provenance of the pinned input bytes; this receipt records the deterministic
+# derived TAR hashes that are actually embedded in the APK.
+echo "[wizard] normalize rootfs absolute symlinks for APK-local extraction"
+python3 "${REPO_ROOT}/tools/bootstrap/normalize_rootfs_tar_symlinks.py" \
+  --root "${GENERATED_ASSETS_ROOT}" \
+  --families "alpine19,qemu19" \
+  --abis "arm64-v8a,armeabi-v7a" \
+  --receipt "${ROOTFS_NORMALIZATION_RECEIPT}"
 
 # devFastPath deliberately skips the normal preBuild sync task, so materialize
 # loader.apk explicitly once after the clean.
@@ -170,8 +183,9 @@ source_commit="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1], 
   echo "Embedded runtime seed source: \`xoureldeen/Vectras-VM-Android@${source_commit}\`"
   echo
   echo "Bootstrap TARs: exact SHA-256 enforced by tools/ci/bootstrap-assets.v1.json."
-  echo "Alpine19 TARs: exact size + Git blob SHA-1 enforced; SHA-256 emitted in receipt."
-  echo "QEMU19 TARs: same-arch Alpine v3.19 + QEMU 8.1.5-r0 assembled at build time and embedded in APK; device network not required."
+  echo "Alpine19 TARs: exact source size + Git blob SHA-1 + SHA-256 enforced before deterministic rootfs-symlink normalization."
+  echo "QEMU19 TARs: same-arch Alpine v3.19 + QEMU 8.1.5-r0 assembled at build time, then rootfs symlinks normalized and embedded in APK; device network not required."
+  echo "Rootfs normalization: ${ROOTFS_NORMALIZATION_RECEIPT}; derived embedded TAR SHA-256 values recorded separately from pinned input provenance."
   echo "Omega ARMv7: direct ld.lld freestanding ELF; deterministic rebuild audit; APK native-carrier byte identity verified."
   echo "Android 10 W^X: executable code is kept APK/install-owned, not copied into writable app home."
   echo
