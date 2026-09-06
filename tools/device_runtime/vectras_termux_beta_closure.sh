@@ -23,6 +23,8 @@ esac
 PREFIX="${PREFIX:-/data/data/com.termux/files/usr}"
 PKG_APP="${VECTRAS_PACKAGE:-com.rafacodephi.app}"
 BASE_OUT="${VECTRAS_BETA_RECEIPT_DIR:-$HOME/.local/state/vectras-beta}"
+RUN_AS="$(command -v run-as 2>/dev/null || true)"
+[ -n "$RUN_AS" ] || RUN_AS="/system/bin/run-as"
 mkdir -p "$BASE_OUT" 2>/dev/null || true
 STAMP="$(date -u +%Y%m%dT%H%M%SZ 2>/dev/null || date +%Y%m%dT%H%M%S)"
 RECEIPT="$BASE_OUT/vectras-beta-closure-$STAMP.tsv"
@@ -54,7 +56,7 @@ run_capture() {
   # Usage: run_capture phase subject command...
   local phase="$1" subject="$2"; shift 2
   local output rc
-  output="$($@ 2>&1)"; rc=$?
+  output="$("$@" 2>&1)"; rc=$?
   if [ "$rc" -eq 0 ]; then
     record "$phase" PASS "$subject" "$(printf '%s' "$output" | head -n 1)"
   else
@@ -85,18 +87,18 @@ check_pkg() {
 
 check_app_path() {
   local rel="$1" id="$2" kind="${3:-exists}"
-  if ! command -v run-as >/dev/null 2>&1 && [ ! -x /system/bin/run-as ]; then
+  if [ ! -x "$RUN_AS" ]; then
     record APP_FILES TOKEN_VAZIO "$id" "run-as unavailable; physical app-private path cannot be inspected"
     return 0
   fi
   local testop="-e"
   [ "$kind" = "exec" ] && testop="-x"
-  if /system/bin/run-as "$PKG_APP" sh -c "[ $testop \"\$PWD/$rel\" ]" >/dev/null 2>&1; then
+  if "$RUN_AS" "$PKG_APP" sh -c "[ $testop \"\$PWD/$rel\" ]" >/dev/null 2>&1; then
     record APP_FILES PASS "$id" "$rel $kind"
   else
     local rc=$?
     # Distinguish inaccessible run-as from a genuinely missing path.
-    if ! /system/bin/run-as "$PKG_APP" sh -c 'pwd' >/dev/null 2>&1; then
+    if ! "$RUN_AS" "$PKG_APP" sh -c 'pwd' >/dev/null 2>&1; then
       record APP_FILES TOKEN_VAZIO "$id" "run-as denied/non-debuggable; cannot claim path missing (probe rc=$rc)"
     else
       record APP_FILES BLOCKER "$id" "$rel missing or not $kind"
