@@ -71,21 +71,28 @@ jobs:
           print('VECTRAS_RUNTIME_SCHEMA_KEY_ALIGNMENT=PASS')
           PY
 
-      - name: Assert exact private executable binding and fail-closed launch
+      - name: Assert exact executable and resolved argv binding
         shell: bash
         run: |
           set -euo pipefail
           gate=app/src/main/java/com/vectras/vm/runtime/VectrasRuntimeEvidenceGate.java
           launcher=app/src/main/java/com/vectras/vm/runtime/QemuDirectLauncher.java
           doctor=tools/device_runtime/vectras_termux_beta_closure.sh
+          validator=tools/device_runtime/validate_vectras_runtime_receipt.py
           grep -Fq 'public static final String GUEST_PATH' "$gate"
           grep -Fq 'resolvePrivateGuestExecutable' "$gate"
           grep -Fq 'executeThroughProot(proot, qemu.guestPath' "$gate"
+          grep -Fq 'sha256Argv(resolvedLaunchArgv)' "$gate"
+          grep -Fq 'doc.put("resolved_launch_argv_sha256", resolvedLaunchArgvSha256)' "$gate"
+          grep -Fq 'doc.put("resolved_launch_argv", launchArgv)' "$gate"
           grep -Fq 'doc.put("apk_sha256", apkSha)' "$gate"
           grep -Fq 'doc.put("qemu_sha256", qemuSha)' "$gate"
           grep -Fq '.setPath(VectrasRuntimeEvidenceGate.GUEST_PATH)' "$launcher"
           grep -Fq 'VectrasRuntimeEvidenceGate.probe' "$launcher"
-          grep -Fq 'launchArgv.set(0, evidence.resolvedQemuGuestPath)' "$launcher"
+          grep -Fq 'List<String> launchArgv = evidence.resolvedLaunchArgv' "$launcher"
+          grep -Fq 'launchArgv.get(0).equals(evidence.resolvedQemuGuestPath)' "$launcher"
+          grep -Fq 'resolvedArgvHash=' "$launcher"
+          grep -Fq 'resolved_launch_argv_sha256 mismatch' "$validator"
           grep -Fq 'if (!evidence.ok)' "$launcher"
           grep -Fq '/data/data/com.termux.rafacodephi/files/usr' "$doctor"
           if grep -Fq '/data/data/com.termux/files/usr/bin/bash' "$doctor"; then
