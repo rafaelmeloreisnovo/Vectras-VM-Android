@@ -13,7 +13,6 @@ import com.vectras.vm.main.core.MainStartVM;
 import com.vectras.vterm.Terminal;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -91,10 +90,11 @@ public final class QemuDirectLauncher {
                     .setPath(VectrasRuntimeEvidenceGate.GUEST_PATH)
                     .setSdlVideoDriver("x11");
 
+            List<String> requestedArgv = contract.toProcessArgv();
             VectrasRuntimeEvidenceGate.Result evidence = VectrasRuntimeEvidenceGate.probe(
                     context,
                     proot,
-                    contract.getQemuBinary()
+                    requestedArgv
             );
             if (!evidence.ok) {
                 throw new IOException(
@@ -104,13 +104,17 @@ public final class QemuDirectLauncher {
                 );
             }
 
-            List<String> launchArgv = new ArrayList<>(contract.toProcessArgv());
+            List<String> launchArgv = evidence.resolvedLaunchArgv;
             if (launchArgv.isEmpty()) {
-                throw new IOException("QEMU runtime evidence gate passed but argv is empty");
+                throw new IOException("QEMU runtime evidence gate passed but resolved argv is empty");
             }
-            launchArgv.set(0, evidence.resolvedQemuGuestPath);
+            if (!launchArgv.get(0).equals(evidence.resolvedQemuGuestPath)) {
+                throw new IOException("QEMU runtime evidence argv/path binding mismatch");
+            }
             Log.i(TAG, "QEMU runtime DEVICE_PROVEN receipt=" + evidence.receiptPath
-                    + " executable=" + evidence.resolvedQemuGuestPath);
+                    + " executable=" + evidence.resolvedQemuGuestPath
+                    + " contractHash=" + contract.getArgvSha256()
+                    + " resolvedArgvHash=" + evidence.resolvedLaunchArgvSha256);
 
             prepareRuntime(proot);
 
@@ -129,7 +133,7 @@ public final class QemuDirectLauncher {
                 return;
             }
 
-            Log.i(TAG, "Dispatching direct QEMU argv: hash=" + contract.getArgvSha256()
+            Log.i(TAG, "Dispatching direct QEMU argv: resolvedHash=" + evidence.resolvedLaunchArgvSha256
                     + " args=" + launchArgv.size());
             process = builder.start();
             ProcessBudgetRegistry.bindProcess(slot, process);
