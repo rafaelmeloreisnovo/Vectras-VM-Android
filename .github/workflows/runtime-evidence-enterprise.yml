@@ -1,0 +1,102 @@
+name: Vectras Runtime Evidence Enterprise
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - master
+      - 'rafaelia/runtime-evidence-enterprise-*'
+    paths:
+      - 'app/src/main/java/com/vectras/vm/runtime/QemuDirectLauncher.java'
+      - 'app/src/main/java/com/vectras/vm/runtime/VectrasRuntimeEvidenceGate.java'
+      - 'tools/device_runtime/vectras_termux_beta_closure.sh'
+      - 'tools/device_runtime/validate_vectras_runtime_receipt.py'
+      - 'tests/test_vectras_runtime_receipt.py'
+      - 'docs/contracts/vectras.runtime-evidence.v1.schema.json'
+      - '.github/workflows/runtime-evidence-enterprise.yml'
+  pull_request:
+    paths:
+      - 'app/src/main/java/com/vectras/vm/runtime/QemuDirectLauncher.java'
+      - 'app/src/main/java/com/vectras/vm/runtime/VectrasRuntimeEvidenceGate.java'
+      - 'tools/device_runtime/vectras_termux_beta_closure.sh'
+      - 'tools/device_runtime/validate_vectras_runtime_receipt.py'
+      - 'tests/test_vectras_runtime_receipt.py'
+      - 'docs/contracts/vectras.runtime-evidence.v1.schema.json'
+      - '.github/workflows/runtime-evidence-enterprise.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: vectras-runtime-evidence-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  contract-fast:
+    name: Runtime evidence contracts
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          fetch-depth: 1
+
+      - name: Validate Python, JSON and Bash contracts
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m py_compile tools/device_runtime/validate_vectras_runtime_receipt.py
+          python3 -m unittest tests.test_vectras_runtime_receipt -v
+          python3 -m json.tool docs/contracts/vectras.runtime-evidence.v1.schema.json >/dev/null
+          bash -n tools/device_runtime/vectras_termux_beta_closure.sh
+
+      - name: Assert receipt schema and validator stay key-aligned
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import importlib.util
+          import json
+          from pathlib import Path
+
+          validator_path = Path('tools/device_runtime/validate_vectras_runtime_receipt.py')
+          spec = importlib.util.spec_from_file_location('validator', validator_path)
+          module = importlib.util.module_from_spec(spec)
+          assert spec and spec.loader
+          spec.loader.exec_module(module)
+          schema = json.loads(Path('docs/contracts/vectras.runtime-evidence.v1.schema.json').read_text())
+          required = set(schema['required'])
+          if required != module.TOP_KEYS:
+              raise SystemExit(f'schema/validator key drift: {sorted(required ^ module.TOP_KEYS)}')
+          print('VECTRAS_RUNTIME_SCHEMA_KEY_ALIGNMENT=PASS')
+          PY
+
+      - name: Assert exact private executable binding and fail-closed launch
+        shell: bash
+        run: |
+          set -euo pipefail
+          gate=app/src/main/java/com/vectras/vm/runtime/VectrasRuntimeEvidenceGate.java
+          launcher=app/src/main/java/com/vectras/vm/runtime/QemuDirectLauncher.java
+          doctor=tools/device_runtime/vectras_termux_beta_closure.sh
+          grep -Fq 'public static final String GUEST_PATH' "$gate"
+          grep -Fq 'resolvePrivateGuestExecutable' "$gate"
+          grep -Fq 'executeThroughProot(proot, qemu.guestPath' "$gate"
+          grep -Fq 'doc.put("apk_sha256", apkSha)' "$gate"
+          grep -Fq 'doc.put("qemu_sha256", qemuSha)' "$gate"
+          grep -Fq '.setPath(VectrasRuntimeEvidenceGate.GUEST_PATH)' "$launcher"
+          grep -Fq 'VectrasRuntimeEvidenceGate.probe' "$launcher"
+          grep -Fq 'launchArgv.set(0, evidence.resolvedQemuGuestPath)' "$launcher"
+          grep -Fq 'if (!evidence.ok)' "$launcher"
+          grep -Fq '/data/data/com.termux.rafacodephi/files/usr' "$doctor"
+          if grep -Fq '/data/data/com.termux/files/usr/bin/bash' "$doctor"; then
+            echo 'legacy Termux shebang returned' >&2
+            exit 1
+          fi
+          grep -Fq 'if [ "$failures" -gt 0 ]' "$doctor"
+
+  android-build:
+    name: Android compile/test matrix
+    needs: contract-fast
+    uses: ./.github/workflows/android-native-ci.yml
+    with:
+      profile_set: official_arm32_arm64
