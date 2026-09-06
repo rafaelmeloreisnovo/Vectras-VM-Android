@@ -2,22 +2,22 @@
 """Derive APK-safe PRoot bootstrap TARs from already verified pinned inputs.
 
 SetupFeatureCore validates ``<filesDir>/usr/tmp`` immediately after extracting
-``bootstrap/<abi>.tar``.  The historical setup flow only creates that directory
-later, before Alpine extraction.  Therefore a bootstrap carrying a valid
+``bootstrap/<abi>.tar``. The historical setup flow only creates that directory
+later, before Alpine extraction. Therefore a bootstrap carrying a valid
 ``usr/bin/proot`` but no ``usr/tmp`` can be extracted and then rolled back by its
 own post-check.
 
-This normalizer closes that ordering gap at packaging time.  It preserves every
+This normalizer closes that ordering gap at packaging time. It preserves every
 existing member and regular-file byte, and injects only ``usr/tmp/`` when absent.
-The injected directory is mode 0771, uid/gid 0, mtime 0.  The pinned source TAR
-hash remains provenance; the receipt records the derived TAR hash actually
-embedded in the APK.
+The injected directory is mode 0771, uid/gid 0, mtime 0. A conventional TAR root
+member ``.``/``./`` is allowed but traversal/absolute paths remain rejected. The
+pinned source TAR hash remains provenance; the receipt records the derived TAR
+hash actually embedded in the APK.
 """
 from __future__ import annotations
 
 import argparse
 import hashlib
-import io
 import json
 import os
 import posixpath
@@ -45,8 +45,10 @@ def normalize_name(name: str) -> str:
     normalized = posixpath.normpath(raw)
     while normalized.startswith("./"):
         normalized = normalized[2:]
-    if pure.is_absolute() or normalized in {"", ".", ".."} or normalized.startswith("../"):
+    if pure.is_absolute() or normalized in {"", ".."} or normalized.startswith("../"):
         raise ValueError(f"unsafe TAR member path: {name}")
+    if normalized == ".":
+        return "."
     return normalized.rstrip("/")
 
 
@@ -207,6 +209,9 @@ def main() -> int:
             "USR_TMP_PRESENT_BEFORE_DEVICE_EXTRACTION",
             "USR_TMP_MODE_0771_WHEN_INJECTED",
             "REGULAR_FILE_BYTES_PRESERVED",
+            "TAR_ROOT_MEMBER_DOT_ALLOWED",
+            "NO_ABSOLUTE_MEMBER_PATHS",
+            "NO_DOTDOT_ESCAPE",
             "DERIVED_TAR_SHA256_RECORDED",
             "DEVICE_EXECUTION_NOT_CLAIMED",
         ],
