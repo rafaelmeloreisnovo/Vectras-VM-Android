@@ -48,9 +48,12 @@ jobs:
           set -euo pipefail
           python3 -m py_compile \
             tools/bootstrap/normalize_bootstrap_tar_layout.py \
-            tools/bootstrap/normalize_rootfs_tar_symlinks.py
+            tools/bootstrap/normalize_rootfs_tar_symlinks.py \
+            tools/bootstrap/materialize_embedded_runtime_seed_assets.py \
+            tools/ci/run_apk_wizard_with_transient_retry.py
           python3 tests/test_normalize_bootstrap_tar_layout.py
           python3 tests/test_normalize_rootfs_tar_symlinks.py
+          python3 tests/test_apk_wizard_transient_retry.py
 
       - name: Shell-loader smoke build
         shell: bash
@@ -63,7 +66,11 @@ jobs:
 
       - name: Build APK wizard lanes (arm64 and arm32+arm64)
         shell: bash
-        run: ./tools/ci/build_apk_wizard.sh
+        run: |
+          python3 tools/ci/run_apk_wizard_with_transient_retry.py \
+            --attempts 4 \
+            --base-backoff-seconds 1 \
+            -- ./tools/ci/build_apk_wizard.sh
 
       - name: Upload APK wizard artifacts (best effort)
         if: always()
