@@ -13,8 +13,8 @@ import java.util.concurrent.atomic.AtomicBoolean
 /**
  * Receipt-driven maintenance state machine for an installed RAFCODEPHI Termux.
  *
- * The sequence is intentionally fixed and cannot accept free-form commands:
- * BOOTSTRAP -> REFRESH -> VECTRAS_QEMU -> PROBE.
+ * Fixed sequence, no free-form commands:
+ * BOOTSTRAP -> REFRESH -> VECTRAS_QEMU -> PROBE -> PROOT_VERIFY -> NINJA_VERIFY -> QEMU_VERIFY.
  * A stage advances only after the local PendingIntent result is bound to the
  * persisted request and reports Termux errorCode=0 plus process exitCode=0.
  */
@@ -39,6 +39,9 @@ object VectrasTermuxMaintenanceCoordinator {
         REFRESH_PENDING,
         VECTRAS_QEMU_PENDING,
         PROBE_PENDING,
+        PROOT_VERIFY_PENDING,
+        NINJA_VERIFY_PENDING,
+        QEMU_VERIFY_PENDING,
         COMPLETE,
         FAILED,
     }
@@ -57,6 +60,9 @@ object VectrasTermuxMaintenanceCoordinator {
                 State.REFRESH_PENDING,
                 State.VECTRAS_QEMU_PENDING,
                 State.PROBE_PENDING,
+                State.PROOT_VERIFY_PENDING,
+                State.NINJA_VERIFY_PENDING,
+                State.QEMU_VERIFY_PENDING,
             )
     }
 
@@ -76,8 +82,8 @@ object VectrasTermuxMaintenanceCoordinator {
                     "RAFCODEPHI runtime repair is already in progress at ${snapshot.expectedStage ?: snapshot.state}."
                 } else {
                     "The external RAFCODEPHI Termux runtime is installed but not fully ready. " +
-                        "Repair will run the bounded sequence: bootstrap/toolchain, package metadata refresh, " +
-                        "Vectras QEMU packages, then a final freestanding probe."
+                        "Repair will bootstrap the toolchain, refresh package metadata, install Vectras QEMU, " +
+                        "then execute PRoot, Ninja and QEMU smoke checks before completion."
                 }
                 AlertDialog.Builder(activity, R.style.MainDialogTheme)
                     .setTitle("Repair RAFCODEPHI runtime")
@@ -175,7 +181,7 @@ object VectrasTermuxMaintenanceCoordinator {
                     state = State.COMPLETE,
                     expectedStage = null,
                     expectedTransaction = null,
-                    reason = "bounded_maintenance_sequence_complete",
+                    reason = "bounded_maintenance_and_runtime_smokes_complete",
                 )
                 CrossRepoIntegrationManager.queryIntegration(context.applicationContext) { status ->
                     CrossRepoIntegrationManager.logStatus(status)
@@ -249,7 +255,13 @@ object VectrasTermuxMaintenanceCoordinator {
             VectrasTermuxIpcContract.MaintenanceStage.VECTRAS_QEMU
         VectrasTermuxIpcContract.MaintenanceStage.VECTRAS_QEMU ->
             VectrasTermuxIpcContract.MaintenanceStage.PROBE
-        VectrasTermuxIpcContract.MaintenanceStage.PROBE -> null
+        VectrasTermuxIpcContract.MaintenanceStage.PROBE ->
+            VectrasTermuxIpcContract.MaintenanceStage.PROOT_VERIFY
+        VectrasTermuxIpcContract.MaintenanceStage.PROOT_VERIFY ->
+            VectrasTermuxIpcContract.MaintenanceStage.NINJA_VERIFY
+        VectrasTermuxIpcContract.MaintenanceStage.NINJA_VERIFY ->
+            VectrasTermuxIpcContract.MaintenanceStage.QEMU_VERIFY
+        VectrasTermuxIpcContract.MaintenanceStage.QEMU_VERIFY -> null
     }
 
     private fun pendingState(stage: VectrasTermuxIpcContract.MaintenanceStage): State = when (stage) {
@@ -257,6 +269,9 @@ object VectrasTermuxMaintenanceCoordinator {
         VectrasTermuxIpcContract.MaintenanceStage.REFRESH -> State.REFRESH_PENDING
         VectrasTermuxIpcContract.MaintenanceStage.VECTRAS_QEMU -> State.VECTRAS_QEMU_PENDING
         VectrasTermuxIpcContract.MaintenanceStage.PROBE -> State.PROBE_PENDING
+        VectrasTermuxIpcContract.MaintenanceStage.PROOT_VERIFY -> State.PROOT_VERIFY_PENDING
+        VectrasTermuxIpcContract.MaintenanceStage.NINJA_VERIFY -> State.NINJA_VERIFY_PENDING
+        VectrasTermuxIpcContract.MaintenanceStage.QEMU_VERIFY -> State.QEMU_VERIFY_PENDING
     }
 
     private fun isStale(snapshot: Snapshot): Boolean {
