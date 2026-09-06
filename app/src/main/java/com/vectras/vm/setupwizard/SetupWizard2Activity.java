@@ -154,13 +154,6 @@ public class SetupWizard2Activity extends AppCompatActivity {
                     }
                 }
 
-                // validateProotCoreState requires <filesDir>/usr/tmp immediately after
-                // the bootstrap TAR is extracted. Historically startExtractSystemFiles
-                // created it only after that validation, so a valid usr/bin/proot could
-                // be rolled back solely because the writable runtime tmp directory had
-                // not been prepared yet. Make the prerequisite explicit and idempotent.
-                ensureProotTmpDirectory(appContext.getFilesDir());
-
                 baseReady = SetupFeatureCore.startExtractSystemFiles(appContext);
                 if (baseReady) {
                     if (!SetupFeatureCore.isInstalledQemu(appContext)) {
@@ -242,24 +235,6 @@ public class SetupWizard2Activity extends AppCompatActivity {
                 renderCurrentState();
             });
         }, "vectras-runtime-full-repair").start();
-    }
-
-    private static void ensureProotTmpDirectory(File filesDir) {
-        if (filesDir == null || !filesDir.isDirectory()) {
-            throw new IllegalStateException("App files directory is missing");
-        }
-        File tmpDir = new File(filesDir, "usr/tmp");
-        if (!tmpDir.isDirectory() && !tmpDir.mkdirs()) {
-            throw new IllegalStateException("Unable to create PRoot tmp directory: " + tmpDir);
-        }
-        // Execution is required for directory traversal. Keep the directory private
-        // enough for app use while satisfying the existing canWrite/canExecute gates.
-        if (!tmpDir.setReadable(true, true) || !tmpDir.setWritable(true, true) || !tmpDir.setExecutable(true, true)) {
-            throw new IllegalStateException("Unable to set PRoot tmp directory mode: " + tmpDir);
-        }
-        if (!tmpDir.canWrite() || !tmpDir.canExecute()) {
-            throw new IllegalStateException("PRoot tmp directory is not writable/executable: " + tmpDir);
-        }
     }
 
     private static void ensureQemuExecutables(File distroDir) {
