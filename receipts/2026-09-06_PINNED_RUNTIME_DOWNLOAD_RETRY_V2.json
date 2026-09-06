@@ -1,0 +1,56 @@
+{
+  "schema": "vectras.hotfix_receipt/v1",
+  "receipt_id": "VECTRAS-PINNED-RUNTIME-DOWNLOAD-RETRY-20260906-V2",
+  "repository": "rafaelmeloreisnovo/Vectras-VM-Android",
+  "baseline": "276abe7de54f88d9417ae95887a27515ff56e738",
+  "baseline_branch": "master",
+  "predecessor_root_fix": "e34e7e4ed55ce823c4f3dd864189fb76b5c0e566",
+  "supersedes_unmergeable_work_branch": "hotfix/pinned-runtime-download-retry-20260906",
+  "trigger": {
+    "workflow": "APK Wizard",
+    "run_id": 34063289795,
+    "job_id": 101567552766,
+    "passed_before_failure": [
+      "ROOTFS_NORMALIZER_TESTS: PASS cases=2",
+      "shell-loader assembleDebug"
+    ],
+    "failure_class": "TRANSIENT_PINNED_SOURCE_TRANSPORT_RESET",
+    "error": "ConnectionResetError: [Errno 104] Connection reset by peer",
+    "pinned_source_commit": "e1faf376b4b034384cdab9a4ab1e608c61a83521",
+    "failed_asset": "app/src/main/assets/alpine19/armeabi-v7a.tar"
+  },
+  "retry_contract": {
+    "max_attempts": 4,
+    "backoff_seconds": [1, 2, 4],
+    "cap_seconds": 8,
+    "same_command_each_attempt": true,
+    "retry_allowlist": [
+      "connection reset",
+      "remote disconnect",
+      "transport timeout",
+      "temporary DNS resolution failure",
+      "HTTP 408/425/429/500/502/503/504"
+    ],
+    "fail_fast": [
+      "HTTP 404",
+      "size mismatch",
+      "Git blob SHA-1 mismatch",
+      "SHA-256 mismatch",
+      "TAR policy violation",
+      "missing family marker"
+    ]
+  },
+  "invariants": {
+    "pinned_source_selection_unchanged": true,
+    "fallback_to_upstream_master": false,
+    "alternate_content_source": false,
+    "integrity_validators_modified": false,
+    "device_execution_claimed": false
+  },
+  "tests": {
+    "standalone_cases": 5,
+    "remote_gate": "TOKEN_VAZIO_PENDING_PR_RUN"
+  },
+  "claim_allowed": false,
+  "rollback_ref": "276abe7de54f88d9417ae95887a27515ff56e738"
+}
