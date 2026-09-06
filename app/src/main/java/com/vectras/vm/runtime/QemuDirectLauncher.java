@@ -88,6 +88,19 @@ public final class QemuDirectLauncher {
                     .setXdgRuntimeDir("/tmp")
                     .setSdlVideoDriver("x11");
 
+            VectrasRuntimeEvidenceGate.Result evidence = VectrasRuntimeEvidenceGate.probe(
+                    context,
+                    proot,
+                    contract.getQemuBinary()
+            );
+            if (!evidence.ok) {
+                Log.e(TAG, "Direct QEMU launch blocked by runtime evidence gate: state="
+                        + evidence.state + " reason=" + evidence.reason
+                        + " receipt=" + evidence.receiptPath);
+                throw new IOException("QEMU runtime evidence gate failed: " + evidence.reason);
+            }
+            Log.i(TAG, "Runtime evidence DEVICE_PROVEN receipt=" + evidence.receiptPath);
+
             prepareRuntime(proot);
 
             ProcessBuilder builder = new ProcessBuilder();
