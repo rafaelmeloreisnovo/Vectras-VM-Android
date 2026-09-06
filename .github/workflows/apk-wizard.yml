@@ -42,11 +42,14 @@ jobs:
       - name: Install pinned Android native toolchain
         run: bash tools/ci/install_android_native_toolchain.sh
 
-      - name: Validate rootfs symlink normalization contract
+      - name: Validate APK-local bootstrap normalization contracts
         shell: bash
         run: |
           set -euo pipefail
-          python3 -m py_compile tools/bootstrap/normalize_rootfs_tar_symlinks.py
+          python3 -m py_compile \
+            tools/bootstrap/normalize_bootstrap_tar_layout.py \
+            tools/bootstrap/normalize_rootfs_tar_symlinks.py
+          python3 tests/test_normalize_bootstrap_tar_layout.py
           python3 tests/test_normalize_rootfs_tar_symlinks.py
 
       - name: Shell-loader smoke build
