@@ -160,7 +160,7 @@ object VectrasTermuxMaintenanceCoordinator {
 
             val succeeded = resultBundlePresent && errorCode == 0 && exitCode == 0
             if (!succeeded) {
-                persist(
+                persistOrLog(
                     context = context,
                     runId = current.runId,
                     state = State.FAILED,
@@ -175,7 +175,7 @@ object VectrasTermuxMaintenanceCoordinator {
 
             val next = nextStage(stage)
             if (next == null) {
-                persist(
+                persistOrLog(
                     context = context,
                     runId = current.runId,
                     state = State.COMPLETE,
@@ -218,7 +218,7 @@ object VectrasTermuxMaintenanceCoordinator {
         stage: VectrasTermuxIpcContract.MaintenanceStage,
     ): VectrasTermuxBridge.DispatchResult {
         val transactionId = VectrasTermuxBridge.newMaintenanceTransactionId()
-        persist(
+        val statePersisted = persist(
             context = context,
             runId = runId,
             state = pendingState(stage),
@@ -226,6 +226,15 @@ object VectrasTermuxMaintenanceCoordinator {
             expectedTransaction = transactionId,
             reason = "dispatch_pending",
         )
+        if (!statePersisted) {
+            return VectrasTermuxBridge.DispatchResult(
+                state = VectrasTermuxBridge.State.REQUEST_PERSISTENCE_FAILED,
+                transactionId = transactionId,
+                binaryName = stage.targetName,
+                component = null,
+                reason = "maintenance_state_not_persisted",
+            )
+        }
 
         val result = VectrasTermuxBridge.dispatchMaintenance(
             context = context,
@@ -233,7 +242,7 @@ object VectrasTermuxMaintenanceCoordinator {
             transactionId = transactionId,
         )
         if (result.state != VectrasTermuxBridge.State.DISPATCHED) {
-            persist(
+            persistOrLog(
                 context = context,
                 runId = runId,
                 state = State.FAILED,
@@ -279,7 +288,7 @@ object VectrasTermuxMaintenanceCoordinator {
         return System.currentTimeMillis() - snapshot.updatedAtEpochMs > MAX_IN_FLIGHT_AGE_MS
     }
 
-    private fun persist(
+    private fun persistOrLog(
         context: Context,
         runId: String?,
         state: State,
@@ -287,7 +296,20 @@ object VectrasTermuxMaintenanceCoordinator {
         expectedTransaction: String?,
         reason: String?,
     ) {
-        context.applicationContext.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+        if (!persist(context, runId, state, expectedStage, expectedTransaction, reason)) {
+            Log.e(TAG, "failed to persist terminal maintenance state=$state run=$runId reason=$reason")
+        }
+    }
+
+    private fun persist(
+        context: Context,
+        runId: String?,
+        state: State,
+        expectedStage: VectrasTermuxIpcContract.MaintenanceStage?,
+        expectedTransaction: String?,
+        reason: String?,
+    ): Boolean {
+        val committed = context.applicationContext.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
             .edit()
             .putString(KEY_RUN_ID, runId)
             .putString(KEY_STATE, state.name)
@@ -295,10 +317,12 @@ object VectrasTermuxMaintenanceCoordinator {
             .putString(KEY_EXPECTED_TRANSACTION, expectedTransaction)
             .putString(KEY_LAST_REASON, reason)
             .putLong(KEY_UPDATED_AT, System.currentTimeMillis())
-            .apply()
+            .commit()
         Log.i(
             TAG,
-            "run=$runId state=$state stage=${expectedStage ?: "none"} tx=${expectedTransaction ?: "none"} reason=$reason",
+            "run=$runId state=$state stage=${expectedStage ?: "none"} tx=${expectedTransaction ?: "none"} " +
+                "reason=$reason persisted=$committed",
         )
+        return committed
     }
 }
