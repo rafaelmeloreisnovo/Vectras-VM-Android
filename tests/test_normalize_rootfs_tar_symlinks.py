@@ -3,6 +3,7 @@ from __future__ import annotations
 import importlib.util
 import io
 import tarfile
+import tempfile
 from pathlib import Path
 
 
@@ -76,3 +77,27 @@ def test_rejects_escaping_relative_symlink(tmp_path: Path) -> None:
         assert "escaping symlink target rejected" in str(exc)
     else:
         raise AssertionError("escaping symlink was not rejected")
+
+
+def run_standalone() -> None:
+    with tempfile.TemporaryDirectory(prefix="vectras-rootfs-normalizer-test-") as tmp:
+        root = Path(tmp)
+        test_alpine_absolute_rootfs_symlinks_become_host_safe_relative_links(root / "case-ok")
+    with tempfile.TemporaryDirectory(prefix="vectras-rootfs-normalizer-test-") as tmp:
+        root = Path(tmp)
+        test_rejects_escaping_relative_symlink(root / "case-reject")
+    print("ROOTFS_NORMALIZER_TESTS: PASS cases=2")
+
+
+if __name__ == "__main__":
+    # Keep this file compatible with pytest while also making the CI gate valid
+    # on a bare Python installation.
+    with tempfile.TemporaryDirectory(prefix="vectras-rootfs-normalizer-test-") as tmp:
+        case = Path(tmp) / "case-ok"
+        case.mkdir(parents=True)
+        test_alpine_absolute_rootfs_symlinks_become_host_safe_relative_links(case)
+    with tempfile.TemporaryDirectory(prefix="vectras-rootfs-normalizer-test-") as tmp:
+        case = Path(tmp) / "case-reject"
+        case.mkdir(parents=True)
+        test_rejects_escaping_relative_symlink(case)
+    print("ROOTFS_NORMALIZER_TESTS: PASS cases=2")
