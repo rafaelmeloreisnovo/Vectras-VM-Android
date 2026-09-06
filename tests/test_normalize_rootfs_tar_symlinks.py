@@ -60,7 +60,11 @@ def test_alpine_absolute_rootfs_symlinks_become_host_safe_relative_links(tmp_pat
 
     with tarfile.open(tar_path, "r:*") as tf:
         members = {member.name: member for member in tf.getmembers()}
-        assert "./" in members
+        # Python tarfile canonicalizes an archive entry spelled "./" to "."
+        # when reading it back.  The semantic root member is preserved; testing
+        # the raw spelling after a read made the gate fail on valid archives.
+        assert "." in members
+        assert members["."].isdir()
         assert members["bin/sh"].linkname == "busybox"
         assert members["usr/bin/env"].linkname == "../../bin/busybox"
         assert not members["bin/sh"].linkname.startswith("/")
