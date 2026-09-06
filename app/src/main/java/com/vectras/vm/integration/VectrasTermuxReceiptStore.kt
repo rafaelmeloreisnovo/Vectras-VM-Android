@@ -4,6 +4,7 @@ import android.content.Context
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.File
+import java.util.ArrayList
 
 /** Internal append-only request/receipt store for the Termux bridge. */
 object VectrasTermuxReceiptStore {
@@ -101,11 +102,11 @@ object VectrasTermuxReceiptStore {
             }
             val argumentsArray = value.optJSONArray("arguments") ?: return null
             if (argumentsArray.length() != argumentCount) return null
-            val arguments = buildList(argumentCount) {
-                for (index in 0 until argumentCount) {
-                    val argument = argumentsArray.optString(index, null) ?: return null
-                    add(argument)
-                }
+            val arguments = ArrayList<String>(argumentCount)
+            for (index in 0 until argumentCount) {
+                if (argumentsArray.isNull(index)) return null
+                val argument = argumentsArray.optString(index)
+                arguments.add(argument)
             }
             if (hashArguments(arguments) != argumentsSha256) return null
 
