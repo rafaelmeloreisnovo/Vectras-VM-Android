@@ -4,6 +4,8 @@
   "repository": "rafaelmeloreisnovo/Vectras-VM-Android",
   "stacked_base": "a693bf439b1d7b5217da82b58a986a3eaca01189",
   "original_baseline": "c98e5a79f70f6fd1316cad26faf328a725b8a792",
+  "promotion_base_observed": "276abe7de54f88d9417ae95887a27515ff56e738",
+  "promotion_base_branch": "master",
   "trigger": {
     "workflow": "APK Wizard",
     "run_id": 34063289795,
@@ -48,7 +50,7 @@
   },
   "tests": {
     "contract_cases": 5,
-    "remote_execution": "TOKEN_VAZIO_PENDING_NEW_PR_RUN"
+    "remote_execution": "TOKEN_VAZIO_PENDING_SYNCHRONIZE_RUN"
   },
   "claim_allowed": false,
   "rollback_ref": "a693bf439b1d7b5217da82b58a986a3eaca01189"
