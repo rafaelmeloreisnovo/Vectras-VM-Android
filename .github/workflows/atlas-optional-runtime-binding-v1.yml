@@ -1,0 +1,25 @@
+name: atlas-optional-runtime-binding-v1
+
+on:
+  push:
+    paths:
+      - 'docs/federation/ATLAS_OPTIONAL_RUNTIME_BINDING_V1.json'
+      - 'tools/verify_atlas_optional_runtime_binding_v1.py'
+      - '.github/workflows/atlas-optional-runtime-binding-v1.yml'
+  pull_request:
+    paths:
+      - 'docs/federation/ATLAS_OPTIONAL_RUNTIME_BINDING_V1.json'
+      - 'tools/verify_atlas_optional_runtime_binding_v1.py'
+      - '.github/workflows/atlas-optional-runtime-binding-v1.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 tools/verify_atlas_optional_runtime_binding_v1.py
