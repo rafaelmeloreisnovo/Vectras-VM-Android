@@ -1,0 +1,47 @@
+name: Vectras beta runtime closure
+
+on:
+  pull_request:
+    branches: [ master, main, develop ]
+    paths:
+      - 'tools/device_runtime/vectras_termux_beta_closure.sh'
+      - '.github/workflows/vectras-beta-runtime-closure.yml'
+  push:
+    branches:
+      - 'rafaelia/vectras-beta-runtime-closure-*'
+    paths:
+      - 'tools/device_runtime/vectras_termux_beta_closure.sh'
+      - '.github/workflows/vectras-beta-runtime-closure.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  static-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Bash syntax
+        run: bash -n tools/device_runtime/vectras_termux_beta_closure.sh
+      - name: Help path
+        run: bash tools/device_runtime/vectras_termux_beta_closure.sh --help
+      - name: Verify non-short-circuit staged repair contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('tools/device_runtime/vectras_termux_beta_closure.sh')
+          s = p.read_text(encoding='utf-8')
+          assert 'set -e' not in s, 'doctor must not stop at first runtime error'
+          stage1 = 'pkg install -y "${BOOTSTRAP_PKGS[@]}"'
+          refresh = 'pkg update -y'
+          stage2 = 'pkg install -y "${QEMU_PKGS[@]}"'
+          a, b, c = s.index(stage1), s.index(refresh), s.index(stage2)
+          assert a < b < c, 'required order: bootstrap -> metadata refresh -> QEMU'
+          for token in ('PASS', 'FAIL', 'BLOCKER', 'TOKEN_VAZIO'):
+              assert token in s, f'missing evidence state: {token}'
+          assert 'run-as denied/non-debuggable' in s
+          assert 'Fail only after the complete survey' in s
+          print('VECTRAS_BETA_CLOSURE_STATIC_CONTRACT=PASS')
+          PY
