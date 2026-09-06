@@ -9,6 +9,8 @@ on:
       - 'app/src/main/java/com/vectras/vm/integration/VectrasTermuxBridge.kt'
       - 'app/src/main/java/com/vectras/vm/integration/VectrasTermuxReceiptStore.kt'
       - 'app/src/main/java/com/vectras/vm/integration/VectrasTermuxResultReceiver.kt'
+      - 'app/src/main/java/com/vectras/vm/integration/VectrasTermuxMaintenanceCoordinator.kt'
+      - 'app/src/main/java/com/vectras/vm/VectrasApp.java'
       - 'app/src/*/AndroidManifest.xml'
       - 'tools/verify_vectras_termux_ipc_v3.py'
       - 'tools/verify_vectras_termux_ipc_v3_manifests.py'
@@ -121,6 +123,10 @@ jobs:
           assert contract['security']['result_requires_local_pending_request'] is True
           assert report['state'] == 'PASS_STATIC_CONTRACT'
           assert report['claim_allowed'] is False
+          assert report['checks']['maintenance_argv_bounded'] is True
+          assert report['checks']['maintenance_receipt_driven'] is True
+          assert report['checks']['maintenance_order_bound'] is True
+          assert report['checks']['maintenance_transaction_bound'] is True
           assert report['runtime_boundary']['qemu_guest_boot'] == 'TOKEN_VAZIO'
           assert cross['state'] == 'PASS_PINNED_CONTRACT_CHAIN'
           assert cross['claim_allowed'] is False
@@ -129,7 +135,7 @@ jobs:
           assert cross['provider']['contract_authority_parent'] == contract['provider']['base_commit']
           assert cross['consumer']['pin_relation'] in ('EXACT', 'DESCENDANT_OF_PINNED_BASELINE')
           assert cross['runtime_boundary']['guest_boot'] == 'TOKEN_VAZIO'
-          print('PASS Vectras Termux IPC v3 static + pinned source→contract provenance chain')
+          print('PASS Vectras Termux IPC v3 static + maintenance + pinned source→contract provenance chain')
           PY
 
       - name: Upload C07 static receipts
