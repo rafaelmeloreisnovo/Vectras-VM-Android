@@ -14,6 +14,7 @@ import com.vectras.vterm.Terminal;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * Launches qemu-system-* through PRoot with an argument vector, never through
@@ -86,13 +87,40 @@ public final class QemuDirectLauncher {
                     .setDisplay(DISPLAY)
                     .setPulseServer("127.0.0.1")
                     .setXdgRuntimeDir("/tmp")
+                    .setPath(VectrasRuntimeEvidenceGate.GUEST_PATH)
                     .setSdlVideoDriver("x11");
+
+            List<String> requestedArgv = contract.toProcessArgv();
+            VectrasRuntimeEvidenceGate.Result evidence = VectrasRuntimeEvidenceGate.probe(
+                    context,
+                    proot,
+                    requestedArgv
+            );
+            if (!evidence.ok) {
+                throw new IOException(
+                        "QEMU runtime evidence gate failed: state=" + evidence.state
+                                + " reason=" + evidence.reason
+                                + " receipt=" + evidence.receiptPath
+                );
+            }
+
+            List<String> launchArgv = evidence.resolvedLaunchArgv;
+            if (launchArgv.isEmpty()) {
+                throw new IOException("QEMU runtime evidence gate passed but resolved argv is empty");
+            }
+            if (!launchArgv.get(0).equals(evidence.resolvedQemuGuestPath)) {
+                throw new IOException("QEMU runtime evidence argv/path binding mismatch");
+            }
+            Log.i(TAG, "QEMU runtime DEVICE_PROVEN receipt=" + evidence.receiptPath
+                    + " executable=" + evidence.resolvedQemuGuestPath
+                    + " contractHash=" + contract.getArgvSha256()
+                    + " resolvedArgvHash=" + evidence.resolvedLaunchArgvSha256);
 
             prepareRuntime(proot);
 
             ProcessBuilder builder = new ProcessBuilder();
             proot.applyEnvironment(builder.environment());
-            builder.command(proot.buildCommand(contract.toProcessArgv()));
+            builder.command(proot.buildCommand(launchArgv));
 
             slot = ProcessBudgetRegistry.tryAcquireSlot(
                     "qemu-direct",
@@ -105,8 +133,8 @@ public final class QemuDirectLauncher {
                 return;
             }
 
-            Log.i(TAG, "Dispatching direct QEMU argv: hash=" + contract.getArgvSha256()
-                    + " args=" + contract.getArgv().size());
+            Log.i(TAG, "Dispatching direct QEMU argv: resolvedHash=" + evidence.resolvedLaunchArgvSha256
+                    + " args=" + launchArgv.size());
             process = builder.start();
             ProcessBudgetRegistry.bindProcess(slot, process);
             synchronized (Terminal.class) {
