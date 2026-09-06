@@ -15,15 +15,15 @@ present and rolls the extraction back.
 This tool derives an APK-safe TAR from the pinned/materialized rootfs without
 changing file contents. Absolute symlink targets are rewritten to equivalent
 relative targets inside the same rootfs. Absolute member names, escaping links,
-device nodes, and absolute hard-link targets fail closed. The operation is
-idempotent and emits an append-friendly JSON receipt containing before/after
-SHA-256 values and every rewritten link sample.
+device nodes, and absolute hard-link targets fail closed. A conventional TAR
+root member named ``.``/``./`` is allowed; it cannot escape the archive root.
+The operation is idempotent and emits an append-friendly JSON receipt containing
+before/after SHA-256 values and every rewritten link sample.
 """
 from __future__ import annotations
 
 import argparse
 import hashlib
-import io
 import json
 import os
 import posixpath
@@ -32,7 +32,6 @@ import tempfile
 from datetime import datetime, timezone
 from pathlib import Path, PurePosixPath
 
-TOKEN_VAZIO = "TOKEN_VAZIO"
 ALLOWED_FAMILIES = {"alpine19", "qemu19"}
 ALLOWED_ABIS = {"arm64-v8a", "armeabi-v7a", "x86", "x86_64"}
 FAMILY_MARKERS = {
@@ -70,8 +69,12 @@ def assert_member_path_safe(name: str) -> str:
     raw = name.replace("\\", "/")
     pure = PurePosixPath(raw)
     normalized = normalize_member_name(raw)
-    if pure.is_absolute() or normalized in {"", ".", ".."} or normalized.startswith("../"):
+    if pure.is_absolute() or normalized in {"", ".."} or normalized.startswith("../"):
         raise ValueError(f"unsafe TAR member path: {name}")
+    # GNU/BusyBox tar commonly emits a root directory member as '.' or './'.
+    # It is a location marker, not a path escape, and is safe to preserve.
+    if normalized == ".":
+        return "."
     return normalized
 
 
@@ -271,6 +274,7 @@ def main() -> int:
             "PINNED_SOURCE_BYTES_ARE_INPUT_PROVENANCE",
             "ABSOLUTE_ROOTFS_SYMLINKS_BECOME_EQUIVALENT_RELATIVE_SYMLINKS",
             "REGULAR_FILE_BYTES_UNCHANGED",
+            "TAR_ROOT_MEMBER_DOT_ALLOWED",
             "NO_ABSOLUTE_MEMBER_PATHS",
             "NO_DOTDOT_ESCAPE",
             "NO_DEVICE_NODES",
