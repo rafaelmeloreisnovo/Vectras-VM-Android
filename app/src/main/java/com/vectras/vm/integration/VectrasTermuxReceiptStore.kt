@@ -15,6 +15,9 @@ object VectrasTermuxReceiptStore {
     data class PendingRequest(
         val transactionId: String,
         val binaryName: String,
+        val commandPath: String,
+        val requestKind: String,
+        val arguments: List<String>,
         val requestSha256: String,
         val argumentCount: Int,
         val argumentsSha256: String,
@@ -30,6 +33,8 @@ object VectrasTermuxReceiptStore {
         context: Context,
         transactionId: String,
         binaryName: String,
+        commandPath: String,
+        requestKind: String,
         arguments: List<String>,
         requestSha256: String,
         producerApkSha256: String?,
@@ -42,11 +47,7 @@ object VectrasTermuxReceiptStore {
         val target = File(directory, "$transactionId.json")
         if (target.exists()) return false
 
-        val argumentsSha256 = VectrasTermuxIpcContract.sha256(
-            arguments.joinToString(separator = "\n") { argument ->
-                "${argument.toByteArray(Charsets.UTF_8).size}:$argument"
-            },
-        )
+        val argumentsSha256 = hashArguments(arguments)
         val request = JSONObject().apply {
             put("schema", REQUEST_SCHEMA)
             put("protocol", VectrasTermuxIpcContract.PROTOCOL)
@@ -60,7 +61,8 @@ object VectrasTermuxReceiptStore {
             put("action", VectrasTermuxIpcContract.ACTION_RUN_COMMAND)
             put("permission", VectrasTermuxIpcContract.RUN_COMMAND_PERMISSION)
             put("binary_name", binaryName)
-            put("command_path", VectrasTermuxIpcContract.commandPath(binaryName))
+            put("command_path", commandPath)
+            put("request_kind", requestKind)
             put("provider_apk_sha256_discovery", providerApkSha256Discovery ?: "TOKEN_VAZIO")
             put("provider_binary_sha256_discovery", providerBinarySha256Discovery ?: "TOKEN_VAZIO")
             put("provider_identity_observed_at_epoch_ms", providerIdentityObservedAtEpochMs)
@@ -92,11 +94,33 @@ object VectrasTermuxReceiptStore {
             val argumentsSha256 = value.optString("arguments_sha256")
             if (!SHA256_PATTERN.matches(requestSha256)) return null
             if (!SHA256_PATTERN.matches(argumentsSha256)) return null
+
+            val argumentCount = value.optInt("argument_count", -1)
+            if (argumentCount < 0 || argumentCount > VectrasTermuxIpcContract.MAX_TOTAL_ARGUMENTS) {
+                return null
+            }
+            val argumentsArray = value.optJSONArray("arguments") ?: return null
+            if (argumentsArray.length() != argumentCount) return null
+            val arguments = buildList(argumentCount) {
+                for (index in 0 until argumentCount) {
+                    val argument = argumentsArray.optString(index, null) ?: return null
+                    add(argument)
+                }
+            }
+            if (hashArguments(arguments) != argumentsSha256) return null
+
+            val commandPath = value.optString("command_path")
+            val requestKind = value.optString("request_kind")
+            if (commandPath.isBlank() || requestKind !in ALLOWED_REQUEST_KINDS) return null
+
             PendingRequest(
                 transactionId = transactionId,
                 binaryName = value.optString("binary_name"),
+                commandPath = commandPath,
+                requestKind = requestKind,
+                arguments = arguments,
                 requestSha256 = requestSha256,
-                argumentCount = value.optInt("argument_count", -1),
+                argumentCount = argumentCount,
                 argumentsSha256 = argumentsSha256,
                 producerApkSha256 = optionalSha256(value.optString("producer_apk_sha256")),
                 providerApkSha256Discovery = optionalSha256(
@@ -125,6 +149,12 @@ object VectrasTermuxReceiptStore {
         if (target.exists()) return false
         return writeAtomic(target, receipt.toString(2) + "\n")
     }
+
+    private fun hashArguments(arguments: List<String>): String = VectrasTermuxIpcContract.sha256(
+        arguments.joinToString(separator = "\n") { argument ->
+            "${argument.toByteArray(Charsets.UTF_8).size}:$argument"
+        },
+    )
 
     private fun requestDirectory(context: Context): File? =
         ensureDirectory(File(context.filesDir, REQUEST_DIRECTORY))
@@ -161,6 +191,7 @@ object VectrasTermuxReceiptStore {
 
     private fun safeTransactionId(value: String): Boolean = TRANSACTION_PATTERN.matches(value)
 
+    private val ALLOWED_REQUEST_KINDS = setOf("qemu", "maintenance")
     private val TRANSACTION_PATTERN = Regex("^[A-Za-z0-9._:-]{8,128}$")
     private val SHA256_PATTERN = Regex("^[0-9a-f]{64}$")
 }

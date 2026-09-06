@@ -14,6 +14,9 @@ import com.vectras.qemu.Config;
 import com.vectras.qemu.MainSettingsManager;
 import com.vectras.vm.core.DeterministicRuntimeMatrix;
 import com.vectras.vm.download.DownloadStateReconciler;
+import com.vectras.vm.integration.VectrasTermuxMaintenanceCoordinator;
+import com.vectras.vm.main.MainActivity;
+import com.vectras.vm.setupwizard.SetupFeatureCore;
 import com.vectras.vm.utils.PackageUtils;
 import com.vectras.vm.utils.UIUtils;
 import com.vectras.vm.vectra.VectraCore;
@@ -24,6 +27,7 @@ import java.util.Locale;
 public class VectrasApp extends Application {
 	public static VectrasApp vectrasapp;
 	private static WeakReference<Context> context;
+    private boolean termuxMaintenanceOfferIssued = false;
 
 	public static Context getContext() {
 		return context.get();
@@ -81,7 +85,24 @@ public class VectrasApp extends Application {
 
             @Override public void onActivityCreated(@NonNull Activity activity, Bundle savedInstanceState) {}
             @Override public void onActivityStarted(@NonNull Activity activity) {}
-            @Override public void onActivityResumed(@NonNull Activity activity) {}
+
+            @Override
+            public void onActivityResumed(@NonNull Activity activity) {
+                if (termuxMaintenanceOfferIssued || !(activity instanceof MainActivity)) {
+                    return;
+                }
+                try {
+                    if (!SetupFeatureCore.isInstalledSystemFiles(activity)
+                            || !SetupFeatureCore.isInstalledQemu(activity)) {
+                        return;
+                    }
+                    termuxMaintenanceOfferIssued = true;
+                    VectrasTermuxMaintenanceCoordinator.offerRepairIfNeeded(activity);
+                } catch (Throwable t) {
+                    android.util.Log.w("VectrasApp", "Termux maintenance readiness check failed", t);
+                }
+            }
+
             @Override public void onActivityPaused(@NonNull Activity activity) {}
             @Override public void onActivityStopped(@NonNull Activity activity) {}
             @Override public void onActivitySaveInstanceState(@NonNull Activity activity, @NonNull Bundle outState) {}
@@ -93,7 +114,6 @@ public class VectrasApp extends Application {
 	@Override
 	public void onTerminate() {
 		super.onTerminate();
-		// Cleanup VectraCore resources
 		VectraCore.shutdown();
 	}
 
