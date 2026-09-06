@@ -1,0 +1,111 @@
+name: PBIP-L1 Evidence
+
+on:
+  pull_request:
+    paths:
+      - 'app/src/main/java/com/vectras/vm/core/PbipL1.java'
+      - 'app/src/test/java/com/vectras/vm/core/PbipL1Test.java'
+      - 'docs/rafaelia/PBIP_L1_FEDERATED_BINDING_V1.md'
+      - '.github/workflows/pbip-l1-evidence.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pbip-l1-evidence-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  pbip-l1:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Provision canonical Android CMake
+        shell: bash
+        run: |
+          set -euo pipefail
+          SDK_ROOT="${ANDROID_SDK_ROOT:-${ANDROID_HOME:-/usr/local/lib/android/sdk}}"
+          SDKMANAGER="${SDK_ROOT}/cmdline-tools/latest/bin/sdkmanager"
+          if [[ ! -x "${SDKMANAGER}" ]]; then
+            SDKMANAGER="$(command -v sdkmanager)"
+          fi
+          yes | "${SDKMANAGER}" --licenses >/dev/null || true
+          "${SDKMANAGER}" "cmake;3.22.1"
+
+      - name: Run canonical PBIP-L1 unit tests
+        run: |
+          set -euo pipefail
+          ./tools/gradle_with_jdk21.sh \
+            :app:testDebugUnitTest \
+            --tests com.vectras.vm.core.PbipL1Test \
+            --stacktrace
+
+      - name: Emit append-only evidence payload
+        env:
+          PBIP_COMMIT: ${{ github.event.pull_request.head.sha || github.sha }}
+          PBIP_RUN_ID: ${{ github.run_id }}
+          PBIP_RUN_ATTEMPT: ${{ github.run_attempt }}
+        run: |
+          set -euo pipefail
+          mkdir -p build/pbip-l1
+          SRC='app/src/main/java/com/vectras/vm/core/PbipL1.java'
+          TEST='app/src/test/java/com/vectras/vm/core/PbipL1Test.java'
+          SRC_SHA="$(sha256sum "$SRC" | awk '{print $1}')"
+          TEST_SHA="$(sha256sum "$TEST" | awk '{print $1}')"
+          python3 - "$SRC_SHA" "$TEST_SHA" <<'PY'
+          import json, os, sys
+          src_sha, test_sha = sys.argv[1:]
+          receipt = {
+              "schema_version": "1.0",
+              "federation_id": "PBIP-L1-FED-V1",
+              "formula_id": "PBIP-L1",
+              "provider": "github-actions",
+              "repository": os.environ["GITHUB_REPOSITORY"],
+              "implementation_commit": os.environ["PBIP_COMMIT"],
+              "workflow_run_id": int(os.environ["PBIP_RUN_ID"]),
+              "workflow_run_attempt": int(os.environ["PBIP_RUN_ATTEMPT"]),
+              "implementation_path": "app/src/main/java/com/vectras/vm/core/PbipL1.java",
+              "implementation_sha256": src_sha,
+              "test_path": "app/src/test/java/com/vectras/vm/core/PbipL1Test.java",
+              "test_sha256": test_sha,
+              "numeric_tolerance": 1e-12,
+              "canonical_cases": [
+                  {"r": 5, "d_perp": 3, "q2": 16, "delta_b": 64, "class": "SECANT"},
+                  {"r": 5, "d_perp": 5, "q2": 0, "delta_b": 0, "class": "TANGENT"},
+                  {"r": 5, "d_perp": 6, "q2": -11, "delta_b": -44, "class": "NO_REAL_INTERSECTION"}
+              ],
+              "source_observed": True,
+              "implemented_pbip_consumer": True,
+              "pbip_unit_build_proven": True,
+              "unit_test_execution_proven": True,
+              "android_runtime_proven": False,
+              "device_proven": False,
+              "reproduced_independently": False,
+              "claim_allowed": False
+          }
+          with open("build/pbip-l1/PBIP_L1_CI_RECEIPT.v1.json", "w", encoding="utf-8") as f:
+              json.dump(receipt, f, indent=2, sort_keys=True)
+              f.write("\n")
+          PY
+          sha256sum build/pbip-l1/PBIP_L1_CI_RECEIPT.v1.json \
+            > build/pbip-l1/PBIP_L1_CI_RECEIPT.v1.json.sha256
+          cat build/pbip-l1/PBIP_L1_CI_RECEIPT.v1.json
+          cat build/pbip-l1/PBIP_L1_CI_RECEIPT.v1.json.sha256
+
+      - name: Upload PBIP-L1 evidence artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: pbip-l1-ci-receipt
+          path: build/pbip-l1/
+          if-no-files-found: error
+          retention-days: 90
