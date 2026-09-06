@@ -1,26 +1,27 @@
-#!/data/data/com.termux/files/usr/bin/bash
+#!/data/data/com.termux.rafacodephi/files/usr/bin/bash
 # Vectras/RAFCODEPHI beta closure doctor.
-# Audits the whole chain and, with --repair, performs idempotent Termux repair.
-# It intentionally does not stop at the first failure.
+# Audits the whole chain and, with --repair, performs idempotent staged repair.
+# It intentionally surveys every gate before returning a fail-closed status.
 set -u
 
 MODE="audit"
 case "${1:-}" in
   "") ;;
   --audit) MODE="audit" ;;
-  --repair) MODE="repair" ;;
+  --repair|--enterprise) MODE="repair" ;;
   -h|--help)
     cat <<'EOF'
-Usage: vectras_termux_beta_closure.sh [--audit|--repair]
-  --audit   inspect every gate; do not install packages (default)
-  --repair  install/repair staged Termux packages, then inspect every gate
+Usage: vectras_termux_beta_closure.sh [--audit|--repair|--enterprise]
+  --audit       inspect every gate; do not install packages (default)
+  --repair      staged pkg repair + full inspection; RAFCODEPHI gate is required
+  --enterprise  alias for --repair
 EOF
     exit 0
     ;;
   *) printf 'unknown option: %s\n' "$1" >&2; exit 2 ;;
 esac
 
-PREFIX="${PREFIX:-/data/data/com.termux/files/usr}"
+PREFIX="${PREFIX:-/data/data/com.termux.rafacodephi/files/usr}"
 PKG_APP="${VECTRAS_PACKAGE:-com.rafacodephi.app}"
 BASE_OUT="${VECTRAS_BETA_RECEIPT_DIR:-$HOME/.local/state/vectras-beta}"
 RUN_AS="$(command -v run-as 2>/dev/null || true)"
@@ -53,7 +54,6 @@ record() {
 }
 
 run_capture() {
-  # Usage: run_capture phase subject command...
   local phase="$1" subject="$2"; shift 2
   local output rc
   output="$("$@" 2>&1)"; rc=$?
@@ -88,7 +88,7 @@ check_pkg() {
 check_app_path() {
   local rel="$1" id="$2" kind="${3:-exists}"
   if [ ! -x "$RUN_AS" ]; then
-    record APP_FILES TOKEN_VAZIO "$id" "run-as unavailable; physical app-private path cannot be inspected"
+    record APP_FILES TOKEN_VAZIO "$id" "run-as unavailable; in-app receipt must prove private runtime"
     return 0
   fi
   local testop="-e"
@@ -97,9 +97,8 @@ check_app_path() {
     record APP_FILES PASS "$id" "$rel $kind"
   else
     local rc=$?
-    # Distinguish inaccessible run-as from a genuinely missing path.
     if ! "$RUN_AS" "$PKG_APP" sh -c 'pwd' >/dev/null 2>&1; then
-      record APP_FILES TOKEN_VAZIO "$id" "run-as denied/non-debuggable; cannot claim path missing (probe rc=$rc)"
+      record APP_FILES TOKEN_VAZIO "$id" "run-as denied/non-debuggable; use in-app vectras.runtime-evidence.v1 receipt (probe rc=$rc)"
     else
       record APP_FILES BLOCKER "$id" "$rel missing or not $kind"
     fi
@@ -123,8 +122,6 @@ if [ "$MODE" = "repair" ]; then
   if ! command -v pkg >/dev/null 2>&1; then
     record REPAIR BLOCKER pkg "Termux pkg command unavailable"
   else
-    # Stage 1 must complete before repository metadata is refreshed; QEMU is
-    # intentionally not mixed into the same resolver transaction.
     out="$(pkg install -y "${BOOTSTRAP_PKGS[@]}" 2>&1)"; rc=$?
     [ "$rc" -eq 0 ] && record REPAIR PASS bootstrap_toolchain "stage1 installed" || record REPAIR FAIL bootstrap_toolchain "rc=$rc $(printf '%s' "$out" | tail -n 1)"
 
@@ -136,7 +133,6 @@ if [ "$MODE" = "repair" ]; then
   fi
 fi
 
-# Never short-circuit package inventory: one broken package must not hide the rest.
 for p in "${BOOTSTRAP_PKGS[@]}"; do check_pkg "$p"; done
 for p in "${QEMU_PKGS[@]}"; do check_pkg "$p"; done
 
@@ -151,15 +147,20 @@ command -v clang >/dev/null 2>&1 && run_capture TERMUX_EXEC clang_version clang 
 command -v qemu-system-x86_64 >/dev/null 2>&1 && run_capture TERMUX_EXEC qemu_x86_64_version qemu-system-x86_64 --version
 command -v qemu-img >/dev/null 2>&1 && run_capture TERMUX_EXEC qemu_img_version qemu-img --version
 
-# Android package visibility: this is independent of app-private file visibility.
 if /system/bin/cmd package path "$PKG_APP" >/tmp/vectras_pkg_path.$$ 2>/tmp/vectras_pkg_err.$$; then
-  record ANDROID_PACKAGE PASS installed "$(head -n 1 /tmp/vectras_pkg_path.$$)"
+  APP_PATH_LINE="$(head -n 1 /tmp/vectras_pkg_path.$$)"
+  record ANDROID_PACKAGE PASS installed "$APP_PATH_LINE"
+  APP_APK="${APP_PATH_LINE#package:}"
+  if [ -r "$APP_APK" ] && command -v sha256sum >/dev/null 2>&1; then
+    record ANDROID_PACKAGE PASS apk_sha256 "$(sha256sum "$APP_APK" | awk '{print $1}')"
+  else
+    record ANDROID_PACKAGE TOKEN_VAZIO apk_sha256 "APK path not readable externally; in-app receipt hashes its own sourceDir"
+  fi
 else
   record ANDROID_PACKAGE BLOCKER installed "$(head -n 1 /tmp/vectras_pkg_err.$$ 2>/dev/null || echo package_not_visible)"
 fi
 rm -f /tmp/vectras_pkg_path.$$ /tmp/vectras_pkg_err.$$ 2>/dev/null || true
 
-# Installed Vectras standalone runtime expected by SetupFeatureCore/diagnostic contract.
 check_app_path files/usr APP_USR exists
 check_app_path files/usr/bin/proot APP_PROOT exists
 check_app_path files/usr/bin/proot APP_PROOT_EXEC exec
@@ -170,24 +171,32 @@ check_app_path files/distro/usr/bin/qemu-system-i386 APP_QEMU_I386 exec
 check_app_path files/distro/usr/bin/qemu-system-aarch64 APP_QEMU_AARCH64 exec
 check_app_path files/distro/usr/bin/qemu-img APP_QEMU_IMG exec
 
-# Cross-repo freestanding control gate is optional here; absence is evidence, not a reason to stop.
 RAF_GATE="$PREFIX/libexec/rafproot-fs"
 if [ -x "$RAF_GATE" ]; then
   record RAFCODE_GATE PASS rafproot_fs "$RAF_GATE"
+  if command -v sha256sum >/dev/null 2>&1; then
+    record RAFCODE_GATE PASS gate_sha256 "$(sha256sum "$RAF_GATE" | awk '{print $1}')"
+  else
+    record RAFCODE_GATE TOKEN_VAZIO gate_sha256 "sha256sum unavailable"
+  fi
   run_capture RAFCODE_GATE probe "$RAF_GATE" --probe
   run_capture RAFCODE_GATE ninja "$RAF_GATE" --run ninja --version
   run_capture RAFCODE_GATE proot "$RAF_GATE" --run proot --version
   run_capture RAFCODE_GATE qemu "$RAF_GATE" --run qemu-system-x86_64 --version
 else
-  record RAFCODE_GATE TOKEN_VAZIO rafproot_fs "$RAF_GATE not installed; Vectras standalone path remains independently auditable"
+  if [ "$MODE" = "repair" ]; then
+    record RAFCODE_GATE BLOCKER rafproot_fs "$RAF_GATE missing in enterprise repair mode"
+  else
+    record RAFCODE_GATE TOKEN_VAZIO rafproot_fs "$RAF_GATE not installed; audit claim remains open"
+  fi
 fi
 
 cp "$RECEIPT" "$LATEST" 2>/dev/null || true
 printf '\nReceipt: %s\n' "$RECEIPT"
 printf 'Summary: PASS=%d FAIL/BLOCKER=%d BLOCKER=%d TOKEN_VAZIO=%d\n' "$passes" "$failures" "$blockers" "$token_vazios"
 
-# Fail only after the complete survey has been emitted.
-if [ "$blockers" -gt 0 ]; then
+# Full survey first, fail-closed status second. Any real FAIL is a failed closure.
+if [ "$failures" -gt 0 ]; then
   exit 1
 fi
 exit 0
