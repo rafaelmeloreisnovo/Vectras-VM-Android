@@ -15,6 +15,16 @@ assert spec.loader is not None
 spec.loader.exec_module(module)
 
 
+def _root(tf: tarfile.TarFile) -> None:
+    info = tarfile.TarInfo("./")
+    info.type = tarfile.DIRTYPE
+    info.mode = 0o755
+    info.uid = 0
+    info.gid = 0
+    info.mtime = 0
+    tf.addfile(info)
+
+
 def _regular(tf: tarfile.TarFile, name: str, data: bytes, mode: int = 0o755) -> None:
     info = tarfile.TarInfo(name)
     info.size = len(data)
@@ -27,6 +37,7 @@ def _regular(tf: tarfile.TarFile, name: str, data: bytes, mode: int = 0o755) -> 
 
 def _build_bootstrap(path: Path, *, include_tmp: bool) -> None:
     with tarfile.open(path, "w", format=tarfile.PAX_FORMAT) as tf:
+        _root(tf)
         _regular(tf, "usr/bin/proot", b"proot-binary", 0o755)
         if include_tmp:
             directory = tarfile.TarInfo("usr/tmp/")
@@ -49,6 +60,7 @@ def test_injects_usr_tmp_and_preserves_proot_bytes(tmp_path: Path) -> None:
 
     with tarfile.open(tar_path, "r:*") as tf:
         members = {member.name.rstrip("/"): member for member in tf.getmembers()}
+        assert "." in members
         assert "usr/bin/proot" in members
         assert "usr/tmp" in members
         assert members["usr/tmp"].isdir()
