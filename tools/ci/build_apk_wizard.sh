@@ -8,6 +8,7 @@ GRADLEW="${REPO_ROOT}/gradlew"
 RUNTIME_SEED_MANIFEST="${REPO_ROOT}/configs/embedded_runtime_seed_assets.v1.json"
 RUNTIME_SEED_RECEIPT="${OUT_DIR}/alpine19-materialization.json"
 QEMU_RUNTIME_RECEIPT="${OUT_DIR}/qemu19-materialization.json"
+BOOTSTRAP_LAYOUT_RECEIPT="${OUT_DIR}/bootstrap-layout-normalization.json"
 ROOTFS_NORMALIZATION_RECEIPT="${OUT_DIR}/rootfs-symlink-normalization.json"
 BOOTSTRAP_RECEIPT_SRC="${REPO_ROOT}/app/build/reports/bootstrap/bootstrap-materialization.json"
 BOOTSTRAP_RECEIPT_DST="${OUT_DIR}/bootstrap-materialization.json"
@@ -32,6 +33,15 @@ echo "[wizard] clean app build tree before runtime materialization"
 echo "[wizard] materialize pinned PRoot bootstrap TARs with SHA-256 enforcement"
 python3 "${REPO_ROOT}/tools/ci/materialize_bootstrap_assets.py"
 cp -f "${BOOTSTRAP_RECEIPT_SRC}" "${BOOTSTRAP_RECEIPT_DST}"
+
+# SetupFeatureCore validates usr/tmp immediately after bootstrap extraction, before
+# its historical later mkdir step. Keep the exact upstream SHA in the source
+# receipt above, then derive the APK-carried TAR with usr/tmp guaranteed present.
+echo "[wizard] normalize PRoot bootstrap runtime layout for ARM lanes"
+python3 "${REPO_ROOT}/tools/bootstrap/normalize_bootstrap_tar_layout.py" \
+  --root "${GENERATED_ASSETS_ROOT}/bootstrap" \
+  --abis "arm64-v8a,armeabi-v7a" \
+  --receipt "${BOOTSTRAP_LAYOUT_RECEIPT}"
 
 echo "[wizard] materialize pinned Alpine19 rootfs TARs for ARM lanes"
 python3 "${REPO_ROOT}/tools/bootstrap/materialize_embedded_runtime_seed_assets.py" \
@@ -92,7 +102,7 @@ with zipfile.ZipFile(apk) as zf:
             raise SystemExit(f'missing embedded QEMU runtime: {entry}')
         data = zf.read(entry)
         with tarfile.open(fileobj=io.BytesIO(data), mode='r:*') as tf:
-            names = {m.name.lstrip('./') for m in tf.getmembers()}
+            names = {m.name.lstrip('./').rstrip('/') for m in tf.getmembers()}
         missing = sorted(required - names)
         if missing:
             raise SystemExit(f'{entry} missing runtime markers: {missing}')
@@ -182,7 +192,8 @@ source_commit="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1], 
   echo
   echo "Embedded runtime seed source: \`xoureldeen/Vectras-VM-Android@${source_commit}\`"
   echo
-  echo "Bootstrap TARs: exact SHA-256 enforced by tools/ci/bootstrap-assets.v1.json."
+  echo "Bootstrap TARs: exact source SHA-256 enforced by tools/ci/bootstrap-assets.v1.json, then usr/tmp layout normalized before APK packaging."
+  echo "Bootstrap layout normalization: ${BOOTSTRAP_LAYOUT_RECEIPT}; derived embedded TAR SHA-256 values recorded separately from pinned input provenance."
   echo "Alpine19 TARs: exact source size + Git blob SHA-1 + SHA-256 enforced before deterministic rootfs-symlink normalization."
   echo "QEMU19 TARs: same-arch Alpine v3.19 + QEMU 8.1.5-r0 assembled at build time, then rootfs symlinks normalized and embedded in APK; device network not required."
   echo "Rootfs normalization: ${ROOTFS_NORMALIZATION_RECEIPT}; derived embedded TAR SHA-256 values recorded separately from pinned input provenance."
