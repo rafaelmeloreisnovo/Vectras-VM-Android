@@ -59,8 +59,14 @@ def test_alpine_absolute_rootfs_symlinks_become_host_safe_relative_links(tmp_pat
     assert first["before_sha256"] != first["after_sha256"]
 
     with tarfile.open(tar_path, "r:*") as tf:
-        members = {member.name: member for member in tf.getmembers()}
-        assert "./" in members
+        # tarfile may expose a conventional './' root entry as '.'. Compare
+        # through the normalizer's own canonical member-name contract instead
+        # of requiring one serialization spelling.
+        members = {
+            module.normalize_member_name(member.name): member
+            for member in tf.getmembers()
+        }
+        assert "." in members
         assert members["bin/sh"].linkname == "busybox"
         assert members["usr/bin/env"].linkname == "../../bin/busybox"
         assert not members["bin/sh"].linkname.startswith("/")
