@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import re
 import sys
@@ -14,7 +15,7 @@ GUEST_PATH = "/usr/local/bin:/usr/bin:/bin:/usr/local/sbin:/usr/sbin:/sbin"
 SHA_RE = re.compile(r"^[0-9a-f]{64}$")
 QEMU_RE = re.compile(r"^qemu-system-[A-Za-z0-9_.-]+$")
 GUEST_EXEC_RE = re.compile(r"^/(?:usr/local/bin|usr/bin|bin|usr/local/sbin|usr/sbin|sbin)/[A-Za-z0-9_.-]+$")
-HASH_FIELDS = ("apk_sha256", "proot_sha256", "qemu_sha256", "qemu_img_sha256")
+ARTIFACT_HASH_FIELDS = ("apk_sha256", "proot_sha256", "qemu_sha256", "qemu_img_sha256")
 BOOL_FIELDS = (
     "proot_executable",
     "root_shell_executable",
@@ -23,8 +24,10 @@ BOOL_FIELDS = (
     "bootstrap_validator_ok",
 )
 TOP_KEYS = {
-    "schema", "receipt_id", "created_unix_ms", "package_name", "requested_qemu_binary",
-    "guest_path", "resolved_qemu_guest_path", "resolved_qemu_img_guest_path",
+    "schema", "receipt_id", "created_unix_ms", "package_name",
+    "requested_qemu_token", "requested_qemu_binary", "guest_path",
+    "resolved_qemu_guest_path", "resolved_qemu_img_guest_path",
+    "resolved_launch_argv_sha256", "resolved_launch_argv",
     "apk_sha256", "proot_sha256", "qemu_sha256", "qemu_img_sha256",
     "proot_executable", "root_shell_executable", "qemu_executable", "qemu_img_executable",
     "bootstrap_validator_ok", "bootstrap_validator_summary", "qemu_probe", "qemu_img_probe",
@@ -32,6 +35,19 @@ TOP_KEYS = {
     "android_supported_abis", "device_state", "reproduced_state", "claim_allowed", "reason",
 }
 PROBE_KEYS = {"ok", "exit_code", "status", "detail"}
+
+
+def basename(value: str) -> str:
+    return value.replace("\\", "/").rsplit("/", 1)[-1]
+
+
+def sha256_argv(argv: list[str]) -> str:
+    digest = hashlib.sha256()
+    for arg in argv:
+        data = arg.encode("utf-8")
+        digest.update(len(data).to_bytes(4, byteorder="big", signed=False))
+        digest.update(data)
+    return digest.hexdigest()
 
 
 def validate_probe(name: str, raw: Any, errors: list[str]) -> None:
@@ -74,23 +90,45 @@ def validate(path: Path) -> dict[str, Any]:
         errors.append("created_unix_ms invalid")
     if not isinstance(doc.get("package_name"), str) or not doc.get("package_name"):
         errors.append("package_name invalid")
-    qemu_token = doc.get("requested_qemu_binary")
-    if not isinstance(qemu_token, str) or not QEMU_RE.fullmatch(qemu_token):
+
+    requested_token = doc.get("requested_qemu_token")
+    qemu_binary = doc.get("requested_qemu_binary")
+    if not isinstance(requested_token, str) or not requested_token or len(requested_token) > 1024:
+        errors.append("requested_qemu_token invalid")
+    if not isinstance(qemu_binary, str) or not QEMU_RE.fullmatch(qemu_binary):
         errors.append("requested_qemu_binary invalid")
+    elif isinstance(requested_token, str) and basename(requested_token) != qemu_binary:
+        errors.append("requested_qemu_token basename mismatch")
+
     if doc.get("guest_path") != GUEST_PATH:
         errors.append("guest_path mismatch")
     qemu_guest = doc.get("resolved_qemu_guest_path")
     qemu_img_guest = doc.get("resolved_qemu_img_guest_path")
     if not isinstance(qemu_guest, str) or not GUEST_EXEC_RE.fullmatch(qemu_guest):
         errors.append("resolved_qemu_guest_path invalid")
-    elif isinstance(qemu_token, str) and Path(qemu_guest).name != qemu_token:
+    elif isinstance(qemu_binary, str) and Path(qemu_guest).name != qemu_binary:
         errors.append("resolved_qemu_guest_path basename mismatch")
     if not isinstance(qemu_img_guest, str) or not GUEST_EXEC_RE.fullmatch(qemu_img_guest):
         errors.append("resolved_qemu_img_guest_path invalid")
     elif Path(qemu_img_guest).name != "qemu-img":
         errors.append("resolved_qemu_img_guest_path basename mismatch")
 
-    for field in HASH_FIELDS:
+    launch_argv = doc.get("resolved_launch_argv")
+    argv_structure_ok = isinstance(launch_argv, list) and bool(launch_argv) and all(isinstance(item, str) for item in launch_argv)
+    if not argv_structure_ok:
+        errors.append("resolved_launch_argv invalid")
+        launch_argv = []
+    elif launch_argv[0] != qemu_guest:
+        errors.append("resolved_launch_argv[0] must equal resolved_qemu_guest_path")
+    argv_sha = doc.get("resolved_launch_argv_sha256")
+    if argv_sha != "TOKEN_VAZIO" and (not isinstance(argv_sha, str) or not SHA_RE.fullmatch(argv_sha)):
+        errors.append("resolved_launch_argv_sha256 invalid")
+    if argv_structure_ok and isinstance(argv_sha, str) and SHA_RE.fullmatch(argv_sha):
+        calculated = sha256_argv(launch_argv)
+        if calculated != argv_sha:
+            errors.append("resolved_launch_argv_sha256 mismatch")
+
+    for field in ARTIFACT_HASH_FIELDS:
         value = doc.get(field)
         if value != "TOKEN_VAZIO" and (not isinstance(value, str) or not SHA_RE.fullmatch(value)):
             errors.append(f"{field} invalid")
@@ -118,7 +156,17 @@ def validate(path: Path) -> dict[str, Any]:
     if doc.get("reproduced_state") == "REPRODUCED":
         errors.append("single receipt cannot self-promote REPRODUCED")
 
-    hashes_bound = all(isinstance(doc.get(field), str) and SHA_RE.fullmatch(doc[field]) for field in HASH_FIELDS)
+    artifact_hashes_bound = all(
+        isinstance(doc.get(field), str) and SHA_RE.fullmatch(doc[field])
+        for field in ARTIFACT_HASH_FIELDS
+    )
+    argv_bound = (
+        argv_structure_ok
+        and isinstance(argv_sha, str)
+        and SHA_RE.fullmatch(argv_sha) is not None
+        and sha256_argv(launch_argv) == argv_sha
+        and launch_argv[0] == qemu_guest
+    )
     runtime_files_ok = all(doc.get(field) is True for field in BOOL_FIELDS)
     probes_ok = all(
         isinstance(doc.get(field), dict)
@@ -126,7 +174,7 @@ def validate(path: Path) -> dict[str, Any]:
         and doc[field].get("exit_code") == 0
         for field in ("qemu_probe", "qemu_img_probe")
     )
-    expected_promoted = hashes_bound and runtime_files_ok and probes_ok
+    expected_promoted = artifact_hashes_bound and argv_bound and runtime_files_ok and probes_ok
     promoted = doc.get("device_state") == "DEVICE_PROVEN" and doc.get("claim_allowed") is True
     if promoted != expected_promoted:
         errors.append("promotion invariant violated")
@@ -149,8 +197,9 @@ def reproduce(first: dict[str, Any], second: dict[str, Any]) -> dict[str, Any]:
     if a.get("created_unix_ms") == b.get("created_unix_ms"):
         errors.append("timestamps must differ")
     for field in (
-        "package_name", "requested_qemu_binary", "guest_path",
+        "package_name", "requested_qemu_token", "requested_qemu_binary", "guest_path",
         "resolved_qemu_guest_path", "resolved_qemu_img_guest_path",
+        "resolved_launch_argv_sha256", "resolved_launch_argv",
         "apk_sha256", "proot_sha256", "qemu_sha256", "qemu_img_sha256",
         "android_fingerprint", "android_hardware",
     ):
@@ -159,8 +208,10 @@ def reproduce(first: dict[str, Any], second: dict[str, Any]) -> dict[str, Any]:
     for label, doc in (("first", a), ("second", b)):
         if not (doc.get("device_state") == "DEVICE_PROVEN" and doc.get("claim_allowed") is True):
             errors.append(f"{label} not DEVICE_PROVEN")
-        if any(not isinstance(doc.get(field), str) or not SHA_RE.fullmatch(doc[field]) for field in HASH_FIELDS):
+        if any(not isinstance(doc.get(field), str) or not SHA_RE.fullmatch(doc[field]) for field in ARTIFACT_HASH_FIELDS):
             errors.append(f"{label} artifact hashes not bound")
+        if not isinstance(doc.get("resolved_launch_argv_sha256"), str) or not SHA_RE.fullmatch(doc["resolved_launch_argv_sha256"]):
+            errors.append(f"{label} resolved argv not bound")
     return {
         "schema": "vectras.runtime-reproduction.v1",
         "receipt_ids": [a.get("receipt_id"), b.get("receipt_id")],
@@ -169,6 +220,11 @@ def reproduce(first: dict[str, Any], second: dict[str, Any]) -> dict[str, Any]:
         "proot_sha256": a.get("proot_sha256") if a.get("proot_sha256") == b.get("proot_sha256") else None,
         "qemu_sha256": a.get("qemu_sha256") if a.get("qemu_sha256") == b.get("qemu_sha256") else None,
         "qemu_img_sha256": a.get("qemu_img_sha256") if a.get("qemu_img_sha256") == b.get("qemu_img_sha256") else None,
+        "resolved_launch_argv_sha256": (
+            a.get("resolved_launch_argv_sha256")
+            if a.get("resolved_launch_argv_sha256") == b.get("resolved_launch_argv_sha256")
+            else None
+        ),
         "android_fingerprint": a.get("android_fingerprint") if a.get("android_fingerprint") == b.get("android_fingerprint") else None,
         "reproduced_state": "REPRODUCED" if not errors else "TOKEN_VAZIO",
         "claim_allowed": not errors,
