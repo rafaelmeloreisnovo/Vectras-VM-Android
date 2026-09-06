@@ -30,6 +30,18 @@ jobs:
           distribution: temurin
           java-version: '21'
 
+      - name: Provision canonical Android CMake
+        shell: bash
+        run: |
+          set -euo pipefail
+          SDK_ROOT="${ANDROID_SDK_ROOT:-${ANDROID_HOME:-/usr/local/lib/android/sdk}}"
+          SDKMANAGER="${SDK_ROOT}/cmdline-tools/latest/bin/sdkmanager"
+          if [[ ! -x "${SDKMANAGER}" ]]; then
+            SDKMANAGER="$(command -v sdkmanager)"
+          fi
+          yes | "${SDKMANAGER}" --licenses >/dev/null || true
+          "${SDKMANAGER}" "cmake;3.22.1"
+
       - name: Run canonical PBIP-L1 unit tests
         run: |
           set -euo pipefail
