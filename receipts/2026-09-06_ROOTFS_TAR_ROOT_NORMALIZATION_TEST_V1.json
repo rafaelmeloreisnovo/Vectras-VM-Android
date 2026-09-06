@@ -1,0 +1,31 @@
+{
+  "schema": "vectras.hotfix_receipt/v1",
+  "receipt_id": "VECTRAS-ROOTFS-TAR-ROOT-NORMALIZATION-TEST-20260906-V1",
+  "repository": "rafaelmeloreisnovo/Vectras-VM-Android",
+  "baseline": "c98e5a79f70f6fd1316cad26faf328a725b8a792",
+  "source_commit": "1efcea1333a2ae0c2f5456a40b55ab207b3d4b12",
+  "observed_failure": {
+    "workflow": "APK Wizard",
+    "run_id": 34062941516,
+    "job_id": 101566616706,
+    "step": "Validate APK-local bootstrap normalization contracts",
+    "test": "tests/test_normalize_rootfs_tar_symlinks.py",
+    "failure": "assert './' in members"
+  },
+  "root_cause_classification": "TEST_ASSERTED_SERIALIZATION_SPELLING_INSTEAD_OF_CANONICAL_ROOT_MEMBER",
+  "evidence": [
+    "fixture writes TarInfo('./')",
+    "normalizer contract explicitly accepts conventional root member '.' or './'",
+    "tarfile may expose the root member as '.' when the archive is reopened"
+  ],
+  "change": "build the member map through normalize_member_name() and assert canonical '.' root membership",
+  "non_changes": [
+    "rootfs TAR rewrite algorithm",
+    "symlink target rewrite semantics",
+    "runtime assets",
+    "Android/QEMU code",
+    "device claim"
+  ],
+  "claim_allowed": false,
+  "rollback_ref": "c98e5a79f70f6fd1316cad26faf328a725b8a792"
+}
