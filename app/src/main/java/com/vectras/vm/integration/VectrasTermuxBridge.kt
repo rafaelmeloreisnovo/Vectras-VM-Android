@@ -14,7 +14,7 @@ import java.util.UUID
  * Bounded dispatcher from Vectras to the external Termux RAFCODE-Phi runtime.
  *
  * A successful return means Android accepted the service dispatch. It does not
- * prove QEMU execution, exit code, guest boot or VM correctness.
+ * prove QEMU execution, exit code, package installation or guest correctness.
  */
 object VectrasTermuxBridge {
 
@@ -88,21 +88,75 @@ object VectrasTermuxBridge {
                 reason = "arguments_outside_ipc_v3_contract",
             )
 
+        return dispatchBoundedCommand(
+            context = context,
+            targetName = binaryName,
+            commandPath = VectrasTermuxIpcContract.commandPath(binaryName),
+            arguments = boundedArguments,
+            requestKind = "qemu",
+            transactionPrefix = "tx-vectras-termux",
+        ) { transactionId ->
+            VectrasTermuxIpcContract.canonicalRequest(
+                transactionId = transactionId,
+                binaryName = binaryName,
+                arguments = boundedArguments,
+            )
+        }
+    }
+
+    fun dispatchMaintenance(
+        context: Context,
+        stage: VectrasTermuxIpcContract.MaintenanceStage,
+    ): DispatchResult {
+        val boundedArguments = VectrasTermuxIpcContract.boundedMaintenanceArguments(stage)
+            ?: return DispatchResult(
+                State.INVALID_ARGUMENTS,
+                null,
+                stage.targetName,
+                null,
+                reason = "maintenance_arguments_outside_ipc_v3_contract",
+            )
+
+        return dispatchBoundedCommand(
+            context = context,
+            targetName = stage.targetName,
+            commandPath = stage.commandPath,
+            arguments = boundedArguments,
+            requestKind = "maintenance",
+            transactionPrefix = "tx-vectras-maint",
+        ) { transactionId ->
+            VectrasTermuxIpcContract.canonicalMaintenanceRequest(
+                transactionId = transactionId,
+                stage = stage,
+                arguments = boundedArguments,
+            )
+        }
+    }
+
+    private fun dispatchBoundedCommand(
+        context: Context,
+        targetName: String,
+        commandPath: String,
+        arguments: List<String>,
+        requestKind: String,
+        transactionPrefix: String,
+        canonicalRequest: (String) -> String,
+    ): DispatchResult {
         if (!CrossRepoIntegrationManager.isTermuxInstalled(context)) {
-            return DispatchResult(State.TERMUX_NOT_INSTALLED, null, binaryName, null)
+            return DispatchResult(State.TERMUX_NOT_INSTALLED, null, targetName, null)
         }
         if (!hasRunCommandPermission(context)) {
             return DispatchResult(
                 State.PERMISSION_REQUIRED,
                 null,
-                binaryName,
+                targetName,
                 null,
                 reason = VectrasTermuxIpcContract.RUN_COMMAND_PERMISSION,
             )
         }
 
-        val transactionId = "tx-vectras-termux-${UUID.randomUUID()}"
-        val providerIdentity = CrossRepoIntegrationManager.loadProviderIdentity(context, binaryName)
+        val transactionId = "$transactionPrefix-${UUID.randomUUID()}"
+        val providerIdentity = CrossRepoIntegrationManager.loadProviderIdentity(context, targetName)
         val producerApkSha256 = context.applicationInfo.sourceDir
             ?.let(::File)
             ?.takeIf { it.isFile }
@@ -111,18 +165,14 @@ object VectrasTermuxBridge {
             providerIdentity.providerApkSha256 != null &&
             providerIdentity.providerBinarySha256Discovery != null
 
-        val requestSha256 = VectrasTermuxIpcContract.sha256(
-            VectrasTermuxIpcContract.canonicalRequest(
-                transactionId = transactionId,
-                binaryName = binaryName,
-                arguments = boundedArguments,
-            ),
-        )
+        val requestSha256 = VectrasTermuxIpcContract.sha256(canonicalRequest(transactionId))
         if (!VectrasTermuxReceiptStore.writePending(
                 context = context,
                 transactionId = transactionId,
-                binaryName = binaryName,
-                arguments = boundedArguments,
+                binaryName = targetName,
+                commandPath = commandPath,
+                requestKind = requestKind,
+                arguments = arguments,
                 requestSha256 = requestSha256,
                 producerApkSha256 = producerApkSha256,
                 providerApkSha256Discovery = providerIdentity.providerApkSha256,
@@ -134,11 +184,11 @@ object VectrasTermuxBridge {
             return DispatchResult(
                 State.REQUEST_PERSISTENCE_FAILED,
                 transactionId,
-                binaryName,
+                targetName,
                 null,
                 reason = "pending_request_not_persisted",
                 requestSha256 = requestSha256,
-                argumentCount = boundedArguments.size,
+                argumentCount = arguments.size,
                 provenanceBound = provenanceBound,
             )
         }
@@ -146,11 +196,9 @@ object VectrasTermuxBridge {
         val receiptIntent = Intent(context, VectrasTermuxResultReceiver::class.java).apply {
             action = VectrasTermuxResultReceiver.ACTION_EXECUTION_RESULT
             putExtra(VectrasTermuxResultReceiver.EXTRA_TRANSACTION_ID, transactionId)
-            putExtra(VectrasTermuxResultReceiver.EXTRA_BINARY_NAME, binaryName)
+            putExtra(VectrasTermuxResultReceiver.EXTRA_BINARY_NAME, targetName)
             putExtra(VectrasTermuxResultReceiver.EXTRA_REQUEST_SHA256, requestSha256)
         }
-        // Termux fills the result Bundle into this explicit PendingIntent. On
-        // Android 12+ this narrowly scoped token must therefore be mutable.
         val pendingFlags = PendingIntent.FLAG_UPDATE_CURRENT or
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                 PendingIntent.FLAG_MUTABLE
@@ -170,26 +218,11 @@ object VectrasTermuxBridge {
                 VectrasTermuxIpcContract.SERVICE_CLASS,
             )
             action = VectrasTermuxIpcContract.ACTION_RUN_COMMAND
-            putExtra(
-                VectrasTermuxIpcContract.EXTRA_COMMAND_PATH,
-                VectrasTermuxIpcContract.commandPath(binaryName),
-            )
-            putExtra(
-                VectrasTermuxIpcContract.EXTRA_ARGUMENTS,
-                boundedArguments.toTypedArray(),
-            )
-            putExtra(
-                VectrasTermuxIpcContract.EXTRA_WORKDIR,
-                VectrasTermuxIpcContract.WORKDIR,
-            )
-            putExtra(
-                VectrasTermuxIpcContract.EXTRA_RUNNER,
-                VectrasTermuxIpcContract.RUNNER_APP_SHELL,
-            )
-            putExtra(
-                VectrasTermuxIpcContract.EXTRA_PENDING_INTENT,
-                resultPendingIntent,
-            )
+            putExtra(VectrasTermuxIpcContract.EXTRA_COMMAND_PATH, commandPath)
+            putExtra(VectrasTermuxIpcContract.EXTRA_ARGUMENTS, arguments.toTypedArray())
+            putExtra(VectrasTermuxIpcContract.EXTRA_WORKDIR, VectrasTermuxIpcContract.WORKDIR)
+            putExtra(VectrasTermuxIpcContract.EXTRA_RUNNER, VectrasTermuxIpcContract.RUNNER_APP_SHELL)
+            putExtra(VectrasTermuxIpcContract.EXTRA_PENDING_INTENT, resultPendingIntent)
         }
 
         return try {
@@ -202,18 +235,18 @@ object VectrasTermuxBridge {
                 DispatchResult(
                     State.SERVICE_UNAVAILABLE,
                     transactionId,
-                    binaryName,
+                    targetName,
                     null,
                     reason = "service_component_null",
                     requestSha256 = requestSha256,
-                    argumentCount = boundedArguments.size,
+                    argumentCount = arguments.size,
                     provenanceBound = provenanceBound,
                 )
             } else {
                 DispatchResult(
                     state = State.DISPATCHED,
                     transactionId = transactionId,
-                    binaryName = binaryName,
+                    binaryName = targetName,
                     component = component.flattenToShortString(),
                     executionProven = false,
                     claimAllowed = false,
@@ -223,7 +256,7 @@ object VectrasTermuxBridge {
                         "dispatch_accepted_provenance_partial_execution_receipt_pending"
                     },
                     requestSha256 = requestSha256,
-                    argumentCount = boundedArguments.size,
+                    argumentCount = arguments.size,
                     provenanceBound = provenanceBound,
                 )
             }
@@ -231,28 +264,33 @@ object VectrasTermuxBridge {
             DispatchResult(
                 State.PERMISSION_REQUIRED,
                 transactionId,
-                binaryName,
+                targetName,
                 null,
                 reason = exc.javaClass.simpleName,
                 requestSha256 = requestSha256,
-                argumentCount = boundedArguments.size,
+                argumentCount = arguments.size,
                 provenanceBound = provenanceBound,
             )
         } catch (exc: RuntimeException) {
             DispatchResult(
                 State.ERROR,
                 transactionId,
-                binaryName,
+                targetName,
                 null,
                 reason = exc.javaClass.simpleName,
                 requestSha256 = requestSha256,
-                argumentCount = boundedArguments.size,
+                argumentCount = arguments.size,
                 provenanceBound = provenanceBound,
             )
         }
     }
 
     fun allowedBinaryNames(): Set<String> = allowedBinaries.toSet()
+
+    fun allowedReceiptTargets(): Set<String> = allowedBinaries + setOf(
+        VectrasTermuxIpcContract.MAINTENANCE_RAFPROOT_TARGET,
+        VectrasTermuxIpcContract.MAINTENANCE_PKG_TARGET,
+    )
 
     private fun hasRunCommandPermission(context: Context): Boolean {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) return true
