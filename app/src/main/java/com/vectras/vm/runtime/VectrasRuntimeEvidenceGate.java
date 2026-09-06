@@ -19,17 +19,19 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
-import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Locale;
 import java.util.regex.Pattern;
 
 /**
  * Fail-closed in-app evidence gate for Vectras' private PRoot/QEMU runtime.
  *
- * <p>The gate deliberately resolves executable files only inside the app-owned
- * rootfs, hashes those exact files, executes their corresponding absolute guest
- * paths through the same {@link ProotCommandBuilder}, and writes a synced receipt
- * before QEMU launch is admitted.</p>
+ * <p>The gate resolves executable files only inside the app-owned rootfs, hashes
+ * those exact files, executes their corresponding absolute guest paths through
+ * the same {@link ProotCommandBuilder}, resolves the final launch argv, hashes
+ * that argv, and writes a synced receipt before QEMU launch is admitted.</p>
  */
 public final class VectrasRuntimeEvidenceGate {
     private static final String TAG = "VectrasRuntimeEvidence";
@@ -47,13 +49,27 @@ public final class VectrasRuntimeEvidenceGate {
         public final String receiptPath;
         public final String reason;
         public final String resolvedQemuGuestPath;
+        public final String resolvedLaunchArgvSha256;
+        public final List<String> resolvedLaunchArgv;
 
-        Result(boolean ok, String state, String receiptPath, String reason, String resolvedQemuGuestPath) {
+        Result(
+                boolean ok,
+                String state,
+                String receiptPath,
+                String reason,
+                String resolvedQemuGuestPath,
+                String resolvedLaunchArgvSha256,
+                List<String> resolvedLaunchArgv
+        ) {
             this.ok = ok;
             this.state = state;
             this.receiptPath = receiptPath;
             this.reason = reason;
             this.resolvedQemuGuestPath = resolvedQemuGuestPath;
+            this.resolvedLaunchArgvSha256 = resolvedLaunchArgvSha256;
+            this.resolvedLaunchArgv = Collections.unmodifiableList(
+                    new ArrayList<>(resolvedLaunchArgv == null ? Collections.emptyList() : resolvedLaunchArgv)
+            );
         }
     }
 
@@ -71,11 +87,22 @@ public final class VectrasRuntimeEvidenceGate {
         }
     }
 
-    public static Result probe(Context context, ProotCommandBuilder proot, String qemuBinary) {
-        if (context == null || proot == null || qemuBinary == null) {
+    public static Result probe(
+            Context context,
+            ProotCommandBuilder proot,
+            List<String> requestedProcessArgv
+    ) {
+        if (context == null || proot == null || requestedProcessArgv == null || requestedProcessArgv.isEmpty()) {
             return failed("invalid-probe-input", "");
         }
-        String token = qemuBinary.trim();
+        for (int i = 0; i < requestedProcessArgv.size(); i++) {
+            if (requestedProcessArgv.get(i) == null) {
+                return failed("null-argv-item-" + i, "");
+            }
+        }
+
+        String requestedToken = requestedProcessArgv.get(0).trim();
+        String token = basename(requestedToken);
         if (!QEMU_TOKEN.matcher(token).matches()) {
             return failed("unsafe-or-unrecognized-qemu-token", "");
         }
@@ -110,6 +137,13 @@ public final class VectrasRuntimeEvidenceGate {
                 && isSha256(qemuSha)
                 && isSha256(qemuImgSha);
 
+        ArrayList<String> resolvedLaunchArgv = new ArrayList<>(requestedProcessArgv);
+        if (qemu != null) {
+            resolvedLaunchArgv.set(0, qemu.guestPath);
+        }
+        String resolvedArgvSha = sha256Argv(resolvedLaunchArgv);
+        boolean argvBound = qemu != null && isSha256(resolvedArgvSha);
+
         boolean runtimeOk = prootReady
                 && shellReady
                 && qemuReady
@@ -117,10 +151,11 @@ public final class VectrasRuntimeEvidenceGate {
                 && bootstrap.ok
                 && qemuProbe.ok
                 && qemuImgProbe.ok
-                && hashesBound;
+                && hashesBound
+                && argvBound;
 
         String state = runtimeOk ? "DEVICE_PROVEN" : "TOKEN_VAZIO";
-        String reason = runtimeOk ? "private-runtime-hash-and-exec-probes-pass" : buildReason(
+        String reason = runtimeOk ? "private-runtime-hash-exec-and-argv-probes-pass" : buildReason(
                 prootReady,
                 shellReady,
                 qemuReady,
@@ -128,14 +163,18 @@ public final class VectrasRuntimeEvidenceGate {
                 bootstrap.ok,
                 qemuProbe.ok,
                 qemuImgProbe.ok,
-                hashesBound
+                hashesBound,
+                argvBound
         );
 
         String receiptPath = writeReceipt(
                 context,
+                requestedToken,
                 token,
                 qemu == null ? "" : qemu.guestPath,
                 qemuImg == null ? "" : qemuImg.guestPath,
+                resolvedArgvSha,
+                resolvedLaunchArgv,
                 state,
                 runtimeOk,
                 reason,
@@ -154,11 +193,33 @@ public final class VectrasRuntimeEvidenceGate {
         if (receiptPath.isEmpty()) {
             return failed("receipt-write-failed", qemu == null ? "" : qemu.guestPath);
         }
-        return new Result(runtimeOk, state, receiptPath, reason, qemu == null ? "" : qemu.guestPath);
+        return new Result(
+                runtimeOk,
+                state,
+                receiptPath,
+                reason,
+                qemu == null ? "" : qemu.guestPath,
+                resolvedArgvSha,
+                resolvedLaunchArgv
+        );
     }
 
     private static Result failed(String reason, String guestPath) {
-        return new Result(false, "TOKEN_VAZIO", "", reason, guestPath);
+        return new Result(
+                false,
+                "TOKEN_VAZIO",
+                "",
+                reason,
+                guestPath,
+                "TOKEN_VAZIO",
+                Collections.emptyList()
+        );
+    }
+
+    private static String basename(String value) {
+        if (value == null) return "";
+        int slash = Math.max(value.lastIndexOf('/'), value.lastIndexOf('\\'));
+        return slash >= 0 ? value.substring(slash + 1) : value;
     }
 
     private static PrivateExecutable resolvePrivateGuestExecutable(File filesDir, String name) {
@@ -181,7 +242,7 @@ public final class VectrasRuntimeEvidenceGate {
         try {
             ProcessBuilder builder = new ProcessBuilder();
             proot.applyEnvironment(builder.environment());
-            builder.command(proot.buildCommand(Arrays.asList(guestPath, argument)));
+            builder.command(proot.buildCommand(java.util.Arrays.asList(guestPath, argument)));
             builder.redirectErrorStream(true);
             process = builder.start();
             TimeoutExecutionResult result = ProcessRuntimeOps.waitForByCategory(
@@ -218,6 +279,26 @@ public final class VectrasRuntimeEvidenceGate {
         return true;
     }
 
+    private static String sha256Argv(List<String> argv) {
+        if (argv == null || argv.isEmpty()) return "TOKEN_VAZIO";
+        try {
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            for (String arg : argv) {
+                if (arg == null) return "TOKEN_VAZIO";
+                byte[] bytes = arg.getBytes(StandardCharsets.UTF_8);
+                int length = bytes.length;
+                digest.update((byte) ((length >>> 24) & 0xff));
+                digest.update((byte) ((length >>> 16) & 0xff));
+                digest.update((byte) ((length >>> 8) & 0xff));
+                digest.update((byte) (length & 0xff));
+                digest.update(bytes);
+            }
+            return hex(digest.digest());
+        } catch (Exception failure) {
+            return "TOKEN_VAZIO";
+        }
+    }
+
     private static String buildReason(
             boolean proot,
             boolean shell,
@@ -226,7 +307,8 @@ public final class VectrasRuntimeEvidenceGate {
             boolean bootstrap,
             boolean qemuExec,
             boolean qemuImgExec,
-            boolean hashesBound
+            boolean hashesBound,
+            boolean argvBound
     ) {
         StringBuilder out = new StringBuilder();
         appendGap(out, "proot", proot);
@@ -237,6 +319,7 @@ public final class VectrasRuntimeEvidenceGate {
         appendGap(out, "qemu-exec", qemuExec);
         appendGap(out, "qemu-img-exec", qemuImgExec);
         appendGap(out, "artifact-hashes", hashesBound);
+        appendGap(out, "resolved-argv", argvBound);
         return out.length() == 0 ? "unknown-gap" : out.toString();
     }
 
@@ -248,9 +331,12 @@ public final class VectrasRuntimeEvidenceGate {
 
     private static String writeReceipt(
             Context context,
+            String requestedQemuToken,
             String requestedQemuBinary,
             String resolvedQemuGuestPath,
             String resolvedQemuImgGuestPath,
+            String resolvedLaunchArgvSha256,
+            List<String> resolvedLaunchArgv,
             String state,
             boolean claimAllowed,
             String reason,
@@ -277,10 +363,15 @@ public final class VectrasRuntimeEvidenceGate {
             doc.put("receipt_id", receiptId);
             doc.put("created_unix_ms", now);
             doc.put("package_name", context.getPackageName());
+            doc.put("requested_qemu_token", requestedQemuToken);
             doc.put("requested_qemu_binary", requestedQemuBinary);
             doc.put("guest_path", GUEST_PATH);
             doc.put("resolved_qemu_guest_path", resolvedQemuGuestPath);
             doc.put("resolved_qemu_img_guest_path", resolvedQemuImgGuestPath);
+            doc.put("resolved_launch_argv_sha256", resolvedLaunchArgvSha256);
+            JSONArray launchArgv = new JSONArray();
+            for (String arg : resolvedLaunchArgv) launchArgv.put(arg);
+            doc.put("resolved_launch_argv", launchArgv);
             doc.put("apk_sha256", apkSha);
             doc.put("proot_sha256", prootSha);
             doc.put("qemu_sha256", qemuSha);
@@ -352,15 +443,18 @@ public final class VectrasRuntimeEvidenceGate {
             while ((read = input.read(buffer)) >= 0) {
                 if (read > 0) digest.update(buffer, 0, read);
             }
-            byte[] raw = digest.digest();
-            StringBuilder out = new StringBuilder(64);
-            for (byte b : raw) {
-                out.append(String.format(Locale.ROOT, "%02x", b & 0xff));
-            }
-            return out.toString();
+            return hex(digest.digest());
         } catch (Exception failure) {
             return "TOKEN_VAZIO";
         }
+    }
+
+    private static String hex(byte[] raw) {
+        StringBuilder out = new StringBuilder(raw.length * 2);
+        for (byte b : raw) {
+            out.append(String.format(Locale.ROOT, "%02x", b & 0xff));
+        }
+        return out.toString();
     }
 
     private static final class ProbeResult {
