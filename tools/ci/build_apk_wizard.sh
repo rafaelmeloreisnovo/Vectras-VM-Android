@@ -8,6 +8,8 @@ GRADLEW="${REPO_ROOT}/gradlew"
 RUNTIME_SEED_MANIFEST="${REPO_ROOT}/configs/embedded_runtime_seed_assets.v1.json"
 RUNTIME_SEED_RECEIPT="${OUT_DIR}/alpine19-materialization.json"
 QEMU_RUNTIME_RECEIPT="${OUT_DIR}/qemu19-materialization.json"
+BOOTSTRAP_LAYOUT_RECEIPT="${OUT_DIR}/bootstrap-layout-normalization.json"
+ROOTFS_NORMALIZATION_RECEIPT="${OUT_DIR}/rootfs-symlink-normalization.json"
 BOOTSTRAP_RECEIPT_SRC="${REPO_ROOT}/app/build/reports/bootstrap/bootstrap-materialization.json"
 BOOTSTRAP_RECEIPT_DST="${OUT_DIR}/bootstrap-materialization.json"
 GENERATED_ASSETS_ROOT="${REPO_ROOT}/app/build/generated/bootstrapAssets"
@@ -16,7 +18,8 @@ EMBEDDED_BUILD_CONTEXT="${GENERATED_ASSETS_ROOT}/evidence/build-context.json"
 OMEGA_OUT_DIR="${OUT_DIR}/omega-freestanding-armv7"
 OMEGA_BINARY="${OMEGA_OUT_DIR}/omega-core-armv7.elf"
 OMEGA_AUDIT="${OMEGA_OUT_DIR}/elf-audit.json"
-OMEGA_APK_RECEIPT="${OUT_DIR}/app-debug-arm32-arm64.omega-materialization.json"
+OMEGA_ARM32_APK_RECEIPT="${OUT_DIR}/app-debug-armeabi-v7a.omega-materialization.json"
+OMEGA_DUAL_APK_RECEIPT="${OUT_DIR}/app-debug-arm32-arm64.omega-materialization.json"
 
 mkdir -p "${OUT_DIR}"
 
@@ -31,6 +34,15 @@ echo "[wizard] clean app build tree before runtime materialization"
 echo "[wizard] materialize pinned PRoot bootstrap TARs with SHA-256 enforcement"
 python3 "${REPO_ROOT}/tools/ci/materialize_bootstrap_assets.py"
 cp -f "${BOOTSTRAP_RECEIPT_SRC}" "${BOOTSTRAP_RECEIPT_DST}"
+
+# SetupFeatureCore validates usr/tmp immediately after bootstrap extraction, before
+# its historical later mkdir step. Keep the exact upstream SHA in the source
+# receipt above, then derive the APK-carried TAR with usr/tmp guaranteed present.
+echo "[wizard] normalize PRoot bootstrap runtime layout for ARM lanes"
+python3 "${REPO_ROOT}/tools/bootstrap/normalize_bootstrap_tar_layout.py" \
+  --root "${GENERATED_ASSETS_ROOT}/bootstrap" \
+  --abis "arm64-v8a,armeabi-v7a" \
+  --receipt "${BOOTSTRAP_LAYOUT_RECEIPT}"
 
 echo "[wizard] materialize pinned Alpine19 rootfs TARs for ARM lanes"
 python3 "${REPO_ROOT}/tools/bootstrap/materialize_embedded_runtime_seed_assets.py" \
@@ -47,6 +59,18 @@ bash "${REPO_ROOT}/tools/bootstrap/materialize_alpine_qemu_runtime.sh" \
   --target-root "${GENERATED_ASSETS_ROOT}" \
   --abis "arm64-v8a,armeabi-v7a" \
   --receipt "${QEMU_RUNTIME_RECEIPT}"
+
+# Android host-side Java checks resolve absolute symlinks outside the extracted rootfs.
+# Convert Alpine/QEMU links such as bin/sh -> /bin/busybox into equivalent relative
+# rootfs-local links before packaging. Source materialization receipts remain the
+# provenance of the pinned input bytes; this receipt records the deterministic
+# derived TAR hashes that are actually embedded in the APK.
+echo "[wizard] normalize rootfs absolute symlinks for APK-local extraction"
+python3 "${REPO_ROOT}/tools/bootstrap/normalize_rootfs_tar_symlinks.py" \
+  --root "${GENERATED_ASSETS_ROOT}" \
+  --families "alpine19,qemu19" \
+  --abis "arm64-v8a,armeabi-v7a" \
+  --receipt "${ROOTFS_NORMALIZATION_RECEIPT}"
 
 # devFastPath deliberately skips the normal preBuild sync task, so materialize
 # loader.apk explicitly once after the clean.
@@ -71,6 +95,7 @@ required = {
     'usr/bin/qemu-img',
     'bin/busybox',
     'bin/sh',
+    'usr/bin/env',
 }
 with zipfile.ZipFile(apk) as zf:
     for abi in abis:
@@ -79,7 +104,7 @@ with zipfile.ZipFile(apk) as zf:
             raise SystemExit(f'missing embedded QEMU runtime: {entry}')
         data = zf.read(entry)
         with tarfile.open(fileobj=io.BytesIO(data), mode='r:*') as tf:
-            names = {m.name.lstrip('./') for m in tf.getmembers()}
+            names = {m.name.lstrip('./').rstrip('/') for m in tf.getmembers()}
         missing = sorted(required - names)
         if missing:
             raise SystemExit(f'{entry} missing runtime markers: {missing}')
@@ -141,6 +166,17 @@ build_lane() {
   echo "${lane_name}|${policy}|${abis}|${apk_size}" >> "${OUT_DIR}/sizes.tsv"
 }
 
+verify_omega_lane() {
+  local apk="$1"
+  local receipt="$2"
+  python3 "${REPO_ROOT}/tools/ci/verify_omega_freestanding_apk.py" \
+    --apk "${apk}" \
+    --binary "${OMEGA_BINARY}" \
+    --audit "${OMEGA_AUDIT}" \
+    --output "${receipt}" \
+    --commit "$(git -C "${REPO_ROOT}" rev-parse HEAD)"
+}
+
 rm -f "${OUT_DIR}/sizes.tsv"
 
 build_lane "app-debug-arm64-v8a" "arm64-only" "arm64-v8a" "false" "arm64-v8a"
@@ -153,15 +189,18 @@ bash "${REPO_ROOT}/tools/ci/materialize_omega_freestanding_asset.sh" \
   --out-dir "${OMEGA_OUT_DIR}" \
   --commit "$(git -C "${REPO_ROOT}" rev-parse HEAD)"
 
+# Dedicated ARM32 debug artifact for the Moto E7 Power / Android 10 evidence lane.
+# This uses the repository's existing arm32-debug policy and carries only the
+# armeabi-v7a native surface while retaining the complete APK-local runtime seed.
+build_lane "app-debug-armeabi-v7a" "arm32-debug" "armeabi-v7a" "true" "armeabi-v7a"
+
+echo "[wizard] verify Omega native carrier byte identity inside ARM32-only APK"
+verify_omega_lane "${OUT_DIR}/app-debug-armeabi-v7a.apk" "${OMEGA_ARM32_APK_RECEIPT}"
+
 build_lane "app-debug-arm32-arm64" "arm32-arm64" "arm64-v8a,armeabi-v7a" "true" "arm64-v8a,armeabi-v7a"
 
 echo "[wizard] verify Omega native carrier byte identity inside dual-ARM APK"
-python3 "${REPO_ROOT}/tools/ci/verify_omega_freestanding_apk.py" \
-  --apk "${OUT_DIR}/app-debug-arm32-arm64.apk" \
-  --binary "${OMEGA_BINARY}" \
-  --audit "${OMEGA_AUDIT}" \
-  --output "${OMEGA_APK_RECEIPT}" \
-  --commit "$(git -C "${REPO_ROOT}" rev-parse HEAD)"
+verify_omega_lane "${OUT_DIR}/app-debug-arm32-arm64.apk" "${OMEGA_DUAL_APK_RECEIPT}"
 
 source_commit="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1], encoding="utf-8"))["source_commit"])' "${RUNTIME_SEED_MANIFEST}")"
 {
@@ -169,10 +208,13 @@ source_commit="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1], 
   echo
   echo "Embedded runtime seed source: \`xoureldeen/Vectras-VM-Android@${source_commit}\`"
   echo
-  echo "Bootstrap TARs: exact SHA-256 enforced by tools/ci/bootstrap-assets.v1.json."
-  echo "Alpine19 TARs: exact size + Git blob SHA-1 enforced; SHA-256 emitted in receipt."
-  echo "QEMU19 TARs: same-arch Alpine v3.19 + QEMU 8.1.5-r0 assembled at build time and embedded in APK; device network not required."
-  echo "Omega ARMv7: direct ld.lld freestanding ELF; deterministic rebuild audit; APK native-carrier byte identity verified."
+  echo "Bootstrap TARs: exact source SHA-256 enforced by tools/ci/bootstrap-assets.v1.json, then usr/tmp layout normalized before APK packaging."
+  echo "Bootstrap layout normalization: ${BOOTSTRAP_LAYOUT_RECEIPT}; derived embedded TAR SHA-256 values recorded separately from pinned input provenance."
+  echo "Alpine19 TARs: exact source size + Git blob SHA-1 + SHA-256 enforced before deterministic rootfs-symlink normalization."
+  echo "QEMU19 TARs: same-arch Alpine v3.19 + QEMU 8.1.5-r0 assembled at build time, then rootfs symlinks normalized and embedded in APK; device network not required."
+  echo "Rootfs normalization: ${ROOTFS_NORMALIZATION_RECEIPT}; derived embedded TAR SHA-256 values recorded separately from pinned input provenance."
+  echo "Moto E7 lane: arm32-debug / armeabi-v7a only, complete runtime payload, Omega ARMv7 carrier verified."
+  echo "Omega ARMv7: direct ld.lld freestanding ELF; deterministic rebuild audit; APK native-carrier byte identity verified in ARM32 and dual-ARM lanes."
   echo "Android 10 W^X: executable code is kept APK/install-owned, not copied into writable app home."
   echo
   echo "Boundary: APK runtime materialization != device extraction != physical execution != VM boot. claim_allowed=false until physical receipts close those gates."
