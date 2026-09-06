@@ -5,6 +5,7 @@ import android.content.Context;
 import android.os.Build;
 
 import com.vectras.qemu.MainSettingsManager;
+import com.vectras.vm.core.TermuxPkgContract;
 import com.vectras.vm.utils.DeviceUtils;
 
 import java.io.File;
@@ -134,14 +135,26 @@ public class AppConfig {
         return neededPkgsDebianUbuntu();
     }
 
+    /**
+     * Termux baseline used by LibraryChecker. This is stage 1 only: it makes
+     * PRoot/Ninja/LLVM/CMake available for the freestanding execution gate and
+     * installs x11-repo before any Vectras QEMU package is requested.
+     */
     public static String neededPkgsTermux() {
-        if (DeviceUtils.isArm()) {
-            return "bash aria2 tar xterm proot pulseaudio";
-        }
-        return "bash aria2 tar xterm proot pulseaudio";
+        return TermuxPkgContract.packageString(TermuxPkgContract.Stage.BOOTSTRAP_TOOLCHAIN);
+    }
+
+    /**
+     * Stage 2 package set. Call only after the bootstrap/toolchain stage has
+     * installed x11-repo and package metadata has been refreshed.
+     */
+    public static String neededPkgsTermuxVectrasQemu() {
+        return TermuxPkgContract.packageString(TermuxPkgContract.Stage.VECTRAS_QEMU);
     }
 
     public static String neededPkgs32bitTermux() {
+        // Termux resolves the architecture from its repository; package names
+        // remain stable and the ELF/device gate carries the ABI distinction.
         return neededPkgsTermux();
     }
 
