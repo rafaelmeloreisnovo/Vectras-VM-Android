@@ -13,8 +13,8 @@ import java.util.concurrent.atomic.AtomicBoolean
 /**
  * Receipt-driven maintenance state machine for an installed RAFCODEPHI Termux.
  *
- * The sequence is intentionally fixed and cannot accept free-form commands:
- * BOOTSTRAP -> REFRESH -> VECTRAS_QEMU -> PROBE.
+ * Fixed sequence, no free-form commands:
+ * BOOTSTRAP -> REFRESH -> VECTRAS_QEMU -> PROBE -> PROOT_VERIFY -> NINJA_VERIFY -> QEMU_VERIFY.
  * A stage advances only after the local PendingIntent result is bound to the
  * persisted request and reports Termux errorCode=0 plus process exitCode=0.
  */
@@ -39,6 +39,9 @@ object VectrasTermuxMaintenanceCoordinator {
         REFRESH_PENDING,
         VECTRAS_QEMU_PENDING,
         PROBE_PENDING,
+        PROOT_VERIFY_PENDING,
+        NINJA_VERIFY_PENDING,
+        QEMU_VERIFY_PENDING,
         COMPLETE,
         FAILED,
     }
@@ -57,6 +60,9 @@ object VectrasTermuxMaintenanceCoordinator {
                 State.REFRESH_PENDING,
                 State.VECTRAS_QEMU_PENDING,
                 State.PROBE_PENDING,
+                State.PROOT_VERIFY_PENDING,
+                State.NINJA_VERIFY_PENDING,
+                State.QEMU_VERIFY_PENDING,
             )
     }
 
@@ -76,8 +82,8 @@ object VectrasTermuxMaintenanceCoordinator {
                     "RAFCODEPHI runtime repair is already in progress at ${snapshot.expectedStage ?: snapshot.state}."
                 } else {
                     "The external RAFCODEPHI Termux runtime is installed but not fully ready. " +
-                        "Repair will run the bounded sequence: bootstrap/toolchain, package metadata refresh, " +
-                        "Vectras QEMU packages, then a final freestanding probe."
+                        "Repair will bootstrap the toolchain, refresh package metadata, install Vectras QEMU, " +
+                        "then execute PRoot, Ninja and QEMU smoke checks before completion."
                 }
                 AlertDialog.Builder(activity, R.style.MainDialogTheme)
                     .setTitle("Repair RAFCODEPHI runtime")
@@ -154,7 +160,7 @@ object VectrasTermuxMaintenanceCoordinator {
 
             val succeeded = resultBundlePresent && errorCode == 0 && exitCode == 0
             if (!succeeded) {
-                persist(
+                persistOrLog(
                     context = context,
                     runId = current.runId,
                     state = State.FAILED,
@@ -169,13 +175,13 @@ object VectrasTermuxMaintenanceCoordinator {
 
             val next = nextStage(stage)
             if (next == null) {
-                persist(
+                persistOrLog(
                     context = context,
                     runId = current.runId,
                     state = State.COMPLETE,
                     expectedStage = null,
                     expectedTransaction = null,
-                    reason = "bounded_maintenance_sequence_complete",
+                    reason = "bounded_maintenance_and_runtime_smokes_complete",
                 )
                 CrossRepoIntegrationManager.queryIntegration(context.applicationContext) { status ->
                     CrossRepoIntegrationManager.logStatus(status)
@@ -212,7 +218,7 @@ object VectrasTermuxMaintenanceCoordinator {
         stage: VectrasTermuxIpcContract.MaintenanceStage,
     ): VectrasTermuxBridge.DispatchResult {
         val transactionId = VectrasTermuxBridge.newMaintenanceTransactionId()
-        persist(
+        val statePersisted = persist(
             context = context,
             runId = runId,
             state = pendingState(stage),
@@ -220,6 +226,15 @@ object VectrasTermuxMaintenanceCoordinator {
             expectedTransaction = transactionId,
             reason = "dispatch_pending",
         )
+        if (!statePersisted) {
+            return VectrasTermuxBridge.DispatchResult(
+                state = VectrasTermuxBridge.State.REQUEST_PERSISTENCE_FAILED,
+                transactionId = transactionId,
+                binaryName = stage.targetName,
+                component = null,
+                reason = "maintenance_state_not_persisted",
+            )
+        }
 
         val result = VectrasTermuxBridge.dispatchMaintenance(
             context = context,
@@ -227,7 +242,7 @@ object VectrasTermuxMaintenanceCoordinator {
             transactionId = transactionId,
         )
         if (result.state != VectrasTermuxBridge.State.DISPATCHED) {
-            persist(
+            persistOrLog(
                 context = context,
                 runId = runId,
                 state = State.FAILED,
@@ -249,7 +264,13 @@ object VectrasTermuxMaintenanceCoordinator {
             VectrasTermuxIpcContract.MaintenanceStage.VECTRAS_QEMU
         VectrasTermuxIpcContract.MaintenanceStage.VECTRAS_QEMU ->
             VectrasTermuxIpcContract.MaintenanceStage.PROBE
-        VectrasTermuxIpcContract.MaintenanceStage.PROBE -> null
+        VectrasTermuxIpcContract.MaintenanceStage.PROBE ->
+            VectrasTermuxIpcContract.MaintenanceStage.PROOT_VERIFY
+        VectrasTermuxIpcContract.MaintenanceStage.PROOT_VERIFY ->
+            VectrasTermuxIpcContract.MaintenanceStage.NINJA_VERIFY
+        VectrasTermuxIpcContract.MaintenanceStage.NINJA_VERIFY ->
+            VectrasTermuxIpcContract.MaintenanceStage.QEMU_VERIFY
+        VectrasTermuxIpcContract.MaintenanceStage.QEMU_VERIFY -> null
     }
 
     private fun pendingState(stage: VectrasTermuxIpcContract.MaintenanceStage): State = when (stage) {
@@ -257,11 +278,27 @@ object VectrasTermuxMaintenanceCoordinator {
         VectrasTermuxIpcContract.MaintenanceStage.REFRESH -> State.REFRESH_PENDING
         VectrasTermuxIpcContract.MaintenanceStage.VECTRAS_QEMU -> State.VECTRAS_QEMU_PENDING
         VectrasTermuxIpcContract.MaintenanceStage.PROBE -> State.PROBE_PENDING
+        VectrasTermuxIpcContract.MaintenanceStage.PROOT_VERIFY -> State.PROOT_VERIFY_PENDING
+        VectrasTermuxIpcContract.MaintenanceStage.NINJA_VERIFY -> State.NINJA_VERIFY_PENDING
+        VectrasTermuxIpcContract.MaintenanceStage.QEMU_VERIFY -> State.QEMU_VERIFY_PENDING
     }
 
     private fun isStale(snapshot: Snapshot): Boolean {
         if (!snapshot.inProgress || snapshot.updatedAtEpochMs <= 0L) return false
         return System.currentTimeMillis() - snapshot.updatedAtEpochMs > MAX_IN_FLIGHT_AGE_MS
+    }
+
+    private fun persistOrLog(
+        context: Context,
+        runId: String?,
+        state: State,
+        expectedStage: VectrasTermuxIpcContract.MaintenanceStage?,
+        expectedTransaction: String?,
+        reason: String?,
+    ) {
+        if (!persist(context, runId, state, expectedStage, expectedTransaction, reason)) {
+            Log.e(TAG, "failed to persist terminal maintenance state=$state run=$runId reason=$reason")
+        }
     }
 
     private fun persist(
@@ -271,8 +308,8 @@ object VectrasTermuxMaintenanceCoordinator {
         expectedStage: VectrasTermuxIpcContract.MaintenanceStage?,
         expectedTransaction: String?,
         reason: String?,
-    ) {
-        context.applicationContext.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+    ): Boolean {
+        val committed = context.applicationContext.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
             .edit()
             .putString(KEY_RUN_ID, runId)
             .putString(KEY_STATE, state.name)
@@ -280,10 +317,12 @@ object VectrasTermuxMaintenanceCoordinator {
             .putString(KEY_EXPECTED_TRANSACTION, expectedTransaction)
             .putString(KEY_LAST_REASON, reason)
             .putLong(KEY_UPDATED_AT, System.currentTimeMillis())
-            .apply()
+            .commit()
         Log.i(
             TAG,
-            "run=$runId state=$state stage=${expectedStage ?: "none"} tx=${expectedTransaction ?: "none"} reason=$reason",
+            "run=$runId state=$state stage=${expectedStage ?: "none"} tx=${expectedTransaction ?: "none"} " +
+                "reason=$reason persisted=$committed",
         )
+        return committed
     }
 }

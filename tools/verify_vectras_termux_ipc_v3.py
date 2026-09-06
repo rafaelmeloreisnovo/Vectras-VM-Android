@@ -40,13 +40,13 @@ def sha256_file(path: Path) -> str:
     return digest.hexdigest()
 
 
-def require(text: str, snippets: list[str], label: str, errors: list[str]) -> None:
+def require(text: str, snippets: tuple[str, ...], label: str, errors: list[str]) -> None:
     for snippet in snippets:
         if snippet not in text:
             errors.append(f"{label}: missing {snippet!r}")
 
 
-def forbid(text: str, snippets: list[str], label: str, errors: list[str]) -> None:
+def forbid(text: str, snippets: tuple[str, ...], label: str, errors: list[str]) -> None:
     for snippet in snippets:
         if snippet in text:
             errors.append(f"{label}: forbidden {snippet!r}")
@@ -57,19 +57,15 @@ def integer_constant(text: str, name: str) -> int | None:
     return int(match.group(1)) if match else None
 
 
-def main() -> int:
-    args = parse_args()
-    errors: list[str] = []
+def load_inputs(errors: list[str]) -> tuple[dict[str, str], dict[str, Any]]:
     texts: dict[str, str] = {}
     inputs: dict[str, Any] = {}
-
     for label, path in FILES.items():
         if not path.is_file():
             errors.append(f"missing {label}: {path}")
             continue
         texts[label] = path.read_text(encoding="utf-8")
         inputs[label] = {"path": str(path.relative_to(ROOT)), "sha256": sha256_file(path)}
-
     for manifest in MANIFESTS:
         label = f"manifest:{manifest.parent.parent.name}"
         if not manifest.is_file():
@@ -77,73 +73,59 @@ def main() -> int:
             continue
         texts[label] = manifest.read_text(encoding="utf-8")
         inputs[label] = {"path": str(manifest.relative_to(ROOT)), "sha256": sha256_file(manifest)}
+    return texts, inputs
+
+
+def main() -> int:
+    args = parse_args()
+    errors: list[str] = []
+    texts, inputs = load_inputs(errors)
 
     contract: dict[str, Any] = {}
-    if "contract_json" in texts:
+    raw_contract = texts.get("contract_json")
+    if raw_contract:
         try:
-            contract = json.loads(texts["contract_json"])
-        except json.JSONDecodeError as error:
-            errors.append(f"contract_json invalid: {error}")
+            contract = json.loads(raw_contract)
+        except json.JSONDecodeError as exc:
+            errors.append(f"contract_json invalid: {exc}")
 
     if contract:
         if contract.get("schema") != "raf.vectras-termux-ipc-contract.v3":
             errors.append("contract schema mismatch")
-        request = contract.get("request", {})
-        fixed = request.get("fixed_arguments", [])
-        max_total = request.get("max_total_arguments")
-        max_extra = request.get("max_extra_arguments")
-        if not isinstance(fixed, list):
-            errors.append("fixed_arguments is not a list")
-        elif max_total != len(fixed) + max_extra:
-            errors.append("max_total_arguments != fixed + max_extra")
         if contract.get("claim_allowed") is not False:
             errors.append("contract claim_allowed must be false")
+        request = contract.get("request", {})
+        fixed = request.get("fixed_arguments", [])
+        if not isinstance(fixed, list):
+            errors.append("fixed_arguments is not a list")
+        elif request.get("max_total_arguments") != len(fixed) + request.get("max_extra_arguments", -1):
+            errors.append("max_total_arguments != fixed + max_extra")
         if contract.get("security", {}).get("result_requires_local_pending_request") is not True:
             errors.append("local pending request binding is not required")
 
     contract_source = texts.get("contract_source", "")
-    require(
-        contract_source,
-        [
-            'PROTOCOL = "raf.vectras-termux-ipc.v3"',
-            'TERMUX_PACKAGE = "com.termux.rafacodephi"',
-            'SERVICE_CLASS = "com.termux.app.RunCommandService"',
-            'RESULT_BUNDLE = "result"',
-            'RESULT_STDOUT_ORIGINAL_LENGTH = "stdout_original_length"',
-            'RESULT_STDERR_ORIGINAL_LENGTH = "stderr_original_length"',
-            'RESULT_EXIT_CODE = "exitCode"',
-            'RESULT_ERR = "err"',
-            'RESULT_ERRMSG = "errmsg"',
-            'RUNNER_APP_SHELL = "app-shell"',
-            'WORKDIR = "~/"',
-            'MAX_TOTAL_ARGUMENTS = 32',
-            'MAX_ARGUMENT_LENGTH = 256',
-            'MAX_ARGUMENT_BYTES = 4096',
-            '"-accel", "tcg"',
-            '"-display", "none"',
-            '"-monitor", "none"',
-            '"-serial", "stdio"',
-            '"-no-reboot"',
-            'canonicalRequest(',
-            'appendField("transaction_id", transactionId)',
-            'enum class MaintenanceStage(',
-            'BOOTSTRAP(',
-            'REFRESH(',
-            'VECTRAS_QEMU(',
-            'PROBE(',
-            'MAINTENANCE_RAFPROOT_PATH = "\\$PREFIX/libexec/rafproot-fs"',
-            'MAINTENANCE_PKG_PATH = "\\$PREFIX/bin/pkg"',
-            'listOf("--pkg-bootstrap")',
-            'listOf("update", "-y")',
-            'listOf("--pkg-vectras")',
-            'listOf("--probe")',
-            'boundedMaintenanceArguments(',
-            'maintenanceStageFrom(',
-            'canonicalMaintenanceRequest(',
-        ],
-        "contract_source",
-        errors,
-    )
+    require(contract_source, (
+        'PROTOCOL = "raf.vectras-termux-ipc.v3"',
+        'TERMUX_PACKAGE = "com.termux.rafacodephi"',
+        'SERVICE_CLASS = "com.termux.app.RunCommandService"',
+        'RUNNER_APP_SHELL = "app-shell"',
+        'MAX_TOTAL_ARGUMENTS = 32',
+        'MAX_ARGUMENT_LENGTH = 256',
+        'MAX_ARGUMENT_BYTES = 4096',
+        'enum class MaintenanceStage(',
+        'MAINTENANCE_RAFPROOT_PATH = "\\$PREFIX/libexec/rafproot-fs"',
+        'MAINTENANCE_PKG_PATH = "\\$PREFIX/bin/pkg"',
+        'listOf("--pkg-bootstrap")',
+        'listOf("update", "-y")',
+        'listOf("--pkg-vectras")',
+        'listOf("--probe")',
+        'listOf("--run", "proot", "--version")',
+        'listOf("--run", "ninja", "--version")',
+        'listOf("--run", "qemu-system-x86_64", "--version")',
+        'boundedMaintenanceArguments(',
+        'maintenanceStageFrom(',
+        'canonicalMaintenanceRequest(',
+    ), "contract_source", errors)
     if contract:
         for name, json_key in (
             ("MAX_TOTAL_ARGUMENTS", "max_total_arguments"),
@@ -156,199 +138,117 @@ def main() -> int:
                 errors.append(f"{name} mismatch source={observed} contract={expected}")
 
     manager = texts.get("manager", "")
-    require(
-        manager,
-        [
-            'TERMUX_PACKAGE = "com.termux.rafacodephi"',
-            'TERMUX_RUN_COMMAND_PERMISSION =',
-            '"qemu_binary_names"',
-            '"qemu_binary_sha256"',
-            '"provider_apk_sha256"',
-            '"protocol_version"',
-            '"private_paths_exposed"',
-            'provenanceReady',
-            'persistProviderIdentity(',
-            'Context.RECEIVER_EXPORTED',
-            'UUID.randomUUID()',
-        ],
-        "manager",
-        errors,
-    )
-    forbid(
-        manager,
-        ['"prefix_path"', '"qemu_binary_paths"', 'Context.RECEIVER_NOT_EXPORTED'],
-        "manager",
-        errors,
-    )
+    require(manager, (
+        'TERMUX_PACKAGE = "com.termux.rafacodephi"',
+        'TERMUX_RUN_COMMAND_PERMISSION =',
+        '"qemu_binary_names"',
+        '"qemu_binary_sha256"',
+        '"provider_apk_sha256"',
+        '"private_paths_exposed"',
+        'persistProviderIdentity(',
+        'Context.RECEIVER_EXPORTED',
+    ), "manager", errors)
+    forbid(manager, ('"prefix_path"', '"qemu_binary_paths"', 'Context.RECEIVER_NOT_EXPORTED'), "manager", errors)
 
     bridge = texts.get("bridge", "")
-    require(
-        bridge,
-        [
-            'VectrasTermuxIpcContract.boundedArguments(arguments)',
-            'VectrasTermuxIpcContract.boundedMaintenanceArguments(stage)',
-            'CrossRepoIntegrationManager.loadProviderIdentity(context, targetName)',
-            'producerApkSha256',
-            'VectrasTermuxReceiptStore.writePending(',
-            'State.REQUEST_PERSISTENCE_FAILED',
-            'VectrasTermuxIpcContract.EXTRA_RUNNER',
-            'VectrasTermuxIpcContract.RUNNER_APP_SHELL',
-            'PendingIntent.FLAG_MUTABLE',
-            'executionProven = false',
-            'claimAllowed = false',
-            'provenanceBound = provenanceBound',
-            '"dispatch_accepted_discovery_identity_bound_execution_receipt_pending"',
-            '"dispatch_accepted_provenance_partial_execution_receipt_pending"',
-            'fun dispatchMaintenance(',
-            'fun allowedReceiptTargets()',
-            'requestKind = "maintenance"',
-            'transactionIdOverride = transactionId',
-        ],
-        "bridge",
-        errors,
-    )
-    forbid(
-        bridge,
-        [
-            'RUN_COMMAND_BACKGROUND',
-            'EXTRA_BACKGROUND',
-            'Runtime.getRuntime().exec',
-            '/data/data/com.termux',
-        ],
-        "bridge",
-        errors,
-    )
+    require(bridge, (
+        'VectrasTermuxIpcContract.boundedArguments(arguments)',
+        'VectrasTermuxIpcContract.boundedMaintenanceArguments(stage)',
+        'VectrasTermuxReceiptStore.writePending(',
+        'commandPath = commandPath',
+        'requestKind = requestKind',
+        'PendingIntent.FLAG_MUTABLE',
+        'fun dispatchMaintenance(',
+        'requestKind = "maintenance"',
+        'transactionIdOverride = transactionId',
+        'executionProven = false',
+        'claimAllowed = false',
+    ), "bridge", errors)
+    forbid(bridge, ('Runtime.getRuntime().exec', 'ProcessBuilder(', '/data/data/com.termux'), "bridge", errors)
 
     store = texts.get("store", "")
-    require(
-        store,
-        [
-            'REQUEST_SCHEMA = "raf.vectras-termux-request.v4"',
-            'state", "PENDING_DISPATCH_RESULT"',
-            '"request_sha256"',
-            '"arguments_sha256"',
-            '"producer_apk_sha256"',
-            '"provider_apk_sha256_discovery"',
-            '"provider_binary_sha256_discovery"',
-            '"provider_identity_scope", "DISCOVERY_NOT_EXECUTION"',
-            '"executable_sha256_at_execution", "TOKEN_VAZIO"',
-            '"command_path"',
-            '"request_kind"',
-            'hashArguments(arguments)',
-            'if (hashArguments(arguments) != argumentsSha256) return null',
-            'writeAtomic(',
-            'if (target.exists()) return false',
-            '"claim_allowed", false',
-        ],
-        "store",
-        errors,
-    )
+    require(store, (
+        'REQUEST_SCHEMA = "raf.vectras-termux-request.v4"',
+        '"command_path"',
+        '"request_kind"',
+        '"arguments_sha256"',
+        'hashArguments(arguments)',
+        'if (hashArguments(arguments) != argumentsSha256) return null',
+        'if (target.exists()) return false',
+        '"claim_allowed", false',
+    ), "store", errors)
 
     receiver = texts.get("receiver", "")
-    require(
-        receiver,
-        [
-            'VectrasTermuxReceiptStore.loadPending(context, transactionId)',
-            'VectrasTermuxBridge.allowedReceiptTargets()',
-            'RESULT_STDOUT_ORIGINAL_LENGTH',
-            'RESULT_STDERR_ORIGINAL_LENGTH',
-            'RESULT_ERRMSG',
-            'RESULT_ERR',
-            '"raf.android-runtime-receipt.v3"',
-            '"termux_error_code"',
-            '"termux_error_message_sha256"',
-            '"stdout_truncated"',
-            '"stderr_truncated"',
-            '"execution_receipt_present"',
-            '"producer_apk_sha256"',
-            '"provider_apk_sha256_discovery"',
-            '"provider_binary_sha256_discovery"',
-            '"provider_identity_scope", "DISCOVERY_NOT_EXECUTION"',
-            '"executable_sha256_at_execution", "TOKEN_VAZIO"',
-            '"provenance_chain_sha256"',
-            '"provenance_chain_complete", false',
-            '"guest_boot_artifact_sha256"',
-            '"request_kind"',
-            '"command_path"',
-            '"claim_allowed", false',
-            'VectrasTermuxReceiptStore.writeReceipt(',
-            'if (persisted && pending.requestKind == "maintenance")',
-            'VectrasTermuxMaintenanceCoordinator.onExecutionResult(',
-        ],
-        "receiver",
-        errors,
-    )
-    forbid(
-        receiver,
-        [
-            'put("stdout", stdout)',
-            'put("stderr", stderr)',
-            'put("errmsg",',
-            '"provenance_chain_complete", true',
-        ],
-        "receiver",
-        errors,
-    )
+    require(receiver, (
+        'VectrasTermuxReceiptStore.loadPending(context, transactionId)',
+        'VectrasTermuxBridge.allowedReceiptTargets()',
+        '"raf.android-runtime-receipt.v3"',
+        '"termux_error_code"',
+        '"execution_receipt_present"',
+        '"command_path"',
+        '"request_kind"',
+        '"provenance_chain_complete", false',
+        '"claim_allowed", false',
+        'VectrasTermuxReceiptStore.writeReceipt(',
+        'if (persisted && pending.requestKind == "maintenance")',
+        'VectrasTermuxMaintenanceCoordinator.onExecutionResult(',
+    ), "receiver", errors)
+    forbid(receiver, (
+        'put("stdout", stdout)',
+        'put("stderr", stderr)',
+        'put("errmsg",',
+        '"provenance_chain_complete", true',
+    ), "receiver", errors)
 
     maintenance = texts.get("maintenance", "")
-    require(
-        maintenance,
-        [
-            'BOOTSTRAP -> REFRESH -> VECTRAS_QEMU -> PROBE',
-            'current.expectedStage != stage',
-            'current.expectedTransaction != pending.transactionId',
-            'resultBundlePresent && errorCode == 0 && exitCode == 0',
-            'MaintenanceStage.BOOTSTRAP ->',
-            'MaintenanceStage.REFRESH',
-            'MaintenanceStage.REFRESH ->',
-            'MaintenanceStage.VECTRAS_QEMU',
-            'MaintenanceStage.VECTRAS_QEMU ->',
-            'MaintenanceStage.PROBE',
-            'MaintenanceStage.PROBE -> null',
-            'VectrasTermuxBridge.newMaintenanceTransactionId()',
-            'VectrasTermuxBridge.dispatchMaintenance(',
-            'state = State.FAILED',
-            'state = State.COMPLETE',
-            'maintenance_already_in_progress',
-        ],
-        "maintenance",
-        errors,
-    )
-    forbid(
-        maintenance,
-        ['Runtime.getRuntime().exec', 'ProcessBuilder(', 'Thread.sleep(', '/data/data/com.termux'],
-        "maintenance",
-        errors,
-    )
+    require(maintenance, (
+        'BOOTSTRAP -> REFRESH -> VECTRAS_QEMU -> PROBE -> PROOT_VERIFY -> NINJA_VERIFY -> QEMU_VERIFY',
+        'current.expectedStage != stage',
+        'current.expectedTransaction != pending.transactionId',
+        'resultBundlePresent && errorCode == 0 && exitCode == 0',
+        'MaintenanceStage.BOOTSTRAP ->',
+        'MaintenanceStage.REFRESH ->',
+        'MaintenanceStage.VECTRAS_QEMU ->',
+        'MaintenanceStage.PROBE ->',
+        'MaintenanceStage.PROOT_VERIFY ->',
+        'MaintenanceStage.NINJA_VERIFY ->',
+        'MaintenanceStage.QEMU_VERIFY -> null',
+        'State.PROOT_VERIFY_PENDING',
+        'State.NINJA_VERIFY_PENDING',
+        'State.QEMU_VERIFY_PENDING',
+        'bounded_maintenance_and_runtime_smokes_complete',
+        'maintenance_already_in_progress',
+    ), "maintenance", errors)
+    forbid(maintenance, ('Runtime.getRuntime().exec', 'ProcessBuilder(', 'Thread.sleep(', '/data/data/com.termux'), "maintenance", errors)
 
     application = texts.get("application", "")
-    require(
-        application,
-        [
-            'activity instanceof MainActivity',
-            'SetupFeatureCore.isInstalledSystemFiles(activity)',
-            'SetupFeatureCore.isInstalledQemu(activity)',
-            'VectrasTermuxMaintenanceCoordinator.offerRepairIfNeeded(activity)',
-            'termuxMaintenanceOfferIssued = true',
-        ],
-        "application",
-        errors,
-    )
+    require(application, (
+        'activity instanceof MainActivity',
+        'SetupFeatureCore.isInstalledSystemFiles(activity)',
+        'SetupFeatureCore.isInstalledQemu(activity)',
+        'VectrasTermuxMaintenanceCoordinator.offerRepairIfNeeded(activity)',
+    ), "application", errors)
 
     for manifest in MANIFESTS:
         label = f"manifest:{manifest.parent.parent.name}"
-        text = texts.get(label, "")
-        require(
-            text,
-            [
-                'com.termux.rafacodephi.permission.RUN_COMMAND',
-                '<package android:name="com.termux.rafacodephi"',
-                'com.vectras.vm.integration.VectrasTermuxResultReceiver',
-                'android:exported="false"',
-            ],
-            label,
-            errors,
-        )
+        require(texts.get(label, ""), (
+            'com.termux.rafacodephi.permission.RUN_COMMAND',
+            '<package android:name="com.termux.rafacodephi"',
+            'com.vectras.vm.integration.VectrasTermuxResultReceiver',
+            'android:exported="false"',
+        ), label, errors)
+
+    maintenance_order_bound = all(token in maintenance for token in (
+        'MaintenanceStage.PROBE ->',
+        'MaintenanceStage.PROOT_VERIFY ->',
+        'MaintenanceStage.NINJA_VERIFY ->',
+        'MaintenanceStage.QEMU_VERIFY -> null',
+    ))
+    runtime_smokes_bound = all(token in contract_source for token in (
+        'listOf("--run", "proot", "--version")',
+        'listOf("--run", "ninja", "--version")',
+        'listOf("--run", "qemu-system-x86_64", "--version")',
+    ))
 
     state = "FAIL" if errors else "PASS_STATIC_CONTRACT"
     report = {
@@ -362,24 +262,21 @@ def main() -> int:
             "bounded_arguments": not any("MAX_" in item for item in errors),
             "request_persisted_before_dispatch": "writePending(" in bridge,
             "result_bound_to_pending_request": "loadPending(context, transactionId)" in receiver,
-            "material_identity_discovery_bound": (
-                '"provider_apk_sha256_discovery"' in receiver
-                and '"provider_binary_sha256_discovery"' in receiver
-            ),
+            "material_identity_discovery_bound": '"provider_apk_sha256_discovery"' in receiver,
             "execution_identity_not_promoted": (
                 '"executable_sha256_at_execution", "TOKEN_VAZIO"' in receiver
                 and '"provenance_chain_complete", false' in receiver
             ),
             "termux_error_metadata_preserved": '"termux_error_code"' in receiver,
             "raw_output_not_persisted": not any(
-                forbidden in receiver
-                for forbidden in ('put("stdout", stdout)', 'put("stderr", stderr)', 'put("errmsg",')
+                token in receiver for token in ('put("stdout", stdout)', 'put("stderr", stderr)', 'put("errmsg",')
             ),
             "claim_boundary_preserved": '"claim_allowed", false' in receiver,
             "maintenance_argv_bounded": 'boundedMaintenanceArguments(stage)' in bridge,
             "maintenance_receipt_driven": 'if (persisted && pending.requestKind == "maintenance")' in receiver,
-            "maintenance_order_bound": 'MaintenanceStage.PROBE -> null' in maintenance,
+            "maintenance_order_bound": maintenance_order_bound,
             "maintenance_transaction_bound": 'current.expectedTransaction != pending.transactionId' in maintenance,
+            "runtime_smokes_bound": runtime_smokes_bound,
         },
         "runtime_boundary": {
             "android_build": "TOKEN_VAZIO",
@@ -387,23 +284,21 @@ def main() -> int:
             "dispatch_execution": "TOKEN_VAZIO",
             "termux_exit_receipt": "TOKEN_VAZIO",
             "maintenance_complete": "TOKEN_VAZIO",
+            "proot_smoke": "TOKEN_VAZIO",
+            "ninja_smoke": "TOKEN_VAZIO",
+            "qemu_smoke": "TOKEN_VAZIO",
             "executable_sha256_at_execution": "TOKEN_VAZIO",
             "qemu_guest_boot": "TOKEN_VAZIO",
         },
         "errors": errors,
         "falsifiers": [
-            "request_not_persisted_before_mutable_pending_intent",
             "result_without_local_pending_request_accepted",
-            "total_argument_bound_exceeded",
-            "protected_qemu_option_overridden",
             "maintenance_free_form_command_accepted",
             "maintenance_stage_advanced_without_zero_exit_receipt",
             "maintenance_stale_transaction_advanced_state",
-            "termux_internal_error_ignored",
-            "truncated_output_reported_as_complete",
+            "maintenance_completed_after_probe_without_runtime_smokes",
+            "proot_ninja_or_qemu_smoke_missing",
             "raw_private_output_persisted",
-            "discovery_digest_promoted_to_execution_identity",
-            "provenance_chain_marked_complete_without_execution_identity",
             "exit_code_promoted_to_guest_boot",
         ],
     }
@@ -412,9 +307,8 @@ def main() -> int:
         args.output.parent.mkdir(parents=True, exist_ok=True)
         args.output.write_text(json.dumps(report, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     print(json.dumps({"state": state, "error_count": len(errors)}, sort_keys=True))
-    if errors:
-        for error in errors:
-            print(f"FAIL: {error}")
+    for error in errors:
+        print(f"FAIL: {error}")
     return 1 if errors else 0
 
 

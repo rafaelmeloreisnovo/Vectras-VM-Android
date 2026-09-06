@@ -82,6 +82,21 @@ object VectrasTermuxIpcContract {
             MAINTENANCE_RAFPROOT_PATH,
             listOf("--probe"),
         ),
+        PROOT_VERIFY(
+            MAINTENANCE_RAFPROOT_TARGET,
+            MAINTENANCE_RAFPROOT_PATH,
+            listOf("--run", "proot", "--version"),
+        ),
+        NINJA_VERIFY(
+            MAINTENANCE_RAFPROOT_TARGET,
+            MAINTENANCE_RAFPROOT_PATH,
+            listOf("--run", "ninja", "--version"),
+        ),
+        QEMU_VERIFY(
+            MAINTENANCE_RAFPROOT_TARGET,
+            MAINTENANCE_RAFPROOT_PATH,
+            listOf("--run", "qemu-system-x86_64", "--version"),
+        ),
     }
 
     private val protectedOptions = setOf(
@@ -117,7 +132,7 @@ object VectrasTermuxIpcContract {
         targetName: String,
         commandPath: String,
         arguments: List<String>,
-    ): MaintenanceStage? = MaintenanceStage.entries.firstOrNull { stage ->
+    ): MaintenanceStage? = MaintenanceStage.values().firstOrNull { stage ->
         stage.targetName == targetName &&
             stage.commandPath == commandPath &&
             stage.arguments == arguments
