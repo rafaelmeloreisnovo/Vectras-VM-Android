@@ -8,7 +8,6 @@ import com.vectras.vm.core.ProcessRuntimeOps;
 import com.vectras.vm.core.ProcessRuntimeOps.ExecutionCategory;
 import com.vectras.vm.core.ProcessRuntimeOps.TimeoutExecutionResult;
 import com.vectras.vm.core.ProotCommandBuilder;
-import com.vectras.vm.qemu.QemuBinaryResolver;
 import com.vectras.vm.setupwizard.SetupFeatureCore;
 
 import org.json.JSONObject;
@@ -16,7 +15,6 @@ import org.json.JSONObject;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.util.Arrays;
@@ -27,8 +25,9 @@ import java.util.Arrays;
  * <p>Unlike an external run-as doctor, this code runs inside the Vectras app
  * sandbox and can therefore prove its own private PRoot/rootfs/QEMU state even
  * for a non-debuggable release APK. It is fail-closed: a QEMU launch is not
- * admitted unless the same PRoot environment can execute QEMU and qemu-img
- * version probes and the private runtime files are executable.</p>
+ * admitted unless the same PRoot environment can execute the exact requested
+ * QEMU binary and qemu-img version probes and the private runtime files are
+ * executable.</p>
  */
 public final class VectrasRuntimeEvidenceGate {
     private static final String TAG = "VectrasRuntimeEvidence";
@@ -55,17 +54,19 @@ public final class VectrasRuntimeEvidenceGate {
         if (context == null || proot == null || qemuBinary == null || qemuBinary.trim().isEmpty()) {
             return new Result(false, "TOKEN_VAZIO", "", "invalid-probe-input");
         }
+        if (containsWhitespace(qemuBinary) || qemuBinary.contains("/") || qemuBinary.contains("\\")) {
+            return new Result(false, "TOKEN_VAZIO", "", "unsafe-qemu-token");
+        }
 
         File filesDir = context.getFilesDir();
         File prootFile = new File(filesDir, "usr/bin/proot");
         File rootShell = new File(filesDir, "distro/bin/sh");
-        QemuBinaryResolver.Resolution qemu = QemuBinaryResolver.resolveAny(context, TAG);
-        File qemuFile = qemu.found ? new File(qemu.fullPath) : null;
+        File qemuFile = resolveRuntimeFile(filesDir, qemuBinary);
         File qemuImg = resolveRuntimeFile(filesDir, "qemu-img");
 
         boolean prootReady = executable(prootFile);
         boolean shellReady = executable(rootShell);
-        boolean qemuReady = qemuFile != null && executable(qemuFile);
+        boolean qemuReady = executable(qemuFile);
         boolean qemuImgReady = executable(qemuImg);
 
         ProbeResult qemuProbe = qemuReady
@@ -93,10 +94,13 @@ public final class VectrasRuntimeEvidenceGate {
         );
 
         String receiptPath = writeReceipt(
-                context, state, ok, reason,
+                context, qemuBinary, state, ok, reason,
                 prootFile, rootShell, qemuFile, qemuImg,
                 qemuProbe, qemuImgProbe, bootstrap
         );
+        if (receiptPath.isEmpty() && ok) {
+            return new Result(false, "TOKEN_VAZIO", "", "receipt-write-failed");
+        }
         return new Result(ok, state, receiptPath, reason);
     }
 
@@ -117,9 +121,7 @@ public final class VectrasRuntimeEvidenceGate {
         } catch (Exception failure) {
             return new ProbeResult(false, -1, "EXCEPTION", failure.getClass().getSimpleName());
         } finally {
-            if (process != null) {
-                process.destroy();
-            }
+            if (process != null) process.destroy();
         }
     }
 
@@ -138,6 +140,13 @@ public final class VectrasRuntimeEvidenceGate {
 
     private static boolean executable(File file) {
         return file != null && file.isFile() && file.canExecute();
+    }
+
+    private static boolean containsWhitespace(String value) {
+        for (int i = 0; i < value.length(); i++) {
+            if (Character.isWhitespace(value.charAt(i))) return true;
+        }
+        return false;
     }
 
     private static String buildReason(
@@ -163,6 +172,7 @@ public final class VectrasRuntimeEvidenceGate {
 
     private static String writeReceipt(
             Context context,
+            String requestedQemuBinary,
             String state,
             boolean claimAllowed,
             String reason,
@@ -176,9 +186,7 @@ public final class VectrasRuntimeEvidenceGate {
     ) {
         try {
             File evidenceDir = new File(context.getFilesDir(), "evidence");
-            if (!evidenceDir.isDirectory() && !evidenceDir.mkdirs()) {
-                return "";
-            }
+            if (!evidenceDir.isDirectory() && !evidenceDir.mkdirs()) return "";
             long now = System.currentTimeMillis();
             File receipt = new File(evidenceDir, "vectras-runtime-" + now + ".json");
             JSONObject doc = new JSONObject();
@@ -186,6 +194,7 @@ public final class VectrasRuntimeEvidenceGate {
             doc.put("receipt_id", now + "-" + context.getPackageName());
             doc.put("created_unix_ms", now);
             doc.put("package_name", context.getPackageName());
+            doc.put("requested_qemu_binary", requestedQemuBinary);
             doc.put("apk_sha256", sha256(applicationApk(context)));
             doc.put("proot_sha256", sha256(proot));
             doc.put("qemu_sha256", sha256(qemu));
@@ -203,19 +212,19 @@ public final class VectrasRuntimeEvidenceGate {
             doc.put("claim_allowed", claimAllowed);
             doc.put("reason", reason);
             byte[] bytes = (doc.toString(2) + "\n").getBytes(StandardCharsets.UTF_8);
-            try (FileOutputStream out = new FileOutputStream(receipt)) {
-                out.write(bytes);
-                out.getFD().sync();
-            }
-            File latest = new File(evidenceDir, "vectras-runtime-latest.json");
-            try (FileOutputStream out = new FileOutputStream(latest)) {
-                out.write(bytes);
-                out.getFD().sync();
-            }
+            writeSynced(receipt, bytes);
+            writeSynced(new File(evidenceDir, "vectras-runtime-latest.json"), bytes);
             return receipt.getAbsolutePath();
         } catch (Exception failure) {
             Log.e(TAG, "Unable to write runtime evidence receipt", failure);
             return "";
+        }
+    }
+
+    private static void writeSynced(File path, byte[] bytes) throws Exception {
+        try (FileOutputStream out = new FileOutputStream(path)) {
+            out.write(bytes);
+            out.getFD().sync();
         }
     }
 
