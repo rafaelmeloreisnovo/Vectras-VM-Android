@@ -2,8 +2,8 @@
 
 - `FEDERATION_ID`: `PBIP-L1-FED-V1`
 - `FORMULA_ID`: `PBIP-L1`
-- `role`: `EXECUTABLE_CONSUMER_CANDIDATE`
-- `state`: `WIRED_DOCUMENTALLY / RUNTIME_NOT_PROVEN`
+- `role`: `EXECUTABLE_CONSUMER`
+- `state`: `IMPLEMENTED / CI_PENDING / DEVICE_NOT_PROVEN`
 - `claim_allowed`: `false`
 - `date`: `2026-09-06`
 
@@ -11,7 +11,7 @@
 
 Formal mathematics stays in `rafaelmeloreisnovo/Matem-tica-` (PR #23). Cross-repository relation authority stays in `rafaelmeloreisnovo/Mapa`. Academic synthesis stays in `rafaelmeloreisnovo/papers` (PR #73).
 
-The relation to consume is:
+The implemented relation is:
 
 ```math
 q^2=r^2-d_\perp^2,
@@ -19,30 +19,40 @@ q^2=r^2-d_\perp^2,
 \Delta_B=4(r^2-d_\perp^2)=4q^2.
 ```
 
-## Local anchors
+## Executable anchors
 
-Existing Vectras mathematical anchors include:
+- `app/src/main/java/com/vectras/vm/core/PbipL1.java`
+- `app/src/test/java/com/vectras/vm/core/PbipL1Test.java`
+- existing general math anchor: `app/src/main/java/com/vectras/vm/core/MathUtils.java`
 
-- `app/src/main/java/com/vectras/vm/rafaelia/MathUtils.java`
-- `app/src/main/java/com/vectras/vm/rafaelia/RafaeliaFormulas.java`
-
-This document does not claim that PBIP-L1 is already implemented by those classes. It binds the future implementation to a stable ID and prevents ad-hoc duplicate formulas.
-
-## Required executable contract
-
-A future implementation SHOULD expose deterministic, side-effect-free operations equivalent to:
+`PbipL1` is deterministic and side-effect-free. It exposes:
 
 ```text
-half_chord_sq(r, d_perp) = r*r - d_perp*d_perp
-pbip_discriminant(r, d_perp) = 4 * half_chord_sq(r, d_perp)
-classify(delta): delta>0 SECANT; delta==0 TANGENT; delta<0 NO_REAL_INTERSECTION
+halfChordSquared(r, d_perp)
+discriminant(r, d_perp)
+classifyDiscriminant(delta, tolerance)
+classify(r, d_perp[, tolerance])
 ```
 
-Numerical tests must include positive, zero and negative discriminant cases and state tolerance explicitly for floating-point paths.
+Classification contract:
+
+```text
+Delta_B > tolerance   -> SECANT
+|Delta_B| <= tolerance -> TANGENT
+Delta_B < -tolerance  -> NO_REAL_INTERSECTION
+```
+
+Default floating-point tolerance is `1e-12`. The three canonical integer-valued vectors are asserted exactly (`EPS=0`).
+
+## Canonical vectors
+
+```text
+r=5, d_perp=3 -> q^2=16,  Delta_B=64  -> SECANT
+r=5, d_perp=5 -> q^2=0,   Delta_B=0   -> TANGENT
+r=5, d_perp=6 -> q^2=-11, Delta_B=-44 -> NO_REAL_INTERSECTION
+```
 
 ## Geometry namespace guard
-
-Keep distinct:
 
 ```text
 H_RADIAL_30 = (sqrt(3)/2) r
@@ -51,20 +61,26 @@ TANGENTS_SYMMETRIC_±30 != PARALLEL_PULSE_30
 Poincare return map != Poincare conjecture
 ```
 
+The implementation is Euclidean line-circle geometry only. It does not establish a physical vortex law or any Poincare-conjecture implication.
+
 ## Evidence state
 
 ```text
 SOURCE_OBSERVED=true
 WIRED_DOCUMENTALLY=true
+IMPLEMENTED_PBIP_CONSUMER=true
 BUILD_PROVEN=false
+UNIT_TEST_EXECUTION_PROVEN=false
 RUNTIME_PROVEN=false
 DEVICE_PROVEN=false
 REPRODUCED=false
 TOKEN_VAZIO_CI_BINDING_PBIP_L1
 ```
 
+`BUILD_PROVEN` and `UNIT_TEST_EXECUTION_PROVEN` may change only after observing a successful provider CI run for the implementation commit.
+
 ## R3
 
-- `F_ok`: stable consumer ID and local anchors are defined.
-- `F_gap`: executable method/test/CI receipt is absent.
-- `F_next`: add deterministic implementation and receipt without changing claim state prematurely.
+- `F_ok`: deterministic implementation and canonical tests exist on the PR branch.
+- `F_gap`: provider CI receipt is still pending; device/runtime evidence is absent.
+- `F_next`: bind a successful CI run into RafPolimata as the first executed PBIP-L1 receipt.
