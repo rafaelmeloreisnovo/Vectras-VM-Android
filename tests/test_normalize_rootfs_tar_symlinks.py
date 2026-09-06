@@ -15,6 +15,14 @@ assert spec.loader is not None
 spec.loader.exec_module(module)
 
 
+def _root(tf: tarfile.TarFile) -> None:
+    info = tarfile.TarInfo("./")
+    info.type = tarfile.DIRTYPE
+    info.mode = 0o755
+    info.mtime = 0
+    tf.addfile(info)
+
+
 def _regular(tf: tarfile.TarFile, name: str, data: bytes, mode: int = 0o755) -> None:
     info = tarfile.TarInfo(name)
     info.size = len(data)
@@ -34,6 +42,7 @@ def _symlink(tf: tarfile.TarFile, name: str, target: str) -> None:
 
 def _build_alpine_tar(path: Path) -> None:
     with tarfile.open(path, "w", format=tarfile.PAX_FORMAT) as tf:
+        _root(tf)
         _regular(tf, "bin/busybox", b"busybox")
         _symlink(tf, "bin/sh", "/bin/busybox")
         _symlink(tf, "usr/bin/env", "/bin/busybox")
@@ -51,6 +60,7 @@ def test_alpine_absolute_rootfs_symlinks_become_host_safe_relative_links(tmp_pat
 
     with tarfile.open(tar_path, "r:*") as tf:
         members = {member.name: member for member in tf.getmembers()}
+        assert "./" in members
         assert members["bin/sh"].linkname == "busybox"
         assert members["usr/bin/env"].linkname == "../../bin/busybox"
         assert not members["bin/sh"].linkname.startswith("/")
@@ -67,6 +77,7 @@ def test_alpine_absolute_rootfs_symlinks_become_host_safe_relative_links(tmp_pat
 def test_rejects_escaping_relative_symlink(tmp_path: Path) -> None:
     tar_path = tmp_path / "bad.tar"
     with tarfile.open(tar_path, "w", format=tarfile.PAX_FORMAT) as tf:
+        _root(tf)
         _regular(tf, "bin/busybox", b"busybox")
         _symlink(tf, "bin/sh", "../../outside")
         _symlink(tf, "usr/bin/env", "/bin/busybox")
@@ -81,18 +92,6 @@ def test_rejects_escaping_relative_symlink(tmp_path: Path) -> None:
 
 def run_standalone() -> None:
     with tempfile.TemporaryDirectory(prefix="vectras-rootfs-normalizer-test-") as tmp:
-        root = Path(tmp)
-        test_alpine_absolute_rootfs_symlinks_become_host_safe_relative_links(root / "case-ok")
-    with tempfile.TemporaryDirectory(prefix="vectras-rootfs-normalizer-test-") as tmp:
-        root = Path(tmp)
-        test_rejects_escaping_relative_symlink(root / "case-reject")
-    print("ROOTFS_NORMALIZER_TESTS: PASS cases=2")
-
-
-if __name__ == "__main__":
-    # Keep this file compatible with pytest while also making the CI gate valid
-    # on a bare Python installation.
-    with tempfile.TemporaryDirectory(prefix="vectras-rootfs-normalizer-test-") as tmp:
         case = Path(tmp) / "case-ok"
         case.mkdir(parents=True)
         test_alpine_absolute_rootfs_symlinks_become_host_safe_relative_links(case)
@@ -101,3 +100,9 @@ if __name__ == "__main__":
         case.mkdir(parents=True)
         test_rejects_escaping_relative_symlink(case)
     print("ROOTFS_NORMALIZER_TESTS: PASS cases=2")
+
+
+if __name__ == "__main__":
+    # Keep this file compatible with pytest while also making the CI gate valid
+    # on a bare Python installation.
+    run_standalone()
