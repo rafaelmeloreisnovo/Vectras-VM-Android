@@ -95,6 +95,7 @@ object VectrasTermuxBridge {
             arguments = boundedArguments,
             requestKind = "qemu",
             transactionPrefix = "tx-vectras-termux",
+            transactionIdOverride = null,
         ) { transactionId ->
             VectrasTermuxIpcContract.canonicalRequest(
                 transactionId = transactionId,
@@ -107,11 +108,21 @@ object VectrasTermuxBridge {
     fun dispatchMaintenance(
         context: Context,
         stage: VectrasTermuxIpcContract.MaintenanceStage,
+        transactionId: String = newMaintenanceTransactionId(),
     ): DispatchResult {
+        if (!TRANSACTION_PATTERN.matches(transactionId)) {
+            return DispatchResult(
+                State.INVALID_ARGUMENTS,
+                transactionId,
+                stage.targetName,
+                null,
+                reason = "invalid_maintenance_transaction_id",
+            )
+        }
         val boundedArguments = VectrasTermuxIpcContract.boundedMaintenanceArguments(stage)
             ?: return DispatchResult(
                 State.INVALID_ARGUMENTS,
-                null,
+                transactionId,
                 stage.targetName,
                 null,
                 reason = "maintenance_arguments_outside_ipc_v3_contract",
@@ -124,14 +135,17 @@ object VectrasTermuxBridge {
             arguments = boundedArguments,
             requestKind = "maintenance",
             transactionPrefix = "tx-vectras-maint",
-        ) { transactionId ->
+            transactionIdOverride = transactionId,
+        ) { resolvedTransactionId ->
             VectrasTermuxIpcContract.canonicalMaintenanceRequest(
-                transactionId = transactionId,
+                transactionId = resolvedTransactionId,
                 stage = stage,
                 arguments = boundedArguments,
             )
         }
     }
+
+    fun newMaintenanceTransactionId(): String = "tx-vectras-maint-${UUID.randomUUID()}"
 
     private fun dispatchBoundedCommand(
         context: Context,
@@ -140,6 +154,7 @@ object VectrasTermuxBridge {
         arguments: List<String>,
         requestKind: String,
         transactionPrefix: String,
+        transactionIdOverride: String?,
         canonicalRequest: (String) -> String,
     ): DispatchResult {
         if (!CrossRepoIntegrationManager.isTermuxInstalled(context)) {
@@ -155,7 +170,7 @@ object VectrasTermuxBridge {
             )
         }
 
-        val transactionId = "$transactionPrefix-${UUID.randomUUID()}"
+        val transactionId = transactionIdOverride ?: "$transactionPrefix-${UUID.randomUUID()}"
         val providerIdentity = CrossRepoIntegrationManager.loadProviderIdentity(context, targetName)
         val producerApkSha256 = context.applicationInfo.sourceDir
             ?.let(::File)
@@ -310,4 +325,6 @@ object VectrasTermuxBridge {
         }
         digest.digest().joinToString("") { "%02x".format(it) }
     }.getOrNull()
+
+    private val TRANSACTION_PATTERN = Regex("^[A-Za-z0-9._:-]{8,128}$")
 }
