@@ -1,0 +1,55 @@
+{
+  "schema": "vectras.hotfix_receipt/v1",
+  "receipt_id": "VECTRAS-PINNED-RUNTIME-DOWNLOAD-RETRY-20260906-V1",
+  "repository": "rafaelmeloreisnovo/Vectras-VM-Android",
+  "stacked_base": "a693bf439b1d7b5217da82b58a986a3eaca01189",
+  "original_baseline": "c98e5a79f70f6fd1316cad26faf328a725b8a792",
+  "trigger": {
+    "workflow": "APK Wizard",
+    "run_id": 34063289795,
+    "job_id": 101567552766,
+    "step": "Build APK wizard lanes (arm64 and arm32+arm64)",
+    "failure_class": "TRANSIENT_PINNED_SOURCE_TRANSPORT_RESET",
+    "error": "ConnectionResetError: [Errno 104] Connection reset by peer",
+    "pinned_source_commit": "e1faf376b4b034384cdab9a4ab1e608c61a83521",
+    "failed_asset": "app/src/main/assets/alpine19/armeabi-v7a.tar"
+  },
+  "change": {
+    "layer": "CI orchestration transport resilience",
+    "max_attempts": 4,
+    "backoff_seconds": [1, 2, 4],
+    "backoff_cap_seconds": 8,
+    "retry_allowlist": [
+      "connection reset",
+      "remote disconnect",
+      "transport timeout",
+      "temporary DNS resolution failure",
+      "HTTP 408/425/429/500/502/503/504"
+    ],
+    "non_retryable_examples": [
+      "HTTP 404",
+      "size mismatch",
+      "Git blob SHA-1 mismatch",
+      "SHA-256 mismatch",
+      "TAR safety violation",
+      "missing family marker"
+    ]
+  },
+  "invariants": {
+    "same_command_each_attempt": true,
+    "pinned_source_selection_unchanged": true,
+    "fallback_to_master": false,
+    "alternate_content_source": false,
+    "size_validation_unchanged": true,
+    "git_blob_sha1_validation_unchanged": true,
+    "sha256_validation_unchanged": true,
+    "tar_policy_unchanged": true,
+    "device_execution_claimed": false
+  },
+  "tests": {
+    "contract_cases": 5,
+    "remote_execution": "TOKEN_VAZIO_PENDING_NEW_PR_RUN"
+  },
+  "claim_allowed": false,
+  "rollback_ref": "a693bf439b1d7b5217da82b58a986a3eaca01189"
+}
