@@ -1,0 +1,67 @@
+name: Termux pkg contract gate
+
+on:
+  push:
+    branches:
+      - 'rafaelia/freestanding-proot-pkg-gate-*'
+    paths:
+      - 'app/src/main/java/com/vectras/vm/core/TermuxPkgContract.java'
+      - 'app/src/main/java/com/vectras/vm/AppConfig.java'
+      - '.github/workflows/termux-pkg-contract-gate.yml'
+  pull_request:
+    paths:
+      - 'app/src/main/java/com/vectras/vm/core/TermuxPkgContract.java'
+      - 'app/src/main/java/com/vectras/vm/AppConfig.java'
+      - 'app/src/test/java/com/vectras/vm/core/TermuxPkgContractTest.java'
+      - '.github/workflows/termux-pkg-contract-gate.yml'
+
+jobs:
+  deterministic-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - name: Compile pure package contract
+        run: |
+          set -euo pipefail
+          mkdir -p build/pkg-contract
+          javac -d build/pkg-contract \
+            app/src/main/java/com/vectras/vm/core/TermuxPkgContract.java
+      - name: Verify stages and AppConfig wiring
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat > build/pkg-contract/ContractSmoke.java <<'JAVA'
+          import com.vectras.vm.core.TermuxPkgContract;
+          import java.util.List;
+          public final class ContractSmoke {
+              public static void main(String[] args) {
+                  List<String> boot = TermuxPkgContract.packages(
+                          TermuxPkgContract.Stage.BOOTSTRAP_TOOLCHAIN);
+                  List<String> qemu = TermuxPkgContract.packages(
+                          TermuxPkgContract.Stage.VECTRAS_QEMU);
+                  if (!boot.contains("proot") || !boot.contains("proot-distro") ||
+                      !boot.contains("ninja") || !boot.contains("clang") ||
+                      !boot.contains("x11-repo")) throw new AssertionError("bootstrap contract gap");
+                  if (boot.contains("qemu-system-x86-64-headless"))
+                      throw new AssertionError("qemu leaked into stage 1");
+                  if (!qemu.contains("qemu-system-x86-64-headless") ||
+                      !qemu.contains("qemu-utils")) throw new AssertionError("qemu contract gap");
+                  if (TermuxPkgContract.hasDuplicatePackages())
+                      throw new AssertionError("duplicate package");
+                  List<String> argv = TermuxPkgContract.pkgInstallArgv(
+                          TermuxPkgContract.Stage.BOOTSTRAP_TOOLCHAIN);
+                  if (!argv.subList(0, 3).equals(java.util.Arrays.asList("pkg", "install", "-y")))
+                      throw new AssertionError("argv prefix changed");
+              }
+          }
+          JAVA
+          javac -cp build/pkg-contract -d build/pkg-contract build/pkg-contract/ContractSmoke.java
+          java -cp build/pkg-contract ContractSmoke
+          grep -q 'TermuxPkgContract.packageString(TermuxPkgContract.Stage.BOOTSTRAP_TOOLCHAIN)' \
+            app/src/main/java/com/vectras/vm/AppConfig.java
+          grep -q 'TermuxPkgContract.packageString(TermuxPkgContract.Stage.VECTRAS_QEMU)' \
+            app/src/main/java/com/vectras/vm/AppConfig.java
