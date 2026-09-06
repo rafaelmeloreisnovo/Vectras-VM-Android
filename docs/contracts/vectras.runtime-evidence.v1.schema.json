@@ -1,0 +1,93 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:vectras:runtime-evidence:v1",
+  "title": "Vectras In-App Runtime Evidence v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "receipt_id",
+    "created_unix_ms",
+    "package_name",
+    "requested_qemu_binary",
+    "guest_path",
+    "resolved_qemu_guest_path",
+    "resolved_qemu_img_guest_path",
+    "apk_sha256",
+    "proot_sha256",
+    "qemu_sha256",
+    "qemu_img_sha256",
+    "proot_executable",
+    "root_shell_executable",
+    "qemu_executable",
+    "qemu_img_executable",
+    "bootstrap_validator_ok",
+    "bootstrap_validator_summary",
+    "qemu_probe",
+    "qemu_img_probe",
+    "android_fingerprint",
+    "android_model",
+    "android_manufacturer",
+    "android_hardware",
+    "android_supported_abis",
+    "device_state",
+    "reproduced_state",
+    "claim_allowed",
+    "reason"
+  ],
+  "properties": {
+    "schema": {"const": "vectras.runtime-evidence.v1"},
+    "receipt_id": {"type": "string", "minLength": 8, "maxLength": 256},
+    "created_unix_ms": {"type": "integer", "minimum": 1},
+    "package_name": {"type": "string", "pattern": "^[A-Za-z0-9_.]+$"},
+    "requested_qemu_binary": {"type": "string", "pattern": "^qemu-system-[A-Za-z0-9_.-]+$"},
+    "guest_path": {"const": "/usr/local/bin:/usr/bin:/bin:/usr/local/sbin:/usr/sbin:/sbin"},
+    "resolved_qemu_guest_path": {"type": "string"},
+    "resolved_qemu_img_guest_path": {"type": "string"},
+    "apk_sha256": {"$ref": "#/$defs/hash_state"},
+    "proot_sha256": {"$ref": "#/$defs/hash_state"},
+    "qemu_sha256": {"$ref": "#/$defs/hash_state"},
+    "qemu_img_sha256": {"$ref": "#/$defs/hash_state"},
+    "proot_executable": {"type": "boolean"},
+    "root_shell_executable": {"type": "boolean"},
+    "qemu_executable": {"type": "boolean"},
+    "qemu_img_executable": {"type": "boolean"},
+    "bootstrap_validator_ok": {"type": "boolean"},
+    "bootstrap_validator_summary": {"type": "string", "maxLength": 4096},
+    "qemu_probe": {"$ref": "#/$defs/probe"},
+    "qemu_img_probe": {"$ref": "#/$defs/probe"},
+    "android_fingerprint": {"type": "string", "maxLength": 4096},
+    "android_model": {"type": "string", "maxLength": 512},
+    "android_manufacturer": {"type": "string", "maxLength": 512},
+    "android_hardware": {"type": "string", "maxLength": 512},
+    "android_supported_abis": {
+      "type": "array",
+      "items": {"type": "string", "minLength": 1, "maxLength": 128},
+      "uniqueItems": true,
+      "maxItems": 32
+    },
+    "device_state": {"enum": ["DEVICE_PROVEN", "TOKEN_VAZIO"]},
+    "reproduced_state": {"enum": ["REPRODUCED", "TOKEN_VAZIO"]},
+    "claim_allowed": {"type": "boolean"},
+    "reason": {"type": "string", "minLength": 1, "maxLength": 4096}
+  },
+  "$defs": {
+    "hash_state": {
+      "oneOf": [
+        {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+        {"const": "TOKEN_VAZIO"}
+      ]
+    },
+    "probe": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["ok", "exit_code", "status", "detail"],
+      "properties": {
+        "ok": {"type": "boolean"},
+        "exit_code": {"type": "integer", "minimum": -1, "maximum": 255},
+        "status": {"type": "string", "minLength": 1, "maxLength": 128},
+        "detail": {"type": "string", "maxLength": 512}
+      }
+    }
+  }
+}
