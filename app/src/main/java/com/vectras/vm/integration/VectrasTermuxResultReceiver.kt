@@ -25,7 +25,7 @@ class VectrasTermuxResultReceiver : BroadcastReceiver() {
         val intentRequestSha256 = intent.getStringExtra(EXTRA_REQUEST_SHA256)
         if (intentBinary != null && intentBinary != pending.binaryName) return
         if (intentRequestSha256 != null && intentRequestSha256 != pending.requestSha256) return
-        if (pending.binaryName !in VectrasTermuxBridge.allowedBinaryNames()) return
+        if (pending.binaryName !in VectrasTermuxBridge.allowedReceiptTargets()) return
 
         val result = intent.getBundleExtra(VectrasTermuxIpcContract.RESULT_BUNDLE)
         val resultBundlePresent = result != null
@@ -164,6 +164,8 @@ class VectrasTermuxResultReceiver : BroadcastReceiver() {
             put("target_package", VectrasTermuxIpcContract.TERMUX_PACKAGE)
             put("service_class", VectrasTermuxIpcContract.SERVICE_CLASS)
             put("binary_name", pending.binaryName)
+            put("command_path", pending.commandPath)
+            put("request_kind", pending.requestKind)
             put("argument_count", pending.argumentCount)
             put("arguments_sha256", pending.argumentsSha256)
             put("input_sha256", pending.requestSha256)
@@ -200,7 +202,16 @@ class VectrasTermuxResultReceiver : BroadcastReceiver() {
             put("F_next", fNext)
         }
 
-        VectrasTermuxReceiptStore.writeReceipt(context, transactionId, receipt)
+        val persisted = VectrasTermuxReceiptStore.writeReceipt(context, transactionId, receipt)
+        if (persisted && pending.requestKind == "maintenance") {
+            VectrasTermuxMaintenanceCoordinator.onExecutionResult(
+                context = context.applicationContext,
+                pending = pending,
+                resultBundlePresent = resultBundlePresent,
+                exitCode = exitCode,
+                errorCode = errorCode,
+            )
+        }
     }
 
     private fun intOrNull(bundle: Bundle, key: String): Int? {
