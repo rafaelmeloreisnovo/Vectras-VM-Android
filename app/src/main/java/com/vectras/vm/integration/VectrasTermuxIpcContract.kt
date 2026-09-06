@@ -52,6 +52,38 @@ object VectrasTermuxIpcContract {
 
     const val MAX_EXTRA_ARGUMENTS = MAX_TOTAL_ARGUMENTS - 11
 
+    const val MAINTENANCE_RAFPROOT_TARGET = "rafproot-fs"
+    const val MAINTENANCE_PKG_TARGET = "pkg"
+    const val MAINTENANCE_RAFPROOT_PATH = "\$PREFIX/libexec/rafproot-fs"
+    const val MAINTENANCE_PKG_PATH = "\$PREFIX/bin/pkg"
+
+    enum class MaintenanceStage(
+        val targetName: String,
+        val commandPath: String,
+        val arguments: List<String>,
+    ) {
+        BOOTSTRAP(
+            MAINTENANCE_RAFPROOT_TARGET,
+            MAINTENANCE_RAFPROOT_PATH,
+            listOf("--pkg-bootstrap"),
+        ),
+        REFRESH(
+            MAINTENANCE_PKG_TARGET,
+            MAINTENANCE_PKG_PATH,
+            listOf("update", "-y"),
+        ),
+        VECTRAS_QEMU(
+            MAINTENANCE_RAFPROOT_TARGET,
+            MAINTENANCE_RAFPROOT_PATH,
+            listOf("--pkg-vectras"),
+        ),
+        PROBE(
+            MAINTENANCE_RAFPROOT_TARGET,
+            MAINTENANCE_RAFPROOT_PATH,
+            listOf("--probe"),
+        ),
+    }
+
     private val protectedOptions = setOf(
         "-accel",
         "-display",
@@ -71,16 +103,24 @@ object VectrasTermuxIpcContract {
         if (extraArguments.any(::overridesProtectedOption)) return null
 
         val combined = fixedArguments + extraArguments
-        if (combined.size > MAX_TOTAL_ARGUMENTS) return null
+        return boundedRawArguments(combined)
+    }
 
-        var totalBytes = 0
-        for (argument in combined) {
-            if (argument.length > MAX_ARGUMENT_LENGTH) return null
-            if ('\u0000' in argument || '\n' in argument || '\r' in argument) return null
-            totalBytes += argument.toByteArray(Charsets.UTF_8).size
-            if (totalBytes > MAX_ARGUMENT_BYTES) return null
-        }
-        return combined
+    fun boundedMaintenanceArguments(stage: MaintenanceStage): List<String>? {
+        val expected = stage.arguments
+        val bounded = boundedRawArguments(expected) ?: return null
+        if (bounded != expected) return null
+        return bounded
+    }
+
+    fun maintenanceStageFrom(
+        targetName: String,
+        commandPath: String,
+        arguments: List<String>,
+    ): MaintenanceStage? = MaintenanceStage.entries.firstOrNull { stage ->
+        stage.targetName == targetName &&
+            stage.commandPath == commandPath &&
+            stage.arguments == arguments
     }
 
     fun commandPath(binaryName: String): String = "\$PREFIX/bin/$binaryName"
@@ -89,6 +129,26 @@ object VectrasTermuxIpcContract {
         transactionId: String,
         binaryName: String,
         arguments: List<String>,
+    ): String = canonicalCommandRequest(
+        transactionId = transactionId,
+        commandPath = commandPath(binaryName),
+        arguments = arguments,
+    )
+
+    fun canonicalMaintenanceRequest(
+        transactionId: String,
+        stage: MaintenanceStage,
+        arguments: List<String>,
+    ): String = canonicalCommandRequest(
+        transactionId = transactionId,
+        commandPath = stage.commandPath,
+        arguments = arguments,
+    )
+
+    private fun canonicalCommandRequest(
+        transactionId: String,
+        commandPath: String,
+        arguments: List<String>,
     ): String = buildString {
         appendField("protocol", PROTOCOL)
         appendField("transaction_id", transactionId)
@@ -96,7 +156,7 @@ object VectrasTermuxIpcContract {
         appendField("service_class", SERVICE_CLASS)
         appendField("action", ACTION_RUN_COMMAND)
         appendField("permission", RUN_COMMAND_PERMISSION)
-        appendField("command_path", commandPath(binaryName))
+        appendField("command_path", commandPath)
         appendField("workdir", WORKDIR)
         appendField("runner", RUNNER_APP_SHELL)
         appendField("argument_count", arguments.size.toString())
@@ -112,6 +172,18 @@ object VectrasTermuxIpcContract {
         MessageDigest.getInstance("SHA-256")
             .digest(value.toByteArray(Charsets.UTF_8))
             .joinToString("") { "%02x".format(it) }
+
+    private fun boundedRawArguments(arguments: List<String>): List<String>? {
+        if (arguments.size > MAX_TOTAL_ARGUMENTS) return null
+        var totalBytes = 0
+        for (argument in arguments) {
+            if (argument.length > MAX_ARGUMENT_LENGTH) return null
+            if ('\u0000' in argument || '\n' in argument || '\r' in argument) return null
+            totalBytes += argument.toByteArray(Charsets.UTF_8).size
+            if (totalBytes > MAX_ARGUMENT_BYTES) return null
+        }
+        return arguments.toList()
+    }
 
     private fun overridesProtectedOption(argument: String): Boolean =
         protectedOptions.any { option -> argument == option || argument.startsWith("$option=") }
