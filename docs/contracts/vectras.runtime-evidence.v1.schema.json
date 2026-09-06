@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:vectras:runtime-evidence:v1",
+  "title": "Vectras In-App Runtime Evidence v1",
+  "type": "object",
+  "required": [
+    "schema", "receipt_id", "created_unix_ms", "package_name", "requested_qemu_binary",
+    "apk_sha256", "proot_sha256", "qemu_sha256", "qemu_img_sha256",
+    "proot_executable", "root_shell_executable", "qemu_executable", "qemu_img_executable",
+    "bootstrap_validator_ok", "bootstrap_validator_summary", "qemu_probe", "qemu_img_probe",
+    "device_state", "reproduced_state", "claim_allowed", "reason"
+  ],
+  "properties": {
+    "schema": {"const": "vectras.runtime-evidence.v1"},
+    "receipt_id": {"type": "string", "minLength": 8},
+    "created_unix_ms": {"type": "integer", "minimum": 1},
+    "package_name": {"type": "string", "minLength": 3},
+    "requested_qemu_binary": {"type": "string", "pattern": "^qemu-system-[A-Za-z0-9_.-]+$"},
+    "apk_sha256": {"type": "string"},
+    "proot_sha256": {"type": "string"},
+    "qemu_sha256": {"type": "string"},
+    "qemu_img_sha256": {"type": "string"},
+    "proot_executable": {"type": "boolean"},
+    "root_shell_executable": {"type": "boolean"},
+    "qemu_executable": {"type": "boolean"},
+    "qemu_img_executable": {"type": "boolean"},
+    "bootstrap_validator_ok": {"type": "boolean"},
+    "bootstrap_validator_summary": {"type": "string"},
+    "qemu_probe": {"$ref": "#/$defs/probe"},
+    "qemu_img_probe": {"$ref": "#/$defs/probe"},
+    "device_state": {"enum": ["DEVICE_PROVEN", "TOKEN_VAZIO"]},
+    "reproduced_state": {"enum": ["REPRODUCED", "TOKEN_VAZIO"]},
+    "claim_allowed": {"type": "boolean"},
+    "reason": {"type": "string"}
+  },
+  "$defs": {
+    "probe": {
+      "type": "object",
+      "required": ["ok", "exit_code", "status", "detail"],
+      "properties": {
+        "ok": {"type": "boolean"},
+        "exit_code": {"type": "integer"},
+        "status": {"type": "string"},
+        "detail": {"type": "string"}
+      }
+    }
+  }
+}
