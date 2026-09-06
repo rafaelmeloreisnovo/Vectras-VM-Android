@@ -1,0 +1,33 @@
+{
+  "schema": "rafaelia.vectras.atlas_optional_runtime_binding.v1",
+  "repository": "rafaelmeloreisnovo/Vectras-VM-Android",
+  "baseline_commit": "c98e5a79f70f6fd1316cad26faf328a725b8a792",
+  "role": "VECTRAS_OPTIONAL_RUNTIME",
+  "routing_authority": "rafaelmeloreisnovo/Mapa",
+  "orchestration_owner": "rafaelmeloreisnovo/termux-app-rafacodephi",
+  "llm_provider": "rafaelmeloreisnovo/llamaRafaelia",
+  "local_runtime_contract": "docs/federation/REPOSITORY_CONTRACT_V1.md",
+  "cross_repo_protocol": "docs/contracts/VECTRAS_TERMUX_IPC_V2.md",
+  "input_boundary": "GOVERNED_BOUNDED_VM_REQUEST",
+  "output_boundary": "VM_RUNTIME_STATUS_AND_MINIMIZED_RECEIPT",
+  "requires_upstream_governance": true,
+  "may_extract_intent": false,
+  "may_grant_capabilities": false,
+  "may_bypass_termux_governance": false,
+  "may_promote_apk_to_guest_boot": false,
+  "health_gates": [
+    "android_app_build",
+    "shell_ok",
+    "storage_ok",
+    "proot_ok",
+    "qemu_binary_ok",
+    "image_or_rootfs_ok",
+    "command_render_ok",
+    "process_start_ok",
+    "display_or_console_ok",
+    "guest_boot_evidence"
+  ],
+  "physical_android_e2e": "TOKEN_VAZIO",
+  "guest_boot": "TOKEN_VAZIO",
+  "claim_allowed": false
+}
