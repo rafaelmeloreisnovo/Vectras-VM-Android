@@ -88,6 +88,13 @@ typedef struct RafB7DiskOps {
 } RafB7DiskOps;
 
 typedef int (*RafB7GpuAvailableFn)(void *ctx, uint32_t backend);
+/*
+ * qualified() is intentionally separate from available().
+ * available: runtime/device capability exists.
+ * qualified: repeated same-workload total-cost evidence currently permits routing.
+ * The callback may use bytes to apply a measured crossover threshold.
+ */
+typedef int (*RafB7GpuQualifiedFn)(void *ctx, uint32_t backend, uint32_t bytes);
 typedef int (*RafB7GpuDispatchFn)(void *ctx, uint32_t backend,
                                   const void *src, void *dst,
                                   uint32_t bytes, uint32_t lanes,
@@ -97,6 +104,7 @@ typedef int (*RafB7GpuWaitFn)(void *ctx, uint32_t backend);
 typedef struct RafB7GpuOps {
     void *ctx;
     RafB7GpuAvailableFn available;
+    RafB7GpuQualifiedFn qualified;
     RafB7GpuDispatchFn dispatch;
     RafB7GpuWaitFn wait;
 } RafB7GpuOps;
