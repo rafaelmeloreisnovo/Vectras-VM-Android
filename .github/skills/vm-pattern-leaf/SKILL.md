@@ -1,6 +1,6 @@
 ---
 name: vm-pattern-leaf
-description: Apply reusable architecture patterns to the Vectras VM/QEMU consumer role while preserving bounded requests, safe-state behavior, protected arguments, data minimization, and dispatch/execution/guest-boot evidence separation. Use when a prior architecture suggests a useful trigger, state, validation, logging, queue, rollback, or error mechanism.
+description: Apply reusable architecture patterns to the Vectras VM/QEMU consumer role while preserving bounded requests, safe-state behavior, protected arguments, data minimization, and dispatch/execution/guest-boot evidence separation. Use when a prior architecture suggests a useful trigger, state, validation, logging, queue, storage-layout, memory-map, bus-resource, rollback, or error mechanism.
 ---
 
 # VM / QEMU Pattern Leaf
@@ -27,6 +27,65 @@ Reference transfers:
 
 Transfer behavior, not source syntax.
 
+## Event and commit geometry
+
+Treat request creation, update, cancellation/delete, dispatch, process exit and guest-observed state as distinct transitions. A VM configuration update should preserve prior evidence when the local ledger is append/supersede oriented.
+
+```text
+request identity
+-> validated config
+-> dispatch
+-> host process observation
+-> exit/status
+-> guest observation
+-> receipt/current view
+```
+
+## Memory and bus geometry
+
+Legacy IRQ/DMA/ISA/bridge/address-map reasoning transfers as a resource-topology model:
+
+```text
+resource
+-> address/port/channel
+-> owner
+-> width/alignment
+-> event/transfer route
+-> contention/failure state
+```
+
+QEMU/device-model configuration and current guest/host architecture contracts own exact addresses, IRQ numbers and MMIO layout. Historical constants are never copied blindly.
+
+## Storage locality geometry
+
+Disk geometry and fragmentation ideas map to VM images as:
+
+```text
+guest logical block
+-> image format allocation
+-> host file extent/cache
+-> storage backend
+-> measured latency/throughput
+```
+
+Keep logical guest layout separate from host physical placement. A sparse image, aligned extent or sequential read strategy is an optimization only if integrity and rollback remain testable.
+
+HDD seek times, SSD startup latency and flash-cell type are benchmark inputs, not universal constants.
+
+## Binary/boot geometry
+
+Historical boot records, option ROM/EEPROM and executable-header ideas transfer as:
+
+```text
+boot source
+-> validated metadata/header
+-> mapped region/device
+-> firmware/loader transition
+-> guest-visible state
+```
+
+Exact boot vectors, magic values and offsets require the target firmware/image specification.
+
 ## Preserve
 
 - discovery, dispatch, process execution, exit and guest boot as distinct layers;
@@ -52,4 +111,4 @@ Only sanitized mechanisms may arrive from a private seed. Do not publish raw pri
 
 ## Completion
 
-Record `source_pattern`, `vm_leaf`, request/state boundary, falsifier, safe-state/rollback, `F_ok`, `F_gap`, `F_next` and `claim_allowed=false` unless an exact-scope gate promotes it.
+Record `source_pattern`, `vm_leaf`, request/state boundary, memory/bus/storage geometry if relevant, falsifier, safe-state/rollback, `F_ok`, `F_gap`, `F_next` and `claim_allowed=false` unless an exact-scope gate promotes it.
