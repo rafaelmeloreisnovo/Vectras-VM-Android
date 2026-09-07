@@ -190,12 +190,14 @@ static void raf_b7_append_receipt(RafB7Plan *plan, uint16_t stage,
 static uint16_t raf_b7_choose_backend(RafB7Plan *plan, uint32_t bytes) {
     if (plan != 0 && (plan->flags & RAF_B7_FLAG_ALLOW_GPU) != 0u &&
         bytes >= plan->gpu_threshold && plan->gpu.available != 0 &&
-        plan->gpu.dispatch != 0) {
+        plan->gpu.qualified != 0 && plan->gpu.dispatch != 0) {
         if ((plan->capabilities & RAF_B7_CAP_GPU_VULKAN) != 0u &&
-            plan->gpu.available(plan->gpu.ctx, RAF_B7_BACKEND_VULKAN) > 0)
+            plan->gpu.available(plan->gpu.ctx, RAF_B7_BACKEND_VULKAN) > 0 &&
+            plan->gpu.qualified(plan->gpu.ctx, RAF_B7_BACKEND_VULKAN, bytes) > 0)
             return RAF_B7_BACKEND_VULKAN;
         if ((plan->capabilities & RAF_B7_CAP_GPU_OPENCL) != 0u &&
-            plan->gpu.available(plan->gpu.ctx, RAF_B7_BACKEND_OPENCL) > 0)
+            plan->gpu.available(plan->gpu.ctx, RAF_B7_BACKEND_OPENCL) > 0 &&
+            plan->gpu.qualified(plan->gpu.ctx, RAF_B7_BACKEND_OPENCL, bytes) > 0)
             return RAF_B7_BACKEND_OPENCL;
     }
     return (plan != 0 && (plan->capabilities & RAF_B7_CAP_NEON) != 0u)
@@ -370,8 +372,8 @@ int raf_b7_pipeline_step(RafB7Plan *plan) {
     }
 
     if (compute->state == RAF_B7_BANK_COMPUTE) {
-        rc = raf_b7_compute(plan, compute);
-        if (rc != RAF_B7_OK) return rc;
+        int rc_compute = raf_b7_compute(plan, compute);
+        if (rc_compute != RAF_B7_OK) return rc_compute;
     }
 
     if (!plan->input_eof && ingress->state == RAF_B7_BANK_EMPTY) {
@@ -404,6 +406,7 @@ int raf_b7_pipeline_step(RafB7Plan *plan) {
     plan->compute_index = old_read;
     plan->write_index = old_compute;
     ++plan->epoch;
+    (void)rc;
     return RAF_B7_OK;
 }
 
