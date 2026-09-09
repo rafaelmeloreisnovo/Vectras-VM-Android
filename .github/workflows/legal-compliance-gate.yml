@@ -61,9 +61,7 @@ jobs:
         run: python3 tools/ci/check_legal_gate.py
 
       - name: Verify append-only transform provenance chain
-        run: |
-          python3 tools/ci/verify_provenance_transform_chain.py \
-            resources/compliance/PROVENANCE_TRANSFORM_REGISTER.jsonl
+        run: python3 tools/ci/verify_provenance_transform_chain.py
 
       - name: Verify engine/rmr SPDX coverage
         run: |
