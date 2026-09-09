@@ -41,6 +41,21 @@ static u32 rmr_vf_mix(u32 h, u32 x) {
   return h;
 }
 
+static void rmr_vf_state_copy(RmR_VectorFieldState *dst, const RmR_VectorFieldState *src) {
+  dst->n_raw = src->n_raw;
+  dst->n_mod42 = src->n_mod42;
+  dst->arc_deg = src->arc_deg;
+  dst->chord_q16 = src->chord_q16;
+  dst->h_q16 = src->h_q16;
+  dst->toroid_node = src->toroid_node;
+  dst->spiral_q16 = src->spiral_q16;
+  dst->gap_q16 = src->gap_q16;
+  dst->audit_crc = src->audit_crc;
+  dst->phi_q8 = src->phi_q8;
+  dst->flags = src->flags;
+  dst->watchdog = src->watchdog;
+}
+
 static u32 rmr_vf_chord_q16(u32 deg) {
   u32 d = deg % RMR_VECTOR_ARC_BASE;
   u32 over = 0u - (u32)(d > 180u);
@@ -81,7 +96,8 @@ void RmR_VectorField_Init(RmR_VectorFieldState *state) {
 u32 RmR_VectorField_RunIndex(RmR_VectorFieldState *state, u32 index, u32 correction_steps) {
   if (!state) return RMR_VECTOR_FLAG_FAILSAFE;
 
-  RmR_VectorFieldState rollback = *state;
+  RmR_VectorFieldState rollback;
+  rmr_vf_state_copy(&rollback, state);
   u32 capped = correction_steps;
   u32 wd_mask = 0u - (u32)(correction_steps > RMR_VECTOR_WATCHDOG_MAX);
   capped = rmr_vf_select(wd_mask, RMR_VECTOR_WATCHDOG_MAX, capped);
@@ -115,13 +131,8 @@ u32 RmR_VectorField_RunIndex(RmR_VectorFieldState *state, u32 index, u32 correct
   state->audit_crc = rmr_vf_mix(state->audit_crc, state->toroid_node);
   state->audit_crc = rmr_vf_mix(state->audit_crc, state->phi_q8 ^ state->flags);
 
-  /* HOTFIX: n_mod42 = n_raw % MOD_BASE is always < MOD_BASE by definition, so the
-   * previous condition (>= MOD_BASE) was mathematically impossible — a dead safety
-   * net.  The real convergence hazard is gap_q16/spiral_q16 reaching 0 after ~78
-   * rmr_vf_step_contract multiplications by sqrt(3)/2 in Q16.16; once zero, the
-   * state degenerates (audit_crc xor'd with 0 every step).  Guard that instead. */
   if (state->gap_q16 == 0u || state->spiral_q16 == 0u) {
-    *state = rollback;
+    rmr_vf_state_copy(state, &rollback);
     state->flags |= RMR_VECTOR_FLAG_ROLLBACK | RMR_VECTOR_FLAG_FAILSAFE;
   }
 
@@ -131,12 +142,11 @@ u32 RmR_VectorField_RunIndex(RmR_VectorFieldState *state, u32 index, u32 correct
 u32 RmR_VectorField_RunBytecode(RmR_VectorFieldState *state, const u8 *bytecode, u32 len) {
   if (!state || !bytecode) return RMR_VECTOR_FLAG_FAILSAFE;
 
-  const RmR_VectorFieldState rollback = *state;
+  RmR_VectorFieldState rollback;
+  rmr_vf_state_copy(&rollback, state);
   u32 pc = 0u;
   u32 running = 1u;
 
-  /* pc advances monotonically by one fixed 2-byte instruction. The correction
-   * watchdog protects correction work only; bytecode traversal is bounded by len. */
   while (running && pc + 1u < len) {
     const u32 op = bytecode[pc];
     const u32 arg = bytecode[pc + 1u];
@@ -177,7 +187,7 @@ u32 RmR_VectorField_RunBytecode(RmR_VectorFieldState *state, const u8 *bytecode,
       state->watchdog += capped;
 
       if (overflow || state->gap_q16 == 0u || state->spiral_q16 == 0u) {
-        *state = rollback;
+        rmr_vf_state_copy(state, &rollback);
         state->flags |= RMR_VECTOR_FLAG_ROLLBACK |
                         RMR_VECTOR_FLAG_WATCHDOG |
                         RMR_VECTOR_FLAG_FAILSAFE;
@@ -200,16 +210,15 @@ u32 RmR_VectorField_RunBytecode(RmR_VectorFieldState *state, const u8 *bytecode,
     }
 
     if (!known) {
-      *state = rollback;
+      rmr_vf_state_copy(state, &rollback);
       state->flags |= RMR_VECTOR_FLAG_ROLLBACK | RMR_VECTOR_FLAG_FAILSAFE;
       return state->flags;
     }
     pc += 2u;
   }
 
-  /* A trailing half-instruction is malformed unless a prior SEAL ended execution. */
   if (running && pc != len) {
-    *state = rollback;
+    rmr_vf_state_copy(state, &rollback);
     state->flags |= RMR_VECTOR_FLAG_ROLLBACK | RMR_VECTOR_FLAG_FAILSAFE;
   }
   return state->flags;
