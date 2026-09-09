@@ -64,3 +64,42 @@ Android JNI remains a hosted adapter. The existing `abi_core_freestanding` targe
 `F_gap`: CI, final-link output inspection, physical ARM receipts, ARM32 NEON route, GPIO authority and throughput remain evidence-gated.
 
 `F_next_single`: open a draft PR and observe canonical CI/freestanding-link evidence for this exact head before any merge or runtime claim.
+
+---
+
+## APPEND — Second-pass symbol audit — 2026-09-09
+
+This section is append-only and supersedes no earlier observation; it records findings discovered while reviewing the delta itself.
+
+### Hidden freestanding symbol risks removed
+
+1. C aggregate assignment in checkpoint/rollback paths could legally be lowered by the compiler to an external `memcpy`, even when source contains no libc call. Topological and vector state snapshots are now copied field-by-field.
+2. Fixed-width CRC word loads no longer use `__builtin_memcpy`; ARM/x86 hardware paths assemble little-endian 32/64-bit words explicitly from bytes.
+3. An isolated ARMv7 freestanding object check exposed `__aeabi_uldivmod` in the vector kernel from 64-bit division/modulo. The topological guard already had zero undefined symbols.
+4. The vector geometry was algebraically reduced without changing its residue class: chord multiplication is bounded in `u32`; toroid node is evaluated term-by-term in `Z/1000Z`. The resulting ARMv7 vector object check had zero undefined symbols.
+
+### Stale KAT provenance resolved
+
+The historical smoke signature `0xe30aefc6` represents the pre-hotfix behavior where repeated contraction was allowed to reach `gap_q16=spiral_q16=0`. Commit `8f7ababa4174289a8b22e554223cd87c8372e977` replaced the mathematically dead modulo guard with rollback on zero convergence, but did not update `demo_cli/src/rmr_vector_field_selftest.c`.
+
+Reproduction of both semantics shows:
+
+- pre-hotfix terminal degeneration => `0xe30aefc6`;
+- post-hotfix fail-closed rollback => `0xb1a90198`.
+
+The selftest KAT is therefore updated to `0xb1a90198`, with the causal commit recorded beside the assertion. Base geometry remains unchanged for index 0: `n=56`, `mod42=14`, `arc=56`, `chord_q16=20388`, `h_q16=17656`, `toroid_node=983`, `gap_q16=spiral_q16=23943` after seven correction steps.
+
+### Evidence boundary for local checks
+
+The ARMv7 symbol result is an isolated compiler/object-level reproduction of the materialized source logic under strict freestanding ARMv7 flags. It is useful engineering evidence but is not substituted for canonical repository CI, the repository's dedicated final-link probe, APK/NDK matrix evidence, or physical-device execution.
+
+### Updated gaps
+
+- `ARMV7_OBJECT_UNDEFINED_SYMBOLS = 0_OBSERVED_ISOLATED_REPRODUCTION`.
+- `CANONICAL_FREESTANDING_FINAL_LINK = TOKEN_VAZIO_PROVIDER` until exact-head CI/link-probe evidence is retrieved.
+- `APK_NDK_GRADLE_MATRIX = TOKEN_VAZIO_PROVIDER` for this exact head.
+- all physical-device, GPIO authority, ARM32 RMR-NEON routing, CRC HW/SW on-device equivalence and throughput gates remain unchanged.
+
+### Updated F_next_single
+
+Observe the exact PR head through the canonical CI + dedicated `vectra_freestanding_link_probe`; merge remains forbidden until that evidence exists.
