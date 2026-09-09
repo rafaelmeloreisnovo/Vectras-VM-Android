@@ -41,11 +41,38 @@ static u32 rmr_vf_mix(u32 h, u32 x) {
   return h;
 }
 
+static void rmr_vf_state_copy(RmR_VectorFieldState *dst, const RmR_VectorFieldState *src) {
+  dst->n_raw = src->n_raw;
+  dst->n_mod42 = src->n_mod42;
+  dst->arc_deg = src->arc_deg;
+  dst->chord_q16 = src->chord_q16;
+  dst->h_q16 = src->h_q16;
+  dst->toroid_node = src->toroid_node;
+  dst->spiral_q16 = src->spiral_q16;
+  dst->gap_q16 = src->gap_q16;
+  dst->audit_crc = src->audit_crc;
+  dst->phi_q8 = src->phi_q8;
+  dst->flags = src->flags;
+  dst->watchdog = src->watchdog;
+}
+
 static u32 rmr_vf_chord_q16(u32 deg) {
   u32 d = deg % RMR_VECTOR_ARC_BASE;
   u32 over = 0u - (u32)(d > 180u);
   u32 folded = rmr_vf_select(over, RMR_VECTOR_ARC_BASE - d, d);
-  return (u32)(((u64)folded * RMR_VECTOR_Q16_ONE) / 180u);
+  /* folded <= 180, therefore folded*65536 fits u32 and avoids ARM32 u64 div. */
+  return (folded * RMR_VECTOR_Q16_ONE) / 180u;
+}
+
+/* Equivalent to the previous 64-bit sum modulo 1000, but each term is reduced
+ * first. This preserves Z/1000Z geometry while avoiding __aeabi_uldivmod on
+ * freestanding ARM32. */
+static u32 rmr_vf_toroid_node(const RmR_VectorFieldState *s) {
+  u32 acc = ((s->n_raw % RMR_VECTOR_NODE_MOD) * 17u) % RMR_VECTOR_NODE_MOD;
+  acc += ((s->n_mod42 % RMR_VECTOR_NODE_MOD) * RMR_VECTOR_MOD_BASE) % RMR_VECTOR_NODE_MOD;
+  acc += ((s->arc_deg % RMR_VECTOR_NODE_MOD) * 3u) % RMR_VECTOR_NODE_MOD;
+  acc += (s->h_q16 >> 6) % RMR_VECTOR_NODE_MOD;
+  return acc % RMR_VECTOR_NODE_MOD;
 }
 
 static u32 rmr_vf_load_number(u32 index) {
@@ -81,7 +108,8 @@ void RmR_VectorField_Init(RmR_VectorFieldState *state) {
 u32 RmR_VectorField_RunIndex(RmR_VectorFieldState *state, u32 index, u32 correction_steps) {
   if (!state) return RMR_VECTOR_FLAG_FAILSAFE;
 
-  RmR_VectorFieldState rollback = *state;
+  RmR_VectorFieldState rollback;
+  rmr_vf_state_copy(&rollback, state);
   u32 capped = correction_steps;
   u32 wd_mask = 0u - (u32)(correction_steps > RMR_VECTOR_WATCHDOG_MAX);
   capped = rmr_vf_select(wd_mask, RMR_VECTOR_WATCHDOG_MAX, capped);
@@ -91,10 +119,7 @@ u32 RmR_VectorField_RunIndex(RmR_VectorFieldState *state, u32 index, u32 correct
   state->arc_deg = state->n_raw % RMR_VECTOR_ARC_BASE;
   state->chord_q16 = rmr_vf_chord_q16(state->arc_deg);
   state->h_q16 = rmr_vf_q16_mul(state->chord_q16, RMR_VECTOR_SQRT3_OVER_2_Q16);
-  state->toroid_node = (u32)(((u64)state->n_raw * 17u +
-                              (u64)state->n_mod42 * RMR_VECTOR_MOD_BASE +
-                              (u64)state->arc_deg * 3u +
-                              (state->h_q16 >> 6)) % RMR_VECTOR_NODE_MOD);
+  state->toroid_node = rmr_vf_toroid_node(state);
 
   for (u32 i = 0u; i < capped; ++i) {
     rmr_vf_step_contract(state);
@@ -115,13 +140,8 @@ u32 RmR_VectorField_RunIndex(RmR_VectorFieldState *state, u32 index, u32 correct
   state->audit_crc = rmr_vf_mix(state->audit_crc, state->toroid_node);
   state->audit_crc = rmr_vf_mix(state->audit_crc, state->phi_q8 ^ state->flags);
 
-  /* HOTFIX: n_mod42 = n_raw % MOD_BASE is always < MOD_BASE by definition, so the
-   * previous condition (>= MOD_BASE) was mathematically impossible — a dead safety
-   * net.  The real convergence hazard is gap_q16/spiral_q16 reaching 0 after ~78
-   * rmr_vf_step_contract multiplications by sqrt(3)/2 in Q16.16; once zero, the
-   * state degenerates (audit_crc xor'd with 0 every step).  Guard that instead. */
   if (state->gap_q16 == 0u || state->spiral_q16 == 0u) {
-    *state = rollback;
+    rmr_vf_state_copy(state, &rollback);
     state->flags |= RMR_VECTOR_FLAG_ROLLBACK | RMR_VECTOR_FLAG_FAILSAFE;
   }
 
@@ -131,68 +151,82 @@ u32 RmR_VectorField_RunIndex(RmR_VectorFieldState *state, u32 index, u32 correct
 u32 RmR_VectorField_RunBytecode(RmR_VectorFieldState *state, const u8 *bytecode, u32 len) {
   if (!state || !bytecode) return RMR_VECTOR_FLAG_FAILSAFE;
 
+  RmR_VectorFieldState rollback;
+  rmr_vf_state_copy(&rollback, state);
   u32 pc = 0u;
   u32 running = 1u;
-  while (running && pc + 1u < len && state->watchdog < RMR_VECTOR_WATCHDOG_MAX) {
-    u32 op = bytecode[pc];
-    u32 arg = bytecode[pc + 1u];
-    u32 known = 0u;
+
+  while (running && pc + 1u < len) {
+    const u32 op = bytecode[pc];
+    const u32 arg = bytecode[pc + 1u];
+    u32 known = 1u;
 
     if (op == RMR_VECTOR_OP_LOAD_NUM) {
       state->n_raw = rmr_vf_load_number(arg);
       state->audit_crc = rmr_vf_mix(state->audit_crc, state->n_raw);
-      known = 1u;
     } else if (op == RMR_VECTOR_OP_MOD42) {
       state->n_mod42 = state->n_raw % RMR_VECTOR_MOD_BASE;
       state->flags |= rmr_vf_mask_eq(state->n_mod42, 22u) & RMR_VECTOR_FLAG_VOID22;
       state->audit_crc = rmr_vf_mix(state->audit_crc, state->n_mod42);
-      known = 1u;
     } else if (op == RMR_VECTOR_OP_ARC360) {
       state->arc_deg = state->n_raw % RMR_VECTOR_ARC_BASE;
       state->audit_crc = rmr_vf_mix(state->audit_crc, state->arc_deg);
-      known = 1u;
     } else if (op == RMR_VECTOR_OP_CHORD_Q16) {
       state->chord_q16 = rmr_vf_chord_q16(state->arc_deg);
       state->audit_crc = rmr_vf_mix(state->audit_crc, state->chord_q16);
-      known = 1u;
     } else if (op == RMR_VECTOR_OP_H_EQ_Q16) {
       state->h_q16 = rmr_vf_q16_mul(state->chord_q16, RMR_VECTOR_SQRT3_OVER_2_Q16);
       state->audit_crc = rmr_vf_mix(state->audit_crc, state->h_q16);
-      known = 1u;
     } else if (op == RMR_VECTOR_OP_TOROID_NODE) {
-      state->toroid_node = (u32)(((u64)state->n_raw * 17u +
-                                  (u64)state->n_mod42 * RMR_VECTOR_MOD_BASE +
-                                  (u64)state->arc_deg * 3u +
-                                  (state->h_q16 >> 6)) % RMR_VECTOR_NODE_MOD);
+      state->toroid_node = rmr_vf_toroid_node(state);
       state->audit_crc = rmr_vf_mix(state->audit_crc, state->toroid_node);
-      known = 1u;
     } else if (op == RMR_VECTOR_OP_CORRECT) {
-      u32 capped = rmr_vf_select(0u - (u32)(arg > RMR_VECTOR_WATCHDOG_MAX), RMR_VECTOR_WATCHDOG_MAX, arg);
+      const u32 remaining = (state->watchdog < RMR_VECTOR_WATCHDOG_MAX)
+                              ? (RMR_VECTOR_WATCHDOG_MAX - state->watchdog)
+                              : 0u;
+      const u32 overflow = (u32)(arg > remaining);
+      const u32 capped = rmr_vf_select(0u - overflow, remaining, arg);
+
       for (u32 i = 0u; i < capped; ++i) {
         rmr_vf_step_contract(state);
       }
       state->watchdog += capped;
-      state->flags |= (0u - (u32)(arg > RMR_VECTOR_WATCHDOG_MAX)) & RMR_VECTOR_FLAG_WATCHDOG;
-      known = 1u;
+
+      if (overflow || state->gap_q16 == 0u || state->spiral_q16 == 0u) {
+        rmr_vf_state_copy(state, &rollback);
+        state->flags |= RMR_VECTOR_FLAG_ROLLBACK |
+                        RMR_VECTOR_FLAG_WATCHDOG |
+                        RMR_VECTOR_FLAG_FAILSAFE;
+        return state->flags;
+      }
     } else if (op == RMR_VECTOR_OP_AUDIT) {
-      u32 ok = rmr_vf_mask_nonzero(state->n_raw) &
-               (rmr_vf_mask_nonzero(state->chord_q16) | rmr_vf_mask_eq(state->arc_deg, 0u)) &
-               (rmr_vf_mask_nonzero(state->h_q16) | rmr_vf_mask_eq(state->chord_q16, 0u));
-      u32 dec = rmr_vf_select(0u - (u32)(state->phi_q8 > 10u), 10u, 0u);
+      const u32 ok = rmr_vf_mask_nonzero(state->n_raw) &
+                     (rmr_vf_mask_nonzero(state->chord_q16) | rmr_vf_mask_eq(state->arc_deg, 0u)) &
+                     (rmr_vf_mask_nonzero(state->h_q16) | rmr_vf_mask_eq(state->chord_q16, 0u));
+      const u32 dec = rmr_vf_select(0u - (u32)(state->phi_q8 > 10u), 10u, 0u);
       state->phi_q8 = rmr_vf_select(ok, state->phi_q8 + 5u, state->phi_q8 - dec);
-      state->phi_q8 = rmr_vf_select(0u - (u32)(state->phi_q8 > RMR_VECTOR_PHI_Q8_MAX), RMR_VECTOR_PHI_Q8_MAX, state->phi_q8);
+      state->phi_q8 = rmr_vf_select(0u - (u32)(state->phi_q8 > RMR_VECTOR_PHI_Q8_MAX),
+                                    RMR_VECTOR_PHI_Q8_MAX,
+                                    state->phi_q8);
       state->audit_crc = rmr_vf_mix(state->audit_crc, state->phi_q8);
-      known = 1u;
     } else if (op == RMR_VECTOR_OP_SEAL) {
       running = 0u;
-      known = 1u;
+    } else {
+      known = 0u;
     }
 
-    state->flags |= (0u - (known ^ 1u)) & RMR_VECTOR_FLAG_FAILSAFE;
+    if (!known) {
+      rmr_vf_state_copy(state, &rollback);
+      state->flags |= RMR_VECTOR_FLAG_ROLLBACK | RMR_VECTOR_FLAG_FAILSAFE;
+      return state->flags;
+    }
     pc += 2u;
   }
 
-  state->flags |= (0u - (u32)(state->watchdog >= RMR_VECTOR_WATCHDOG_MAX && running)) & RMR_VECTOR_FLAG_WATCHDOG;
+  if (running && pc != len) {
+    rmr_vf_state_copy(state, &rollback);
+    state->flags |= RMR_VECTOR_FLAG_ROLLBACK | RMR_VECTOR_FLAG_FAILSAFE;
+  }
   return state->flags;
 }
 

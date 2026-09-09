@@ -27,6 +27,13 @@ jobs:
 
       - name: Install host build deps
         run: |
+          set -euo pipefail
+          # The hosted runner carries a mutable Chrome APT source, but this host
+          # engine job does not use Chrome. Keep package bootstrap deterministic
+          # by removing only that unrelated source before refreshing Ubuntu deps.
+          sudo rm -f \
+            /etc/apt/sources.list.d/google-chrome.list \
+            /etc/apt/sources.list.d/google-chrome.sources
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends build-essential cmake ninja-build make pkg-config python3 ripgrep
 

@@ -41,6 +41,33 @@ int main(void) {
     return 1;
   }
 
+  /* Cumulative correction budget: an already-consumed watchdog window may not
+   * be exceeded by a later CORRECT opcode. Failure must rollback atomically. */
+  RmR_VectorField_Init(&s);
+  s.watchdog = RMR_VECTOR_WATCHDOG_MAX - 1u;
+  const u32 rollback_gap = s.gap_q16;
+  const u8 over_budget[] = {
+    RMR_VECTOR_OP_CORRECT, 2u,
+    RMR_VECTOR_OP_SEAL, 0u
+  };
+  const u32 over_flags = RmR_VectorField_RunBytecode(&s, over_budget, (u32)sizeof(over_budget));
+  if ((over_flags & (RMR_VECTOR_FLAG_WATCHDOG | RMR_VECTOR_FLAG_FAILSAFE | RMR_VECTOR_FLAG_ROLLBACK)) !=
+      (RMR_VECTOR_FLAG_WATCHDOG | RMR_VECTOR_FLAG_FAILSAFE | RMR_VECTOR_FLAG_ROLLBACK) ||
+      s.watchdog != RMR_VECTOR_WATCHDOG_MAX - 1u || s.gap_q16 != rollback_gap) {
+    printf("FAIL vector cumulative watchdog flags=%08x wd=%u gap=%u\n", over_flags, s.watchdog, s.gap_q16);
+    return 1;
+  }
+
+  /* Unknown instructions fail closed and restore the entry state. */
+  RmR_VectorField_Init(&s);
+  const u8 unknown_op[] = {0x68u, 0u};
+  const u32 unknown_flags = RmR_VectorField_RunBytecode(&s, unknown_op, (u32)sizeof(unknown_op));
+  if ((unknown_flags & (RMR_VECTOR_FLAG_FAILSAFE | RMR_VECTOR_FLAG_ROLLBACK)) !=
+      (RMR_VECTOR_FLAG_FAILSAFE | RMR_VECTOR_FLAG_ROLLBACK) || s.n_raw != 0u) {
+    printf("FAIL vector unknown opcode flags=%08x n=%u\n", unknown_flags, s.n_raw);
+    return 1;
+  }
+
   RmR_VectorField_Init(&s);
   (void)RmR_VectorField_RunIndex(&s, 0x16u, 99u);
   if ((s.flags & RMR_VECTOR_FLAG_VOID22) == 0u || (s.flags & RMR_VECTOR_FLAG_WATCHDOG) == 0u) {
@@ -49,7 +76,12 @@ int main(void) {
   }
 
   const u32 sig = RmR_VectorField_SmokeSignature();
-  if (sig != 0xe30aefc6u) {
+  /* 0xe30aefc6 encoded the pre-8f7ababa behavior where the contraction could
+   * reach gap=spiral=0. Commit 8f7ababa made that degeneration rollback to the
+   * last valid checkpoint; the resulting canonical safety-state signature is
+   * 0xb1a90198. Keep this KAT tied to the fail-closed semantics, not the stale
+   * pre-hotfix terminal state. */
+  if (sig != 0xb1a90198u) {
     printf("FAIL vector signature=%08x\n", sig);
     return 1;
   }

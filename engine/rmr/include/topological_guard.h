@@ -3,7 +3,7 @@
 #ifndef RMR_TOPOLOGICAL_GUARD_H
 #define RMR_TOPOLOGICAL_GUARD_H
 
-#include <stdint.h>
+#include "rmr_types.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -16,25 +16,28 @@ typedef enum {
 } rmr_arch_t;
 
 typedef struct {
-  uint64_t cycles;
-  uint64_t connectivity;
-  uint64_t entropy;
-  uint64_t topo_hash;
+  u64 cycles;
+  u64 connectivity;
+  u64 entropy;
+  u64 topo_hash;
 } rmr_topo_state_t;
 
 typedef struct {
   rmr_topo_state_t current;
   rmr_topo_state_t checkpoint;
-  uint32_t watchdog_limit;
-  uint32_t watchdog_count;
-  uint32_t rollback_count;
-  uint8_t failsafe_triggered;
-  uint8_t arch;
+  u32 watchdog_limit;
+  u32 watchdog_count;
+  /* Complement-coded peer: watchdog_peer == ~watchdog_count.
+   * A single-counter corruption therefore fails closed before state advances. */
+  u32 watchdog_peer;
+  u32 rollback_count;
+  u8 failsafe_triggered;
+  u8 arch;
 } rmr_topo_guard_t;
 
-void rmr_topo_guard_init(rmr_topo_guard_t *guard, uint32_t watchdog_limit);
+void rmr_topo_guard_init(rmr_topo_guard_t *guard, u32 watchdog_limit);
 void rmr_topo_guard_checkpoint(rmr_topo_guard_t *guard);
-int rmr_topo_guard_step(rmr_topo_guard_t *guard, const uint8_t *bytes, uint32_t len);
+int rmr_topo_guard_step(rmr_topo_guard_t *guard, const u8 *bytes, u32 len);
 void rmr_topo_guard_rollback(rmr_topo_guard_t *guard);
 rmr_arch_t rmr_detect_arch(void);
 

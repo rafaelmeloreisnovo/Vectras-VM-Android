@@ -6,25 +6,16 @@
    ───────────────────────────────────────────────────────────────
    Estratégia:
    - ARM64 NEON: 128-bit vectorization via intrinsics
-   - x86_64: SSE4.2 / AVX2 via __builtin / intrinsics
+   - x86_64: SSE4.2 / AVX2 via intrinsics
    - RISCV64: scalar fallback (V extension future)
-   - Supera KVM em operações de: CRC32, XOR fold, memcpy alinhado,
-     hash φ-step, parity 2D, popcount bulk
+   - CRC32C, XOR fold, memcpy, φ-step and popcount are acceleration
+     candidates; performance promotion requires measured receipts.
    ─────────────────────────────────────────────────────────────── */
 #include "rmr_hw_detect.h"
-
+#include "rmr_types.h"
 #include "zero.h"
 #include "zero_compat.h"
 
-/* ── Type definitions ── */
-typedef unsigned char      u8;
-typedef unsigned int       u32;
-typedef unsigned long long u64;
-
-/* ─────────────────────────────────────────────────────────────
-   SECTION 1: ARM64 NEON bulk XOR fold (16 bytes/cycle)
-   Benchmark target: > 20 GB/s on Cortex-A78
-   ───────────────────────────────────────────────────────────── */
 #if defined(__aarch64__)
 #  if defined(__has_include)
 #    if __has_include(<arm_neon.h>)
@@ -42,27 +33,23 @@ typedef unsigned long long u64;
 #if defined(__aarch64__) && defined(RMR_NEON_AVAILABLE) && (RMR_NEON_AVAILABLE == 1)
 
 u32 rmr_neon_xor_fold32(const u8 *data, u32 len) {
-    if (!data || len == 0) return 0u;
+    if (!data || len == 0u) return 0u;
     uint32x4_t acc = vdupq_n_u32(0u);
-    u32 i = 0;
-    /* 16-byte aligned bulk */
+    u32 i = 0u;
     for (; i + 16u <= len; i += 16u) {
-        uint8x16_t v = vld1q_u8(data + i);
+        const uint8x16_t v = vld1q_u8(data + i);
         acc = veorq_u32(acc, vreinterpretq_u32_u8(v));
     }
-    /* horizontal XOR of 4 lanes */
     u32 result = vgetq_lane_u32(acc, 0) ^ vgetq_lane_u32(acc, 1)
                ^ vgetq_lane_u32(acc, 2) ^ vgetq_lane_u32(acc, 3);
-    /* tail bytes */
     for (; i < len; ++i) result ^= (u32)data[i];
     return result;
 }
 
-/* NEON bulk memcpy — 4× unrolled 16-byte loads */
 void rmr_neon_memcpy(u8 *dst, const u8 *src, u32 len) {
-    u32 i = 0;
+    u32 i = 0u;
     for (; i + 64u <= len; i += 64u) {
-        uint8x16x4_t v = vld1q_u8_x4(src + i);
+        const uint8x16x4_t v = vld1q_u8_x4(src + i);
         vst1q_u8_x4(dst + i, v);
     }
     for (; i + 16u <= len; i += 16u) {
@@ -71,40 +58,53 @@ void rmr_neon_memcpy(u8 *dst, const u8 *src, u32 len) {
     for (; i < len; ++i) dst[i] = src[i];
 }
 
-/* NEON CRC32C hardware path (ARMv8.0-CRC) */
 #if defined(__ARM_FEATURE_CRC32)
 #  if defined(__has_include)
 #    if __has_include(<arm_acle.h>)
 #      include <arm_acle.h>
+#      define RMR_ARM_CRC32_INTRINSICS_AVAILABLE 1
 #    else
-#      error "__ARM_FEATURE_CRC32 build requires <arm_acle.h>"
+#      define RMR_ARM_CRC32_INTRINSICS_AVAILABLE 0
 #    endif
 #  else
 #    include <arm_acle.h>
+#    define RMR_ARM_CRC32_INTRINSICS_AVAILABLE 1
 #  endif
+#else
+#  define RMR_ARM_CRC32_INTRINSICS_AVAILABLE 0
+#endif
+
+#if RMR_ARM_CRC32_INTRINSICS_AVAILABLE
+static u32 rmr_arm_load_le32(const u8 *p) {
+    return ((u32)p[0]) |
+           ((u32)p[1] << 8) |
+           ((u32)p[2] << 16) |
+           ((u32)p[3] << 24);
+}
+
+static u64 rmr_arm_load_le64(const u8 *p) {
+    return ((u64)rmr_arm_load_le32(p)) |
+           ((u64)rmr_arm_load_le32(p + 4) << 32);
+}
+
 u32 rmr_neon_crc32c(u32 seed, const u8 *data, u32 len) {
-    u32 crc = seed, i = 0;
+    u32 crc = seed, i = 0u;
     for (; i + 8u <= len; i += 8u) {
-        u64 word;
-        __builtin_memcpy(&word, data + i, 8);
-        crc = __crc32cd(crc, word);
+        crc = __crc32cd(crc, rmr_arm_load_le64(data + i));
     }
     for (; i + 4u <= len; i += 4u) {
-        u32 word;
-        __builtin_memcpy(&word, data + i, 4);
-        crc = __crc32cw(crc, word);
+        crc = __crc32cw(crc, rmr_arm_load_le32(data + i));
     }
     for (; i < len; ++i) crc = __crc32cb(crc, data[i]);
     return crc;
 }
 #else
-/* SW fallback */
 u32 rmr_neon_crc32c(u32 seed, const u8 *data, u32 len) {
     u32 crc = seed;
-    for (u32 i = 0; i < len; ++i) {
+    for (u32 i = 0u; i < len; ++i) {
         crc ^= data[i];
-        for (u32 b = 0; b < 8u; ++b) {
-            u32 mask = (u32)(-(int)(crc & 1u));
+        for (u32 b = 0u; b < 8u; ++b) {
+            const u32 mask = 0u - (crc & 1u);
             crc = (crc >> 1u) ^ (RMR_ZERO_CRC32C_POLY_U32 & mask);
         }
     }
@@ -112,16 +112,13 @@ u32 rmr_neon_crc32c(u32 seed, const u8 *data, u32 len) {
 }
 #endif
 
-/* NEON φ-step: R(t+1) = R(t) × PHI64 vectorized */
 void rmr_neon_phi_step_bulk(u32 *states, u32 count) {
-    /* PHI32 = 0x9E3779B9 */
-    uint32x4_t phi = vdupq_n_u32(RMR_ZERO_PHI32_U32);
-    u32 i = 0;
+    const uint32x4_t phi = vdupq_n_u32(RMR_ZERO_PHI32_U32);
+    u32 i = 0u;
     for (; i + 4u <= count; i += 4u) {
         uint32x4_t s = vld1q_u32(states + i);
         s = vmulq_u32(s, phi);
-        /* ensure non-zero: vceqq_u32 → select 1 if zero */
-        uint32x4_t zero_mask = vceqq_u32(s, vdupq_n_u32(0u));
+        const uint32x4_t zero_mask = vceqq_u32(s, vdupq_n_u32(0u));
         s = vorrq_u32(s, vandq_u32(zero_mask, vdupq_n_u32(1u)));
         vst1q_u32(states + i, s);
     }
@@ -131,13 +128,12 @@ void rmr_neon_phi_step_bulk(u32 *states, u32 count) {
     }
 }
 
-/* NEON popcount bulk (64-bit input via vcntq_u8) */
 u32 rmr_neon_popcount_bulk(const u32 *data, u32 count) {
-    uint64x2_t acc = vdupq_n_u64(0);
-    u32 i = 0;
+    uint64x2_t acc = vdupq_n_u64(0u);
+    u32 i = 0u;
     for (; i + 4u <= count; i += 4u) {
-        uint8x16_t v = vld1q_u8((const u8 *)(data + i));
-        uint8x16_t bits = vcntq_u8(v);
+        const uint8x16_t v = vld1q_u8((const u8 *)(data + i));
+        const uint8x16_t bits = vcntq_u8(v);
         acc = vpadalq_u32(acc, vpaddlq_u16(vpaddlq_u8(bits)));
     }
     u64 total = vgetq_lane_u64(acc, 0) + vgetq_lane_u64(acc, 1);
@@ -152,29 +148,42 @@ u32 rmr_neon_popcount_bulk(const u32 *data, u32 count) {
 }
 
 #elif defined(__x86_64__) || defined(__i386__)
-/* ─────────────────────────────────────────────────────────────
-   SECTION 2: x86_64 SSE4.2 / POPCNT paths
-   ───────────────────────────────────────────────────────────── */
-#if defined(__has_include)
-#  if __has_include(<immintrin.h>)
-#    include <immintrin.h>
+#  if defined(__has_include)
+#    if __has_include(<immintrin.h>)
+#      include <immintrin.h>
+#      define RMR_X86_INTRINSICS_AVAILABLE 1
+#    else
+#      define RMR_X86_INTRINSICS_AVAILABLE 0
+#    endif
 #  else
-#    error "x86 SIMD build requires <immintrin.h>"
+#    include <immintrin.h>
+#    define RMR_X86_INTRINSICS_AVAILABLE 1
 #  endif
-#else
-#  include <immintrin.h>
+
+#if RMR_X86_INTRINSICS_AVAILABLE
+static u32 rmr_x86_load_le32(const u8 *p) {
+    return ((u32)p[0]) |
+           ((u32)p[1] << 8) |
+           ((u32)p[2] << 16) |
+           ((u32)p[3] << 24);
+}
+
+#if defined(__x86_64__)
+static u64 rmr_x86_load_le64(const u8 *p) {
+    return ((u64)rmr_x86_load_le32(p)) |
+           ((u64)rmr_x86_load_le32(p + 4) << 32);
+}
 #endif
 
 u32 rmr_neon_xor_fold32(const u8 *data, u32 len) {
-    if (!data || len == 0) return 0u;
-    u32 result = 0u, i = 0;
+    if (!data || len == 0u) return 0u;
+    u32 result = 0u, i = 0u;
 #if defined(__SSE2__)
     __m128i acc = _mm_setzero_si128();
     for (; i + 16u <= len; i += 16u) {
-        __m128i v = _mm_loadu_si128((const __m128i *)(data + i));
+        const __m128i v = _mm_loadu_si128((const __m128i *)(data + i));
         acc = _mm_xor_si128(acc, v);
     }
-    /* horizontal XOR 128→32 */
     u32 t[4];
     _mm_storeu_si128((__m128i *)t, acc);
     result = t[0] ^ t[1] ^ t[2] ^ t[3];
@@ -184,31 +193,29 @@ u32 rmr_neon_xor_fold32(const u8 *data, u32 len) {
 }
 
 void rmr_neon_memcpy(u8 *dst, const u8 *src, u32 len) {
-    __builtin_memcpy(dst, src, len);
+    for (u32 i = 0u; i < len; ++i) dst[i] = src[i];
 }
 
 u32 rmr_neon_crc32c(u32 seed, const u8 *data, u32 len) {
 #if defined(__SSE4_2__)
-    u32 crc = seed, i = 0;
+    u32 crc = seed, i = 0u;
 #if defined(__x86_64__)
     for (; i + 8u <= len; i += 8u) {
-        u64 w; __builtin_memcpy(&w, data + i, 8);
-        crc = (u32)_mm_crc32_u64(crc, w);
+        crc = (u32)_mm_crc32_u64(crc, rmr_x86_load_le64(data + i));
     }
 #endif
     for (; i + 4u <= len; i += 4u) {
-        u32 w; __builtin_memcpy(&w, data + i, 4);
-        crc = _mm_crc32_u32(crc, w);
+        crc = _mm_crc32_u32(crc, rmr_x86_load_le32(data + i));
     }
     for (; i < len; ++i) crc = _mm_crc32_u8(crc, data[i]);
     return crc;
 #else
     u32 crc = seed;
-    for (u32 i = 0; i < len; ++i) {
+    for (u32 i = 0u; i < len; ++i) {
         crc ^= data[i];
-        for (u32 b = 0; b < 8u; ++b) {
-            u32 m = (u32)(-(int)(crc & 1u));
-            crc = (crc >> 1u) ^ (RMR_ZERO_CRC32C_POLY_U32 & m);
+        for (u32 b = 0u; b < 8u; ++b) {
+            const u32 mask = 0u - (crc & 1u);
+            crc = (crc >> 1u) ^ (RMR_ZERO_CRC32C_POLY_U32 & mask);
         }
     }
     return crc;
@@ -216,15 +223,15 @@ u32 rmr_neon_crc32c(u32 seed, const u8 *data, u32 len) {
 }
 
 void rmr_neon_phi_step_bulk(u32 *states, u32 count) {
-    for (u32 i = 0; i < count; ++i) {
+    for (u32 i = 0u; i < count; ++i) {
         states[i] *= RMR_ZERO_PHI32_U32;
         if (!states[i]) states[i] = 1u;
     }
 }
 
 u32 rmr_neon_popcount_bulk(const u32 *data, u32 count) {
-    u64 total = 0;
-    for (u32 i = 0; i < count; ++i) {
+    u64 total = 0u;
+    for (u32 i = 0u; i < count; ++i) {
 #if defined(__POPCNT__)
         total += (u64)__builtin_popcount(data[i]);
 #else
@@ -237,43 +244,80 @@ u32 rmr_neon_popcount_bulk(const u32 *data, u32 count) {
     }
     return (u32)total;
 }
-
 #else
-/* ── Generic scalar fallback ── */
 u32 rmr_neon_xor_fold32(const u8 *data, u32 len) {
-    u32 r = 0;
-    for (u32 i = 0; i < len; ++i) r ^= (u32)data[i];
+    u32 r = 0u;
+    for (u32 i = 0u; i < len; ++i) r ^= (u32)data[i];
     return r;
 }
 void rmr_neon_memcpy(u8 *dst, const u8 *src, u32 len) {
-    for (u32 i = 0; i < len; ++i) dst[i] = src[i];
+    for (u32 i = 0u; i < len; ++i) dst[i] = src[i];
 }
 u32 rmr_neon_crc32c(u32 seed, const u8 *data, u32 len) {
     u32 crc = seed;
-    for (u32 i = 0; i < len; ++i) {
+    for (u32 i = 0u; i < len; ++i) {
         crc ^= data[i];
-        for (u32 b = 0; b < 8u; ++b) {
-            u32 m = (u32)(-(int)(crc & 1u));
-            crc = (crc >> 1u) ^ (RMR_ZERO_CRC32C_POLY_U32 & m);
+        for (u32 b = 0u; b < 8u; ++b) {
+            const u32 mask = 0u - (crc & 1u);
+            crc = (crc >> 1u) ^ (RMR_ZERO_CRC32C_POLY_U32 & mask);
         }
     }
     return crc;
 }
 void rmr_neon_phi_step_bulk(u32 *states, u32 count) {
-    for (u32 i = 0; i < count; ++i) {
+    for (u32 i = 0u; i < count; ++i) {
         states[i] *= RMR_ZERO_PHI32_U32;
         if (!states[i]) states[i] = 1u;
     }
 }
 u32 rmr_neon_popcount_bulk(const u32 *data, u32 count) {
-    u64 t = 0;
-    for (u32 i = 0; i < count; ++i) {
+    u64 total = 0u;
+    for (u32 i = 0u; i < count; ++i) {
         u32 v = data[i];
         v = v - ((v >> 1u) & 0x55555555u);
         v = (v & 0x33333333u) + ((v >> 2u) & 0x33333333u);
         v = (v + (v >> 4u)) & 0x0F0F0F0Fu;
-        t += (u64)((v * 0x01010101u) >> 24u);
+        total += (u64)((v * 0x01010101u) >> 24u);
     }
-    return (u32)t;
+    return (u32)total;
+}
+#endif
+
+#else
+u32 rmr_neon_xor_fold32(const u8 *data, u32 len) {
+    u32 r = 0u;
+    for (u32 i = 0u; i < len; ++i) r ^= (u32)data[i];
+    return r;
+}
+void rmr_neon_memcpy(u8 *dst, const u8 *src, u32 len) {
+    for (u32 i = 0u; i < len; ++i) dst[i] = src[i];
+}
+u32 rmr_neon_crc32c(u32 seed, const u8 *data, u32 len) {
+    u32 crc = seed;
+    for (u32 i = 0u; i < len; ++i) {
+        crc ^= data[i];
+        for (u32 b = 0u; b < 8u; ++b) {
+            const u32 mask = 0u - (crc & 1u);
+            crc = (crc >> 1u) ^ (RMR_ZERO_CRC32C_POLY_U32 & mask);
+        }
+    }
+    return crc;
+}
+void rmr_neon_phi_step_bulk(u32 *states, u32 count) {
+    for (u32 i = 0u; i < count; ++i) {
+        states[i] *= RMR_ZERO_PHI32_U32;
+        if (!states[i]) states[i] = 1u;
+    }
+}
+u32 rmr_neon_popcount_bulk(const u32 *data, u32 count) {
+    u64 total = 0u;
+    for (u32 i = 0u; i < count; ++i) {
+        u32 v = data[i];
+        v = v - ((v >> 1u) & 0x55555555u);
+        v = (v & 0x33333333u) + ((v >> 2u) & 0x33333333u);
+        v = (v + (v >> 4u)) & 0x0F0F0F0Fu;
+        total += (u64)((v * 0x01010101u) >> 24u);
+    }
+    return (u32)total;
 }
 #endif

@@ -13,7 +13,6 @@ static int expect_true(int cond, const char *msg) {
   return 0;
 }
 
-
 static int asset_guard_lowlevel_contract(void) {
   int failed = 0;
   RmR_AssetGuard guard;
@@ -55,19 +54,29 @@ int main(void) {
     failed += expect_true(hw.cache_hint_l4 >= (8u * 1024u * 1024u), "x86/arm/ppc32 exposes l4 hint");
   }
 
-
   rmr_topo_guard_t guard;
   const unsigned char bytes[] = {1, 2, 3, 3, 5, 8, 13, 21};
   rmr_topo_guard_init(&guard, 4u);
   rmr_topo_guard_checkpoint(&guard);
   failed += expect_true((int)guard.arch == (int)rmr_detect_arch(), "topo guard arch detect coherent");
+  failed += expect_true(guard.watchdog_peer == ~guard.watchdog_count, "topo watchdog pair initialized coherent");
   failed += expect_true(rmr_topo_guard_step(&guard, bytes, (uint32_t)sizeof(bytes)) == 0, "topo guard first step ok");
+  failed += expect_true(guard.watchdog_peer == ~guard.watchdog_count, "topo watchdog pair remains coherent");
   failed += expect_true(guard.current.topo_hash != 0u, "topo hash evolved");
   failed += expect_true(rmr_topo_guard_step(&guard, bytes, (uint32_t)sizeof(bytes)) == 0, "topo guard second step ok");
   failed += expect_true(rmr_topo_guard_step(&guard, bytes, (uint32_t)sizeof(bytes)) == 0, "topo guard third step ok");
   failed += expect_true(rmr_topo_guard_step(&guard, bytes, (uint32_t)sizeof(bytes)) == 2, "watchdog triggers rollback");
   failed += expect_true(guard.rollback_count == 1u, "rollback counter incremented");
   failed += expect_true(guard.failsafe_triggered == 1u, "failsafe flag raised");
+  failed += expect_true(guard.watchdog_peer == ~guard.watchdog_count, "rollback restores watchdog pair coherence");
+
+  /* Deliberate single-counter corruption must be detected before state advances. */
+  rmr_topo_guard_init(&guard, 4u);
+  rmr_topo_guard_checkpoint(&guard);
+  guard.watchdog_peer ^= 1u;
+  failed += expect_true(rmr_topo_guard_step(&guard, bytes, (uint32_t)sizeof(bytes)) == 3, "peer watchdog divergence fails closed");
+  failed += expect_true(guard.rollback_count == 1u, "peer watchdog divergence rolls back");
+  failed += expect_true(guard.watchdog_peer == ~guard.watchdog_count, "peer watchdog rollback repairs encoding");
 
   failed += asset_guard_lowlevel_contract();
 
