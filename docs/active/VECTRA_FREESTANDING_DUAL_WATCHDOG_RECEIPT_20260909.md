@@ -103,3 +103,31 @@ The ARMv7 symbol result is an isolated compiler/object-level reproduction of the
 ### Updated F_next_single
 
 Observe the exact PR head through the canonical CI + dedicated `vectra_freestanding_link_probe`; merge remains forbidden until that evidence exists.
+
+---
+
+## APPEND — Exact-head provider observation — 2026-09-09
+
+Observed PR head before this receipt append: `29c4c6eef8428827956cf6517382b510d4965a4d` on draft PR `#1142`; PR state was open, mergeable, not merged.
+
+Provider evidence changed from absence to active execution:
+
+- `Tools Runtime Evidence / host-evidence = SUCCESS`, including toolchain inventory, fail-closed runtime-tools gate, AArch64 geometry syntax/ABI compile, ARMv7 RAFCODE Phi emitter syntax/ABI compile, and receipt upload.
+- `Legal Compliance Gate = SUCCESS`.
+- `Validate Formula = IN_PROGRESS`.
+- `android-ci = IN_PROGRESS`; wrapper input resolution succeeded and canonical Android resolve had started. The adaptive compile-matrix wrapper lane was reported skipped at this observation point and is not counted as build proof.
+- `Shell-Loader Smoke = IN_PROGRESS`.
+- `audit-benchmark-contract = IN_PROGRESS`.
+- `APK Wizard = IN_PROGRESS`; Android SDK/toolchain setup had started, while native toolchain install, bootstrap contracts, shell-loader build, ARM64/ARM32+ARM64 APK lanes and artifact upload were still pending.
+- `host-ci = PENDING`.
+- `Orchestrator - Build Matrix = PENDING`.
+
+Therefore the current evidence state is `CI_OBSERVED_PARTIAL_PASS_IN_PROGRESS`, not `PASS` and not `FAIL`.
+
+### Merge gate
+
+`MERGE_ALLOWED = false` for this round. Exact-head canonical Android/host/matrix/freestanding final-link evidence is incomplete; physical-device claims remain `TOKEN_VAZIO`.
+
+### F_next_single
+
+Consume the canonical CI/freestanding-link result for the final PR head after this append; if any low-level or ABI lane fails, patch only the observed failure and preserve this receipt as prior-state evidence.
