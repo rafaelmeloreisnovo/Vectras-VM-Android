@@ -12,6 +12,15 @@ static u64 rmr_topo_mix_hash(u64 h, u64 x) {
   return h;
 }
 
+/* Explicit field copy prevents a freestanding compiler from materializing
+ * checkpoint/rollback as an implicit external memcpy symbol. */
+static void rmr_topo_state_copy(rmr_topo_state_t *dst, const rmr_topo_state_t *src) {
+  dst->cycles = src->cycles;
+  dst->connectivity = src->connectivity;
+  dst->entropy = src->entropy;
+  dst->topo_hash = src->topo_hash;
+}
+
 /* Single forward pass: transition count and 8-lane byte fold share one load. */
 static void rmr_topo_scan(const u8 *bytes, u32 len, u64 *transitions_out, u64 *fold_out) {
   u64 transitions = 0u;
@@ -53,7 +62,7 @@ void rmr_topo_guard_init(rmr_topo_guard_t *guard, u32 watchdog_limit) {
   guard->current.connectivity = 0u;
   guard->current.entropy = 0u;
   guard->current.topo_hash = 0u;
-  guard->checkpoint = guard->current;
+  rmr_topo_state_copy(&guard->checkpoint, &guard->current);
   guard->watchdog_limit = watchdog_limit ? watchdog_limit : 32u;
   guard->watchdog_count = 0u;
   guard->watchdog_peer = ~0u;
@@ -64,12 +73,12 @@ void rmr_topo_guard_init(rmr_topo_guard_t *guard, u32 watchdog_limit) {
 
 void rmr_topo_guard_checkpoint(rmr_topo_guard_t *guard) {
   if (!guard) return;
-  guard->checkpoint = guard->current;
+  rmr_topo_state_copy(&guard->checkpoint, &guard->current);
 }
 
 void rmr_topo_guard_rollback(rmr_topo_guard_t *guard) {
   if (!guard) return;
-  guard->current = guard->checkpoint;
+  rmr_topo_state_copy(&guard->current, &guard->checkpoint);
   guard->rollback_count += 1u;
   guard->failsafe_triggered = 1u;
   guard->watchdog_count = 0u;
@@ -79,7 +88,6 @@ void rmr_topo_guard_rollback(rmr_topo_guard_t *guard) {
 int rmr_topo_guard_step(rmr_topo_guard_t *guard, const u8 *bytes, u32 len) {
   if (!guard || (!bytes && len > 0u)) return -1;
 
-  /* Watchdog A and its complement-coded peer must agree before any mutation. */
   if (!rmr_topo_watchdogs_coherent(guard)) {
     rmr_topo_guard_rollback(guard);
     return 3;
