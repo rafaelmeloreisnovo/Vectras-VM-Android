@@ -60,7 +60,19 @@ static u32 rmr_vf_chord_q16(u32 deg) {
   u32 d = deg % RMR_VECTOR_ARC_BASE;
   u32 over = 0u - (u32)(d > 180u);
   u32 folded = rmr_vf_select(over, RMR_VECTOR_ARC_BASE - d, d);
-  return (u32)(((u64)folded * RMR_VECTOR_Q16_ONE) / 180u);
+  /* folded <= 180, therefore folded*65536 fits u32 and avoids ARM32 u64 div. */
+  return (folded * RMR_VECTOR_Q16_ONE) / 180u;
+}
+
+/* Equivalent to the previous 64-bit sum modulo 1000, but each term is reduced
+ * first. This preserves Z/1000Z geometry while avoiding __aeabi_uldivmod on
+ * freestanding ARM32. */
+static u32 rmr_vf_toroid_node(const RmR_VectorFieldState *s) {
+  u32 acc = ((s->n_raw % RMR_VECTOR_NODE_MOD) * 17u) % RMR_VECTOR_NODE_MOD;
+  acc += ((s->n_mod42 % RMR_VECTOR_NODE_MOD) * RMR_VECTOR_MOD_BASE) % RMR_VECTOR_NODE_MOD;
+  acc += ((s->arc_deg % RMR_VECTOR_NODE_MOD) * 3u) % RMR_VECTOR_NODE_MOD;
+  acc += (s->h_q16 >> 6) % RMR_VECTOR_NODE_MOD;
+  return acc % RMR_VECTOR_NODE_MOD;
 }
 
 static u32 rmr_vf_load_number(u32 index) {
@@ -107,10 +119,7 @@ u32 RmR_VectorField_RunIndex(RmR_VectorFieldState *state, u32 index, u32 correct
   state->arc_deg = state->n_raw % RMR_VECTOR_ARC_BASE;
   state->chord_q16 = rmr_vf_chord_q16(state->arc_deg);
   state->h_q16 = rmr_vf_q16_mul(state->chord_q16, RMR_VECTOR_SQRT3_OVER_2_Q16);
-  state->toroid_node = (u32)(((u64)state->n_raw * 17u +
-                              (u64)state->n_mod42 * RMR_VECTOR_MOD_BASE +
-                              (u64)state->arc_deg * 3u +
-                              (state->h_q16 >> 6)) % RMR_VECTOR_NODE_MOD);
+  state->toroid_node = rmr_vf_toroid_node(state);
 
   for (u32 i = 0u; i < capped; ++i) {
     rmr_vf_step_contract(state);
@@ -169,10 +178,7 @@ u32 RmR_VectorField_RunBytecode(RmR_VectorFieldState *state, const u8 *bytecode,
       state->h_q16 = rmr_vf_q16_mul(state->chord_q16, RMR_VECTOR_SQRT3_OVER_2_Q16);
       state->audit_crc = rmr_vf_mix(state->audit_crc, state->h_q16);
     } else if (op == RMR_VECTOR_OP_TOROID_NODE) {
-      state->toroid_node = (u32)(((u64)state->n_raw * 17u +
-                                  (u64)state->n_mod42 * RMR_VECTOR_MOD_BASE +
-                                  (u64)state->arc_deg * 3u +
-                                  (state->h_q16 >> 6)) % RMR_VECTOR_NODE_MOD);
+      state->toroid_node = rmr_vf_toroid_node(state);
       state->audit_crc = rmr_vf_mix(state->audit_crc, state->toroid_node);
     } else if (op == RMR_VECTOR_OP_CORRECT) {
       const u32 remaining = (state->watchdog < RMR_VECTOR_WATCHDOG_MAX)
