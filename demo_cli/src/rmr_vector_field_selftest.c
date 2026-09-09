@@ -76,7 +76,12 @@ int main(void) {
   }
 
   const u32 sig = RmR_VectorField_SmokeSignature();
-  if (sig != 0xe30aefc6u) {
+  /* 0xe30aefc6 encoded the pre-8f7ababa behavior where the contraction could
+   * reach gap=spiral=0. Commit 8f7ababa made that degeneration rollback to the
+   * last valid checkpoint; the resulting canonical safety-state signature is
+   * 0xb1a90198. Keep this KAT tied to the fail-closed semantics, not the stale
+   * pre-hotfix terminal state. */
+  if (sig != 0xb1a90198u) {
     printf("FAIL vector signature=%08x\n", sig);
     return 1;
   }
