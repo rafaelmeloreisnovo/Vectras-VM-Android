@@ -1,0 +1,74 @@
+{
+  "id": "VECTRAS-SEVEN-GUARDS-TOOLS-V1-20260913",
+  "intent": "materialize provenance/context/evidence/contradiction/uncertainty/reproduction/rollback gate under tools/",
+  "authority": "rafaelmeloreisnovo/Vectras-VM-Android",
+  "federated_authority": "rafaelmeloreisnovo/Mapa",
+  "repo": "rafaelmeloreisnovo/Vectras-VM-Android",
+  "source_commit": "bbbc752c1e5f56875c5d4231d2d20c6bb7fe770f",
+  "target_claim": "STATIC_CONTRACT",
+  "sources": [
+    {
+      "ref": "GitHub:rafaelmeloreisnovo/Vectras-VM-Android@bbbc752c1e5f56875c5d4231d2d20c6bb7fe770f",
+      "kind": "CODE",
+      "hash": "bbbc752c1e5f56875c5d4231d2d20c6bb7fe770f"
+    },
+    {
+      "ref": "GitHub:rafaelmeloreisnovo/Mapa:CASA_CONHECIMENTO_TRABALHO_V1",
+      "kind": "GOVERNANCE",
+      "hash": "1d20bf3d0e2426095c36599b00f73570d3af7ad7"
+    },
+    {
+      "ref": "Drive:title:START HERE — A-A auditar — RAFAELIA",
+      "kind": "GOVERNANCE",
+      "hash": null
+    },
+    {
+      "ref": "Drive:title:RAFAELIA — NOVOexport Navigation Hub Ω",
+      "kind": "INDEX",
+      "hash": null
+    }
+  ],
+  "context": {
+    "scope": "new files under tools/governance plus unit tests under tools/tests",
+    "boundary": "static local gate only; no Android device, QEMU execution, guest boot, provider execution, or performance claim",
+    "observed_at": "2026-09-13T15:55:00-03:00",
+    "governance": "Vectras owns local consumer tooling; Mapa remains federated route/state authority",
+    "data": "PUBLIC",
+    "privacy": "NOT_APPLICABLE",
+    "security": "PUBLIC",
+    "dependencies": []
+  },
+  "evidence": [
+    {
+      "ref": "local-sandbox:validator-core-adversarial-cases",
+      "type": "STATIC_TEST"
+    }
+  ],
+  "contradictions": [],
+  "uncertainty": [
+    {
+      "id": "U-REMOTE-CI",
+      "state": "TOKEN_VAZIO",
+      "needed": "exact-head provider CI/readback after PR creation"
+    }
+  ],
+  "reproduction": {
+    "status": "PASS",
+    "procedure": "python3 -m unittest tools.tests.test_validate_vectras_work_unit",
+    "environment_ref": "local Python stdlib sandbox; repository CI not yet observed"
+  },
+  "rollback": {
+    "ready": true,
+    "predecessor": "git:master@bbbc752c1e5f56875c5d4231d2d20c6bb7fe770f",
+    "procedure": "close the feature branch/PR or revert its additive commits; master is not rewritten"
+  },
+  "reconstructibility": {
+    "status": "PASS",
+    "inputs_pinned": true,
+    "versions_pinned": true,
+    "outputs_identified": true
+  },
+  "state": "VERIFIED_LIMITED",
+  "claim_allowed": false,
+  "next": "open draft PR, inspect exact-head CI/checks, then append a successor receipt only if remote evidence changes state"
+}
