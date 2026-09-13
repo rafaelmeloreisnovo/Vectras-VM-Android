@@ -16,6 +16,8 @@ run_gate() {
 cd "${ROOT_DIR}"
 
 run_gate connectivity python3 tools/ci/validate_tools_runtime_connectivity.py
+run_gate seven_guards_example python3 tools/governance/validate_vectras_work_unit.py tools/governance/examples/vectras-seven-guards.local.json
+run_gate seven_guards_tests python3 -m unittest tools.tests.test_validate_vectras_work_unit
 run_gate arena python3 tools/arena/test_arena_schema.py
 run_gate lowbasic bash tools/ci/test_lowbasic_handoff_matrix.sh
 run_gate rafcode bash tools/ci/run_asm_compiler_refactor_gate.sh

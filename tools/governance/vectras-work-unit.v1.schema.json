@@ -1,0 +1,355 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://rafaelia.local/vectras/schemas/vectras-work-unit.v1.schema.json",
+  "title": "Vectras Seven-Guard Work Unit V1",
+  "type": "object",
+  "required": [
+    "id",
+    "intent",
+    "authority",
+    "federated_authority",
+    "repo",
+    "source_commit",
+    "target_claim",
+    "sources",
+    "context",
+    "evidence",
+    "contradictions",
+    "uncertainty",
+    "reproduction",
+    "rollback",
+    "reconstructibility",
+    "state",
+    "claim_allowed",
+    "next"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "intent": {
+      "type": "string",
+      "minLength": 1
+    },
+    "authority": {
+      "const": "rafaelmeloreisnovo/Vectras-VM-Android"
+    },
+    "federated_authority": {
+      "const": "rafaelmeloreisnovo/Mapa"
+    },
+    "repo": {
+      "const": "rafaelmeloreisnovo/Vectras-VM-Android"
+    },
+    "source_commit": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}$"
+    },
+    "target_claim": {
+      "enum": [
+        "STATIC_CONTRACT",
+        "QEMU_EXECUTION",
+        "GUEST_BOOT",
+        "PERFORMANCE",
+        "PHYSICAL_ANDROID_E2E"
+      ]
+    },
+    "sources": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "ref",
+          "kind"
+        ],
+        "properties": {
+          "ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "kind": {
+            "enum": [
+              "CODE",
+              "GOVERNANCE",
+              "INDEX",
+              "MEMORY",
+              "DOCUMENT",
+              "DATASET",
+              "RUNTIME",
+              "OTHER"
+            ]
+          },
+          "hash": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "context": {
+      "type": "object",
+      "required": [
+        "scope",
+        "boundary",
+        "observed_at",
+        "governance",
+        "data",
+        "privacy",
+        "security"
+      ],
+      "properties": {
+        "scope": {
+          "type": "string",
+          "minLength": 1
+        },
+        "boundary": {
+          "type": "string",
+          "minLength": 1
+        },
+        "observed_at": {
+          "type": "string",
+          "minLength": 1
+        },
+        "governance": {
+          "type": "string",
+          "minLength": 1
+        },
+        "data": {
+          "enum": [
+            "PUBLIC",
+            "INTERNAL",
+            "SENSITIVE",
+            "RESTRICTED",
+            "NOT_APPLICABLE"
+          ]
+        },
+        "privacy": {
+          "enum": [
+            "PUBLIC",
+            "INTERNAL",
+            "SENSITIVE",
+            "RESTRICTED",
+            "NOT_APPLICABLE"
+          ]
+        },
+        "security": {
+          "enum": [
+            "PUBLIC",
+            "INTERNAL",
+            "SENSITIVE",
+            "RESTRICTED",
+            "NOT_APPLICABLE"
+          ]
+        },
+        "dependencies": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "evidence": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "ref",
+          "type"
+        ],
+        "properties": {
+          "ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "type": {
+            "enum": [
+              "STATIC_TEST",
+              "REVIEW",
+              "HASH",
+              "RECEIPT",
+              "NEGATIVE_RESULT",
+              "DISPATCH",
+              "QEMU_PROCESS",
+              "GUEST_BOOT",
+              "PERFORMANCE",
+              "DEVICE_TRANSACTION",
+              "OTHER"
+            ]
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "contradictions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "state"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "state": {
+            "enum": [
+              "OPEN",
+              "RESOLVED",
+              "SUPERSEDED"
+            ]
+          },
+          "ref": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "uncertainty": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "state"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "state": {
+            "enum": [
+              "TOKEN_VAZIO",
+              "BLOCKED",
+              "PARTIAL",
+              "NOT_APPLICABLE",
+              "CLOSED"
+            ]
+          },
+          "needed": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "reproduction": {
+      "type": "object",
+      "required": [
+        "status",
+        "procedure"
+      ],
+      "properties": {
+        "status": {
+          "enum": [
+            "TOKEN_VAZIO",
+            "BLOCKED",
+            "PASS",
+            "FAIL",
+            "NOT_APPLICABLE"
+          ]
+        },
+        "procedure": {
+          "type": "string"
+        },
+        "environment_ref": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "rollback": {
+      "type": "object",
+      "required": [
+        "ready",
+        "predecessor",
+        "procedure"
+      ],
+      "properties": {
+        "ready": {
+          "type": "boolean"
+        },
+        "predecessor": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "procedure": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "reconstructibility": {
+      "type": "object",
+      "required": [
+        "status",
+        "inputs_pinned",
+        "versions_pinned",
+        "outputs_identified"
+      ],
+      "properties": {
+        "status": {
+          "enum": [
+            "TOKEN_VAZIO",
+            "BLOCKED",
+            "PASS",
+            "FAIL"
+          ]
+        },
+        "inputs_pinned": {
+          "type": "boolean"
+        },
+        "versions_pinned": {
+          "type": "boolean"
+        },
+        "outputs_identified": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false
+    },
+    "state": {
+      "enum": [
+        "DRAFT",
+        "TOKEN_VAZIO",
+        "BLOCKED",
+        "CONTRADICTION",
+        "VERIFIED_LIMITED",
+        "REPRODUCED",
+        "ROLLBACK_READY",
+        "CLOSED"
+      ]
+    },
+    "claim_allowed": {
+      "type": "boolean"
+    },
+    "next": {
+      "type": "string",
+      "minLength": 1
+    }
+  },
+  "additionalProperties": false
+}
