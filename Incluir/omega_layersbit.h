@@ -85,9 +85,13 @@ typedef struct {
  * Usa um loop fixo de 512/8 = 64 iterações sobre uint64_t.
  * Compilador vetoriza automaticamente em AArch64 com NEON.            */
 LB_ALWAYS_INLINE void lb_zero(LayersBit *lb) {
-    uint64_t *p = (uint64_t*)(void*)lb;
-    /* sizeof(LayersBit) ≤ 512 + 32 + 8 + 4 + 4 = 560 bytes ≤ 576 = 72×8 */
-    for (uint32_t i = 0; i < 72u; i++) p[i] = 0ULL;
+    /*
+     * Zero exactly the object, byte by byte. The previous fixed 72 x u64 loop
+     * wrote 576 bytes although LayersBit is 560 bytes on the current ABI,
+     * corrupting the following object. A byte view is also alias-safe in C.
+     */
+    uint8_t *p = (uint8_t*)(void*)lb;
+    for (uint32_t i = 0u; i < (uint32_t)sizeof(*lb); i++) p[i] = 0u;
 }
 
 /* ── Bit set/clear/get branchless ─────────────────────────────────── */
