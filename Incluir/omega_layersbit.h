@@ -40,7 +40,7 @@
 #define OMEGA_LAYERSBIT_H
 
 /* ── Suporte freestanding ─────────────────────────────────────────── */
-#if defined(__STDC_HOSTED__)
+#if defined(__STDC_HOSTED__) && (__STDC_HOSTED__ == 1)
   #include <stdint.h>
   #include <string.h>     /* memset / memcpy — presentes mesmo em freestanding */
 #else
@@ -48,6 +48,7 @@
   typedef unsigned short     uint16_t;
   typedef unsigned int       uint32_t;
   typedef unsigned long long uint64_t;
+  typedef   signed int        int32_t;
   typedef   signed long long  int64_t;
   #define NULL ((void*)0)
   static inline void *lb_memset(void *s, int c, uint64_t n) {
@@ -82,12 +83,16 @@ typedef struct {
 } LayersBit;
 
 /* ── Zero da struct sem memset de libc ───────────────────────────────
- * Usa um loop fixo de 512/8 = 64 iterações sobre uint64_t.
- * Compilador vetoriza automaticamente em AArch64 com NEON.            */
+ * Percorre exatamente sizeof(LayersBit); compiladores podem vetorizar
+ * este loop em targets SIMD sem alterar o limite do objeto.            */
 LB_ALWAYS_INLINE void lb_zero(LayersBit *lb) {
-    uint64_t *p = (uint64_t*)(void*)lb;
-    /* sizeof(LayersBit) ≤ 512 + 32 + 8 + 4 + 4 = 560 bytes ≤ 576 = 72×8 */
-    for (uint32_t i = 0; i < 72u; i++) p[i] = 0ULL;
+    /*
+     * Zero exactly the object, byte by byte. The previous fixed 72 x u64 loop
+     * wrote 576 bytes although LayersBit is 560 bytes on the current ABI,
+     * corrupting the following object. A byte view is also alias-safe in C.
+     */
+    uint8_t *p = (uint8_t*)(void*)lb;
+    for (uint32_t i = 0u; i < (uint32_t)sizeof(*lb); i++) p[i] = 0u;
 }
 
 /* ── Bit set/clear/get branchless ─────────────────────────────────── */
@@ -184,9 +189,13 @@ LB_ALWAYS_INLINE uint32_t lb_popcount32(const uint8_t *p) {
 /* ── OMEGA: atrator toroidal = popcount(fold) mod 42 ─────────────── */
 LB_ALWAYS_INLINE void lb_omega(LayersBit *lb) {
     uint32_t ones = lb_popcount32(lb->fold);
-    /* mod 42 branchless via multiply-shift (exact for ones ≤ 256)   */
-    /* ones mod 42 = ones - 42 * (ones * 2731 >> 17)                 */
-    uint32_t q = (ones * 2731u) >> 17u;  /* floor(ones/42) para ones≤256 */
+    /*
+     * Exact reciprocal reduction for the bounded domain ones in [0,256].
+     * 3121/2^17 implements floor(ones/42) over this complete domain.
+     * The previous constant 2731 approximated division by 48 and produced
+     * incorrect residues for 95 of the 257 possible popcounts.
+     */
+    uint32_t q = (ones * 3121u) >> 17u;
     lb->omega = ones - 42u * q;
 }
 
@@ -227,7 +236,7 @@ LB_ALWAYS_INLINE void lb_phi(LayersBit *lb) {
     /* ones/256 em Q16: (ones * 65536) / 256 = ones * 256 */
     uint32_t on   = ones * 256u;
     /* phi = hn × on / 65536 */
-    lb->phi = (hn * on) >> 16u;
+    lb->phi = (uint32_t)(((uint64_t)hn * (uint64_t)on) >> 16u);
 }
 
 /* ── TICK completo: push + atualiza fold + omega + phi ──────────────
