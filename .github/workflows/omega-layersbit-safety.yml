@@ -28,6 +28,11 @@ jobs:
           set -euo pipefail
           cc -O2 -std=c11 -Wall -Wextra -Werror -IIncluir             Incluir/test_omega_layersbit_zero.c -o /tmp/layersbit-zero
           /tmp/layersbit-zero
+      - name: Prove header compiles without hosted headers
+        run: |
+          set -euo pipefail
+          clang -target aarch64-none-elf -O2 -std=c11 -ffreestanding -nostdinc             -Wall -Wextra -Werror -IIncluir -c             Incluir/test_omega_layersbit_zero.c -o /tmp/layersbit-a64.o
+
       - name: Run sanitizer gate
         run: |
           set -euo pipefail
