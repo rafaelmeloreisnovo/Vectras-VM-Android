@@ -1,0 +1,35 @@
+name: Omega LayersBit Safety
+
+on:
+  pull_request:
+    paths:
+      - 'Incluir/omega_layersbit.h'
+      - 'Incluir/test_omega_layersbit_zero.c'
+      - '.github/workflows/omega-layersbit-safety.yml'
+  push:
+    branches: [master]
+    paths:
+      - 'Incluir/omega_layersbit.h'
+      - 'Incluir/test_omega_layersbit_zero.c'
+
+permissions:
+  contents: read
+
+jobs:
+  zero-bounds:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Compile and run guarded zeroing test
+        run: |
+          set -euo pipefail
+          cc -O2 -std=c11 -Wall -Wextra -Werror -IIncluir             Incluir/test_omega_layersbit_zero.c -o /tmp/layersbit-zero
+          /tmp/layersbit-zero
+      - name: Run sanitizer gate
+        run: |
+          set -euo pipefail
+          cc -O1 -g -std=c11 -Wall -Wextra -Werror -fsanitize=address,undefined -IIncluir             Incluir/test_omega_layersbit_zero.c -o /tmp/layersbit-zero-san
+          /tmp/layersbit-zero-san
