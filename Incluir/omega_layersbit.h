@@ -40,7 +40,7 @@
 #define OMEGA_LAYERSBIT_H
 
 /* ── Suporte freestanding ─────────────────────────────────────────── */
-#if defined(__STDC_HOSTED__)
+#if defined(__STDC_HOSTED__) && (__STDC_HOSTED__ == 1)
   #include <stdint.h>
   #include <string.h>     /* memset / memcpy — presentes mesmo em freestanding */
 #else
@@ -48,6 +48,7 @@
   typedef unsigned short     uint16_t;
   typedef unsigned int       uint32_t;
   typedef unsigned long long uint64_t;
+  typedef   signed int        int32_t;
   typedef   signed long long  int64_t;
   #define NULL ((void*)0)
   static inline void *lb_memset(void *s, int c, uint64_t n) {
@@ -82,8 +83,8 @@ typedef struct {
 } LayersBit;
 
 /* ── Zero da struct sem memset de libc ───────────────────────────────
- * Usa um loop fixo de 512/8 = 64 iterações sobre uint64_t.
- * Compilador vetoriza automaticamente em AArch64 com NEON.            */
+ * Percorre exatamente sizeof(LayersBit); compiladores podem vetorizar
+ * este loop em targets SIMD sem alterar o limite do objeto.            */
 LB_ALWAYS_INLINE void lb_zero(LayersBit *lb) {
     /*
      * Zero exactly the object, byte by byte. The previous fixed 72 x u64 loop
@@ -235,7 +236,7 @@ LB_ALWAYS_INLINE void lb_phi(LayersBit *lb) {
     /* ones/256 em Q16: (ones * 65536) / 256 = ones * 256 */
     uint32_t on   = ones * 256u;
     /* phi = hn × on / 65536 */
-    lb->phi = (hn * on) >> 16u;
+    lb->phi = (uint32_t)(((uint64_t)hn * (uint64_t)on) >> 16u);
 }
 
 /* ── TICK completo: push + atualiza fold + omega + phi ──────────────
