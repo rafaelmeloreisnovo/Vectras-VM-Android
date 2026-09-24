@@ -32,5 +32,10 @@ int main(void) {
         lb_omega(&g.state);
         if (g.state.omega != (ones % LB_ATTRACTORS)) return 5;
     }
+    /* Q16 extreme: uniform 0xFF fold => H=0, ones=256, phi=1.0 Q16. */
+    for (uint32_t i = 0u; i < LB_LAYER_BYTES; i++) g.state.fold[i] = 0xFFu;
+    lb_phi(&g.state);
+    if (g.state.phi != 65536u) return 6;
+
     return 0;
 }
