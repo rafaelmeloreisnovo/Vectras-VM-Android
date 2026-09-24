@@ -188,9 +188,13 @@ LB_ALWAYS_INLINE uint32_t lb_popcount32(const uint8_t *p) {
 /* ── OMEGA: atrator toroidal = popcount(fold) mod 42 ─────────────── */
 LB_ALWAYS_INLINE void lb_omega(LayersBit *lb) {
     uint32_t ones = lb_popcount32(lb->fold);
-    /* mod 42 branchless via multiply-shift (exact for ones ≤ 256)   */
-    /* ones mod 42 = ones - 42 * (ones * 2731 >> 17)                 */
-    uint32_t q = (ones * 2731u) >> 17u;  /* floor(ones/42) para ones≤256 */
+    /*
+     * Exact reciprocal reduction for the bounded domain ones in [0,256].
+     * 3121/2^17 implements floor(ones/42) over this complete domain.
+     * The previous constant 2731 approximated division by 48 and produced
+     * incorrect residues for 95 of the 257 possible popcounts.
+     */
+    uint32_t q = (ones * 3121u) >> 17u;
     lb->omega = ones - 42u * q;
 }
 
