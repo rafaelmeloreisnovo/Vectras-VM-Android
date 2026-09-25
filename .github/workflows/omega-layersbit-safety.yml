@@ -10,17 +10,18 @@ on:
       - 'Incluir/zipraf_bit_layer_phase_a_entry_armv7.S'
       - 'Incluir/zipraf_bit_layer_phase_a_entry_aarch64.S'
       - 'docs/ZIPRAF_BIT_LAYER_RASTER_BRIDGE_V1.md'
-      - 'Incluir/zipraf_bit_layer_phase_a_v1.h'
-      - 'Incluir/test_zipraf_bit_layer_phase_a_v1.c'
-      - 'Incluir/zipraf_bit_layer_phase_a_entry_armv7.S'
-      - 'Incluir/zipraf_bit_layer_phase_a_entry_aarch64.S'
-      - 'docs/ZIPRAF_BIT_LAYER_RASTER_BRIDGE_V1.md'
       - '.github/workflows/omega-layersbit-safety.yml'
   push:
     branches: [master]
     paths:
       - 'Incluir/omega_layersbit.h'
       - 'Incluir/test_omega_layersbit_zero.c'
+      - 'Incluir/zipraf_bit_layer_phase_a_v1.h'
+      - 'Incluir/test_zipraf_bit_layer_phase_a_v1.c'
+      - 'Incluir/zipraf_bit_layer_phase_a_entry_armv7.S'
+      - 'Incluir/zipraf_bit_layer_phase_a_entry_aarch64.S'
+      - 'docs/ZIPRAF_BIT_LAYER_RASTER_BRIDGE_V1.md'
+      - '.github/workflows/omega-layersbit-safety.yml'
 
 permissions:
   contents: read
