@@ -5,12 +5,23 @@ on:
     paths:
       - 'Incluir/omega_layersbit.h'
       - 'Incluir/test_omega_layersbit_zero.c'
+      - 'Incluir/zipraf_bit_layer_phase_a_v1.h'
+      - 'Incluir/test_zipraf_bit_layer_phase_a_v1.c'
+      - 'Incluir/zipraf_bit_layer_phase_a_entry_armv7.S'
+      - 'Incluir/zipraf_bit_layer_phase_a_entry_aarch64.S'
+      - 'docs/ZIPRAF_BIT_LAYER_RASTER_BRIDGE_V1.md'
       - '.github/workflows/omega-layersbit-safety.yml'
   push:
     branches: [master]
     paths:
       - 'Incluir/omega_layersbit.h'
       - 'Incluir/test_omega_layersbit_zero.c'
+      - 'Incluir/zipraf_bit_layer_phase_a_v1.h'
+      - 'Incluir/test_zipraf_bit_layer_phase_a_v1.c'
+      - 'Incluir/zipraf_bit_layer_phase_a_entry_armv7.S'
+      - 'Incluir/zipraf_bit_layer_phase_a_entry_aarch64.S'
+      - 'docs/ZIPRAF_BIT_LAYER_RASTER_BRIDGE_V1.md'
+      - '.github/workflows/omega-layersbit-safety.yml'
 
 permissions:
   contents: read
@@ -38,3 +49,99 @@ jobs:
           set -euo pipefail
           cc -O1 -g -std=c11 -Wall -Wextra -Werror -fsanitize=address,undefined -IIncluir             Incluir/test_omega_layersbit_zero.c -o /tmp/layersbit-zero-san
           /tmp/layersbit-zero-san
+
+
+  zipraf-phase-a-runtime:
+    name: ZIPRAF Phase A runtime / ${{ matrix.name }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - target: aarch64-linux-android21
+            name: aarch64
+            emulator: qemu-aarch64
+            entry: Incluir/zipraf_bit_layer_phase_a_entry_aarch64.S
+            extra: ''
+          - target: armv7a-linux-androideabi21
+            name: armv7
+            emulator: qemu-arm
+            entry: Incluir/zipraf_bit_layer_phase_a_entry_armv7.S
+            extra: '-marm'
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+
+      - name: Install LLVM and QEMU user-mode tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang lld binutils file qemu-user
+
+      - name: Hosted canonical witness and exhaustive selftest
+        run: |
+          set -euo pipefail
+          clang -std=c11 -O2 -Wall -Wextra -Werror -Wshadow -pedantic -IIncluir \
+            -DVECTRAS_ZIPRAF_PHASE_A_HOSTED_MAIN \
+            Incluir/test_zipraf_bit_layer_phase_a_v1.c \
+            -o /tmp/vectras-zipraf-phase-a-host
+          /tmp/vectras-zipraf-phase-a-host
+
+      - name: Freestanding object purity
+        run: |
+          set -euo pipefail
+          clang --target='${{ matrix.target }}' ${{ matrix.extra }} \
+            -std=c11 -Os -Wall -Wextra -Werror -Wshadow -pedantic -IIncluir \
+            -ffreestanding -nostdinc -fno-builtin -fno-stack-protector \
+            -fno-pic -fno-pie -fno-unwind-tables -fno-asynchronous-unwind-tables \
+            -fvisibility=hidden -ffunction-sections -fdata-sections \
+            -c Incluir/test_zipraf_bit_layer_phase_a_v1.c \
+            -o /tmp/vectras-zipraf-phase-a-${{ matrix.name }}.o
+          test -z "$(nm -u /tmp/vectras-zipraf-phase-a-${{ matrix.name }}.o)"
+
+      - name: Link static freestanding ELF
+        run: |
+          set -euo pipefail
+          clang --target='${{ matrix.target }}' ${{ matrix.extra }} \
+            -ffreestanding -nostdinc -fno-builtin -fno-stack-protector \
+            -fno-pic -fno-pie -c '${{ matrix.entry }}' \
+            -o /tmp/vectras-zipraf-phase-a-entry-${{ matrix.name }}.o
+          clang --target='${{ matrix.target }}' ${{ matrix.extra }} -fuse-ld=lld \
+            -nostdlib -static -Wl,-no-pie,-e,_start,--gc-sections,--build-id=none \
+            /tmp/vectras-zipraf-phase-a-${{ matrix.name }}.o \
+            /tmp/vectras-zipraf-phase-a-entry-${{ matrix.name }}.o \
+            -o /tmp/vectras-zipraf-phase-a-${{ matrix.name }}
+          file /tmp/vectras-zipraf-phase-a-${{ matrix.name }}
+          ! readelf -lW /tmp/vectras-zipraf-phase-a-${{ matrix.name }} | grep -q ' INTERP '
+          ! readelf -dW /tmp/vectras-zipraf-phase-a-${{ matrix.name }} 2>/dev/null | grep -q 'NEEDED'
+          if readelf -Ws /tmp/vectras-zipraf-phase-a-${{ matrix.name }} | awk '$7=="UND" && $8!="" {bad=1} END{exit bad}'; then
+            :
+          else
+            echo 'undefined external symbol detected' >&2
+            exit 1
+          fi
+
+      - name: Execute Phase A under QEMU
+        run: |
+          set -euo pipefail
+          '${{ matrix.emulator }}' /tmp/vectras-zipraf-phase-a-${{ matrix.name }}
+          sha256sum /tmp/vectras-zipraf-phase-a-${{ matrix.name }}
+
+      - name: Preserve bounded receipt
+        run: |
+          set -euo pipefail
+          {
+            echo 'ZIPRAF_PHASE_A_REFERENCE=RafPolimata@d52afbc38acf6d9580b32cbf9f7f259fa4afdf4b'
+            echo 'ZIPRAF_PHASE_A_RUNTIME=RUNTIME_PROVEN_EMULATED'
+            echo 'ZIPRAF_G_M=TOKEN_VAZIO'
+            echo 'ZIPRAF_T_BL_010=TOKEN_VAZIO'
+            echo 'PHYSICAL_ANDROID=TOKEN_VAZIO'
+            echo 'claim_allowed=false'
+          } > /tmp/vectras-zipraf-phase-a-${{ matrix.name }}.receipt
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: vectras-zipraf-phase-a-${{ matrix.name }}
+          path: /tmp/vectras-zipraf-phase-a-${{ matrix.name }}.receipt
+          if-no-files-found: error
