@@ -35,8 +35,13 @@ typedef long long      raf_i64;
 /*  π     = 3.141592...  → Q16.16: 205887 */
 #define RAF_PI_Q16          205887u
 
-/*  (√3/2)^(π·φ) ≈ 0.3534 → Q16.16: 23163 */
-#define RAF_SPIRAL_PI_PHI_Q16  23163u
+/*  (√3/2)^(π·φ) ≈ 0.4813439044 → round(Q16.16): 31545
+ *  ROLE: fixed-point form of formula 0.5's geometric scale.
+ *  AUTHORITY: formula expression; this constant is an implementation encoding.
+ *  EVIDENCE: tools/audit/verify_rafaelia_formula_constants.py
+ *  FAIL_CLOSED: parity mismatch is FAIL; do not reinterpret the formula to fit a stale literal.
+ */
+#define RAF_SPIRAL_PI_PHI_Q16  31545u
 
 /*  R_corr ≈ 0.963999 → Q16.16: 63176 */
 #define RAF_R_CORR_Q16      63176u
