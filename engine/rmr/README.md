@@ -27,6 +27,29 @@ Para mudanças no engine em **nível baixo** (C/ASM intrínsecos), manter este c
 make all
 ```
 
+## Gate de paridade das fórmulas RAFAELIA
+
+As constantes Q16.16 que codificam expressões matemáticas não são autoridade independente.
+A expressão vem primeiro; o literal inteiro é uma representação derivada.
+
+Gate reproduzível:
+
+```bash
+python3 tools/audit/verify_rafaelia_formula_constants.py
+```
+
+O gate compara:
+
+- `√3/2`, `φ` e `π` em Q16.16;
+- `(√3/2)^(π·φ)` entre a expressão e as duas superfícies C;
+- `|π·sin(999°)|` entre a expressão e as duas superfícies C;
+- duplicatas `rafaelia_formulas_core` ↔ `RmR_MathFabric_RafaeliaExtend`.
+
+Um `PASS` deste gate significa apenas **paridade numérica das constantes declaradas**.
+Não prova significado físico, estabilidade global, desempenho, dispositivo ou validade científica.
+
+Veja `docs/RAFAELIA_FORMULA_CONSTANTS_AUDIT_V1.md`.
+
 ## Core unificado (single source of truth)
 - Header canônico: `include/rmr_unified_kernel.h`
 - Implementação canônica: `src/rmr_unified_kernel.c`
