@@ -54,15 +54,16 @@ static raf_u32 ilog2_u64(raf_u64 v) {
 /* ─── sin(θ_999) pre-computed ───────────────────────────────────────────────── */
 /*
  * θ_999 = 999° mod 360° = 279°  (since sin is periodic 360°)
- * sin(279°) = sin(-81°) = -sin(81°) ≈ -0.9877
- * π × sin(279°) ≈ 3.14159 × (-0.9877) ≈ -3.1019
- * In Q16.16: -3.1019 × 65536 ≈ -203,360  → stored as signed offset
+ * sin(279°) = sin(-81°) = -sin(81°) ≈ -0.9876883406
+ * π × sin(279°) ≈ -3.10291443485
+ * round(|π × sin(279°)| × 65536) = 203353.
  * We store the magnitude and sign separately for unsigned arithmetic.
  *
- * Absolute magnitude: 3.1019 × 65536 = 203360
- * Sign: negative → we SUBTRACT this in the recursion
+ * ROLE: Q16.16 encoding of the signed additive term in formula 29.
+ * EVIDENCE: tools/audit/verify_rafaelia_formula_constants.py
+ * FAIL_CLOSED: parity mismatch is FAIL; Java/double and C/Q16 semantics stay distinct.
  */
-#define SIN_THETA999_PI_MAG_Q16   203360u   /* |π × sin(θ_999)| in Q16.16 */
+#define SIN_THETA999_PI_MAG_Q16   203353u   /* round(|π × sin(θ_999)| × 65536) */
 /* Sign is negative: fn_next = fn × SPIRAL - SIN_THETA999_PI_MAG_Q16          */
 
 /* ═══════════════════════════════════════════════════════════════════════════
