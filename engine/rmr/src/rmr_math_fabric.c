@@ -81,14 +81,20 @@ static u32 rmr_raf_q16_mul(u32 a, u32 b) {
   return (q > 0xFFFFFFFFULL) ? 0xFFFFFFFFu : (u32)q;
 }
 
+/*
+ * ROLE: emit the same fixed-point formula constants used by rafaelia_formulas_core.
+ * AUTHORITY: consumer encoding only; formula semantics live in the owning formula contract.
+ * EVIDENCE: tools/audit/verify_rafaelia_formula_constants.py checks both C surfaces.
+ * FAIL_CLOSED: duplicated literals must remain numerically identical to the canonical expressions.
+ */
 void RmR_MathFabric_RafaeliaExtend(RmR_MathFabricRafaeliaExt *out) {
   if (!out) return;
   out->spiral_q16 = 56756u;
   out->phi_q16 = 106039u;
   out->pi_q16 = 205887u;
-  out->spiral_pi_phi_q16 = 23163u;
+  out->spiral_pi_phi_q16 = 31545u;
   out->r_corr_q16 = 63176u;
-  out->theta_999_sin_pi_q16 = 203360u;
+  out->theta_999_sin_pi_q16 = 203353u;
   out->fomega_low = 963u;
   out->fomega_high = 999u;
   out->ruler_42 = 42u;

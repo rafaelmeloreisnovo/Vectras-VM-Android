@@ -192,7 +192,7 @@ public final class MathUtils {
      *
      * <p>Golden test vectors:</p>
      * <ul>
-     *   <li>fibRafaelStep(0.0) ≈ π×sin(θ_999) ≈ -2.8576</li>
+     *   <li>fibRafaelStep(0.0) = π×sin(999°) ≈ -3.10291443485</li>
      *   <li>fibRafaelStep(1.0) ≈ 0.866 + π×sin(θ_999)</li>
      * </ul>
      */
