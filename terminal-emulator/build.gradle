@@ -16,7 +16,7 @@ android {
         // Obtém a lista de ABIs suportadas do projeto raiz
         def supportedAbis = (rootProject.ext.supportedAbis ?: []) as List<String>
         // Lista de ABIs que este módulo (terminal-emulator) realmente suporta nativamente
-        // para as políticas: arm64-only, arm32-arm64, internal-4abi e internal-5abi.
+        // para as políticas: arm64-only, arm32-debug, arm32-arm64, internal-4abi e internal-5abi.
         def allowedAbis = (rootProject.ext.allowedAbis ?: ['arm64-v8a', 'armeabi-v7a']) as List<String>
         // Política de restrição de ABI definida no projeto raiz
         def appAbiPolicy = (rootProject.ext.appAbiPolicy ?: '').toString()
@@ -41,6 +41,14 @@ android {
             case "arm64-only":
                 requiredAbis = ['arm64-v8a']
                 break
+            case "arm32-debug":
+                if (!ciInternalValidation) {
+                    throw new GradleException(
+                        "terminal-emulator: APP_ABI_POLICY='arm32-debug' requer CI_INTERNAL_VALIDATION=true."
+                    )
+                }
+                requiredAbis = ['armeabi-v7a']
+                break
             case "arm32-arm64":
                 requiredAbis = ['arm64-v8a', 'armeabi-v7a']
                 break
@@ -63,7 +71,7 @@ android {
             default:
                 throw new GradleException(
                     "terminal-emulator: APP_ABI_POLICY='${appAbiPolicy}' inválida. " +
-                    "Use: arm64-only, arm32-arm64, internal-4abi ou internal-5abi."
+                    "Use: arm64-only, arm32-debug, arm32-arm64, internal-4abi ou internal-5abi."
                 )
         }
 
