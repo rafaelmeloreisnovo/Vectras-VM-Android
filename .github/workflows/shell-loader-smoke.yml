@@ -33,7 +33,9 @@ jobs:
           java-version: ${{ steps.java.outputs.version }}
 
       - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
+        uses: android-actions/setup-android@be39fa834029ff78f1a44aa3bb0819b8fc2bd8fd # v4.0.4
+        with:
+          packages: ''
 
       - name: Install pinned Android native toolchain
         run: bash tools/ci/install_android_native_toolchain.sh
