@@ -1,0 +1,41 @@
+{
+  "schema": "rafaelia.ecosystem-federation-receipt/v1",
+  "date": "2026-09-30",
+  "state": "PENDING",
+  "materialized": [
+    "federation/ecosystem-member.v1.json"
+  ],
+  "workflows": [
+    {
+      "name": "Validate Formula",
+      "state": "PASS"
+    },
+    {
+      "name": "audit-benchmark-contract",
+      "state": "PASS"
+    },
+    {
+      "name": "Orchestrator - Build Matrix",
+      "state": "IN_PROGRESS"
+    },
+    {
+      "name": "APK Wizard",
+      "state": "IN_PROGRESS"
+    },
+    {
+      "name": "Shell-Loader Smoke",
+      "state": "IN_PROGRESS"
+    },
+    {
+      "name": "host-ci",
+      "state": "CANCELLED"
+    }
+  ],
+  "evidence_boundary": "no guest boot or physical Android claim promoted",
+  "claim_allowed": false,
+  "R3": {
+    "F_ok": "contract registered and two gates green",
+    "F_gap": "execution workflows incomplete",
+    "F_next": "consume final workflow outcomes and preserve C07/C08 separation"
+  }
+}
