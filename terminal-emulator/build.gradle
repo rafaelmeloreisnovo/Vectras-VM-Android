@@ -44,6 +44,14 @@ android {
             case "arm32-arm64":
                 requiredAbis = ['arm64-v8a', 'armeabi-v7a']
                 break
+            case "arm32-debug":
+                if (!ciInternalValidation) {
+                    throw new GradleException(
+                        "terminal-emulator: APP_ABI_POLICY='arm32-debug' requer CI_INTERNAL_VALIDATION=true."
+                    )
+                }
+                requiredAbis = ['armeabi-v7a']
+                break
             case "internal-4abi":
                 if (!ciInternalValidation) {
                     throw new GradleException(
@@ -63,7 +71,7 @@ android {
             default:
                 throw new GradleException(
                     "terminal-emulator: APP_ABI_POLICY='${appAbiPolicy}' inválida. " +
-                    "Use: arm64-only, arm32-arm64, internal-4abi ou internal-5abi."
+                    "Use: arm64-only, arm32-debug, arm32-arm64, internal-4abi ou internal-5abi."
                 )
         }
 
