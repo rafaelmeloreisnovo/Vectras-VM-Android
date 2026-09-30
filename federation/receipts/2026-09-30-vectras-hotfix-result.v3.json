@@ -1,0 +1,38 @@
+{
+  "schema": "rafaelia.ecosystem-federation-hotfix-result/v3",
+  "date": "2026-09-30",
+  "repository": "rafaelmeloreisnovo/Vectras-VM-Android",
+  "supersedes": "federation/receipts/2026-09-30-ecosystem-hotfix.v2.json",
+  "hotfix": {
+    "cause": "terminal-emulator rejected the already-governed arm32-debug profile used by APK Wizard",
+    "commits": [
+      "d24bd32c050817d15c9fcfeeb25ead9dd0d59f86",
+      "c0a997aa8b6940b8a7d5a789c80e2695c33f8d42"
+    ]
+  },
+  "evidence": {
+    "workflow": "APK Wizard",
+    "run_id": 36705651907,
+    "job_id": 109855151297,
+    "conclusion": "success",
+    "steps": {
+      "bootstrap_contracts": "PASS",
+      "shell_loader_smoke": "PASS",
+      "apk_wizard_lanes": "PASS",
+      "artifact_upload": "PASS"
+    }
+  },
+  "evidence_boundary": {
+    "apk_build_and_materialization": "PASS",
+    "physical_moto_e7_execution": "TOKEN_VAZIO",
+    "guest_boot": "TOKEN_VAZIO",
+    "vm_correctness": "TOKEN_VAZIO"
+  },
+  "claim_allowed": false,
+  "rollback": "Revert c0a997aa8b6940b8a7d5a789c80e2695c33f8d42 and d24bd32c050817d15c9fcfeeb25ead9dd0d59f86; rerun APK Wizard and ABI gates.",
+  "R3": {
+    "F_ok": "arm32-debug policy parity hotfix verified by APK Wizard CI",
+    "F_gap": "physical device execution and VM correctness remain separate",
+    "F_next": "produce physical ARM32 receipt on the intended device without promoting build evidence"
+  }
+}

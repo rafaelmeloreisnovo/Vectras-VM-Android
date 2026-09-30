@@ -1,0 +1,46 @@
+{
+  "schema": "rafaelia.ecosystem-federation-hotfix-receipt/v2",
+  "date": "2026-09-30",
+  "repository": "rafaelmeloreisnovo/Vectras-VM-Android",
+  "branch": "hotfix/ecosystem-federation-v2-20260930",
+  "supersedes": "federation/receipts/2026-09-30-ecosystem-federation.v1.json",
+  "state": "HOTFIX_APPLIED_PENDING_RERUN",
+  "errors": [
+    "APK Wizard arm32-debug lane was rejected by terminal-emulator ABI switch"
+  ],
+  "urgencies": [
+    "rerun APK Wizard and ABI policy gates"
+  ],
+  "gates": {
+    "validate_formula": "PASS_PRE_HOTFIX",
+    "host_ci": "PASS_PRE_HOTFIX",
+    "shell_loader_smoke": "PASS_PRE_HOTFIX",
+    "apk_wizard": "PENDING_RERUN"
+  },
+  "token_vazio": [
+    "physical Moto E7 execution",
+    "device runtime verification"
+  ],
+  "provisions": [
+    "terminal-emulator now accepts arm32-debug only with CI_INTERNAL_VALIDATION=true and exact armeabi-v7a"
+  ],
+  "needs": [
+    "fresh APK Wizard artifact/receipt",
+    "later physical ARM32 device receipt"
+  ],
+  "rollback": "Revert commits c0a997aa8b6940b8a7d5a789c80e2695c33f8d42 and d24bd32c050817d15c9fcfeeb25ead9dd0d59f86.",
+  "hotfix_commits": [
+    "d24bd32c050817d15c9fcfeeb25ead9dd0d59f86",
+    "c0a997aa8b6940b8a7d5a789c80e2695c33f8d42"
+  ],
+  "claim_allowed": false,
+  "R3": {
+    "F_ok": "HOTFIX_APPLIED_PENDING_RERUN",
+    "F_gap": [
+      "APK Wizard arm32-debug lane was rejected by terminal-emulator ABI switch",
+      "physical Moto E7 execution",
+      "device runtime verification"
+    ],
+    "F_next": "rerun APK Wizard and ABI policy gates"
+  }
+}
