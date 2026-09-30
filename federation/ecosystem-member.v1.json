@@ -1,0 +1,48 @@
+{
+  "schema": "rafaelia.ecosystem-member/v1",
+  "repository": "rafaelmeloreisnovo/Vectras-VM-Android",
+  "authority": "android-vm-backend-and-ipc-runtime",
+  "authority_sources": [
+    "docs/federation/REPOSITORY_CONTRACT_V1.md",
+    "docs/contracts/VECTRAS_TERMUX_IPC_V3.md"
+  ],
+  "planes": [
+    "execution"
+  ],
+  "interface": {
+    "produces": [
+      "vm-dispatch-request",
+      "android-runtime-receipt",
+      "vm-runtime-artifact"
+    ],
+    "consumes": [
+      "versioned-ipc-contract",
+      "termux-run-command-service",
+      "vm-artifact"
+    ],
+    "boundary": "contract-or-artifact-reference"
+  },
+  "shared_components": [
+    {
+      "id": "raf_bl0.c",
+      "path": "engine/rmr/raf_bl0.c",
+      "blob_sha": "132f948d199f6679fcae4f33912e0a3ad69691a3"
+    }
+  ],
+  "invariants": {
+    "relationship_is_not_authority_merge": true,
+    "source_is_not_artifact": true,
+    "artifact_is_not_execution": true,
+    "execution_is_not_evidence": true,
+    "evidence_is_not_claim": true,
+    "token_vazio_is_not_zero": true,
+    "implemented_untested_is_not_pass": true,
+    "missing_evidence_may_be_promoted": false
+  },
+  "federation": {
+    "authority_transfer_allowed": false,
+    "body_copy_required": false,
+    "local_gate_required_before_promotion": true
+  },
+  "claim_allowed": false
+}
