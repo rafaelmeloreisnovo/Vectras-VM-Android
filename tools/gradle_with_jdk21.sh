@@ -178,6 +178,22 @@ find_java_home() {
   return 1
 }
 
+should_enable_android_unit_test_defaults() {
+  if [[ "${VECTRA_ANDROID_UNIT_TEST_DEFAULTS:-true}" != "true" ]]; then
+    return 1
+  fi
+
+  local arg
+  for arg in "$@"; do
+    case "$arg" in
+      *testDebugUnitTest*|*testReleaseUnitTest*|*testPerfReleaseUnitTest*)
+        return 0
+        ;;
+    esac
+  done
+  return 1
+}
+
 JAVA_HOME_DETECTED="$(find_java_home || true)"
 if [[ -z "$JAVA_HOME_DETECTED" || ! -x "$JAVA_HOME_DETECTED/bin/java" ]]; then
   echo "ERRO: JDK 21/17 não encontrado. Instale JDK 21 (preferencial) ou JDK 17 e tente novamente." >&2
@@ -218,11 +234,22 @@ if should_require_android_sdk "$@" && [[ -x "$REPO_ROOT/tools/check_android_tool
   fi
 fi
 
+gradle_args=("$@")
+if should_enable_android_unit_test_defaults "$@"; then
+  unit_test_init="$REPO_ROOT/tools/ci/android_unit_test_defaults.init.gradle"
+  if [[ ! -f "$unit_test_init" ]]; then
+    echo "ERRO: política de unit test Android ausente: $unit_test_init" >&2
+    exit 6
+  fi
+  echo "[gradle_with_jdk21] Android JVM unit-test defaults ativos via ${unit_test_init#$REPO_ROOT/}"
+  gradle_args=(-I "$unit_test_init" "${gradle_args[@]}")
+fi
+
 cd "$REPO_ROOT"
 if [[ "${GRADLE_WITH_JDK21_FORCE_SYSTEM_GRADLE:-false}" == "true" ]]; then
   if command -v gradle >/dev/null 2>&1; then
     echo "[gradle_with_jdk21] GRADLE_WITH_JDK21_FORCE_SYSTEM_GRADLE=true; executando gradle do host."
-    exec gradle "$@"
+    exec gradle "${gradle_args[@]}"
   fi
   echo "ERRO: GRADLE_WITH_JDK21_FORCE_SYSTEM_GRADLE=true, mas 'gradle' não foi encontrado no PATH." >&2
   exit 5
@@ -230,7 +257,7 @@ fi
 
 set +e
 wrapper_log_file="$(mktemp -t gradle-wrapper-log.XXXXXX)"
-./gradlew "$@" 2>&1 | tee "$wrapper_log_file"
+./gradlew "${gradle_args[@]}" 2>&1 | tee "$wrapper_log_file"
 wrapper_exit=${PIPESTATUS[0]}
 set -e
 if [[ $wrapper_exit -eq 0 ]]; then
@@ -241,7 +268,7 @@ fi
 if command -v gradle >/dev/null 2>&1; then
   if is_metadata_only_invocation "$@"; then
     echo "[gradle_with_jdk21] gradlew falhou (exit=${wrapper_exit}); fallback para gradle do host permitido para comando de metadata."
-    exec gradle "$@"
+    exec gradle "${gradle_args[@]}"
   fi
   echo "[gradle_with_jdk21] gradlew falhou (exit=${wrapper_exit}); sem fallback automático para tasks de build/test para preservar paridade de distribuição. Use GRADLE_WITH_JDK21_FORCE_SYSTEM_GRADLE=true apenas para validação interna explícita." >&2
 fi
