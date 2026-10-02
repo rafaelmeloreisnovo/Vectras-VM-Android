@@ -101,7 +101,9 @@ jobs:
           if [[ "${{ matrix.variant }}" == "debug" ]]; then
             tools/gradle_with_jdk21.sh --no-daemon -PAPP_ABI_POLICY="${app_abi_policy}" -PSUPPORTED_ABIS="${supported_abis}" -PCI_INTERNAL_VALIDATION="${ci_internal_validation}" :app:testDebugUnitTest
           else
-            tools/gradle_with_jdk21.sh --no-daemon -PAPP_ABI_POLICY="${app_abi_policy}" -PSUPPORTED_ABIS="${supported_abis}" -PCI_INTERNAL_VALIDATION="${ci_internal_validation}" :app:testReleaseUnitTest
+            # Unit tests verify code semantics; they do not distribute a release artifact.
+            # Keep production Firebase enforcement in the Assemble APK release lane below.
+            tools/gradle_with_jdk21.sh --no-daemon -PAPP_ABI_POLICY="${app_abi_policy}" -PSUPPORTED_ABIS="${supported_abis}" -PCI_INTERNAL_VALIDATION="${ci_internal_validation}" -PALLOW_PLACEHOLDER_FIREBASE_FOR_RELEASE=true :app:testReleaseUnitTest
           fi
 
       - name: Assemble APK (${{ matrix.variant }})
