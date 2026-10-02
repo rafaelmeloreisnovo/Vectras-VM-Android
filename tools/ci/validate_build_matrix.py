@@ -135,13 +135,17 @@ for workflow_path in host_semantic_workflows:
             )
             sys.exit(1)
 
-# Guardrail: only canonical Android workflows can own Android *build* responsibilities.
-# Setup actions and the Gradle launcher are infrastructure primitives: evidence/test-only
-# workflows may legitimately use them without becoming an APK/build owner.  Ownership is
-# therefore inferred only from build-producing/delivery markers below.
+# Guardrail: android-ci owns the general Android build lane. Existing narrowly scoped
+# producer lanes are explicit typed exceptions only when already versioned by repository
+# contracts/docs: native ABI matrix and Moto E7 ARM32 beta profile.
+# Setup actions and the Gradle launcher are infrastructure primitives, not ownership.
 android_canonical_workflows = {'android-ci.yml'}
 android_wrapper_workflows = {'android.yml'}
-android_aux_android_workflows = {'compile-matrix.yml'}
+android_aux_android_workflows = {
+    'compile-matrix.yml',
+    'android-native-ci.yml',
+    'moto-e7-arm32-beta.yml',
+}
 android_build_responsibility_markers = [
     'build_android_cmake_matrix.sh',
     ':app:assembleDebug',
