@@ -99,9 +99,9 @@ jobs:
         run: |
           set -euo pipefail
           if [[ "${{ matrix.variant }}" == "debug" ]]; then
-            ./gradlew --no-daemon -PAPP_ABI_POLICY="${app_abi_policy}" -PSUPPORTED_ABIS="${supported_abis}" -PCI_INTERNAL_VALIDATION="${ci_internal_validation}" :app:testDebugUnitTest
+            ./tools/gradle_with_jdk21.sh --no-daemon -PAPP_ABI_POLICY="${app_abi_policy}" -PSUPPORTED_ABIS="${supported_abis}" -PCI_INTERNAL_VALIDATION="${ci_internal_validation}" :app:testDebugUnitTest
           else
-            ./gradlew --no-daemon -PAPP_ABI_POLICY="${app_abi_policy}" -PSUPPORTED_ABIS="${supported_abis}" -PCI_INTERNAL_VALIDATION="${ci_internal_validation}" :app:testReleaseUnitTest
+            ./tools/gradle_with_jdk21.sh --no-daemon -PAPP_ABI_POLICY="${app_abi_policy}" -PSUPPORTED_ABIS="${supported_abis}" -PCI_INTERNAL_VALIDATION="${ci_internal_validation}" :app:testReleaseUnitTest
           fi
 
       - name: Assemble APK (${{ matrix.variant }})
