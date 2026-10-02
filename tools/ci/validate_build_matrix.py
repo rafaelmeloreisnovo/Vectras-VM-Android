@@ -135,13 +135,14 @@ for workflow_path in host_semantic_workflows:
             )
             sys.exit(1)
 
-# Guardrail: only canonical Android workflows can own Android build responsibilities.
+# Guardrail: only canonical Android workflows can own Android *build* responsibilities.
+# Setup actions and the Gradle launcher are infrastructure primitives: evidence/test-only
+# workflows may legitimately use them without becoming an APK/build owner.  Ownership is
+# therefore inferred only from build-producing/delivery markers below.
 android_canonical_workflows = {'android-ci.yml'}
 android_wrapper_workflows = {'android.yml'}
 android_aux_android_workflows = {'compile-matrix.yml'}
-android_responsibility_markers = [
-    'android-actions/setup-android@v3',
-    './tools/gradle_with_jdk21.sh',
+android_build_responsibility_markers = [
     'build_android_cmake_matrix.sh',
     ':app:assembleDebug',
     ':app:assembleRelease',
@@ -160,11 +161,11 @@ for workflow_path in WORKFLOWS.glob('*.yml'):
     if workflow_path.name in android_canonical_workflows or workflow_path.name in android_aux_android_workflows:
         continue
 
-    for marker in android_responsibility_markers:
+    for marker in android_build_responsibility_markers:
         if marker in content:
             print(
-                f'workflow {workflow_path.name} duplicates android responsibility marker '
-                f'({marker}); keep android checks canonical in android-ci.yml'
+                f'workflow {workflow_path.name} duplicates android build responsibility marker '
+                f'({marker}); keep Android build ownership canonical in android-ci.yml'
             )
             sys.exit(1)
 

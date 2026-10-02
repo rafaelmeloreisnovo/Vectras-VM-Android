@@ -1,0 +1,22 @@
+/*
+ * Vectras local-JVM Android unit-test policy.
+ *
+ * Purpose: keep plain JUnit tests from failing at class initialization solely because
+ * android.jar stub methods throw at runtime. This mirrors the existing
+ * terminal-emulator `unitTests.returnDefaultValues = true` policy without changing
+ * production/runtime code and without adding a dependency.
+ *
+ * This does not turn assertion failures into success. Robolectric/instrumented tests
+ * remain responsible for Android framework behavior that needs real semantics.
+ */
+gradle.beforeProject { project ->
+    project.pluginManager.withPlugin('com.android.application') {
+        if (project.path == ':app') {
+            def androidExtension = project.extensions.findByName('android')
+            if (androidExtension == null) {
+                throw new GradleException('Android application plugin active but android extension is unavailable for :app')
+            }
+            androidExtension.testOptions.unitTests.returnDefaultValues = true
+        }
+    }
+}
