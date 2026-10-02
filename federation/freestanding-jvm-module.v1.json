@@ -1,0 +1,51 @@
+{
+  "schema": "rafaelia.freestanding-jvm-module/v1",
+  "id": "vectra-vm-kernel",
+  "repository": "rafaelmeloreisnovo/Vectras-VM-Android",
+  "authority": "Vectras owns VM/QEMU consumer behavior and local low-level kernel modules; Android/JNI remains hosted",
+  "authority_path": "app/",
+  "module_kind": "VM_KERNEL",
+  "boundary": "FREESTANDING_CORE",
+  "jvm_is_freestanding": false,
+  "hosted_adapter_policy": "Android/JNI and VM request construction remain hosted adapters; dispatch acceptance is not process or guest evidence",
+  "required_flags": [
+    "SOURCE_BOUND",
+    "AUTHORITY_BOUND",
+    "FAIL_CLOSED",
+    "SHADOW_GUARD"
+  ],
+  "friction_controls": {
+    "tail_recursion": false,
+    "reflection_dispatch": false,
+    "shadow_state": "CONSUMER_REQUEST_STATE_SEPARATE_FROM_KERNEL_STATE",
+    "warning_transport": "BITMASK_OR_TYPED_STATUS"
+  },
+  "state": "IMPLEMENTED_UNTESTED",
+  "urgency": "P0",
+  "claim_allowed": false,
+  "central_contract": "rafaelmeloreisnovo/RafGitTools:docs/architecture/FREESTANDING_JVM_ORCHESTRATION_V1.md",
+  "token_vazio": [
+    {
+      "id": "TOKEN_VAZIO_VECTRA_JVM_NATIVE_CURRENT_HEAD",
+      "missing": "same-head consumer/JNI/freestanding execution receipt for the selected module",
+      "evidence_needed": "source+ABI+APK or test artifact identity and bounded execution receipt",
+      "urgency": "P1",
+      "next": "bind one existing freestanding module through the typed hosted adapter and run the owner gate"
+    },
+    {
+      "id": "TOKEN_VAZIO_VECTRA_TERMUX_PHYSICAL_TRANSACTION",
+      "missing": "physical producer-consumer transaction linking request digest to provider result and observed process/exit",
+      "evidence_needed": "same-device Vectras request + Termux result + process/exit receipt",
+      "urgency": "P0",
+      "next": "execute the cross-repository physical transaction without promoting dispatch acceptance to runtime proof"
+    },
+    {
+      "id": "TOKEN_VAZIO_VECTRA_GUEST_BOOT",
+      "missing": "guest boot evidence for claims requiring a booted VM",
+      "evidence_needed": "guest-specific boot observation bound to exact request/artifact/device",
+      "urgency": "P1",
+      "next": "keep guest correctness/performance unclaimed until the guest boot gate is observed"
+    }
+  ],
+  "rollback": "close draft PR or revert only this leaf; preserve independent VM consumer/provider rollback boundaries"
+}
