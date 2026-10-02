@@ -56,7 +56,7 @@ public class BoundedStringRingBuffer {
 
     public BoundedStringRingBuffer(int maxLines, int maxBytes) {
         this.maxLines = Math.max(1, maxLines);
-        this.maxBytes = Math.max(64, maxBytes);
+        this.maxBytes = Math.max(1, maxBytes);
         this.charOffsets = new int[this.maxLines];
         this.charLengths = new int[this.maxLines];
         this.utf8ByteCounts = new int[this.maxLines];
