@@ -18,7 +18,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: android-native-ci-${{ github.ref }}-${{ github.workflow }}
+  group: android-native-ci-${{ github.ref }}-${{ github.workflow }}-${{ inputs.profile_set }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 env:
