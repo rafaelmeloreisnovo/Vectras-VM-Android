@@ -137,13 +137,16 @@ for workflow_path in host_semantic_workflows:
 
 # Guardrail: android-ci owns the general Android build lane. Existing narrowly scoped
 # producer lanes are explicit typed exceptions only when already versioned by repository
-# contracts/docs: native ABI matrix and Moto E7 ARM32 beta profile.
+# contracts/docs: native ABI matrix, beta artifact delivery, Omega freestanding deployment,
+# and Moto E7 ARM32 beta profile.
 # Setup actions and the Gradle launcher are infrastructure primitives, not ownership.
 android_canonical_workflows = {'android-ci.yml'}
 android_wrapper_workflows = {'android.yml'}
 android_aux_android_workflows = {
     'compile-matrix.yml',
     'android-native-ci.yml',
+    'beta-debug-builds.yml',
+    'omega-freestanding-deployment.yml',
     'moto-e7-arm32-beta.yml',
 }
 android_build_responsibility_markers = [
