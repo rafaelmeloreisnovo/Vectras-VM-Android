@@ -6,6 +6,8 @@ on:
       - 'CMakeLists.txt'
       - 'app/src/main/cpp/CMakeLists.txt'
       - 'app/src/main/cpp/freestanding_link_probe_entry.c'
+      - 'app/src/main/cpp/lowlevel_abi.c'
+      - 'app/src/main/cpp/catalytic/**'
       - 'engine/platform/android/CMakeLists.txt'
       - 'tools/ci/audit_freestanding_link_probe.py'
       - 'tools/ci/aggregate_freestanding_ndk_receipts.py'
