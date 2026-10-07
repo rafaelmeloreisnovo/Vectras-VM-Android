@@ -601,7 +601,7 @@ jobs:
             for item in "${outcomes[@]}"; do
               name="${item%%=*}"
               outcome="${item#*=}"
-              echo "- ${name}: `${outcome}`"
+              printf -- '- %s: `%s`\n' "${name}" "${outcome}"
               if [[ "${outcome}" == "failure" ]]; then
                 blocked=true
               fi
