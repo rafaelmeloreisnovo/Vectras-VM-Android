@@ -137,4 +137,3 @@ For every material dependency delta record:
 `boundary -> previous dependency -> replacement/retention reason -> execution -> evidence -> rollback -> remaining TOKEN_VAZIO`.
 
 <!-- /RAFAELIA_FREESTANDING_POLICY_V1 -->
-
