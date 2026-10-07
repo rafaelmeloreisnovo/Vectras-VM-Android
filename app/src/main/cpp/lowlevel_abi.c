@@ -170,6 +170,9 @@ int abi_entry_validate_interop(uint16_t producer_major,
 /*
  * VCAT is intentionally amalgamated into the existing freestanding archive.
  * This adds no hosted runtime target and keeps its libc/syscall boundary equal
- * to abi_core_freestanding. The specialist module itself contains no loops.
+ * to abi_core_freestanding. vcat_core.inc keeps the original no-loop specialist
+ * contract; vcat_bootstrap.inc adds bounded streaming loops for TAR metadata
+ * inspection while remaining heap/libc/syscall free.
  */
 #include "catalytic/vcat_core.inc"
+#include "catalytic/vcat_bootstrap.inc"

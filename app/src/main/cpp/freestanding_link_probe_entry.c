@@ -1,5 +1,6 @@
 #include "lowlevel_abi.h"
 #include "catalytic/vcat.h"
+#include "catalytic/vcat_bootstrap.h"
 
 #if !defined(__GNUC__) && !defined(__clang__)
 #error "The freestanding link probe requires GNU/Clang attributes."
@@ -13,6 +14,8 @@
  */
 static volatile uint32_t g_vectra_freestanding_probe_result;
 static volatile vcat_plan g_vectra_catalytic_probe_plan;
+static volatile vcat_tar_entry g_vectra_tar_safe_probe;
+static volatile vcat_tar_entry g_vectra_tar_unsafe_probe;
 
 static const vcat_u8 kVcatElf32Arm[20] = {
     0x7f, 0x45, 0x4c, 0x46, 1, 1, 1, 0,
@@ -23,6 +26,31 @@ static const vcat_u8 kVcatDex[8] = {
 };
 static const vcat_u8 kVcatZip[4] = {0x50, 0x4b, 0x03, 0x04};
 static const vcat_u8 kVcatQcow2[4] = {0x51, 0x46, 0x49, 0xfb};
+
+static const vcat_u8 kVcatTarSafe[VCAT_TAR_BLOCK_BYTES] = {
+    [0] = 'u', [1] = 's', [2] = 'r', [3] = '/', [4] = 'b', [5] = 'i',
+    [6] = 'n', [7] = '/', [8] = 'p', [9] = 'r', [10] = 'o', [11] = 'o',
+    [12] = 't',
+    [100] = '0', [101] = '0', [102] = '0', [103] = '0', [104] = '7',
+    [105] = '5', [106] = '5',
+    [124] = '0', [125] = '0', [126] = '0', [127] = '0', [128] = '0',
+    [129] = '0', [130] = '0', [131] = '0', [132] = '0', [133] = '0',
+    [134] = '1',
+    [156] = '0',
+    [257] = 'u', [258] = 's', [259] = 't', [260] = 'a', [261] = 'r'
+};
+
+static const vcat_u8 kVcatTarUnsafe[VCAT_TAR_BLOCK_BYTES] = {
+    [0] = '.', [1] = '.', [2] = '/', [3] = 'e', [4] = 's', [5] = 'c',
+    [6] = 'a', [7] = 'p', [8] = 'e',
+    [100] = '0', [101] = '0', [102] = '0', [103] = '0', [104] = '7',
+    [105] = '5', [106] = '5',
+    [124] = '0', [125] = '0', [126] = '0', [127] = '0', [128] = '0',
+    [129] = '0', [130] = '0', [131] = '0', [132] = '0', [133] = '0',
+    [134] = '1',
+    [156] = '0',
+    [257] = 'u', [258] = 's', [259] = 't', [260] = 'a', [261] = 'r'
+};
 
 static const vcat_job kVcatJobs[VCAT_LANES] = {
     {kVcatElf32Arm, 20u, 0u, 0u}, {kVcatDex, 8u, 1u, 0u},
@@ -47,13 +75,20 @@ void vectra_freestanding_probe_entry(void) {
 
     vcat_plan16(kVcatJobs, 0x00144000u,
                 (vcat_plan *)&g_vectra_catalytic_probe_plan);
+    vcat_tar_inspect(kVcatTarSafe, VCAT_TAR_BLOCK_BYTES,
+                     (vcat_tar_entry *)&g_vectra_tar_safe_probe);
+    vcat_tar_inspect(kVcatTarUnsafe, VCAT_TAR_BLOCK_BYTES,
+                     (vcat_tar_entry *)&g_vectra_tar_unsafe_probe);
 
     g_vectra_freestanding_probe_result =
         ((uint32_t)(status == VECTRA_LL_ERR_OK) << 1U) |
         (uint32_t)(adaptive_bridge != 0U) |
         ((g_vectra_catalytic_probe_plan.ready_mask == 0x0000ffffu) << 2U) |
         ((g_vectra_catalytic_probe_plan.kernel_boundary ==
-          VCAT_BOUNDARY_KERNEL_REQUIRED) << 3U);
+          VCAT_BOUNDARY_KERNEL_REQUIRED) << 3U) |
+        (((g_vectra_tar_safe_probe.flags & VCAT_TAR_F_READY) != 0u) << 4U) |
+        ((((g_vectra_tar_unsafe_probe.flags & VCAT_TAR_F_SAFE_PATH) == 0u) &&
+          ((g_vectra_tar_unsafe_probe.flags & VCAT_TAR_F_READY) == 0u)) << 5U);
 
     for (;;) {
         __asm__ __volatile__("" ::: "memory");
