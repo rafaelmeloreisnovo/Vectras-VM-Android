@@ -1,0 +1,50 @@
+{
+  "schema_version": "vectras.freestanding-tar-plan.v1",
+  "state": "IMPLEMENTED_UNTESTED",
+  "claim_allowed": false,
+  "source_observation": {
+    "installation_catalog_sha256": "cc424415ed4a4e14dcef1824fc19ffa2fce49851e7d3e7cae602cf624f4e5bf6",
+    "observed_runtime_gap": [
+      "missing-proot",
+      "missing-distro-busybox",
+      "missing-qemu-binary"
+    ]
+  },
+  "implementation": {
+    "component": "VCAT freestanding TAR bootstrap planner",
+    "runtime_external_dependency": false,
+    "libc": false,
+    "heap": false,
+    "jni": false,
+    "java": false,
+    "syscalls": false,
+    "filesystem": false,
+    "dynamic_loader": false,
+    "input": "one 512-byte TAR header already present in memory",
+    "output": "numeric type/mode/size/digest/safety flags",
+    "rejects": [
+      "absolute archive paths",
+      "whole '..' traversal components",
+      "unsafe symlink targets",
+      "unsupported TAR entry types",
+      "invalid octal mode/size fields",
+      "non-ustar structural headers"
+    ],
+    "final_link_witness": "vectra_freestanding_link_probe_entry",
+    "ci_guard": "tools/ci/verify_android_freestanding_contract.sh"
+  },
+  "boundary": {
+    "tar_interpretation_policy": "AUTHORIAL_FREESTANDING_IMPLEMENTED_UNTESTED",
+    "tar_filesystem_write_adapter": "TOKEN_VAZIO",
+    "proot_equivalent_process_virtualization": "TOKEN_VAZIO",
+    "distro_rootfs_payload": "EXTERNAL_PAYLOAD_CURRENTLY_OBSERVED",
+    "qemu_equivalent_vm_execution": "TOKEN_VAZIO",
+    "physical_device_execution": "TOKEN_VAZIO"
+  },
+  "next_gate": "exact-head host+armeabi-v7a+arm64-v8a no-libc final-link CI, then authorial bounded filesystem writer adapter",
+  "invariants": [
+    "SOURCE != ARTIFACT != EXECUTION != EVIDENCE != CLAIM",
+    "TOKEN_VAZIO != 0",
+    "IMPLEMENTED_UNTESTED != PASS"
+  ]
+}
