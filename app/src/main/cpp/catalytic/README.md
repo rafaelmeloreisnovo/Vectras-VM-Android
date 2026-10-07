@@ -83,3 +83,23 @@ Passing the freestanding link probe supports only the claim:
 
 It does **not** certify Android installation, PRoot execution, distro boot, QEMU
 execution or physical VM launch.
+
+## Freestanding TAR bootstrap planner
+
+The bootstrap frontier now also contains `vcat_bootstrap.inc` +
+`vcat_bootstrap.h`. The planner consumes one 512-byte TAR header already in
+memory and emits numeric metadata only:
+
+- ustar structural recognition;
+- octal mode and bounded 32-bit size parsing;
+- regular-file / directory / symlink typing;
+- path traversal rejection for absolute paths and whole `..` components;
+- symlink-target safety classification;
+- deterministic path/link digests;
+- `VCAT_TAR_F_READY` only when the structural and safety gates are satisfied.
+
+This removes TAR **interpretation/policy** from the hosted boundary. It does not
+yet remove the hosted extractor: creating files, chmod/symlink and process launch
+still require a separately evidenced kernel adapter. The next substitution gate
+is therefore an authorial writer/extractor adapter driven by this validated plan,
+not a relabeling of the current `tar` command as freestanding.
