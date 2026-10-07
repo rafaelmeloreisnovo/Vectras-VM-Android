@@ -49,11 +49,26 @@ if grep -Fq -- "target_link_options(abi_core_freestanding" "${cmake_file}"; then
 fi
 
 probe_entry="${repo_root}/app/src/main/cpp/freestanding_link_probe_entry.c"
-[[ -f "${probe_entry}" ]] || { echo "missing ${probe_entry}" >&2; exit 1; }
+vcat_core="${repo_root}/app/src/main/cpp/catalytic/vcat_core.inc"
+vcat_bootstrap="${repo_root}/app/src/main/cpp/catalytic/vcat_bootstrap.inc"
+vcat_bootstrap_header="${repo_root}/app/src/main/cpp/catalytic/vcat_bootstrap.h"
 
-for forbidden in '<stdio.h>' '<stdlib.h>' '<string.h>' 'malloc(' 'free(' 'printf('; do
-  if grep -Fq -- "${forbidden}" "${probe_entry}"; then
-    echo "forbidden hosted dependency in probe entry: ${forbidden}" >&2
+for source_file in "${probe_entry}" "${vcat_core}" "${vcat_bootstrap}" "${vcat_bootstrap_header}"; do
+  [[ -f "${source_file}" ]] || { echo "missing ${source_file}" >&2; exit 1; }
+done
+
+for forbidden in '<stdio.h>' '<stdlib.h>' '<string.h>' '<unistd.h>' '<fcntl.h>' 'malloc(' 'calloc(' 'realloc(' 'free(' 'printf(' 'syscall(' 'JNIEnv' 'System.loadLibrary'; do
+  for source_file in "${probe_entry}" "${vcat_core}" "${vcat_bootstrap}" "${vcat_bootstrap_header}"; do
+    if grep -Fq -- "${forbidden}" "${source_file}"; then
+      echo "forbidden hosted dependency in freestanding source ${source_file}: ${forbidden}" >&2
+      exit 1
+    fi
+  done
+done
+
+for required in 'vcat_tar_inspect' 'VCAT_TAR_F_SAFE_PATH' 'VCAT_TAR_F_READY'; do
+  if ! grep -Fq -- "${required}" "${vcat_bootstrap}" "${vcat_bootstrap_header}" "${probe_entry}"; then
+    echo "missing VCAT bootstrap contract pattern: ${required}" >&2
     exit 1
   fi
 done
