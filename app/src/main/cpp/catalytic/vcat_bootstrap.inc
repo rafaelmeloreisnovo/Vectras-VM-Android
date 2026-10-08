@@ -97,6 +97,19 @@ static int vcat_tar_parse_octal(const vcat_u8 *p,
     return 1;
 }
 
+/* POSIX ustar header checksum: eight checksum bytes are treated as spaces.
+ * All arithmetic is bounded (< 512 * 255) and independent of libc/runtime. */
+static int vcat_tar_checksum_ok(const vcat_u8 *p) {
+    vcat_u32 expected = 0u;
+    vcat_u32 sum = 0u;
+    vcat_u32 i;
+    if (!vcat_tar_parse_octal(p + 148u, 8u, &expected)) return 0;
+    for (i = 0u; i < VCAT_TAR_BLOCK_BYTES; ++i) {
+        sum += (i >= 148u && i < 156u) ? 32u : (vcat_u32)p[i];
+    }
+    return sum == expected;
+}
+
 static int vcat_tar_zero_block(const vcat_u8 *p) {
     vcat_u32 i = 0u;
     while (i < VCAT_TAR_BLOCK_BYTES) {
@@ -148,6 +161,10 @@ VCAT_API void vcat_tar_inspect(const vcat_u8 *header,
         flags |= VCAT_TAR_F_MAGIC_OK;
     }
 
+    if (vcat_tar_checksum_ok(header)) {
+        flags |= VCAT_TAR_F_CHECKSUM_OK;
+    }
+
     if (vcat_tar_component_safe(name, 100u) &&
         (prefix[0] == 0u || vcat_tar_component_safe(prefix, 155u))) {
         flags |= VCAT_TAR_F_SAFE_PATH;
@@ -181,12 +198,14 @@ VCAT_API void vcat_tar_inspect(const vcat_u8 *header,
     link_digest = vcat_tar_digest_field(linkname, 100u);
 
     if ((flags & (VCAT_TAR_F_MAGIC_OK |
+                  VCAT_TAR_F_CHECKSUM_OK |
                   VCAT_TAR_F_SAFE_PATH |
                   VCAT_TAR_F_SIZE_OK |
                   VCAT_TAR_F_MODE_OK |
                   VCAT_TAR_F_SUPPORTED_TYPE |
                   VCAT_TAR_F_SAFE_LINK)) ==
         (VCAT_TAR_F_MAGIC_OK |
+         VCAT_TAR_F_CHECKSUM_OK |
          VCAT_TAR_F_SAFE_PATH |
          VCAT_TAR_F_SIZE_OK |
          VCAT_TAR_F_MODE_OK |
