@@ -37,11 +37,27 @@ static void seed(void) {
     header[261] = (vcat_u8)'r';
 }
 
+/* Test-only TAR checksum generator, no libc/dependencies, keeping all
+ * malformed-path cases structurally valid except the targeted condition. */
+static void seal(void) {
+    vcat_u32 i, j, sum = 0u;
+    for (i = 0u; i < VCAT_TAR_BLOCK_BYTES; ++i)
+        sum += (i >= 148u && i < 156u) ? 32u : (vcat_u32)header[i];
+    for (j = 0u; j < 6u; ++j) {
+        header[153u - j] = (vcat_u8)('0' + (sum & 7u));
+        sum >>= 3u;
+    }
+    header[154] = 0u;
+    header[155] = (vcat_u8)' ';
+}
+
 static int has(vcat_u32 required) {
+    seal();
     vcat_tar_inspect(header, VCAT_TAR_BLOCK_BYTES, &entry);
     return (entry.flags & required) == required;
 }
 static int lacks(vcat_u32 prohibited) {
+    seal();
     vcat_tar_inspect(header, VCAT_TAR_BLOCK_BYTES, &entry);
     return (entry.flags & prohibited) == 0u;
 }
@@ -76,5 +92,14 @@ int main(void) {
     if (!has(VCAT_TAR_F_READY)) return 13;
     seed(); header[0]='/'; header[1]='x';
     if (!lacks(VCAT_TAR_F_SAFE_PATH | VCAT_TAR_F_READY)) return 14;
+    seed(); seal();
+    header[0] = (vcat_u8)'x'; /* No reseal: checksummed original was f */
+    vcat_tar_inspect(header, VCAT_TAR_BLOCK_BYTES, &entry);
+    if ((entry.flags & VCAT_TAR_F_CHECKSUM_OK) != 0u) return 15;
+    if ((entry.flags & VCAT_TAR_F_READY) != 0u) return 16;
+    seed(); header[148] = (vcat_u8)'9'; /* Malformed octal checksum */
+    vcat_tar_inspect(header, VCAT_TAR_BLOCK_BYTES, &entry);
+    if ((entry.flags & VCAT_TAR_F_CHECKSUM_OK) != 0u) return 17;
+    if ((entry.flags & VCAT_TAR_F_READY) != 0u) return 18;
     return 0;
 }
