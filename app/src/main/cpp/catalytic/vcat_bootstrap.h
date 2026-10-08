@@ -30,6 +30,7 @@
 #define VCAT_TAR_F_SAFE_LINK      0x00000020u
 #define VCAT_TAR_F_ZERO_BLOCK     0x00000040u
 #define VCAT_TAR_F_READY          0x00000080u
+#define VCAT_TAR_F_CHECKSUM_OK    0x00000100u
 
 typedef struct {
     vcat_u32 flags;

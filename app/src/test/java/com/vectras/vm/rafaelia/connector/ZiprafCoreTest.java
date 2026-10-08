@@ -21,7 +21,13 @@ public class ZiprafCoreTest {
     @Test
     public void testLargePayloadSharding() throws Exception {
         byte[] large = new byte[300 * 1024]; // 300KB > SHARD_MAX_BYTES(256KB)
-        for (int i = 0; i < large.length; i++) large[i] = (byte)(i ^ 0xAB);
+        // High-entropy deterministic bytes: a repeating 256-byte pattern would
+        // compress below the threshold and never exercise sharding.
+        int state = 0x13579bdf;
+        for (int i = 0; i < large.length; i++) {
+            state = state * 1664525 + 1013904223;
+            large[i] = (byte) (state >>> 24);
+        }
         byte[][] shards = ZiprafCore.pack(large);
         assertTrue("expected sharding", shards.length > 1);
         byte[] result = ZiprafCore.unpack(shards);
@@ -69,7 +75,33 @@ public class ZiprafCoreTest {
     @Test
     public void testHeaderSize() {
         // MAGIC(4)+VERSION(1)+FLAGS(1)+SHARD_ID(2)+TOTAL(2)+RESV(2)+PAYLEN(4)+COMPLEN(4)+SHA256(32)+CRC(4)
-        assertEquals(52, ZiprafCore.HEADER_SIZE);
+        assertEquals(56, ZiprafCore.HEADER_SIZE);
+    }
+
+    private static void expectRejected(byte[] block) throws Exception {
+        try {
+            ZiprafCore.unpack(new byte[][]{block});
+            fail("Malformed ZIPRAF header must fail closed");
+        } catch (java.io.IOException expected) {
+            assertTrue(expected.getMessage().contains("ZIPRAF"));
+        }
+    }
+
+    @Test
+    public void testMalformedHeaderRejectedBeforeBodyAllocation() throws Exception {
+        byte[] valid = ZiprafCore.pack("bounded".getBytes(StandardCharsets.UTF_8))[0];
+        byte[] wrongVersion = valid.clone();
+        wrongVersion[4] = 2;
+        expectRejected(wrongVersion);
+        byte[] wrongShardCount = valid.clone();
+        wrongShardCount[8] = 2; // TOTAL_SHARDS offset, little endian
+        expectRejected(wrongShardCount);
+        byte[] wrongEncodedLength = valid.clone();
+        wrongEncodedLength[16] = (byte) 0xFF; // COMPRESSED_LEN offset
+        expectRejected(wrongEncodedLength);
+        byte[] wrongDecodedLength = valid.clone();
+        wrongDecodedLength[12] = (byte) 0xFF; // PAYLOAD_LEN offset
+        expectRejected(wrongDecodedLength);
     }
 
     @Test

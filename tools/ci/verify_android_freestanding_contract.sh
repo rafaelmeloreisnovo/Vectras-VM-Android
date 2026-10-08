@@ -108,4 +108,15 @@ for pattern in "${workflow_patterns[@]}"; do
   fi
 done
 
+# Behavioral falsifiers run in a HOSTED test harness; the included VCAT
+# production unit remains freestanding and calls no hosted API itself.
+vcat_test="${repo_root}/tools/ci/vcat_tar_guard_selftest.c"
+[[ -f "${vcat_test}" ]] || { echo "missing ${vcat_test}" >&2; exit 1; }
+vcat_test_dir="$(mktemp -d)"
+trap 'rm -rf -- "${vcat_test_dir}"' EXIT
+"${CC:-cc}" -std=c11 -O2 -Wall -Wextra -Werror -Wshadow -pedantic \
+  -ffreestanding -fno-builtin "${vcat_test}" -o "${vcat_test_dir}/vcat-tar-selftest"
+"${vcat_test_dir}/vcat-tar-selftest"
+echo "[verify-freestanding] vcat-tar adverse-path and octal tests PASS (host harness)"
+
 echo "[verify-freestanding] ok"

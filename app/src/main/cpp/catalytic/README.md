@@ -91,12 +91,13 @@ The bootstrap frontier now also contains `vcat_bootstrap.inc` +
 memory and emits numeric metadata only:
 
 - ustar structural recognition;
+- ustar unsigned header checksum validation (8 checksum bytes treated as spaces);
 - octal mode and bounded 32-bit size parsing;
 - regular-file / directory / symlink typing;
 - path traversal rejection for absolute paths and whole `..` components;
 - symlink-target safety classification;
 - deterministic path/link digests;
-- `VCAT_TAR_F_READY` only when the structural and safety gates are satisfied.
+- `VCAT_TAR_F_READY` only when checksum, structural and declared safety gates are satisfied. The TAR header checksum detects accidental/header tampering but is not a cryptographic signature; a ready header alone does not authorize archive extraction, symlink traversal or release promotion.
 
 This removes TAR **interpretation/policy** from the hosted boundary. It does not
 yet remove the hosted extractor: creating files, chmod/symlink and process launch
