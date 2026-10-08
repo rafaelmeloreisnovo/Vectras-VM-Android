@@ -78,6 +78,32 @@ public class ZiprafCoreTest {
         assertEquals(56, ZiprafCore.HEADER_SIZE);
     }
 
+    private static void expectRejected(byte[] block) throws Exception {
+        try {
+            ZiprafCore.unpack(new byte[][]{block});
+            fail("Malformed ZIPRAF header must fail closed");
+        } catch (java.io.IOException expected) {
+            assertTrue(expected.getMessage().contains("ZIPRAF"));
+        }
+    }
+
+    @Test
+    public void testMalformedHeaderRejectedBeforeBodyAllocation() throws Exception {
+        byte[] valid = ZiprafCore.pack("bounded".getBytes(StandardCharsets.UTF_8))[0];
+        byte[] wrongVersion = valid.clone();
+        wrongVersion[4] = 2;
+        expectRejected(wrongVersion);
+        byte[] wrongShardCount = valid.clone();
+        wrongShardCount[8] = 2; // TOTAL_SHARDS offset, little endian
+        expectRejected(wrongShardCount);
+        byte[] wrongEncodedLength = valid.clone();
+        wrongEncodedLength[16] = (byte) 0xFF; // COMPRESSED_LEN offset
+        expectRejected(wrongEncodedLength);
+        byte[] wrongDecodedLength = valid.clone();
+        wrongDecodedLength[12] = (byte) 0xFF; // PAYLOAD_LEN offset
+        expectRejected(wrongDecodedLength);
+    }
+
     @Test
     public void testEmptyPayload() throws Exception {
         byte[] empty = new byte[0];
