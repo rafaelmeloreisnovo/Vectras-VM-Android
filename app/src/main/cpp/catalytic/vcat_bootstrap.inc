@@ -32,18 +32,27 @@ static int vcat_tar_component_safe(const vcat_u8 *p, vcat_u32 n) {
     if (p == (const vcat_u8 *)0 || n == 0u || p[0] == 0u) return 0;
     if (p[0] == (vcat_u8)'/') return 0;
 
-    while (i < n && p[i] != 0u) {
+    while (i < n) {
         const vcat_u8 c = p[i];
+        if (c == 0u) {
+            /* No hidden suffix after NUL in a fixed-width TAR field. */
+            while (++i < n) if (p[i] != 0u) return 0;
+            break;
+        }
         if (c == (vcat_u8)'/') {
-            if (component_len == 2u &&
-                component_first == (vcat_u8)'.' &&
-                component_second == (vcat_u8)'.') {
-                return 0;
-            }
+            /* A trailing slash is allowed for a directory entry; an empty
+             * interior segment or dot segment has ambiguous semantics. */
+            if (component_len == 0u ||
+                (component_len == 1u && component_first == (vcat_u8)'.') ||
+                (component_len == 2u &&
+                 component_first == (vcat_u8)'.' &&
+                 component_second == (vcat_u8)'.')) return 0;
             component_len = 0u;
             component_first = 0u;
             component_second = 0u;
         } else {
+            /* Reject control characters and alternate path separators. */
+            if (c < 32u || c == 127u || c == (vcat_u8)'\\') return 0;
             if (component_len == 0u) component_first = c;
             if (component_len == 1u) component_second = c;
             ++component_len;
@@ -51,11 +60,10 @@ static int vcat_tar_component_safe(const vcat_u8 *p, vcat_u32 n) {
         ++i;
     }
 
-    if (component_len == 2u &&
-        component_first == (vcat_u8)'.' &&
-        component_second == (vcat_u8)'.') {
-        return 0;
-    }
+    if ((component_len == 1u && component_first == (vcat_u8)'.') ||
+        (component_len == 2u &&
+         component_first == (vcat_u8)'.' &&
+         component_second == (vcat_u8)'.')) return 0;
     return 1;
 }
 
@@ -65,17 +73,19 @@ static int vcat_tar_parse_octal(const vcat_u8 *p,
     vcat_u32 i = 0u;
     vcat_u32 value = 0u;
     int saw_digit = 0;
+    int ended = 0;
 
     if (p == (const vcat_u8 *)0 || value_out == (vcat_u32 *)0) return 0;
 
     while (i < n) {
         const vcat_u8 c = p[i];
         if (c == 0u || c == (vcat_u8)' ') {
-            if (saw_digit) break;
+            if (saw_digit) ended = 1;
             ++i;
             continue;
         }
-        if (c < (vcat_u8)'0' || c > (vcat_u8)'7') return 0;
+        /* A second value after a NUL/space terminator is not valid octal. */
+        if (ended || c < (vcat_u8)'0' || c > (vcat_u8)'7') return 0;
         if (value > 0x1fffffffu) return 0;
         value = (value << 3) + (vcat_u32)(c - (vcat_u8)'0');
         saw_digit = 1;
