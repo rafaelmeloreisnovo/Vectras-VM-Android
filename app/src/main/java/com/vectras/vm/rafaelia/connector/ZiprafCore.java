@@ -277,7 +277,12 @@ public final class ZiprafCore {
                 new ByteArrayInputStream(compressed), inflater)) {
             byte[] buf = new byte[8192];
             int n;
-            while ((n = iis.read(buf)) != -1) baos.write(buf, 0, n);
+            while ((n = iis.read(buf)) != -1) {
+                if (n > expectedLen - baos.size()) {
+                    throw new IOException("ZIPRAF decoded data exceeds declared payload length");
+                }
+                baos.write(buf, 0, n);
+            }
         } finally {
             inflater.end();
         }
