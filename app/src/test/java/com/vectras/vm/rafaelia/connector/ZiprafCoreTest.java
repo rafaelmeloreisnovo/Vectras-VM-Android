@@ -21,7 +21,13 @@ public class ZiprafCoreTest {
     @Test
     public void testLargePayloadSharding() throws Exception {
         byte[] large = new byte[300 * 1024]; // 300KB > SHARD_MAX_BYTES(256KB)
-        for (int i = 0; i < large.length; i++) large[i] = (byte)(i ^ 0xAB);
+        // High-entropy deterministic bytes: a repeating 256-byte pattern would
+        // compress below the threshold and never exercise sharding.
+        int state = 0x13579bdf;
+        for (int i = 0; i < large.length; i++) {
+            state = state * 1664525 + 1013904223;
+            large[i] = (byte) (state >>> 24);
+        }
         byte[][] shards = ZiprafCore.pack(large);
         assertTrue("expected sharding", shards.length > 1);
         byte[] result = ZiprafCore.unpack(shards);
@@ -69,7 +75,7 @@ public class ZiprafCoreTest {
     @Test
     public void testHeaderSize() {
         // MAGIC(4)+VERSION(1)+FLAGS(1)+SHARD_ID(2)+TOTAL(2)+RESV(2)+PAYLEN(4)+COMPLEN(4)+SHA256(32)+CRC(4)
-        assertEquals(52, ZiprafCore.HEADER_SIZE);
+        assertEquals(56, ZiprafCore.HEADER_SIZE);
     }
 
     @Test
