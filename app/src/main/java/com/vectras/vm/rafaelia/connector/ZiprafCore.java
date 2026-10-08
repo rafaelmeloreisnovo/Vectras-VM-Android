@@ -112,26 +112,46 @@ public final class ZiprafCore {
         // Parse all shard headers and collect bodies
         byte[] expectedSha256 = null;
         int    origLen        = 0;
+        int    totalBodyLen   = 0;
         boolean compressed    = false;
         byte[][] bodies       = new byte[shards.length][];
 
         for (int i = 0; i < shards.length; i++) {
+            if (shards[i] == null) throw new IOException("null ZIPRAF shard " + i);
             BlockHeader h = parseHeader(shards[i]);
-            if (h.magic != MAGIC) throw new IOException("bad ZIPRAF magic at shard " + i);
-            validateCrc(shards[i], h);
-
+            if (h.magic != MAGIC || h.version != VERSION) {
+                throw new IOException("invalid ZIPRAF magic/version at shard " + i);
+            }
+            if ((h.flags & FLAG_SIGNED) == 0 ||
+                    (h.flags & ~(FLAG_COMPRESSED | FLAG_SHARDED | FLAG_SIGNED)) != 0) {
+                throw new IOException("invalid ZIPRAF flags at shard " + i);
+            }
+            if (h.totalShards != shards.length || h.shardId != i ||
+                    ((h.flags & FLAG_SHARDED) != 0) != (shards.length > 1)) {
+                throw new IOException("invalid ZIPRAF shard sequence at shard " + i);
+            }
+            if (h.payloadLen < 0 || h.payloadLen > MAX_PAYLOAD_BYTES ||
+                    h.compressedLen < 0 || h.compressedLen > SHARD_MAX_BYTES ||
+                    h.compressedLen != shards[i].length - HEADER_SIZE ||
+                    h.compressedLen > MAX_PAYLOAD_BYTES - totalBodyLen) {
+                throw new IOException("invalid ZIPRAF shard length at shard " + i);
+            }
             if (i == 0) {
                 expectedSha256 = h.sha256;
                 origLen        = h.payloadLen;
                 compressed     = (h.flags & FLAG_COMPRESSED) != 0;
+            } else if (h.payloadLen != origLen ||
+                    ((h.flags & FLAG_COMPRESSED) != 0) != compressed ||
+                    !MessageDigest.isEqual(h.sha256, expectedSha256)) {
+                throw new IOException("inconsistent ZIPRAF shard metadata at shard " + i);
             }
+            validateCrc(shards[i], h);
             bodies[i] = new byte[h.compressedLen];
             System.arraycopy(shards[i], HEADER_SIZE, bodies[i], 0, h.compressedLen);
+            totalBodyLen += h.compressedLen;
         }
 
-        // Reassemble body
-        int totalBodyLen = 0;
-        for (byte[] b : bodies) totalBodyLen += b.length;
+        // Reassemble bounded body
         byte[] fullBody = new byte[totalBodyLen];
         int pos = 0;
         for (byte[] b : bodies) {
@@ -140,6 +160,9 @@ public final class ZiprafCore {
         }
 
         byte[] result = compressed ? decompress(fullBody, origLen) : fullBody;
+        if (result.length != origLen) {
+            throw new IOException("ZIPRAF decoded length mismatch");
+        }
 
         // Verify signature
         byte[] actualSha256 = sha256(result);
