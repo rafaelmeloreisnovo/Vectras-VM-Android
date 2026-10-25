@@ -55,3 +55,10 @@ Em `tools/`: `arena/`, `audit/`, `bootstrap/`, `ci/`, `compliance/`, `device_run
 **F_next**: gerar manifesto recursivo no repositório, comparar links e referências com o HEAD exato, classificar arquivos sem dono e executar teste negativo de link quebrado; anexar receipt e manter PR em HOLD.
 
 **Rollback**: descartar somente esta branch de revisão (sem apagar branches históricas) ou reverter exclusivamente o novo documento e ponteiro; nunca excluir fontes, licenças ou registros autorais. `claim_allowed=false`.
+
+## Sucessor S2 — capacidade operacional e índice local (2026-10-25)
+
+- [Índice funcional confirmado](../tools/ci/README.md): funções, entradas/saídas documentadas e riscos, sem execução presumida.
+- [Verificador determinístico](../tools/doc_ref_integrity_gate.py), [testes negativos](../tools/test_doc_ref_integrity_gate.py) e [workflow de CI](../.github/workflows/rafaelia-docs-integrity-v1.yml).
+- O gate fornece estado JSON (PASS_SCOPED/FAIL_SCOPED) para links Markdown locais e censo de diretórios raiz sem índice direto. É **heurístico**, não prova de abandono, segurança, autoria ou certificação; referências HTML/anchors fora do escopo.
+- Verificação depende de execução hospedada no SHA exato; proteção do provedor e revisão humana continuam obrigatórias. `claim_allowed=false` e `PROMOTION=HOLD`.
