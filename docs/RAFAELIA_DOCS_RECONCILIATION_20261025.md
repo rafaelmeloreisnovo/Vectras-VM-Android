@@ -1,5 +1,8 @@
 # RAFAELIA — Reconciliação documental do Vectras (2026-10-25)
 
+> **Censo completo da raiz:** [arquivos soltos e todos os diretórios de primeiro nível](RAFAELIA_ROOT_CENSUS_20261025.md) — contagem por pasta, SHA Git e locais sem índice. Este mapa complementa o inventário recursivo `tools/` ou `scripts/`; não autoriza exclusões.
+
+
 > **Estado: DRAFT / HOLD / SOURCE-INDEXED.** Este documento é um sucessor de navegação, não substitui nem apaga `DOC_INDEX.md`, `PROJECT_STATE.md`, `tools/FILES_MAP.md`, políticas de licença ou histórico. O README e os relatórios antigos continuam sendo fontes datadas, não prova automática do HEAD atual.
 
 ## Corte de origem e limites
