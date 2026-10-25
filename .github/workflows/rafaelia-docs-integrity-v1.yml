@@ -26,6 +26,6 @@ jobs:
             --file README.md \
             --file DOC_INDEX.md \
             --file docs/RAFAELIA_DOCS_RECONCILIATION_20261025.md \
-            --file docs/RAFAELIA_ROOT_CENSUS_20261025.md
+            --file docs/RAFAELIA_ROOT_CENSUS_20261025.md --file tools/ci/README.md
       - name: Historical Markdown audit (nonblocking inventory)
         run: python3 tools/doc_ref_integrity_gate.py --all --audit-only
