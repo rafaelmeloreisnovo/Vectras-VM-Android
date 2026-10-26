@@ -1,5 +1,7 @@
 <!-- DOC_TAXONOMY_SYNC: 2026-06-08 | role: institutional-operational-entry -->
 
+> **Sucessor documental — 25/10/2026 (DRAFT/HOLD):** [Inventário e reconciliação por HEAD exato](docs/RAFAELIA_DOCS_RECONCILIATION_20261025.md). As declarações históricas abaixo continuam preservadas; verificar execução e validade por SHA antes de reutilizá-las.
+
 # Vectras VM Android
 
 **Estado:** `ACTIVE`  

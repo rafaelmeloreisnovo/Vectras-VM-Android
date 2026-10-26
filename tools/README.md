@@ -1,5 +1,7 @@
 <!-- DOC_ORG_SCAN: 2026-04-07 | source-scan: pending-manual-by-domain -->
 
+> **Atualização do mapa — 25/10/2026 (DRAFT/HOLD):** [Reconciliação de ferramentas e diretórios](../docs/RAFAELIA_DOCS_RECONCILIATION_20261025.md). A árvore `tools/` no corte `master@6e4d99c8d90a3a1ddcb68933c693815d7c6e847b` contém 468 arquivos e 47 diretórios internos, não apenas as três famílias listadas na classificação histórica abaixo. Famílias adicionais confirmadas: `ci/`, `bootstrap/`, `qemu/`, `device_runtime/`, `arena/`, `zipraf/`, `state_geometry_lab/`, `skills/`, `math/` e `security/`. Cada item ainda exige evidência funcional própria.
+
 # tools/
 
 ## Camada 1 — Propósito do diretório

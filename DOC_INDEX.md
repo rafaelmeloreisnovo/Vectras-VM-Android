@@ -1,5 +1,7 @@
 <!-- DOC_TAXONOMY_SYNC: 2026-06-09 | role: global-complete-index -->
 
+> **Sucessor de navegação — 2026-10-25 · DRAFT/HOLD:** [censo integral da raiz e lacunas por Git HEAD](docs/RAFAELIA_DOCS_RECONCILIATION_20261025.md). Este índice segue preservado como fotografia histórica até verificação individual dos alvos e status.
+
 # Índice global de documentação — Vectras VM Android
 
 ## Metadados canônicos
