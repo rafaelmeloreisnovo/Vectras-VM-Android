@@ -84,6 +84,8 @@ public final class NativeFastPath {
     private static final int ENTERPRISE_URGENT_COUNT = 5;
     private static final int ENTERPRISE_COMPLEMENTARY_COUNT = 14;
     private static final int RAW_TELEMETRY_LONG_COUNT = 11;
+    // JNI result: 5 legacy routing words plus 4 BitOmega extension words.
+    private static final int NATIVE_ROUTE_WORDS = 9;
 
     private static final HardwareProfile BOOT_PROFILE;
 
@@ -992,7 +994,7 @@ public final class NativeFastPath {
             return new long[]{0L, 0L, 0L, (m00 * m11) - (m01 * m10), 0L};
         }
         long[] route = nativeProcessRoute(cpuCycles, storageReadBytes, storageWriteBytes, inputBytes, outputBytes, m00, m01, m10, m11);
-        if (route != null && route.length == 5) {
+        if (route != null && route.length == NATIVE_ROUTE_WORDS) {
             telemetryNativeHit();
             return route;
         }
