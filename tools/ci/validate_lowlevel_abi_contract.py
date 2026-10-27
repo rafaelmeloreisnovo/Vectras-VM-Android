@@ -150,8 +150,48 @@ def main() -> int:
         if violations:
             return fail("; ".join(violations))
 
+    # JNI is hosted; this gate only checks cross-boundary arity and does not
+    # classify the JNI adapter itself as freestanding or prove device execution.
+    jni_path = ROOT / "app" / "src" / "main" / "cpp" / "vectra_core_accel.c"
+    java_path = ROOT / "app" / "src" / "main" / "java" / "com" / "vectras" / "vm" / "core" / "NativeFastPath.java"
+    if not jni_path.is_file() or not java_path.is_file():
+        return fail("missing JNI route producer or Java consumer")
+
+    native_text = jni_path.read_text(encoding="utf-8")
+    java_text = java_path.read_text(encoding="utf-8")
+    native_route = re.search(
+        r"\bJNIEXPORT\s+jlongArray\s+JNICALL\s+"
+        r"Java_com_vectras_vm_core_NativeFastPath_nativeProcessRoute\s*"
+        r"\([^)]*\)\s*\{(?P<body>.*?)\}\s*(?=JNIEXPORT|\Z)",
+        native_text, re.DOTALL,
+    )
+    if not native_route:
+        return fail("nativeProcessRoute JNI export not found")
+    body = native_route.group("body")
+    words = re.search(r"\bjlong\s+out\s*\[\s*(\d+)\s*\]\s*=", body)
+    allocated = re.search(r"->NewLongArray\s*\(\s*env\s*,\s*(\d+)\s*\)", body)
+    copied = re.search(
+        r"->SetLongArrayRegion\s*\(\s*env\s*,\s*arr\s*,\s*0\s*,\s*(\d+)\s*,\s*out\s*\)",
+        body,
+    )
+    counts = [int(match.group(1)) for match in (words, allocated, copied) if match]
+    if len(counts) != 3 or len(set(counts)) != 1:
+        return fail(f"native route array/allocation/copy cardinality mismatch: {counts}")
+
+    # First five words remain readable by existing VectraCore clients;
+    # four extension words must not be silently discarded by the JNI bridge.
+    declared = re.findall(r"\bNATIVE_ROUTE_WORDS\s*=\s*(\d+)\s*;", java_text)
+    if len(declared) != 1 or int(declared[0]) != counts[0]:
+        return fail(f"Java JNI route arity {declared} differs from C producer {counts[0]}")
+    if not re.search(
+        r"if\s*\(\s*route\s*!=\s*null\s*&&\s*"
+        r"route\.length\s*==\s*NATIVE_ROUTE_WORDS\s*\)",
+        java_text,
+    ):
+        return fail("Java must validate the native route array against NATIVE_ROUTE_WORDS")
+
     print(
-        "LOWLEVEL_ABI_CONTRACT_OK: schema=2.0.0, arm64 mandatory, armv7 optional-internal, exports stable, critical layer without implicit libc/stdlib"
+        "LOWLEVEL_ABI_CONTRACT_OK: schema=2.0.0, arm64 mandatory, armv7 optional-internal, exports stable, critical layer without implicit libc/stdlib, JNI route arity aligned"
     )
     return 0
 
