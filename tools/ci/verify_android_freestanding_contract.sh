@@ -119,4 +119,12 @@ trap 'rm -rf -- "${vcat_test_dir}"' EXIT
 "${vcat_test_dir}/vcat-tar-selftest"
 echo "[verify-freestanding] vcat-tar adverse-path and octal tests PASS (host harness)"
 
+# Hosted compiler/test process is separate from the freestanding header.
+vec2_test="${repo_root}/tools/ci/vectra_vec2_pack_selftest.c"
+[[ -f "${vec2_test}" ]] || { echo "missing ${vec2_test}" >&2; exit 1; }
+"${CC:-cc}" -std=c11 -O2 -Wall -Wextra -Werror -Wshadow -pedantic \
+  -ffreestanding -fno-builtin "${vec2_test}" -o "${vcat_test_dir}/vectra-vec2-selftest"
+"${vcat_test_dir}/vectra-vec2-selftest"
+echo "[verify-freestanding] Vectra vec2 unsigned pack vectors PASS (host harness)"
+
 echo "[verify-freestanding] ok"
