@@ -62,3 +62,7 @@ Em `tools/`: `arena/`, `audit/`, `bootstrap/`, `ci/`, `compliance/`, `device_run
 - [Verificador determinístico](../tools/doc_ref_integrity_gate.py), [testes negativos](../tools/test_doc_ref_integrity_gate.py) e [workflow de CI](../.github/workflows/rafaelia-docs-integrity-v1.yml).
 - O gate fornece estado JSON (PASS_SCOPED/FAIL_SCOPED) para links Markdown locais e censo de diretórios raiz sem índice direto. É **heurístico**, não prova de abandono, segurança, autoria ou certificação; referências HTML/anchors fora do escopo.
 - Verificação depende de execução hospedada no SHA exato; proteção do provedor e revisão humana continuam obrigatórias. `claim_allowed=false` e `PROMOTION=HOLD`.
+
+## Sucessor: contrato e esquema — 27/10/2026
+
+> **DRAFT/HOLD · Fonte pinada:** [Inventário de contratos, JSON Schema, autoridade e consumidores](../contracts/README.md). Superfícies contratuais não são provas de execução, certificação, compatibilidade sem adaptador ou autorização humana. Documentos de 25/10 preservados.
