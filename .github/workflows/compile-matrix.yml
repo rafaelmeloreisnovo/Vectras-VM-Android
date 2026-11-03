@@ -34,7 +34,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Validate lowlevel ABI contract (mandatory gate)
         run: ./tools/ci/validate_lowlevel_abi.sh
 
@@ -45,7 +45,7 @@ jobs:
     outputs:
       matrix_abis: ${{ steps.contract.outputs.matrix_abis }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - id: contract
         shell: bash
         run: |
@@ -82,7 +82,7 @@ jobs:
             profile: internal_4abi
             profile_channel: internal
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
 
       - name: Resolve canonical build versions

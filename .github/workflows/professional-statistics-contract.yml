@@ -30,6 +30,6 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Fail closed on heterogeneous reproducibility promotion
         run: python3 tools/ci/validate_professional_tools_statistics_contract.py

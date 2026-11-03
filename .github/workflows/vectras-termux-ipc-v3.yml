@@ -32,7 +32,7 @@ jobs:
     timeout-minutes: 10
     steps:
       - name: Checkout exact revision with lineage
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
           persist-credentials: false
@@ -74,7 +74,7 @@ jobs:
           PY
 
       - name: Checkout pinned Termux source baseline
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           repository: ${{ steps.provider-provenance.outputs.repository }}
           ref: ${{ steps.provider-provenance.outputs.source_ref }}
@@ -83,7 +83,7 @@ jobs:
           persist-credentials: false
 
       - name: Checkout Termux contract authority commit
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           repository: ${{ steps.provider-provenance.outputs.repository }}
           ref: ${{ steps.provider-provenance.outputs.authority_ref }}

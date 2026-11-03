@@ -63,7 +63,7 @@ jobs:
       lane_label: ${{ steps.flags.outputs.lane_label }}
       expect_perf_results: ${{ steps.flags.outputs.expect_perf_results }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           lfs: true
 
@@ -218,7 +218,7 @@ jobs:
       contents: read
     needs: resolve
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           lfs: true
       - name: Validate lowlevel ABI contract (mandatory gate)
@@ -236,7 +236,7 @@ jobs:
       VECTRAS_RELEASE_KEY_ALIAS: ${{ secrets.VECTRAS_RELEASE_KEY_ALIAS }}
       VECTRAS_RELEASE_KEY_PASSWORD: ${{ secrets.VECTRAS_RELEASE_KEY_PASSWORD }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           lfs: true
 

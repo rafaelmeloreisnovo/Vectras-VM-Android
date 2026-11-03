@@ -20,7 +20,7 @@ jobs:
   static-contract:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Bash syntax
         run: bash -n tools/device_runtime/vectras_termux_beta_closure.sh
       - name: Help path

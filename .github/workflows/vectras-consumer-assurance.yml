@@ -19,7 +19,7 @@ jobs:
   assurance:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Validate execution-chain boundaries
         run: python3 tools/validate_vectras_consumer_assurance.py
       - name: Negative gate — DISPATCHED cannot imply guest boot
