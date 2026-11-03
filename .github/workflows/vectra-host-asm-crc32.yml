@@ -1,0 +1,57 @@
+name: VECTRA isolated x86-64 NASM CRC32 benchmark
+
+on:
+  pull_request:
+    paths:
+      - benchmark_x86_64_fixed.asm
+      - bench/VECTRA_X86_64_CRC32_BENCHMARK.md
+      - .github/workflows/vectra-host-asm-crc32.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  host-asm-crc32:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Checkout exact head
+        uses: actions/checkout@v4
+
+      - name: Install standalone assembler
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends nasm
+
+      - name: Assemble and link freestanding ELF64
+        run: |
+          set -euo pipefail
+          nasm -f elf64 benchmark_x86_64_fixed.asm -o benchmark_x86_64_fixed.o
+          ld -e main -z noexecstack benchmark_x86_64_fixed.o -o benchmark_x86_64_fixed
+          file benchmark_x86_64_fixed
+
+      - name: Execute runtime gate and capture receipt
+        run: |
+          set -euo pipefail
+          ./benchmark_x86_64_fixed | tee benchmark_x86_64_receipt.txt
+          grep -Fxq 'Samples: 56' benchmark_x86_64_receipt.txt
+          grep -Eq '^Mean cycles: [0-9]+$' benchmark_x86_64_receipt.txt
+          grep -Eq '^Stddev cycles \(floor\): [0-9]+$' benchmark_x86_64_receipt.txt
+          grep -Eq '^Min cycles: [0-9]+$' benchmark_x86_64_receipt.txt
+          grep -Eq '^Max cycles: [0-9]+$' benchmark_x86_64_receipt.txt
+          {
+            printf '\nCOMMIT=%s\n' "$GITHUB_SHA"
+            uname -a
+            nasm --version
+            ld --version | head -n 1
+            sha256sum benchmark_x86_64_fixed.asm benchmark_x86_64_fixed
+          } | tee -a benchmark_x86_64_receipt.txt
+
+      - name: Upload diagnostic receipt (not performance proof)
+        uses: actions/upload-artifact@v4
+        with:
+          name: vectra-asm-crc32-diagnostic
+          path: benchmark_x86_64_receipt.txt
+          retention-days: 7
