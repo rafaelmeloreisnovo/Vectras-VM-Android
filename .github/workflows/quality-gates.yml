@@ -34,6 +34,9 @@ jobs:
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
+        with:
+          # The perf ownership gate diffs exact base...head; shallow history fails closed.
+          fetch-depth: 0
 
       - name: Validate canonical workflow ownership and overlapping Android lanes
         run: python3 tools/ci/validate_build_matrix.py
