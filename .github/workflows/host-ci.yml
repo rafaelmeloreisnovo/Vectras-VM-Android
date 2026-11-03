@@ -199,7 +199,7 @@ jobs:
       - name: Upload host binaries (best effort)
         if: always()
         continue-on-error: true
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: host-engine-binaries-${{ github.run_id }}
           path: host-engine-artifacts.tar.gz
@@ -208,7 +208,7 @@ jobs:
       - name: Upload host reports (best effort)
         if: always()
         continue-on-error: true
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: host-ci-results
           path: |
@@ -229,7 +229,7 @@ jobs:
       - name: Upload host logs (best effort)
         if: always()
         continue-on-error: true
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: host-logs-${{ github.run_id }}
           path: |

@@ -77,7 +77,7 @@ jobs:
           cat reports/arm32-watermark/WATERMARK.txt
 
       - name: Upload ARM32 watermark evidence
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: arm32-watermark-${{ github.run_id }}
           path: reports/arm32-watermark/**
@@ -122,7 +122,7 @@ jobs:
             --lane-label debug-internal-arm32-arm64
 
       - name: Upload ARM32 E2E attestation bundle
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: arm32-e2e-attestation-${{ github.run_id }}
           path: arm32-e2e-artifacts/**
