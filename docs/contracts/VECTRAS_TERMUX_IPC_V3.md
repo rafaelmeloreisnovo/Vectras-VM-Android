@@ -171,3 +171,34 @@ O C07 só fecha após:
 7. request/receipt hashes reconciliados.
 
 Guest boot pertence ao C08 e permanece separado.
+## Aditivo VECTRA_APT_STAGE_20261103 — gate de manutenção
+
+Esta alteração **não muda o protocolo IPC v3** ou os nomes de serviços.
+A sequência de reparo passa a incluir um teste de APT antes de PRoot:
+
+```text
+BOOTSTRAP → REFRESH → VECTRAS_QEMU → PROBE → APT_VERIFY
+→ PROOT_VERIFY → NINJA_VERIFY → QEMU_VERIFY → COMPLETE
+```
+
+APT_VERIFY envia ao produtor Termux um pedido **fixo e delimitado**:
+
+```text
+rafproot-fs --run apt-get --version
+```
+
+A conclusão depende de receipt local correspondente à transação corrente,
+bundle presente, erro interno do Termux igual a zero e código de saída zero.
+O novo estado persistido usa o nome APT_VERIFY_PENDING e mantém a
+proteção contra recibos antigos/fora de ordem.
+
+**Limite:** apt-get --version não comprova instalação, downloads, assinatura
+de repositórios, operação offline, integridade de pacotes, bootstrap real
+ou desempenho. Essas evidências continuam TOKEN_VAZIO_NOT_RUN. O
+instalador real permanece de autoridade do repositório Termux, e o
+hotfix de sanitização do executável é independente (Termux PR #518,
+DRAFT/HOLD, ainda não promovido).
+
+**Rollback:** fechar o PR do consumidor ou reverter apenas sua alteração
+após revisão. Sem merge automático, alteração de APK, fluxo de release,
+segredos ou bypass de proteções. claim_allowed=false.
