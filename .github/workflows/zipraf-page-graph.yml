@@ -26,6 +26,6 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Compile and run ZIPRAF page graph KAT
         run: sh tools/zipraf/test_zipraf_page_graph.sh

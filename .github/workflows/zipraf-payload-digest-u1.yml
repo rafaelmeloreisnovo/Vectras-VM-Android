@@ -27,10 +27,10 @@ jobs:
     timeout-minutes: 10
     steps:
       - name: Checkout ZIPRAF producer
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Checkout pinned BLAKE3 provider
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           repository: rafaelmeloreisnovo/BLAKE3
           ref: ff6991d8b13f5b4b16dc311b5acc9c63ae835152

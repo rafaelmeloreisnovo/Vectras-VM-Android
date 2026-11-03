@@ -72,7 +72,7 @@ jobs:
       run_arm64:       ${{ steps.targets.outputs.run_arm64 }}
       run_arm32_arm64: ${{ steps.targets.outputs.run_arm32_arm64 }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Read versions from gradle.properties
         id: ver
@@ -115,7 +115,7 @@ jobs:
     needs: setup
     if: needs.setup.outputs.run_arm64 == 'true'
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           lfs: true
 
@@ -224,7 +224,7 @@ jobs:
     needs: setup
     if: needs.setup.outputs.run_arm32_arm64 == 'true'
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           lfs: true
 
