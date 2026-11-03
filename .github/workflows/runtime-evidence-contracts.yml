@@ -67,7 +67,7 @@ jobs:
             echo "${env_name}=${value}" >> "$GITHUB_ENV"
           done
 
-      - uses: actions/setup-java@v4
+      - uses: actions/setup-java@v6
         with:
           java-version: '21'
           distribution: temurin
