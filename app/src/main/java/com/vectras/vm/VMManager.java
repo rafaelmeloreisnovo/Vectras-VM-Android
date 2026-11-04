@@ -156,6 +156,10 @@ public class VMManager {
         String key = normalizeVmLifecycleId(vmId);
         ProcessSupervisor supervisor = SUPERVISORS.get(key);
         if (supervisor == null) {
+            if (process != null && process.isAlive()) {
+                Log.w(TAG, "unregister refused: live detached process key=" + key);
+                return;
+            }
             VM_STATES.put(key, VmRuntimeState.STOPPED);
             ProcessBudgetRegistry.releaseByProcess(process, key, ProcessRuntimeOps.safePid(process));
             return;
@@ -164,9 +168,14 @@ public class VMManager {
         if (process != null && !supervisor.isBoundTo(process)) {
             return;
         }
+        if (supervisor.isProcessAlive()) {
+            Log.w(TAG, "unregister refused: supervised process still alive key=" + key);
+            return;
+        }
 
         SUPERVISORS.remove(key, supervisor);
         VM_STATES.put(key, VmRuntimeState.STOPPED);
+        releaseSlotForKey(key, "unregister_confirmed_exit");
         ProcessBudgetRegistry.releaseByProcess(process, key, ProcessRuntimeOps.safePid(process));
     }
 
@@ -185,15 +194,11 @@ public class VMManager {
         if (process == null) return;
         long processPid = ProcessRuntimeOps.safePid(process);
         int maxBudget = getMaxSupervisedVmProcesses();
-        ProcessBudgetRegistry.BudgetToken budgetToken = ProcessBudgetRegistry.acquire(
-                "vm_process",
-                "register",
-                resolveBudgetCaller(),
-                vmId,
-                processPid,
-                maxBudget
-        );
-        if (budgetToken == null) {
+        // Exactly one budget reservation per process; double acquisition
+        // could reject a VM even when a single slot was available.
+        ProcessBudgetRegistry.SlotToken slot = ProcessBudgetRegistry.tryAcquireSlot(
+                "vm_process", "register", resolveBudgetCaller(), vmId);
+        if (slot == null) {
             safeTerminateDetachedProcess(process);
             Log.w(TAG, "registerVmProcess rejected: budget acquire denied (" + maxBudget + ") vmId=" + vmId);
             return;
@@ -217,7 +222,7 @@ public class VMManager {
         if (current != null && current.isBoundTo(process) && current.isProcessAlive()) {
             VM_STATES.put(key, VmRuntimeState.RUNNING);
             VmFlowTracker.mark(context, key, VmFlowState.RUNNING, "process_already_bound", "run");
-            ProcessBudgetRegistry.release(budgetToken, key, processPid);
+            ProcessBudgetRegistry.releaseSlot(slot, "register_rejected");
             return;
         }
 
@@ -225,7 +230,7 @@ public class VMManager {
             if (current != null && current.isProcessAlive()) {
                 safeTerminateDetachedProcess(process);
                 Log.w(TAG, "registerVmProcess rejected: vm lifecycle busy for key=" + key + " state=" + state);
-                ProcessBudgetRegistry.release(budgetToken, key, processPid);
+                ProcessBudgetRegistry.releaseSlot(slot, "register_rejected");
                 return;
             }
             VM_STATES.put(key, VmRuntimeState.STOPPED);
@@ -238,30 +243,26 @@ public class VMManager {
             if (previous.isBoundTo(process) && previous.isProcessAlive()) {
                 SUPERVISORS.put(key, previous);
                 VM_STATES.put(key, VmRuntimeState.RUNNING);
-                ProcessBudgetRegistry.release(budgetToken, key, processPid);
+                ProcessBudgetRegistry.releaseSlot(slot, "register_rejected");
                 return;
             }
-            previous.stopGracefully(false);
+            boolean previousStopped = previous.stopGracefully(false);
+            if (!previousStopped || previous.isProcessAlive()) {
+                SUPERVISORS.put(key, previous);
+                VM_STATES.put(key, VmRuntimeState.RUNNING);
+                safeTerminateDetachedProcess(process);
+                ProcessBudgetRegistry.releaseSlot(slot, "previous_process_alive");
+                Log.w(TAG, "replacement refused: prior process still alive key=" + key);
+                return;
+            }
+            releaseSlotForKey(key, "previous_process_stopped");
         }
 
         if (!ensureSupervisorCapacity()) {
             VM_STATES.put(key, VmRuntimeState.STOPPED);
             safeTerminateDetachedProcess(process);
             Log.w(TAG, "registerVmProcess rejected: active supervisor cap reached (" + getMaxSupervisedVmProcesses() + ")");
-            ProcessBudgetRegistry.release(budgetToken, key, processPid);
-            return;
-        }
-
-        ProcessBudgetRegistry.SlotToken slot = ProcessBudgetRegistry.get().tryAcquireSlot(
-                "vm_process",
-                "vm_manager",
-                "VMManager.registerVmProcess",
-                key
-        );
-        if (slot == null) {
-            VM_STATES.put(key, VmRuntimeState.STOPPED);
-            safeTerminateDetachedProcess(process);
-            Log.w(TAG, "registerVmProcess rejected: process budget full key=" + key);
+            ProcessBudgetRegistry.releaseSlot(slot, "register_rejected");
             return;
         }
 
@@ -272,14 +273,13 @@ public class VMManager {
             SUPERVISORS.put(key, supervisor);
             SUPERVISOR_SLOTS.put(key, slot);
             VM_STATES.put(key, VmRuntimeState.RUNNING);
-            ProcessBudgetRegistry.bind(budgetToken, process, key, processPid);
             VmFlowTracker.mark(context, key, VmFlowState.RUNNING, "process_bound", "run");
             spawnProcessExitWatcher(key, supervisor, process);
         } catch (RuntimeException registerError) {
             VM_STATES.put(key, VmRuntimeState.STOPPED);
             ProcessBudgetRegistry.get().releaseSlot(slot, "register_exception");
             safeTerminateDetachedProcess(process);
-            ProcessBudgetRegistry.release(budgetToken, key, processPid);
+            ProcessBudgetRegistry.releaseSlot(slot, "register_rejected");
             String errorMessage = "registerVmProcess recoverable failure: key=" + key
                 + " vmId=" + vmId
                 + " message=" + registerError.getMessage();
@@ -308,8 +308,14 @@ public class VMManager {
         if (active == null || active != supervisor || !active.isBoundTo(process)) {
             return;
         }
+        // An interrupted exit watcher does not prove that the child exited.
+        if (process != null && process.isAlive()) {
+            Log.w(TAG, "exit watcher returned while process still alive key=" + key);
+            return;
+        }
         SUPERVISORS.remove(key, supervisor);
         VM_STATES.put(key, VmRuntimeState.STOPPED);
+        releaseSlotForKey(key, "exit_watcher_confirmed");
         ProcessBudgetRegistry.releaseByProcess(process, key, ProcessRuntimeOps.safePid(process));
     }
 
@@ -334,7 +340,8 @@ public class VMManager {
         for (String key : SUPERVISORS.keySet()) {
             ProcessSupervisor supervisor = SUPERVISORS.get(key);
             if (supervisor == null) continue;
-            if (!supervisor.isProcessAlive() || supervisor.getState() == ProcessSupervisor.State.STOP) {
+            // The process liveness check is authoritative over a stale STOP label.
+            if (!supervisor.isProcessAlive()) {
                 SUPERVISORS.remove(key, supervisor);
                 VM_STATES.put(key, VmRuntimeState.STOPPED);
                 releaseSlotForKey(key, "prune_inactive");
@@ -367,11 +374,15 @@ public class VMManager {
         }
 
         if (oldest != null) {
-            oldest.stopGracefully(false);
-            SUPERVISORS.remove(oldestKey, oldest);
-            if (oldestKey != null) {
-                VM_STATES.put(oldestKey, VmRuntimeState.STOPPED);
-                releaseSlotForKey(oldestKey, "capacity_eviction");
+            boolean stopped = oldest.stopGracefully(false);
+            if (stopped && !oldest.isProcessAlive()) {
+                SUPERVISORS.remove(oldestKey, oldest);
+                if (oldestKey != null) {
+                    VM_STATES.put(oldestKey, VmRuntimeState.STOPPED);
+                    releaseSlotForKey(oldestKey, "capacity_eviction_confirmed");
+                }
+            } else {
+                Log.w(TAG, "capacity eviction refused: oldest process still alive key=" + oldestKey);
             }
         }
 
