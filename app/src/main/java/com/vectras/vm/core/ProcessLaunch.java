@@ -195,9 +195,12 @@ public final class ProcessLaunch {
             boolean stdoutDrained = joinCollector(stdoutThread);
             boolean stderrDrained = joinCollector(stderrThread);
             if (!stdoutDrained || !stderrDrained) {
+                // Preserve the timeout classification even when a descendant retains a log pipe.
+                LaunchStatus status = waitResult.timedOut ? LaunchStatus.TIMEOUT : LaunchStatus.ERROR;
                 return new LaunchResult(
-                        LaunchStatus.ERROR, -1, waitResult.timedOut,
-                        "stream_collector_drain_incomplete", feature, tag, caller, registryId, category);
+                        status, waitResult.exitCode, waitResult.timedOut,
+                        "stream_collector_drain_incomplete:" + waitResult.message,
+                        feature, tag, caller, registryId, category);
             }
 
             LaunchStatus launchStatus = mapStatus(waitResult);
