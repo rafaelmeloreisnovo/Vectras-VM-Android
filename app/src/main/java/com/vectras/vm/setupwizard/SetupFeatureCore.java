@@ -893,7 +893,8 @@ public class SetupFeatureCore {
 
         // Step 2: Run tar extraction
         if (isCompleted) {
-            String[] cmdline = {"tar", "xf", extractedTarPath.toString(), "-C", extractTargetPath.toString()};
+            String[] cmdline = SetupProcessIntegration.buildOwnerSafeTarExtractionCommand(
+                    extractedTarPath.toString(), extractTargetPath.toString());
             try {
                 // Security note: ProcessBuilder receives each token separately. There is no shell invocation here.
                 ProcessBuilder processBuilder = new ProcessBuilder(cmdline);
