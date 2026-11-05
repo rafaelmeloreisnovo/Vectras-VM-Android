@@ -14,6 +14,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.util.Locale;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * Wrapper para start/wait/register/unregister com orçamento de execução por categoria.
@@ -21,6 +22,8 @@ import java.util.Locale;
 public final class ProcessLaunch {
 
     private static final String TAG = "ProcessLaunch";
+    private static final long COLLECTOR_JOIN_BOUND_MS = 1_000L;
+    private static final AtomicLong REGISTRY_SEQUENCE = new AtomicLong();
 
     public enum LaunchStatus {
         SUCCESS,
@@ -116,10 +119,12 @@ public final class ProcessLaunch {
         public synchronized void close() {
             if (closed) return;
             closed = true;
-            VMManager.unregisterVmProcess(registryId, process);
-            if (process != null && process.isAlive()) {
-                process.destroy();
+            if (process != null && process.isAlive()
+                    && !ProcessRuntimeOps.stopProcessWithTimeout(process, 250L, 250L)) {
+                Log.w(TAG, "LaunchTicket close: process termination not confirmed id=" + registryId);
             }
+            // VMManager now keeps a still-alive process supervised rather than marking STOP.
+            VMManager.unregisterVmProcess(registryId, process);
         }
     }
 
@@ -187,8 +192,16 @@ public final class ProcessLaunch {
             }
 
             ProcessRuntimeOps.TimeoutExecutionResult waitResult = ProcessRuntimeOps.waitForByCategory(process, category);
-            joinCollector(stdoutThread);
-            joinCollector(stderrThread);
+            boolean stdoutDrained = joinCollector(stdoutThread);
+            boolean stderrDrained = joinCollector(stderrThread);
+            if (!stdoutDrained || !stderrDrained) {
+                // Preserve the timeout classification even when a descendant retains a log pipe.
+                LaunchStatus status = waitResult.timedOut ? LaunchStatus.TIMEOUT : LaunchStatus.ERROR;
+                return new LaunchResult(
+                        status, waitResult.exitCode, waitResult.timedOut,
+                        "stream_collector_drain_incomplete:" + waitResult.message,
+                        feature, tag, caller, registryId, category);
+            }
 
             LaunchStatus launchStatus = mapStatus(waitResult);
             return new LaunchResult(
@@ -216,10 +229,11 @@ public final class ProcessLaunch {
             );
         } finally {
             if (process != null) {
-                VMManager.unregisterVmProcess(registryId, process);
-                if (process.isAlive()) {
-                    process.destroy();
+                if (process.isAlive()
+                        && !ProcessRuntimeOps.stopProcessWithTimeout(process, 250L, 250L)) {
+                    Log.w(TAG, "ProcessLaunch finally: live process retained in supervisor id=" + registryId);
                 }
+                VMManager.unregisterVmProcess(registryId, process);
             }
         }
     }
@@ -284,18 +298,22 @@ public final class ProcessLaunch {
                 Log.w(TAG, "collector(" + label + ") failed: " + ioException.getMessage());
             }
         }, "process-launch-" + label + "-collector");
+        // A descendant may inherit a pipe: the collector must not pin app shutdown.
+        thread.setDaemon(true);
         thread.start();
         return thread;
     }
 
-    private static void joinCollector(Thread thread) {
+    private static boolean joinCollector(Thread thread) {
         if (thread == null) {
-            return;
+            return true;
         }
         try {
-            thread.join();
+            thread.join(COLLECTOR_JOIN_BOUND_MS);
+            return !thread.isAlive();
         } catch (InterruptedException interruptedException) {
             Thread.currentThread().interrupt();
+            return false;
         }
     }
 
@@ -305,8 +323,10 @@ public final class ProcessLaunch {
                                           @Nullable String vmOrRegistryId) {
         String stablePrefix = sanitize(feature) + "-" + sanitize(tag) + "-" + sanitize(caller);
         String vmPart = sanitize(vmOrRegistryId == null ? "none" : vmOrRegistryId);
-        String tsPart = Long.toHexString(ProcessRuntimeOps.wallMs() & 0xFFFFFL);
-        return stablePrefix + "-" + vmPart + "-" + tsPart;
+        String tsPart = Long.toHexString(ProcessRuntimeOps.wallMs());
+        // Wall clock can repeat across concurrent launches. Sequence gives each lease a unique key.
+        return stablePrefix + "-" + vmPart + "-" + tsPart
+                + "-" + Long.toHexString(REGISTRY_SEQUENCE.incrementAndGet());
     }
 
     private static String sanitize(String value) {
