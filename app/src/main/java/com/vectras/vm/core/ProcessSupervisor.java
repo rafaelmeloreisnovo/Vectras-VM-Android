@@ -75,7 +75,7 @@ public class ProcessSupervisor {
         DEGRADED,
         /** Sequência de fallback de parada em progresso. */
         FAILOVER,
-        /** Processo finalizado com sucesso, timeout ou ausência. */
+        /** Encerramento confirmado (não apenas solicitado). */
         STOP
     }
 
@@ -241,7 +241,9 @@ public class ProcessSupervisor {
 
                 running.destroyForcibly();
                 boolean killed = awaitExit(running, 2_000);
-                transition(State.FAILOVER, State.STOP, killed ? "kill_success" : "kill_timeout", 0, 0, stallMs, "kill");
+                // Do not advertise STOP while the target may still be alive.
+                transition(State.FAILOVER, killed ? State.STOP : State.DEGRADED,
+                        killed ? "kill_success" : "kill_timeout", 0, 0, stallMs, "kill");
                 stopped = killed;
                 return killed;
             } finally {
