@@ -4,7 +4,6 @@ import android.content.Context;
 import android.util.Log;
 
 import com.vectras.vm.VMManager;
-import com.vectras.vm.core.ProcessBudgetRegistry;
 import com.vectras.vm.core.ProcessRuntimeOps;
 import com.vectras.vm.core.ProcessRuntimeOps.ExecutionCategory;
 import com.vectras.vm.core.ProcessRuntimeOps.TimeoutExecutionResult;
@@ -75,7 +74,7 @@ public final class QemuDirectLauncher {
 
     private static void runLaunch(Context context, String vmId, QemuArgvContract contract) {
         Process process = null;
-        ProcessBudgetRegistry.SlotToken slot = null;
+        boolean launchFailed = false;
         try {
             String filesDir = context.getFilesDir().getAbsolutePath();
             ProotCommandBuilder proot = new ProotCommandBuilder(
@@ -122,53 +121,58 @@ public final class QemuDirectLauncher {
             proot.applyEnvironment(builder.environment());
             builder.command(proot.buildCommand(launchArgv));
 
-            slot = ProcessBudgetRegistry.tryAcquireSlot(
-                    "qemu-direct",
-                    "main-service-argv",
-                    "QemuDirectLauncher#runLaunch",
-                    vmId
-            );
-            if (slot == null) {
-                Log.e(TAG, "Direct QEMU launch blocked by process budget for vmId=" + vmId);
-                return;
-            }
-
             Log.i(TAG, "Dispatching direct QEMU argv: resolvedHash=" + evidence.resolvedLaunchArgvSha256
                     + " args=" + launchArgv.size());
             process = builder.start();
-            ProcessBudgetRegistry.bindProcess(slot, process);
             synchronized (Terminal.class) {
                 Terminal.qemuProcess = process;
             }
             Terminal.resetStreamingStopToken();
             VMManager.registerVmProcess(context, vmId, process);
+            if (!VMManager.isVmProcessRegistered(vmId, process)) {
+                throw new IOException("QEMU process registration rejected or process already exited");
+            }
 
             // Empty stdin command is intentional: QEMU is already part of ProcessBuilder argv.
             Terminal.streamLog("", process, false, null);
         } catch (Exception failure) {
+            launchFailed = true;
             Log.e(TAG, "Direct QEMU argv launch failed for vmId=" + vmId, failure);
             com.vectras.vm.logger.VectrasStatus.logError(
                     "<font color='red'>QEMU direct argv failed: "
                             + failure.getClass().getSimpleName() + "</font>"
             );
         } finally {
-            try {
-                VMManager.unregisterVmProcess(vmId, process);
-            } catch (Exception unregisterFailure) {
-                Log.w(TAG, "Unable to unregister direct QEMU process", unregisterFailure);
+            // A successful return from streamLog is not proof that QEMU exited.
+            // Only a failed launch path requests forced teardown; normal still-live
+            // sessions retain their VMManager supervisor and Terminal reference.
+            if (launchFailed && process != null && process.isAlive()) {
+                ProcessRuntimeOps.stopProcessWithTimeout(process, 500L, 500L);
             }
-            try {
-                com.vectras.vm.utils.FileUtils.closeFdsForVm(vmId);
-            } catch (Exception closeFailure) {
-                Log.w(TAG, "Unable to close VM file descriptors", closeFailure);
-            }
-            synchronized (Terminal.class) {
-                if (Terminal.qemuProcess == process) {
-                    Terminal.qemuProcess = null;
+            boolean confirmedExited = process == null || !process.isAlive();
+            if (confirmedExited) {
+                if (process != null) {
+                    try {
+                        VMManager.unregisterVmProcess(vmId, process);
+                    } catch (Exception unregisterFailure) {
+                        Log.w(TAG, "Unable to unregister direct QEMU process", unregisterFailure);
+                    }
                 }
+                try {
+                    com.vectras.vm.utils.FileUtils.closeFdsForVm(vmId);
+                } catch (Exception closeFailure) {
+                    Log.w(TAG, "Unable to close VM file descriptors", closeFailure);
+                }
+                synchronized (Terminal.class) {
+                    if (Terminal.qemuProcess == process) {
+                        Terminal.qemuProcess = null;
+                    }
+                }
+            } else {
+                Log.w(TAG, "QEMU still alive after launch stream/cleanup; retaining process supervision vmId=" + vmId);
             }
             VMManager.clearVmStarting(vmId);
-            ProcessBudgetRegistry.releaseSlot(slot, "qemu_direct_finally");
+            // No independent SlotToken: VMManager owns the single process budget reservation.
         }
     }
 

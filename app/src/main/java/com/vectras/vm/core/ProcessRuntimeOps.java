@@ -217,8 +217,16 @@ public final class ProcessRuntimeOps {
             }
             return TimeoutExecutionResult.success(process.exitValue(), label + "_exit");
         } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            return TimeoutExecutionResult.failed(label + "_interrupted");
+            // Interrupting a waiter must not abandon a live child process.
+            // InterruptedException clears the interrupted bit; restore it after bounded teardown.
+            boolean terminated;
+            try {
+                terminated = stopProcessWithTimeout(process, 250L, 250L);
+            } finally {
+                Thread.currentThread().interrupt();
+            }
+            return TimeoutExecutionResult.failed(
+                    label + (terminated ? "_interrupted_terminated" : "_interrupted_kill_pending"));
         } catch (IllegalThreadStateException e) {
             return TimeoutExecutionResult.failed(label + "_not_terminated");
         }

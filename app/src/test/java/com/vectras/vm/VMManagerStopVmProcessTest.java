@@ -160,6 +160,21 @@ public class VMManagerStopVmProcessTest {
     }
 
     @Test
+    public void isVmProcessRegisteredRequiresTheExactLiveProcess() throws Exception {
+        ConcurrentHashMap<String, ProcessSupervisor> map = supervisorsMap();
+        FakeExitingProcess process = new FakeExitingProcess();
+        VMManager.registerVmProcess(null, "vm-verified-registration", process);
+        Assert.assertTrue(VMManager.isVmProcessRegistered("vm-verified-registration", process));
+        Assert.assertFalse(VMManager.isVmProcessRegistered("vm-verified-registration", new FakeAliveProcess()));
+        Assert.assertFalse(VMManager.isVmProcessRegistered("unknown", process));
+        process.releaseExit();
+        for (int i = 0; i < 40 && map.containsKey("vm-verified-registration"); i++) {
+            Thread.sleep(25L);
+        }
+        Assert.assertFalse(VMManager.isVmProcessRegistered("vm-verified-registration", process));
+    }
+
+    @Test
     public void unregister_mustNotForgetAliveProcessUntilConfirmedExit() throws Exception {
         ConcurrentHashMap<String, ProcessSupervisor> map = supervisorsMap();
         FakeExitingProcess process = new FakeExitingProcess();

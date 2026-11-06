@@ -389,6 +389,16 @@ public class VMManager {
         return SUPERVISORS.size() < getMaxSupervisedVmProcesses();
     }
 
+    /**
+     * True only when the exact Process instance is still supervised and alive.
+     * Call after registration because registerVmProcess can reject capacity without throwing.
+     */
+    public static synchronized boolean isVmProcessRegistered(String vmId, Process process) {
+        if (process == null) return false;
+        ProcessSupervisor supervisor = SUPERVISORS.get(normalizeVmLifecycleId(vmId));
+        return supervisor != null && supervisor.isBoundTo(process) && supervisor.isProcessAlive();
+    }
+
     public static synchronized int getActiveSupervisedVmProcessCount() {
         pruneInactiveSupervisors();
         return SUPERVISORS.size();
