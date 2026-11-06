@@ -35,8 +35,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          # The perf ownership gate diffs exact base...head; shallow history fails closed.
+          # Enforce low-level gate diffs base...head; shallow checkout cannot resolve the merge base.
           fetch-depth: 0
+          persist-credentials: false
 
       - name: Validate canonical workflow ownership and overlapping Android lanes
         run: python3 tools/ci/validate_build_matrix.py
