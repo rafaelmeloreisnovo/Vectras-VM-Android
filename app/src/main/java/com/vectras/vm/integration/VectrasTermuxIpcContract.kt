@@ -82,6 +82,11 @@ object VectrasTermuxIpcContract {
             MAINTENANCE_RAFPROOT_PATH,
             listOf("--probe"),
         ),
+        APT_VERIFY(
+            MAINTENANCE_RAFPROOT_TARGET,
+            MAINTENANCE_RAFPROOT_PATH,
+            listOf("--run", "apt-get", "--version"),
+        ),
         PROOT_VERIFY(
             MAINTENANCE_RAFPROOT_TARGET,
             MAINTENANCE_RAFPROOT_PATH,
