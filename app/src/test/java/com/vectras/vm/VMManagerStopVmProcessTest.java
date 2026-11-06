@@ -1,6 +1,7 @@
 package com.vectras.vm;
 
 import com.vectras.vm.core.ProcessSupervisor;
+import com.vectras.vm.core.ProcessBudgetRegistry;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -151,6 +152,44 @@ public class VMManagerStopVmProcessTest {
     }
 
     @Test
+    public void prune_mustNotDropAliveSupervisorEvenWhenStateSaysStop() {
+        ConcurrentHashMap<String, ProcessSupervisor> map = supervisorsMap();
+        map.put("vm-live-stale-stop", new FakeAliveStopSupervisor());
+        Assert.assertEquals(1, VMManager.getActiveSupervisedVmProcessCount());
+        Assert.assertTrue(map.containsKey("vm-live-stale-stop"));
+    }
+
+    @Test
+    public void unregister_mustNotForgetAliveProcessUntilConfirmedExit() throws Exception {
+        ConcurrentHashMap<String, ProcessSupervisor> map = supervisorsMap();
+        FakeExitingProcess process = new FakeExitingProcess();
+        VMManager.registerVmProcess(null, "vm-unregister-live", process);
+        Assert.assertTrue(map.containsKey("vm-unregister-live"));
+
+        VMManager.unregisterVmProcess("vm-unregister-live", process);
+        Assert.assertTrue(map.containsKey("vm-unregister-live"));
+
+        process.releaseExit();
+        for (int i = 0; i < 40 && map.containsKey("vm-unregister-live"); i++) {
+            Thread.sleep(25L);
+        }
+        Assert.assertFalse(map.containsKey("vm-unregister-live"));
+    }
+
+    @Test
+    public void register_bindsExactlyOneSlotAndExitReleasesIt() throws Exception {
+        int baseline = ProcessBudgetRegistry.get().snapshot().activeCount;
+        FakeExitingProcess process = new FakeExitingProcess();
+        VMManager.registerVmProcess(null, "vm-one-budget-slot", process);
+        Assert.assertEquals(baseline + 1, ProcessBudgetRegistry.get().snapshot().activeCount);
+        process.releaseExit();
+        for (int i = 0; i < 40 && ProcessBudgetRegistry.get().snapshot().activeCount != baseline; i++) {
+            Thread.sleep(25L);
+        }
+        Assert.assertEquals(baseline, ProcessBudgetRegistry.get().snapshot().activeCount);
+    }
+
+    @Test
     public void stopVmProcess_shouldPruneStaleSupervisorWithoutStopCall() {
         ConcurrentHashMap<String, ProcessSupervisor> map = supervisorsMap();
         FakeStoppedProcessSupervisor supervisor = new FakeStoppedProcessSupervisor();
@@ -202,6 +241,27 @@ public class VMManagerStopVmProcessTest {
         @Override
         public synchronized boolean stopGracefully(boolean tryQmp) {
             return result;
+        }
+    }
+
+    private static final class FakeAliveStopSupervisor extends ProcessSupervisor {
+        FakeAliveStopSupervisor() {
+            super(null, "test-live-stale-stop");
+        }
+
+        @Override
+        public boolean isProcessAlive() {
+            return true;
+        }
+
+        @Override
+        public State getState() {
+            return State.STOP;
+        }
+
+        @Override
+        public synchronized boolean stopGracefully(boolean tryQmp) {
+            return false;
         }
     }
 
