@@ -8,6 +8,13 @@ final class SetupProcessIntegration {
     private SetupProcessIntegration() {
     }
 
+    // Android app-private files are owned by the app UID, not by uid 0 stored in the tar.
+    // -o prevents chown 0:0. Toybox (Android), BusyBox, and GNU tar support it on extract.
+    // Pass arguments separately: no shell, no interpretation of archive or destination paths.
+    static String[] buildOwnerSafeTarExtractionCommand(String archivePath, String destinationPath) {
+        return new String[] {"tar", "-o", "-x", "-f", archivePath, "-C", destinationPath};
+    }
+
     static String validateTarLaunchResult(ProcessLaunch.LaunchResult waitResult,
                                           String stderrSummary,
                                           String assetPath,
