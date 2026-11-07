@@ -39,6 +39,7 @@ int main(void) {
     CHECK(raf_opt_parse(0,1u,&h)==RAF_INVALID);
     CHECK(raf_opt_parse((const raf_u8 *)"x",65536u,&h)==RAF_INVALID);
     h.profile=RAF_OPT_STABLE;h.unroll=4u;
+    used=77u; /* sentinel for no-write-on-failure invariant */
     CHECK(raf_opt_emit_flags(&h,flags,4u,&used)==RAF_NO_SPACE &&
           used==77u);
     h.unroll=8u;
