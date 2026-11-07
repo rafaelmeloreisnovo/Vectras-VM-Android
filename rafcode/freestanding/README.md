@@ -165,3 +165,33 @@ and upstream PRoot licenses. Do not infer a verified compiler or end-to-end
 device proof from its finite host tests. Reference prior-art reading only:
 HINTPILOT arXiv:2604.15041; loop semantics arXiv:2602.19868; COMPILOT
 arXiv:2511.00592; none is copied into this MIT implementation.
+
+
+## V4: fail-closed C translation-phase guard + static codegen receipts
+
+Comment metadata is still an inert ordinary C comment except when explicitly
+interpreted by the host build adapter. `raf_opt_parse` now
+accepts the one exact annotation only **before any executable source token or
+preprocessor directive**, ignoring leading ordinary comments, and rejects C
+line-splices (`\` + LF/CRLF), trigraphs, and embedded NUL
+**anywhere** in its bounded source. This is intentionally stricter than
+accepting all legal C11 inputs: phase-1/2 translation and conditional
+preprocessing are *not implemented* in the scanner. Rejected files must be
+reviewed rather than guessed, silently normalized or passed to a shell.
+`RAF_TOKEN_VAZIO` remains distinct from malformed input.
+
+`ci/check_opt_codegen.sh` compiles the sample XOR kernel
+with GCC and Clang (the existing two jobs) at O2, Os and O3, unroll 1 and
+4. It captures host assembly and disassembly digests and exact
+`.text.raf_opt_xor_u32` size in bytes in the job log.
+In the Clang lane it also compiles and identifies ARMv7-A EABI and AArch64
+ELF objects for the same 3x2 configurations and records static assembly
+SHA-256/byte counts. No new CI matrix or runtime package was added.
+
+**Do not interpret differing assembly hashes or section sizes as a
+performance improvement or as proof the emitted loop was actually unrolled.**
+The emitted instructions, optimization effect and equivalence on a
+particular physical ARM device need disassembly review, comparable
+on-device benchmarks and independent falsifiers. All device and APK
+results remain `TOKEN_VAZIO` until they have their own
+receipts. Upstream GPL/PRoot ownership is unchanged.

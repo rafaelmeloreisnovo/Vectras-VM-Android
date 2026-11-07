@@ -38,15 +38,40 @@ static int raf_prefix(const raf_u8 *s, raf_u32 n, const char *prefix) {
     }
     return 1;
 }
+/* C11 translation phases precede comment lexing.  Restrict this
+ * metadata lane to unambiguous source without line-splices or trigraphs.
+ * Reject even when they occur inside a quoted literal or an unrelated
+ * comment: interpreting arbitrary preprocessing is out of scope. */
+static int raf_opt_phase_ambiguous(const raf_u8 *src, raf_u32 size) {
+    raf_u32 k;
+    for (k = 0u; k < size; ++k) {
+        raf_u8 c = src[k];
+        if (c == 0u) return 1;
+        if (c == 92u && k + 1u < size &&
+            (src[k+1u] == 10u ||
+             (src[k+1u] == 13u && k + 2u < size &&
+              src[k+2u] == 10u))) return 1;
+        if (c == 63u && k + 2u < size && src[k+1u] == 63u) {
+            raf_u8 tail = src[k+2u];
+            if (tail == 61u || tail == 47u || tail == 39u ||
+                tail == 40u || tail == 41u || tail == 33u ||
+                tail == 60u || tail == 62u || tail == 45u)
+                return 1;
+        }
+    }
+    return 0;
+}
 raf_status raf_opt_parse(const raf_u8 *src, raf_u32 size, raf_opt_hint *out) {
-    raf_u32 i = 0u, found = 0u;
+    raf_u32 i = 0u, found = 0u, code_seen = 0u;
     raf_opt_hint candidate = {0u,0u};
     if (!src || !out || size > 65535u) return RAF_INVALID;
+    if (raf_opt_phase_ambiguous(src,size)) return RAF_INVALID;
     while (i < size) {
         raf_u8 c = src[i];
         if (c == 0u) return RAF_INVALID;
         if (c == 34u || c == 39u) {
             raf_u8 quote = c;
+            code_seen = 1u;
             int closed = 0;
             ++i;
             while (i < size) {
@@ -75,7 +100,7 @@ raf_status raf_opt_parse(const raf_u8 *src, raf_u32 size, raf_opt_hint *out) {
             while (left < right && raf_space(src[left])) ++left;
             while (right > left && raf_space(src[right-1u])) --right;
             if (raf_prefix(src+left,right-left,"RAF_OPT:")) {
-                if (found) return RAF_INVALID;
+                if (found || code_seen) return RAF_INVALID;
                 for (k = 0u; k < 6u; ++k) {
                     if (raf_match(src+left,right-left,raf_rules[k].mark)) {
                         candidate.profile = raf_rules[k].profile;
@@ -94,6 +119,7 @@ raf_status raf_opt_parse(const raf_u8 *src, raf_u32 size, raf_opt_hint *out) {
             i += 2u;
             continue;
         }
+        if (!raf_space(c)) code_seen = 1u;
         ++i;
     }
     if (!found) return RAF_TOKEN_VAZIO;

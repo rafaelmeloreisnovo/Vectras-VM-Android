@@ -16,6 +16,9 @@ typedef struct {
  * Values: stable|size|speed; unroll: 1|4. Whitespace around
  * the marker is permitted. Unknown/duplicate markers fail closed.
  * Tokens in strings, characters and // line comments are ignored.
+ * The marker must precede any non-comment, non-space source token.
+ * C line splices, C trigraphs and embedded NUL are rejected anywhere
+ * (fail-closed: this bounded scanner is NOT a C preprocessor).
  * If no marker exists, return RAF_TOKEN_VAZIO; never infer defaults.
  * Output is unchanged on failure. Explicit bounded input; no libc. */
 raf_status raf_opt_parse(const raf_u8 *src, raf_u32 size, raf_opt_hint *out);
