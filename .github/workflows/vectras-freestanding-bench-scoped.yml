@@ -4,8 +4,13 @@ on:
   pull_request:
     paths:
       - 'app/src/main/cpp/core/raf_bench_probe.*'
+      - 'app/src/main/cpp/core/raf_runtime_elf.*'
+      - 'app/src/main/cpp/raf_runtime_elf_jni.c'
+      - 'app/src/main/java/com/vectras/vm/runtime/RuntimeAbiSnapshot.java'
+      - 'app/src/main/cpp/CMakeLists.txt'
       - 'app/src/main/cpp/raf_bench_jni.c'
       - 'tools/ci/test_raf_bench_probe.sh'
+      - 'tools/ci/test_raf_runtime_elf.sh'
       - 'tools/ci/verify_arm32_runtime_seed_apk.py'
       - 'tools/ci/test_verify_arm32_runtime_seed_apk.py'
       - '.github/workflows/vectras-freestanding-bench-scoped.yml'
@@ -26,6 +31,8 @@ jobs:
       - name: Verify isolated core object and vectors
         env:
           CC: ${{ matrix.cc }}
-        run: bash tools/ci/test_raf_bench_probe.sh
+        run: |
+          bash tools/ci/test_raf_bench_probe.sh
+          bash tools/ci/test_raf_runtime_elf.sh
       - name: Falsify missing/tampered ARMv7 APK seeds (synthetic)
         run: python3 tools/ci/test_verify_arm32_runtime_seed_apk.py
