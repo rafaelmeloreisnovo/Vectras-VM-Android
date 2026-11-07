@@ -97,3 +97,34 @@ handling. Linux `ptrace` privilege/capability, SELinux and Android limits
 cannot be removed by compiling freestanding or by inline assembly. A full
 PRoot replacement would need a separately engineered and validated tracing,
 register, signal, syscall and filesystem layer. Keep that gap typed.
+
+
+## Independent bitops lane (V2 additive, opt-in ARM instructions)
+
+`include/raf_bitops.h` + `src/raf_bitops.c` provide
+32-bit binary bit-reversal, 32-bit byte swapping, modulo-32 rotate-left and
+bounded big-endian 4-byte loads/stores. Inputs are explicit widths/lengths,
+without libc, heap, JNI, OS, syscalls, filesystem, PRoot or QEMU. The `void *`
+OS callback boundary is **unchanged** and this module does not call it.
+
+Default is the fully portable masked C implementation. Opting in to
+`-DRAF_ENABLE_ARM_BITOPS=1` uses auditable GNU/Clang
+inline `rbit` and `rev` assembly on ARMv7-A
+or AArch64 only (32-bit AArch64 register operands use `%w`).
+An incompatible target intentionally fails compilation. Raw instruction
+opcodes are **not** embedded: these depend on target ISA/ABI/endianness,
+must be assembled by the toolchain, and must not bypass architecture gates.
+
+The independent `ci/check_bitops.sh` tests each `-O2`,
+`-Os`, `-O3` profile, audits `nm -u`
+and a link-only final ELF (`-nostdlib -nostartfiles -nodefaultlibs`,
+zero `DT_NEEDED`), cross-compiles ARMv7/AArch64 opt-in
+ASM and verifies the expected emitted instructions plus a wrong-architecture
+negative test. The link probe **MUST NOT** be executed.
+
+CI remains two compiler jobs; no matrix fanout by profile and no new OS
+dependencies in the core. Profile labels express compiler optimization intent
+only, **not** a proven speedup. Execution on Moto E7 Power, runtime memory
+behavior, real syscall adapter and QEMU guest boot remain `TOKEN_VAZIO`.
+No existing JNI/Android/VM behavior is replaced. Root GPL-2.0, MIT scoped
+file notices and the official PRoot license boundary are preserved.
