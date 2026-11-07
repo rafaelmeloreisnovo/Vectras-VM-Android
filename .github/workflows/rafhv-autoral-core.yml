@@ -1,0 +1,35 @@
+# RAFHV scoped freestanding CI — no guest boot, APK, publication or artifact uploads.
+name: RAFHV authorial freestanding core
+on:
+  pull_request:
+    paths:
+      - 'hypervisor/autoral/**'
+      - '.github/workflows/rafhv-autoral-core.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  freestanding-host-and-arm32:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Checkout exact source
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5, Node 24
+        with:
+          persist-credentials: false
+      - name: Control and A32 tests on GCC
+        working-directory: hypervisor/autoral
+        run: make CC=gcc clean test audit
+      - name: Control and A32 tests on Clang
+        working-directory: hypervisor/autoral
+        run: make CC=clang clean test audit
+      - name: Check ARMv7 ELF freestanding codegen (not Android runtime)
+        working-directory: hypervisor/autoral
+        shell: bash
+        run: |
+          set -euo pipefail
+          clang --target=armv7a-none-eabi -std=c11 -O2 -Wall -Wextra -Werror -Wpedantic -ffreestanding -fno-builtin -fno-stack-protector -c rafhv.c -o build/rafhv-armv7.o
+          clang --target=armv7a-none-eabi -std=c11 -O2 -Wall -Wextra -Werror -Wpedantic -ffreestanding -fno-builtin -fno-stack-protector -c rafhv_a32.c -o build/rafhv_a32-armv7.o
+          file build/rafhv-armv7.o | tee /dev/stderr | grep -q 'ELF 32-bit.*ARM'
+          file build/rafhv_a32-armv7.o | tee /dev/stderr | grep -q 'ELF 32-bit.*ARM'
+          echo 'PASS_SCOPED: ARMv7 freestanding object generation only; device execution NOT_RUN'
