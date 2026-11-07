@@ -21,4 +21,6 @@ jobs:
         env:
           CC: ${{ matrix.compiler }}
           RAF_CROSS_CHECK: ${{ matrix.compiler == 'clang' && '1' || '0' }}
-        run: sh rafcode/freestanding/ci/check.sh
+        run: |
+          sh rafcode/freestanding/ci/check.sh
+          sh rafcode/freestanding/ci/check_bitops.sh
