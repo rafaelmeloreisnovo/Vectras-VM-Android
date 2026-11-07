@@ -32,6 +32,8 @@ import com.vectras.vm.R;
 import com.vectras.vm.SplashActivity;
 import com.vectras.vm.VectrasApp;
 import com.vectras.vm.settings.ThemeActivity;
+import com.vectras.vm.runtime.RuntimeAbiSnapshot;
+import com.vectras.vm.benchmark.FreestandingMicrobench;
 
 import java.util.Locale;
 import java.util.Objects;
@@ -186,6 +188,7 @@ public class MainSettingsManager extends AppCompatActivity
 
     public static class AppPreferencesFragment extends PreferenceFragmentCompat
             implements Preference.OnPreferenceChangeListener {
+        private boolean rafBenchRunning;
         @Override
         public void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
@@ -194,7 +197,10 @@ public class MainSettingsManager extends AppCompatActivity
         @Override
         public void onResume() {
             super.onResume();
-
+            Preference runtime = findPreference("rafRuntimeAbi");
+            if (runtime != null) {
+                runtime.setSummary(RuntimeAbiSnapshot.summary(requireContext()));
+            }
         }
 
         @Override
@@ -207,6 +213,28 @@ public class MainSettingsManager extends AppCompatActivity
         public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
             // Load the Preferences from the XML file
             setPreferencesFromResource(R.xml.settings, rootKey);
+            Preference microbench = findPreference("rafFreestandingMicrobench");
+            if (microbench != null) {
+                microbench.setOnPreferenceClickListener(preference -> {
+                    if (rafBenchRunning) return true;
+                    rafBenchRunning = true;
+                    preference.setEnabled(false);
+                    preference.setSummary("RUNNING: bounded native ALU test");
+                    new Thread(() -> {
+                        final String result = FreestandingMicrobench.runOnce();
+                        if (isAdded()) {
+                            requireActivity().runOnUiThread(() -> {
+                                if (!isAdded()) return;
+                                preference.setSummary(result);
+                                preference.setEnabled(true);
+                                rafBenchRunning = false;
+                            });
+                        }
+                    }, "VectrasFreestandingMicrobench").start();
+                    return true;
+                });
+            }
+
 
             CollapsingToolbarLayout collapsingToolbarLayout =
                     requireActivity().findViewById(R.id.collapsingToolbarLayout);
