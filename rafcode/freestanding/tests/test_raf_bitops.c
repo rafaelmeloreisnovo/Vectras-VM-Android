@@ -23,6 +23,7 @@ int main(void) {
     for (i = 0u; i < (raf_u32)(sizeof(samples)/sizeof(samples[0])); ++i) {
         CHECK("reverse involution", raf_reverse_bits32(raf_reverse_bits32(samples[i]))==samples[i]);
         CHECK("bswap involution", raf_bswap32(raf_bswap32(samples[i]))==samples[i]);
+
     }
     CHECK("store bounded", raf_store_be32(bytes+1u,4u,0x12345678u)==RAF_OK &&
           bytes[0]==0xa5u && bytes[1]==0x12u && bytes[2]==0x34u &&
