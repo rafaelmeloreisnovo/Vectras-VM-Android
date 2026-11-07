@@ -53,9 +53,10 @@ for profile in stable size speed; do
   done
 done
 "$CC" $base $selected -I"$ROOT/include" -c "$ROOT/src/raf_opt_kernel.c" -o "$OUT/annotated.o"
-# The kernel object intentionally references the parser module. Reject only
-# unresolved symbols outside that explicitly allowlisted module boundary.
-if "$NM" -u "$OUT/annotated.o" | grep -Ev '^[[:space:]]+U (raf_opt_parse|raf_opt_emit_flags)
+# Kernel references exactly two intentional symbols supplied by parser.o.
+if "$NM" -u "$OUT/annotated.o" | grep -Ev '^[[:space:]]+U (raf_opt_parse|raf_opt_emit_flags)$' | grep -q '[[:alnum:]_]'; then
+  echo 'FAIL: annotated kernel has imports beyond the parser contract' >&2; exit 1
+fi
 if [ "${RAF_CROSS_CHECK:-0}" = 1 ]; then
   for target in armv7a-none-eabi aarch64-none-elf; do
     clang --target="$target" $base -O2 -I"$ROOT/include" \
@@ -65,57 +66,8 @@ if [ "${RAF_CROSS_CHECK:-0}" = 1 ]; then
     if "$NM" -u "$OUT/$target-parser.o" | grep -q '[[:alnum:]_]'; then
       echo "FAIL cross parser has external symbols $target" >&2; exit 1
     fi
-    if "$NM" -u "$OUT/$target-kernel.o" | grep -Ev '^[[:space:]]+U (raf_opt_parse|raf_opt_emit_flags)
-  done
-  if clang --target=armv7a-none-eabi $base -DRAF_OPT_UNROLL=3 \
-     -I"$ROOT/include" -c "$ROOT/src/raf_opt_kernel.c" \
-     -o "$OUT/negative.o" >/dev/null 2>&1; then
-    echo 'FAIL invalid unroll factor accepted' >&2; exit 1
-  fi
-  echo 'PASS_SCOPED_CROSS_OPT ARMv7 EABI5+AArch64; invalid factor rejected'
-fi
- | grep -q '[[:alnum:]_]'; then
-  echo 'FAIL: annotated kernel has imports beyond the parser contract' >&2; exit 1
-fi
-if [ "${RAF_CROSS_CHECK:-0}" = 1 ]; then
-  for target in armv7a-none-eabi aarch64-none-elf; do
-    clang --target="$target" $base -O2 -I"$ROOT/include" \
-      -c "$ROOT/src/raf_opt_hint.c" -o "$OUT/$target-parser.o"
-    clang --target="$target" $base $selected -I"$ROOT/include" \
-      -c "$ROOT/src/raf_opt_kernel.c" -o "$OUT/$target-kernel.o"
-    if "$NM" -u "$OUT/$target-parser.o" "$OUT/$target-kernel.o" | grep -q '[[:alnum:]_]'; then
-      echo "FAIL cross unresolved symbols $target" >&2; exit 1
-    fi
-  done
-  if clang --target=armv7a-none-eabi $base -DRAF_OPT_UNROLL=3 \
-     -I"$ROOT/include" -c "$ROOT/src/raf_opt_kernel.c" \
-     -o "$OUT/negative.o" >/dev/null 2>&1; then
-    echo 'FAIL invalid unroll factor accepted' >&2; exit 1
-  fi
-  echo 'PASS_SCOPED_CROSS_OPT ARMv7 EABI5+AArch64; invalid factor rejected'
-fi
- | grep -q '[[:alnum:]_]'; then
+    if "$NM" -u "$OUT/$target-kernel.o" | grep -Ev '^[[:space:]]+U (raf_opt_parse|raf_opt_emit_flags)$' | grep -q '[[:alnum:]_]'; then
       echo "FAIL cross kernel imports beyond parser $target" >&2; exit 1
-    fi
-  done
-  if clang --target=armv7a-none-eabi $base -DRAF_OPT_UNROLL=3 \
-     -I"$ROOT/include" -c "$ROOT/src/raf_opt_kernel.c" \
-     -o "$OUT/negative.o" >/dev/null 2>&1; then
-    echo 'FAIL invalid unroll factor accepted' >&2; exit 1
-  fi
-  echo 'PASS_SCOPED_CROSS_OPT ARMv7 EABI5+AArch64; invalid factor rejected'
-fi
- | grep -q '[[:alnum:]_]'; then
-  echo 'FAIL: annotated kernel has imports beyond the parser contract' >&2; exit 1
-fi
-if [ "${RAF_CROSS_CHECK:-0}" = 1 ]; then
-  for target in armv7a-none-eabi aarch64-none-elf; do
-    clang --target="$target" $base -O2 -I"$ROOT/include" \
-      -c "$ROOT/src/raf_opt_hint.c" -o "$OUT/$target-parser.o"
-    clang --target="$target" $base $selected -I"$ROOT/include" \
-      -c "$ROOT/src/raf_opt_kernel.c" -o "$OUT/$target-kernel.o"
-    if "$NM" -u "$OUT/$target-parser.o" "$OUT/$target-kernel.o" | grep -q '[[:alnum:]_]'; then
-      echo "FAIL cross unresolved symbols $target" >&2; exit 1
     fi
   done
   if clang --target=armv7a-none-eabi $base -DRAF_OPT_UNROLL=3 \
