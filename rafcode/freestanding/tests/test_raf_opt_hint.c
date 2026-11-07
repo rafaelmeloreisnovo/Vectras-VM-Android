@@ -36,6 +36,25 @@ int main(void) {
     CHECK(parse_cstr("/* RAF_OPT:PROFILE=stable;UNROLL=4",&h)==RAF_INVALID);
     CHECK(parse_cstr("\"unterminated",&h)==RAF_INVALID);
     CHECK(parse_cstr("/* RAF_OPT:PROFILE=stable;UNROLL=4 */\n int x=0;",&h)==RAF_OK);
+    /* Translation-phase hazards cannot be resolved by a raw-byte lexer. */
+    CHECK(parse_cstr("int x=0;\n/* RAF_OPT:PROFILE=stable;UNROLL=4 */",&h)==RAF_INVALID);
+    CHECK(parse_cstr("#if 0\n/* RAF_OPT:PROFILE=size;UNROLL=4 */\n#endif",&h)==RAF_INVALID);
+    CHECK(parse_cstr("// spliced " "\x5c" "\n"
+                     "/* RAF_OPT:PROFILE=speed;UNROLL=4 */",&h)==RAF_INVALID);
+    CHECK(parse_cstr("/* RAF_OPT:PROFILE=size;UNROLL=1 */\n"
+                     "#define X " "\x5c" "\r\n" "1",&h)==RAF_INVALID);
+    CHECK(parse_cstr("/* license */\n"
+                     "/* RAF_OPT:PROFILE=stable;UNROLL=4 */\nint x=1;",&h)==RAF_OK);
+    CHECK(parse_cstr(" /* RAF_OPT:PROFILE=stable;UNROLL=4 */\n"
+                     "/* following ordinary comment */",&h)==RAF_OK);
+    {
+        const raf_u8 trigraph_bytes[] = {47u,42u,32u,63u,63u,47u,32u,42u,47u};
+        CHECK(raf_opt_parse(trigraph_bytes,(raf_u32)sizeof(trigraph_bytes),&h)==RAF_INVALID);
+    }
+    {
+        const raf_u8 embedded_nul[] = {47u,42u,32u,0u,42u,47u};
+        CHECK(raf_opt_parse(embedded_nul,(raf_u32)sizeof(embedded_nul),&h)==RAF_INVALID);
+    }
     CHECK(raf_opt_parse(0,1u,&h)==RAF_INVALID);
     CHECK(raf_opt_parse((const raf_u8 *)"x",65536u,&h)==RAF_INVALID);
     h.profile=RAF_OPT_STABLE;h.unroll=4u;
