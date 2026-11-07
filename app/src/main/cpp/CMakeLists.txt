@@ -117,6 +117,7 @@ add_custom_target(lowlevel_abi_contract_check
     COMMENT "Validating lowlevel ABI contract + no implicit libc/stdlib policy")
 
 add_library(abi_core_freestanding STATIC
+    core/raf_bench_probe.c
     lowlevel_abi.c
     core/sector.c
     core/arch/primitives.c
@@ -132,6 +133,7 @@ add_library(abi_core_freestanding STATIC
     ${VECTRA_NEON_SOURCES})
 
 add_library(vectra_core_accel SHARED
+    raf_bench_jni.c
     vectra_core_accel.c
     lowlevel_bridge.c
     hardware_profile_bridge.c

@@ -1,0 +1,31 @@
+# SPDX-License-Identifier: GPL-2.0-only
+name: Vectras freestanding ALU microbenchmark (scoped)
+on:
+  pull_request:
+    paths:
+      - 'app/src/main/cpp/core/raf_bench_probe.*'
+      - 'app/src/main/cpp/raf_bench_jni.c'
+      - 'tools/ci/test_raf_bench_probe.sh'
+      - 'tools/ci/verify_arm32_runtime_seed_apk.py'
+      - 'tools/ci/test_verify_arm32_runtime_seed_apk.py'
+      - '.github/workflows/vectras-freestanding-bench-scoped.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  core-no-libc-and-vectors:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    strategy:
+      fail-fast: false
+      matrix:
+        cc: [gcc, clang]
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+      - name: Verify isolated core object and vectors
+        env:
+          CC: ${{ matrix.cc }}
+        run: bash tools/ci/test_raf_bench_probe.sh
+      - name: Falsify missing/tampered ARMv7 APK seeds (synthetic)
+        run: python3 tools/ci/test_verify_arm32_runtime_seed_apk.py
