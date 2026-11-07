@@ -24,3 +24,4 @@ jobs:
         run: |
           sh rafcode/freestanding/ci/check.sh
           sh rafcode/freestanding/ci/check_bitops.sh
+          sh rafcode/freestanding/ci/check_opt_hint.sh

@@ -128,3 +128,40 @@ only, **not** a proven speedup. Execution on Moto E7 Power, runtime memory
 behavior, real syscall adapter and QEMU guest boot remain `TOKEN_VAZIO`.
 No existing JNI/Android/VM behavior is replaced. Root GPL-2.0, MIT scoped
 file notices and the official PRoot license boundary are preserved.
+
+
+## V3 restricted source-comment optimizer contract — scoped, fail-closed
+
+An ordinary C comment is inert. A **host build adapter** may intentionally
+interpret one exact allowlisted marker in a specific source file:
+
+`/* RAF_OPT:PROFILE=stable;UNROLL=4 */`
+
+The independent MIT C11 freestanding scanner is `include/raf_opt_hint.h`
+plus `src/raf_opt_hint.c`. It skips line comments, quoted strings
+and character literals. It recognizes exactly one fully bounded block marker,
+rejecting duplicates, unknown keys, injection suffixes and malformed syntax.
+Missing annotation is `RAF_TOKEN_VAZIO`, **not an implicit build
+default**. It maps exclusively to `-O2`, `-Os`,
+`-O3` with `-DRAF_OPT_UNROLL=1|4`.
+
+The tiny hosted `ci/raf_opt_cli.c` reads source bytes via
+stdio **at build time only**; the standalone C11 parser and algorithm import
+no libc, operating-system calls, filesystem, QEMU, PRoot or Android API.
+`ci/check_opt_hint.sh` reads exactly the annotated
+`src/raf_opt_kernel.c`, emits allowlisted flags into the
+compiler, and verifies both unroll variants at O2/Os/O3 against the same
+hosted correctness tests. GCC and Clang share the original two CI jobs.
+It also rejects deliberately malicious annotations, cross-compiles ARMv7
+EABI5 and AArch64, and audits undefined ELF symbols and DT_NEEDED.
+The link-only probe must **never** be executed.
+
+For compiler-guided unrolling, GCC/Clang use their own guarded pragma.
+Actual emitted machine code, code size, runtime performance, ISA-dependent
+semantics and optimization benefit are separate measurements, **not** assumed.
+Warnings do not authorize arbitrary compiler flags or code execution.
+This lane neither rewrites production source nor changes the root GPL
+and upstream PRoot licenses. Do not infer a verified compiler or end-to-end
+device proof from its finite host tests. Reference prior-art reading only:
+HINTPILOT arXiv:2604.15041; loop semantics arXiv:2602.19868; COMPILOT
+arXiv:2511.00592; none is copied into this MIT implementation.
