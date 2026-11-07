@@ -138,7 +138,7 @@ jobs:
 
       - name: Upload host proof
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: freestanding-link-probe-host
           path: artifacts/freestanding-host
@@ -239,7 +239,7 @@ jobs:
 
       - name: Upload ${{ matrix.abi }} proof
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: freestanding-link-probe-${{ matrix.abi }}
           path: artifacts/freestanding-${{ matrix.abi }}
@@ -290,7 +290,7 @@ jobs:
 
       - name: Upload C05 closure receipt
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: c05-freestanding-closure-${{ github.sha }}
           path: artifacts/c05-closure/

@@ -60,7 +60,7 @@ jobs:
 
       - name: Upload U2 manifest and fixture receipts (best effort)
         continue-on-error: true
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: zipraf-corpus-u2
           path: |

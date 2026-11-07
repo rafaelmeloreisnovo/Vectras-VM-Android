@@ -523,7 +523,7 @@ jobs:
       - name: Upload Android logs
         id: upload_android_logs
         continue-on-error: true
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         if: always()
         with:
           name: android-logs-${{ needs.resolve.outputs.lane_label }}
@@ -533,7 +533,7 @@ jobs:
       - name: Upload Android artifacts
         id: upload_android_artifacts
         continue-on-error: true
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         if: always()
         with:
           name: android-artifacts-${{ needs.resolve.outputs.lane_label }}
@@ -543,7 +543,7 @@ jobs:
       - name: Upload native matrix
         id: upload_native_matrix
         continue-on-error: true
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         if: always()
         with:
           name: native-matrix-${{ needs.resolve.outputs.lane_label }}
@@ -553,7 +553,7 @@ jobs:
       - name: Upload Android reports
         id: upload_android_reports
         continue-on-error: true
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         if: always()
         with:
           name: android-reports-${{ needs.resolve.outputs.lane_label }}
@@ -563,7 +563,7 @@ jobs:
       - name: Upload APK report
         id: upload_apk_report
         continue-on-error: true
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         if: always()
         with:
           name: apk-report-${{ needs.resolve.outputs.lane_label }}
@@ -573,7 +573,7 @@ jobs:
       - name: Upload perf results
         id: upload_perf_results
         continue-on-error: true
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         if: always() && hashFiles(format('ci-artifacts/upload-staging/perf-results-{0}/files/**', needs.resolve.outputs.lane_label)) != ''
         with:
           name: perf-results-${{ needs.resolve.outputs.lane_label }}

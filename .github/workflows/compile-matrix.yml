@@ -161,7 +161,7 @@ jobs:
 
       - name: Upload lane outputs
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: compile-matrix-${{ matrix.abi }}-${{ matrix.variant }}-${{ matrix.profile_channel }}
           path: |

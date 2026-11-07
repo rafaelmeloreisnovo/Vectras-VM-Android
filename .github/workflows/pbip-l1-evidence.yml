@@ -103,7 +103,7 @@ jobs:
           cat build/pbip-l1/PBIP_L1_CI_RECEIPT.v1.json.sha256
 
       - name: Upload PBIP-L1 evidence artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: pbip-l1-ci-receipt
           path: build/pbip-l1/
