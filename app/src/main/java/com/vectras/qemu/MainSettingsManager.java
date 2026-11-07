@@ -9,6 +9,7 @@ import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
+import android.os.Looper;
 import android.text.InputFilter;
 import android.text.InputType;
 import android.util.Log;
@@ -222,14 +223,14 @@ public class MainSettingsManager extends AppCompatActivity
                     preference.setSummary("RUNNING: bounded native ALU test");
                     new Thread(() -> {
                         final String result = FreestandingMicrobench.runOnce();
-                        if (isAdded()) {
-                            requireActivity().runOnUiThread(() -> {
-                                if (!isAdded()) return;
-                                preference.setSummary(result);
-                                preference.setEnabled(true);
-                                rafBenchRunning = false;
-                            });
-                        }
+                        // Never query Fragment attachment or Activity from the worker thread.
+                        // Rotation/detach may occur between an isAdded() check and requireActivity().
+                        new Handler(Looper.getMainLooper()).post(() -> {
+                            if (!isAdded()) return;
+                            preference.setSummary(result);
+                            preference.setEnabled(true);
+                            rafBenchRunning = false;
+                        });
                     }, "VectrasFreestandingMicrobench").start();
                     return true;
                 });
