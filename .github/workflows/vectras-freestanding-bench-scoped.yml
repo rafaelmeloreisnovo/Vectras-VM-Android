@@ -6,6 +6,8 @@ on:
       - 'app/src/main/cpp/core/raf_bench_probe.*'
       - 'app/src/main/cpp/raf_bench_jni.c'
       - 'tools/ci/test_raf_bench_probe.sh'
+      - 'tools/ci/verify_arm32_runtime_seed_apk.py'
+      - 'tools/ci/test_verify_arm32_runtime_seed_apk.py'
       - '.github/workflows/vectras-freestanding-bench-scoped.yml'
   workflow_dispatch:
 permissions:
@@ -25,3 +27,5 @@ jobs:
         env:
           CC: ${{ matrix.cc }}
         run: bash tools/ci/test_raf_bench_probe.sh
+      - name: Falsify missing/tampered ARMv7 APK seeds (synthetic)
+        run: python3 tools/ci/test_verify_arm32_runtime_seed_apk.py
