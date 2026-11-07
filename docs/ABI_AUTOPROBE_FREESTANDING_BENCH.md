@@ -53,3 +53,28 @@ proot/rootfs installation, VM process exit and guest boot receipt as distinct ga
 missing executable, illegal QEMU argv, missing provider permission, VM not booting.
 **Rollback:** close unmerged draft PR; retain previous default branch and append successor receipt.
 **State:** experimental `IMPLEMENTED_UNTESTED` until source/build/physical receipts are independently read back.
+
+## Motorola ARM32 beta packaging repair (additive, not VM runtime PASS)
+
+The original `moto-e7-arm32-beta.yml` lane checked JNI libraries without
+materializing `bootstrap/armeabi-v7a.tar` and `alpine19/armeabi-v7a.tar`.
+The recorded installed APK indeed lacked both. The scoped branch now reuses
+the **existing** `tools/bootstrap/materialize_embedded_runtime_seed_assets.py`
+with `configs/embedded_runtime_seed_assets.v1.json`, pins the original
+upstream commit `e1faf376b4b034384cdab9a4ab1e608c61a83521`, validates
+TAR paths/markers/size/blob SHA-1/SHA-256 and packages only `armeabi-v7a`.
+Build fails closed when the upstream pin cannot be fetched/validated.
+
+The new `tools/ci/verify_arm32_runtime_seed_apk.py` checks exact ZIP paths,
+frozen sizes and SHA-256 **inside the built APK** and writes a scoped receipt.
+`tools/ci/test_verify_arm32_runtime_seed_apk.py` falsifies missing or mutated
+assets with synthetic archive fixtures. The CI artifact includes both origin
+and built-APK integrity receipts, but they do not contain physical runtime claims.
+
+**Still BLOCKED/TOKEN_VAZIO:** QEMU installation/ELF ABI, executable permissions,
+PRoot extraction on Motorola, Termux provider permissions, actual guest process,
+VM boot, cold/warm startup and performance measurements. The user's
+`d5fb8c6...` original catalog stays unchanged as the negative baseline.
+Android beta GitHub Actions `workflow_dispatch` must run on a source ref
+containing this patch; the draft PR alone does not trigger that dispatch-only job.
+Do not use fastboot or modify bootloader partitions for this ABI/VM repair.
