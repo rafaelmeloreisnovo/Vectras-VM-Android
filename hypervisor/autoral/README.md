@@ -1,11 +1,9 @@
-# RAFHV — authorial VM control nucleus v0.1
+# RAFHV — Vectra authorial freestanding VM control and experimental A32 subset
 
-This is newly authored freestanding C11 **VM control logic**, not yet a functioning hypervisor or VMM. CPU ISA emulation, KVM, MMU, IRQ, device models, ELF boot and Android runtime wiring are NOT IMPLEMENTED.
+Self-contained C11 control core plus a **very limited ARM A32 interpreter**. All pure modules use no libc, heap, syscalls, Android, JNI or QEMU; stdint.h is a compiler freestanding header. The Makefile and tests are hosted, and the external CPU callback still is not a guest-security sandbox.
 
-Use make test audit in this directory. Only rafhv.c/h are freestanding. The test harness uses hosted stdio; the compiler-provided stdint.h does not add libc linkage.
+Implemented A32 subset: AL-condition MOV/ADD/SUB immediates, LDR/STR word (pre-index +offset), B without link, SVC surfaced as IO event. Fetch requires X+R permission. Unsupported conditions, opcodes, misaligned PC, invalid reads/stores fault closed. A32 status/PC snapshot is **not** a full architectural PC model; ARM privilege levels, Thumb/T32, exceptions, MMU, GIC, interrupts, devices, ELF loader, guest OS and Android runtime are not supported. No real hypervisor hardware/EL2 or KVM is accessed.
 
-The backend callback is trusted host code and must be supplied by an independently validated CPU backend; a mock HALT is not guest execution. Borrowed buffers must remain alive and cover the mapped length, with synchronization and zeroization owned by the caller. Reset clears only VM metadata. Single-threaded use only. The X permission bit is declarative, not CPU-enforced. Backend failure leaves PC uncommitted.
+From this directory: make CC=gcc test audit; make clean; make CC=clang test audit. Local tests: 23 control + 22 A32 assertions on each compiler; combined relocatable core nm -u empty. ARMv7 cross-compile ELF32 EABI5 observed. A32 fixture executes encoded instructions, **not a bootable guest**. Execution receipts and Android hardware gates remain TOKEN_VAZIO.
 
-Local scope before GitHub CI: GCC + Clang each 23 assertions pass; nm -u on freestanding objects empty; Clang ARMv7 none-eabi compiles ELF32 EABI5. Android/guest NOT_RUN. Licensing: new files marked GPL-2.0-only for inclusion in this fork; original upstream author and obligations retained. No claim of legally certified clean-room.
-
-Navigate to NOVOexport/VECTRA_HYPERVISOR_ATLAS_V1.md for gates, provenance and rollback.
+Caller must keep mapped buffers alive/valid and own zeroization and synchronization. Initial test fixture maps RWX because it writes instructions into the sample buffer, not a hardened production deployment. GPL-2.0-only scoped to new sources in this GPL fork; upstream license and attribution unchanged. Consult NOVOexport/VECTRA_A32_S2.md and the parent V1 Atlas.
