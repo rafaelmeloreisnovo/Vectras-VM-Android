@@ -126,7 +126,7 @@ jobs:
           find "${apk_dir}" -type f -name "*.apk" -exec cp {} "${lane_dir}/" \;
 
       - name: Upload APK artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: apk-${{ matrix.variant }}-${{ matrix.profile }}
           path: ci-artifacts/apk/${{ matrix.variant }}/${{ matrix.profile }}/**/*.apk

@@ -22,7 +22,7 @@ jobs:
       - name: Build stability asm matrix artifacts
         run: ./tools/build_stability_asm.sh
       - name: Upload stability asm artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: stability-asm-${{ github.run_id }}
           path: |
