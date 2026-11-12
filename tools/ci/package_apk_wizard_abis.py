@@ -121,6 +121,7 @@ def validate_lane(root: Path, lane: str, stem: str, policy: str,
     files = [apk, runtime_path, evidence_path]
     if lane != "arm64-v8a":
         omega = root / f"{stem}.omega-materialization.json"
+        require(omega.is_file(), f"missing Omega ARMv7 receipt: {lane}")
         omega_receipt = json_file(omega)
         require(omega_receipt.get("result") == "PASS",
                 f"Omega ARMv7 receipt not PASS: {lane}")
