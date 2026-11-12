@@ -42,6 +42,14 @@ def digest(path: Path) -> str:
     return h.hexdigest()
 
 
+def member_digest(archive: zipfile.ZipFile, name: str) -> str:
+    h = hashlib.sha256()
+    with archive.open(name) as stream:
+        for block in iter(lambda: stream.read(1024 * 1024), b""):
+            h.update(block)
+    return h.hexdigest()
+
+
 def json_file(path: Path) -> dict:
     require(path.is_file(), f"missing receipt: {path.name}")
     try:
@@ -216,7 +224,13 @@ def package_lane(root: Path, out: Path, spec: tuple, commit: str) -> Path:
             require(archive.testzip() is None, f"ZIP CRC failure: {lane}")
             require(json.loads(archive.read("MANIFEST.json")) == manifest,
                     f"archive manifest mismatch: {lane}")
-            require(hashlib.sha256(archive.read(apk.name)).hexdigest() == manifest["apk"]["sha256"],
+            for checksum_line in archive.read("SHA256SUMS").decode("utf-8").splitlines():
+                expected_hash, separator, entry = checksum_line.partition("  ")
+                require(bool(separator) and entry in archive.namelist(),
+                        f"invalid checksum member: {lane}")
+                require(member_digest(archive, entry) == expected_hash,
+                        f"SHA-256 mismatch in package member {entry}: {lane}")
+            require(member_digest(archive, apk.name) == manifest["apk"]["sha256"],
                     f"APK changed inside distribution ZIP: {lane}")
         tmp_path.replace(archive_path)
     except Exception:
