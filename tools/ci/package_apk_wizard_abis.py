@@ -113,7 +113,17 @@ def validate_lane(root: Path, lane: str, stem: str, policy: str,
     files = [apk, runtime_path, evidence_path]
     if lane != "arm64-v8a":
         omega = root / f"{stem}.omega-materialization.json"
-        require(omega.is_file(), f"missing Omega ARMv7 receipt: {lane}")
+        omega_receipt = json_file(omega)
+        require(omega_receipt.get("result") == "PASS",
+                f"Omega ARMv7 receipt not PASS: {lane}")
+        require(omega_receipt.get("source", {}).get("commit") == commit,
+                f"Omega ARMv7 source commit mismatch: {lane}")
+        require(omega_receipt.get("source", {}).get("apk_sha256") == sha,
+                f"Omega ARMv7 APK hash mismatch: {lane}")
+        require(omega_receipt.get("materialization", {}).get("runtime_load_image_identity") is True,
+                f"Omega ARMv7 PT_LOAD identity mismatch: {lane}")
+        require(omega_receipt.get("boundary", {}).get("claim_allowed") is False,
+                f"invalid Omega ARMv7 claim: {lane}")
         files.append(omega)
     # Sidecar produced by the existing build-evidence generator.
     checksum = Path(str(evidence_path) + ".sha256")
@@ -122,6 +132,21 @@ def validate_lane(root: Path, lane: str, stem: str, policy: str,
     require(line == f"{digest(evidence_path)}  {evidence_path.name}",
             f"invalid build-evidence checksum: {lane}")
     files.append(checksum)
+    # Common build receipts are source evidence. Keep them as files in each ZIP,
+    # rather than copying unverified claims into a package manifest.
+    shared = (
+        "bootstrap-materialization.json",
+        "bootstrap-layout-normalization.json",
+        "alpine19-materialization.json",
+        "qemu19-materialization.json",
+        "rootfs-symlink-normalization.json",
+        "REPORT.md",
+        "sizes.tsv",
+    )
+    for name in shared:
+        path = root / name
+        require(path.is_file(), f"missing common build receipt/report: {name}")
+        files.append(path)
 
     manifest = {
         "schema": "vectras.apk-wizard.abi-package.v1",
