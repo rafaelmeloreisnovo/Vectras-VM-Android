@@ -276,7 +276,7 @@ jobs:
         run: ./tools/ci/validate_android_sdk_alignment.sh
 
       - name: Setup JDK
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v6
         with:
           java-version: ${{ env.JAVA_VERSION }}
           distribution: temurin
