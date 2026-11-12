@@ -26,6 +26,16 @@ class PackageAbiZipsTest(unittest.TestCase):
         self.root = Path(self.work.name) / "build"
         self.out = Path(self.work.name) / "packages"
         self.root.mkdir()
+        for name in (
+            "bootstrap-materialization.json",
+            "bootstrap-layout-normalization.json",
+            "alpine19-materialization.json",
+            "qemu19-materialization.json",
+            "rootfs-symlink-normalization.json",
+            "REPORT.md",
+            "sizes.tsv",
+        ):
+            (self.root / name).write_text("test receipt fixture\n")
 
     def create_lane(self, spec, *, extra_native=(), extra_runtime=()):
         lane, stem, policy, abis = spec
@@ -66,7 +76,13 @@ class PackageAbiZipsTest(unittest.TestCase):
             f"{sha(evidence_path)}  {evidence_path.name}\n"
         )
         if lane != "arm64-v8a":
-            (self.root / f"{stem}.omega-materialization.json").write_text("{}")
+            omega = {
+                "result": "PASS",
+                "source": {"commit": COMMIT, "apk_sha256": sha(apk)},
+                "materialization": {"runtime_load_image_identity": True},
+                "boundary": {"claim_allowed": False},
+            }
+            (self.root / f"{stem}.omega-materialization.json").write_text(json.dumps(omega))
         return apk
 
     def test_three_packages_are_independent_and_lossless(self):
