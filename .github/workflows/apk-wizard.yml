@@ -56,6 +56,7 @@ jobs:
           python3 tests/test_normalize_bootstrap_tar_layout.py
           python3 tests/test_normalize_rootfs_tar_symlinks.py
           python3 tests/test_apk_wizard_transient_retry.py
+          python3 -m unittest discover -s tests -p 'test_package_apk_wizard_abis.py' -v
 
       - name: Shell-loader smoke build
         shell: bash
@@ -74,16 +75,37 @@ jobs:
             --base-backoff-seconds 1 \
             -- ./tools/ci/build_apk_wizard.sh
 
-      - name: Upload APK wizard artifacts (best effort)
-        if: always()
-        continue-on-error: true
+      # Packaging runs only after all three APK builds and their runtime receipts pass.
+      # The previous best-effort monolithic upload is replaced by fail-closed ABI ZIPs.
+      - name: Verify and package APKs into architecture ZIPs
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tools/ci/package_apk_wizard_abis.py \
+            --input-dir artifacts/apk-wizard \
+            --output-dir artifacts/apk-wizard/packages \
+            --source-commit "$GITHUB_SHA"
+
+      - name: Upload ARM64 APK ZIP
         uses: actions/upload-artifact@v4
         with:
-          name: apk-wizard
-          path: |
-            artifacts/apk-wizard/*.apk
-            artifacts/apk-wizard/*.json
-            artifacts/apk-wizard/*.sha256
-            artifacts/apk-wizard/REPORT.md
-            artifacts/apk-wizard/sizes.tsv
-          if-no-files-found: warn
+          name: vectras-debug-arm64-v8a
+          path: artifacts/apk-wizard/packages/vectras-debug-arm64-v8a.zip
+          if-no-files-found: error
+          compression-level: 0
+
+      - name: Upload ARM32 APK ZIP
+        uses: actions/upload-artifact@v4
+        with:
+          name: vectras-debug-armeabi-v7a
+          path: artifacts/apk-wizard/packages/vectras-debug-armeabi-v7a.zip
+          if-no-files-found: error
+          compression-level: 0
+
+      - name: Upload dual-ARM APK ZIP
+        uses: actions/upload-artifact@v4
+        with:
+          name: vectras-debug-arm32-arm64
+          path: artifacts/apk-wizard/packages/vectras-debug-arm32-arm64.zip
+          if-no-files-found: error
+          compression-level: 0
