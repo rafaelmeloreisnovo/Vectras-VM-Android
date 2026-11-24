@@ -104,7 +104,7 @@ Política explicitada no build raiz (`build.gradle`):
 
 ```bash
 ./tools/gradle_with_jdk21.sh :app:assembleDebug \
-  -PAGP_VERSION=8.5.2 \
+  -PAGP_VERSION=8.6.1 \
   -PKOTLIN_VERSION=1.9.24
 ```
 
@@ -182,3 +182,7 @@ Para ampliar suporte oficial a JVMs mais novas no ambiente, avaliar upgrade conj
 - Pipeline oficial Host: `.github/workflows/host-ci.yml`.
 - Orquestração e gate final: `.github/workflows/pipeline-orchestrator.yml` + `.github/workflows/quality-gates.yml`.
 - Matriz canônica documentada em `docs/ci/workflow-matrix.md`.
+
+## Candidato CI — WorkManager 2.12.0 / AGP 8.6.1
+
+A PR #1176 observou `checkDebugAarMetadata` exigindo AGP >= 8.6.0. A combinação candidata preserva Gradle 8.7, JDK 17, compileSdk/targetSdk 35 e minSdk 29. Referência: https://developer.android.com/build/releases/agp-8-6-0-release-notes . Este é um teste de integração, não aprovação de distribuição. Exigir Android CI, ABI, assinatura e testes antes da promoção; manter a base e a reversão disponíveis.
