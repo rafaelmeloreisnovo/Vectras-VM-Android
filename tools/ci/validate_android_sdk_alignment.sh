@@ -44,13 +44,22 @@ legacy_min="$(extract_gradle_number '^[[:space:]]*minSdk[[:space:]]+([0-9]+)[[:s
 [[ "$legacy_target" == "$canonical_target" ]] || fail "Divergência targetSdk: canônico=${canonical_target} legado=${legacy_target}"
 [[ "$legacy_min" == "$canonical_min" ]] || fail "Divergência minSdk: canônico=${canonical_min} legado=${legacy_min}"
 
-if rg -n --hidden --glob '.github/workflows/*.yml' --glob '.github/workflows/*.yaml' --glob 'tools/**/*.sh' --glob 'tools/**/*.py' \
-  -e 'cd[[:space:]]+android(/|$)' \
-  -e '(^|[^A-Za-z0-9_./-])android/gradlew([^A-Za-z0-9_./-]|$)' \
-  -e '(^|[^A-Za-z0-9_./-])-p[[:space:]]+android([^A-Za-z0-9_./-]|$)' \
-  --glob "!tools/ci/validate_android_sdk_alignment.sh" \
-  "$ROOT_DIR/.github" "$ROOT_DIR/tools"; then
-  fail "Fluxo oficial referencia o caminho legado android/. Use somente o build canônico na raiz."
-fi
+[[ -d "$ROOT_DIR/.github/workflows" && -d "$ROOT_DIR/tools" ]] || fail 'Diretórios de verificação ausentes.'
+shopt -s nullglob globstar dotglob
+scan_files=("$ROOT_DIR"/.github/workflows/*.yml "$ROOT_DIR"/.github/workflows/*.yaml
+            "$ROOT_DIR"/tools/**/*.sh "$ROOT_DIR"/tools/**/*.py)
+((${#scan_files[@]} > 0)) || fail 'Nenhum arquivo para verificar.'
+for scan_file in "${scan_files[@]}"; do
+  [[ "$scan_file" != "$ROOT_DIR/tools/ci/validate_android_sdk_alignment.sh" ]] || continue
+  [[ -f "$scan_file" && ! -L "$scan_file" ]] || fail "Arquivo de verificação inválido: $scan_file"
+  if grep -nE -e 'cd[[:space:]]+android(/|$)' \
+    -e '(^|[^A-Za-z0-9_./-])android/gradlew([^A-Za-z0-9_./-]|$)' \
+    -e '(^|[^A-Za-z0-9_./-])-p[[:space:]]+android([^A-Za-z0-9_./-]|$)' -- "$scan_file"; then
+    fail "Fluxo oficial referencia o caminho legado android/. Use somente o build canônico na raiz."
+  else
+    scan_status=$?
+    [[ "$scan_status" -eq 1 ]] || fail "Falha ao verificar $scan_file (grep=$scan_status)."
+  fi
+done
 
 echo "Android SDK/build path alignment OK: compileSdk=${canonical_compile}, targetSdk=${canonical_target}, minSdk=${canonical_min}."
