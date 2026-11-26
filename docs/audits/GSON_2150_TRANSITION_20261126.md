@@ -1,0 +1,10 @@
+# Gson 2.15.0 dependency transition — scoped candidate
+
+- Parent source: 6dfea7cb04258fe3575b36c785074b88a41c431b; PR #1178; owner: Vectras VM/QEMU consumer.
+- Coordinate: `com.google.code.gson:gson`, 2.13.2 → 2.15.0, Android hosted Java runtime serialization/deserialization boundary; not part of the freestanding VM kernel.
+- Upstream: https://github.com/google/gson/tree/fcd416909db2bea96eb916bcfb2d0a83cb9b86c3 ; tag gson-parent-2.15.0 resolves to that commit via annotated tag f8ad5148025eb0ee7176353d523d7714761070f7.
+- License: Apache-2.0, exact upstream LICENSE blob d645695673349e3947e8e5ae42332d0ac3164cd7; POM blob 65cda64bc707d16e79e496e64ee5cbed1f821304 confirms 2.15.0. Preserve upstream notices in distribution; packaged notice verification TOKEN_VAZIO.
+- Retention: existing hosted JSON API compatibility and parsing behavior; removal without equivalent behavior would be regression. No new library introduced. Smallest credible authorial replacement: inventory actual Gson call sites and supported schema/adapter behavior, implement bounded typed readers/writers with differential malformed input, roundtrip, size and compatibility tests. No replacement or copied upstream implementation claimed.
+- Evidence: predecessor 28c42663b7fd2923a844ac3f8e23d4dd94f5bd49 run 41659715971 has 830 Android tests, 56 failed, and independent ancestry error in perf gate. Successor 6dfea7cb04258fe3575b36c785074b88a41c431b corrects checkout history and verifies exact comparison endpoints; no margin relaxation. Baseline attribution, current CI, resolved JAR bytes, physical runtime, VM/guest boot and performance remain TOKEN_VAZIO. Do not label predecessor failures Gson regressions without matched baseline.
+- Acceptance: exact-head Android unit/debug/release builds, existing perf gate and artifact consistency, negative JSON/compatibility regression, review and provider promotion controls. Rollback: reviewed revert of the dependency delta or coordinated successor, never delete history.
+- Classification: public source/dependency provenance only; no guest payload, private logs, secrets or raw environment. claim_allowed=false.
