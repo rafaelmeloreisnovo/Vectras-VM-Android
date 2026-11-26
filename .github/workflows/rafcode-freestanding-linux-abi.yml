@@ -1,0 +1,25 @@
+name: RAFCODE freestanding Linux ABI boundary
+on:
+  pull_request:
+    paths:
+      - 'rafcode/freestanding/platform/linux/**'
+      - 'rafcode/freestanding/ci/check_kernel_boundary.sh'
+      - '.github/workflows/rafcode-freestanding-linux-abi.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  linux-syscall-no-libc:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        compiler: [gcc, clang]
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - name: Execute native ELF and cross-link ARM ABI
+        env:
+          CC: ${{ matrix.compiler }}
+          RAF_CROSS_CHECK: ${{ matrix.compiler == 'clang' && '1' || '0' }}
+        run: sh rafcode/freestanding/ci/check_kernel_boundary.sh

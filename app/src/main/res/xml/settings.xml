@@ -100,5 +100,28 @@
                 android:targetClass="com.vectras.vm.settings.UpdaterActivity" />
         </Preference>
 
+        <!-- ABI/read-only runtime snapshot; no installation side effects. -->
+        <Preference
+            android:key="rafRuntimeAbi"
+            android:title="@string/raf_runtime_abi_title"
+            android:summary="@string/raf_runtime_abi_summary"
+            app:iconSpaceReserved="false" />
+
+        <Preference
+            android:key="rafFreestandingMicrobench"
+            android:title="@string/raf_microbench_title"
+            android:summary="@string/raf_microbench_summary"
+            app:iconSpaceReserved="false" />
+
+        <Preference
+            android:key="rafFullBenchmark"
+            android:title="@string/raf_bench_suite_title"
+            android:summary="@string/raf_bench_suite_summary"
+            app:iconSpaceReserved="false">
+            <intent
+                android:targetPackage="com.rafacodephi.app"
+                android:targetClass="com.vectras.vm.benchmark.BenchmarkActivity" />
+        </Preference>
+
     </PreferenceCategory>
 </PreferenceScreen>

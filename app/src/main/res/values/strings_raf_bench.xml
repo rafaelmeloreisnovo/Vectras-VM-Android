@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="raf_runtime_abi_title">Automatic host ABI and runtime assets</string>
+    <string name="raf_runtime_abi_summary">Read-only host ABI / bootstrap inventory</string>
+    <string name="raf_microbench_title">Run freestanding C microbenchmark</string>
+    <string name="raf_microbench_summary">Manual measured ALU kernel; not a VM benchmark</string>
+    <string name="raf_bench_suite_title">Open full benchmark suite</string>
+    <string name="raf_bench_suite_summary">Existing CPU, memory and emulation tests</string>
+</resources>

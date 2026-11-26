@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="raf_runtime_abi_title">ABI automática e recursos do runtime</string>
+    <string name="raf_runtime_abi_summary">Inventário somente leitura de ABI e bootstrap</string>
+    <string name="raf_microbench_title">Executar microbenchmark C freestanding</string>
+    <string name="raf_microbench_summary">Teste manual do núcleo ALU; não mede a VM</string>
+    <string name="raf_bench_suite_title">Abrir suíte completa de benchmarks</string>
+    <string name="raf_bench_suite_summary">Testes existentes de CPU, memória e emulação</string>
+</resources>

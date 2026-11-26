@@ -14,7 +14,7 @@ import java.util.concurrent.atomic.AtomicBoolean
  * Receipt-driven maintenance state machine for an installed RAFCODEPHI Termux.
  *
  * Fixed sequence, no free-form commands:
- * BOOTSTRAP -> REFRESH -> VECTRAS_QEMU -> PROBE -> PROOT_VERIFY -> NINJA_VERIFY -> QEMU_VERIFY.
+ * BOOTSTRAP -> REFRESH -> VECTRAS_QEMU -> PROBE -> APT_VERIFY -> PROOT_VERIFY -> NINJA_VERIFY -> QEMU_VERIFY.
  * A stage advances only after the local PendingIntent result is bound to the
  * persisted request and reports Termux errorCode=0 plus process exitCode=0.
  */
@@ -39,6 +39,7 @@ object VectrasTermuxMaintenanceCoordinator {
         REFRESH_PENDING,
         VECTRAS_QEMU_PENDING,
         PROBE_PENDING,
+        APT_VERIFY_PENDING,
         PROOT_VERIFY_PENDING,
         NINJA_VERIFY_PENDING,
         QEMU_VERIFY_PENDING,
@@ -60,6 +61,7 @@ object VectrasTermuxMaintenanceCoordinator {
                 State.REFRESH_PENDING,
                 State.VECTRAS_QEMU_PENDING,
                 State.PROBE_PENDING,
+                State.APT_VERIFY_PENDING,
                 State.PROOT_VERIFY_PENDING,
                 State.NINJA_VERIFY_PENDING,
                 State.QEMU_VERIFY_PENDING,
@@ -83,7 +85,7 @@ object VectrasTermuxMaintenanceCoordinator {
                 } else {
                     "The external RAFCODEPHI Termux runtime is installed but not fully ready. " +
                         "Repair will bootstrap the toolchain, refresh package metadata, install Vectras QEMU, " +
-                        "then execute PRoot, Ninja and QEMU smoke checks before completion."
+                        "then execute APT, PRoot, Ninja and QEMU smoke checks before completion."
                 }
                 AlertDialog.Builder(activity, R.style.MainDialogTheme)
                     .setTitle("Repair RAFCODEPHI runtime")
@@ -265,6 +267,8 @@ object VectrasTermuxMaintenanceCoordinator {
         VectrasTermuxIpcContract.MaintenanceStage.VECTRAS_QEMU ->
             VectrasTermuxIpcContract.MaintenanceStage.PROBE
         VectrasTermuxIpcContract.MaintenanceStage.PROBE ->
+            VectrasTermuxIpcContract.MaintenanceStage.APT_VERIFY
+        VectrasTermuxIpcContract.MaintenanceStage.APT_VERIFY ->
             VectrasTermuxIpcContract.MaintenanceStage.PROOT_VERIFY
         VectrasTermuxIpcContract.MaintenanceStage.PROOT_VERIFY ->
             VectrasTermuxIpcContract.MaintenanceStage.NINJA_VERIFY
@@ -278,6 +282,7 @@ object VectrasTermuxMaintenanceCoordinator {
         VectrasTermuxIpcContract.MaintenanceStage.REFRESH -> State.REFRESH_PENDING
         VectrasTermuxIpcContract.MaintenanceStage.VECTRAS_QEMU -> State.VECTRAS_QEMU_PENDING
         VectrasTermuxIpcContract.MaintenanceStage.PROBE -> State.PROBE_PENDING
+        VectrasTermuxIpcContract.MaintenanceStage.APT_VERIFY -> State.APT_VERIFY_PENDING
         VectrasTermuxIpcContract.MaintenanceStage.PROOT_VERIFY -> State.PROOT_VERIFY_PENDING
         VectrasTermuxIpcContract.MaintenanceStage.NINJA_VERIFY -> State.NINJA_VERIFY_PENDING
         VectrasTermuxIpcContract.MaintenanceStage.QEMU_VERIFY -> State.QEMU_VERIFY_PENDING

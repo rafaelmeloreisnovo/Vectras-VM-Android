@@ -58,3 +58,17 @@ Consulte também:
 ## Claim boundary
 
 Este NOTICE é um índice de atribuição/proveniência; ele **não declara que todos os itens estejam integralmente auditados nem que o projeto esteja certificado/conforme com qualquer norma**. Lacunas permanecem tipadas nos registros canônicos até evidência suficiente.
+
+## PR #1186 — benchmark/ABI provenance pending (not an authorship claim)
+
+The shipped C ALU benchmark, hosted JNI boundary, benchmark Java adapter and ABI
+snapshot added in PR #1186 have pending file/span lineage and license evidence.
+Their exact PR-head Git blob IDs, scope and unknown ancestry are recorded in
+[PR1186_BENCH_COMPONENT_LINEAGE_PENDING.md](docs/provenance/PR1186_BENCH_COMPONENT_LINEAGE_PENDING.md).
+
+**Origin pending verification; treated as upstream/third-party for attribution
+purposes. No local authorship claim is made.** SPDX headers in the source are
+license declarations, not independent verification of redistribution rights.
+The actual About UI disclosure, NOTICE applicability and shipped APK identity
+remain `TOKEN_VAZIO`; distribution/release gate remains **BLOCKED**. This notice
+records a gap; it does not grant a license or authorize release.

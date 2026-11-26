@@ -1,5 +1,6 @@
 package com.vectras.vm.setupwizard;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
@@ -8,6 +9,16 @@ import com.vectras.vm.core.ProcessLaunch;
 import org.junit.Test;
 
 public class SetupProcessIntegrationTest {
+
+    @Test
+    public void buildOwnerSafeTarExtractionCommand_disablesOwnerRestoreBeforeExtract() {
+        assertArrayEquals(
+                new String[] {"tar", "-o", "-x", "-f", "/data/user/0/app/files/source.tar",
+                        "-C", "/data/user/0/app/files"},
+                SetupProcessIntegration.buildOwnerSafeTarExtractionCommand(
+                        "/data/user/0/app/files/source.tar", "/data/user/0/app/files")
+        );
+    }
 
     @Test
     public void validateTarLaunchResult_flagsTimeout() {

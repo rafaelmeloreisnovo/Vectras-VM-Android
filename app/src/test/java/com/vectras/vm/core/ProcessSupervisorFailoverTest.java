@@ -253,13 +253,13 @@ public class ProcessSupervisorFailoverTest {
         boolean stopped = supervisor.stopGracefully(false);
 
         Assert.assertFalse(stopped);
-        Assert.assertEquals(ProcessSupervisor.State.STOP, supervisor.getState());
+        Assert.assertEquals(ProcessSupervisor.State.DEGRADED, supervisor.getState());
         Assert.assertEquals(1, process.destroyCount);
         Assert.assertEquals(1, process.destroyForciblyCount);
         Assert.assertTrue(supervisor.isBoundTo(process));
         Assert.assertTrue(supervisor.isProcessAlive());
         Assert.assertTrue(sink.containsPrefix("RUN->FAILOVER:no_qmp:term_kill"));
-        Assert.assertTrue(sink.containsPrefix("FAILOVER->STOP:kill_timeout:kill"));
+        Assert.assertTrue(sink.containsPrefix("FAILOVER->DEGRADED:kill_timeout:kill"));
     }
 
 

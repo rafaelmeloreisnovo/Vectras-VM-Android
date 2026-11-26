@@ -119,6 +119,7 @@ def main() -> int:
         'listOf("update", "-y")',
         'listOf("--pkg-vectras")',
         'listOf("--probe")',
+        'listOf("--run", "apt-get", "--version")',
         'listOf("--run", "proot", "--version")',
         'listOf("--run", "ninja", "--version")',
         'listOf("--run", "qemu-system-x86_64", "--version")',
@@ -202,7 +203,7 @@ def main() -> int:
 
     maintenance = texts.get("maintenance", "")
     require(maintenance, (
-        'BOOTSTRAP -> REFRESH -> VECTRAS_QEMU -> PROBE -> PROOT_VERIFY -> NINJA_VERIFY -> QEMU_VERIFY',
+        'BOOTSTRAP -> REFRESH -> VECTRAS_QEMU -> PROBE -> APT_VERIFY -> PROOT_VERIFY -> NINJA_VERIFY -> QEMU_VERIFY',
         'current.expectedStage != stage',
         'current.expectedTransaction != pending.transactionId',
         'resultBundlePresent && errorCode == 0 && exitCode == 0',
@@ -210,9 +211,11 @@ def main() -> int:
         'MaintenanceStage.REFRESH ->',
         'MaintenanceStage.VECTRAS_QEMU ->',
         'MaintenanceStage.PROBE ->',
+        'MaintenanceStage.APT_VERIFY ->',
         'MaintenanceStage.PROOT_VERIFY ->',
         'MaintenanceStage.NINJA_VERIFY ->',
         'MaintenanceStage.QEMU_VERIFY -> null',
+        'State.APT_VERIFY_PENDING',
         'State.PROOT_VERIFY_PENDING',
         'State.NINJA_VERIFY_PENDING',
         'State.QEMU_VERIFY_PENDING',
@@ -240,11 +243,13 @@ def main() -> int:
 
     maintenance_order_bound = all(token in maintenance for token in (
         'MaintenanceStage.PROBE ->',
+        'MaintenanceStage.APT_VERIFY ->',
         'MaintenanceStage.PROOT_VERIFY ->',
         'MaintenanceStage.NINJA_VERIFY ->',
         'MaintenanceStage.QEMU_VERIFY -> null',
     ))
     runtime_smokes_bound = all(token in contract_source for token in (
+        'listOf("--run", "apt-get", "--version")',
         'listOf("--run", "proot", "--version")',
         'listOf("--run", "ninja", "--version")',
         'listOf("--run", "qemu-system-x86_64", "--version")',
@@ -284,6 +289,7 @@ def main() -> int:
             "dispatch_execution": "TOKEN_VAZIO",
             "termux_exit_receipt": "TOKEN_VAZIO",
             "maintenance_complete": "TOKEN_VAZIO",
+            "apt_smoke": "TOKEN_VAZIO",
             "proot_smoke": "TOKEN_VAZIO",
             "ninja_smoke": "TOKEN_VAZIO",
             "qemu_smoke": "TOKEN_VAZIO",
@@ -297,7 +303,7 @@ def main() -> int:
             "maintenance_stage_advanced_without_zero_exit_receipt",
             "maintenance_stale_transaction_advanced_state",
             "maintenance_completed_after_probe_without_runtime_smokes",
-            "proot_ninja_or_qemu_smoke_missing",
+            "apt_proot_ninja_or_qemu_smoke_missing",
             "raw_private_output_persisted",
             "exit_code_promoted_to_guest_boot",
         ],

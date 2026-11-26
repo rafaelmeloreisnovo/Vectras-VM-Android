@@ -40,6 +40,19 @@ jobs:
           yes | sdkmanager --licenses >/dev/null
           sdkmanager "platforms;android-${SDK_API}" "build-tools;${BUILD_TOOLS}" "platform-tools" "ndk;${NDK_VERSION}" "cmake;${CMAKE_VERSION}"
 
+      # Pin to the already-audited upstream commit and exact SHA-256 values.
+      # Build stops before packaging on missing/source-drift/unsafe TAR.
+      - name: Materialize pinned ARMv7 bootstrap and Alpine rootfs
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p reports
+          python3 tools/bootstrap/materialize_embedded_runtime_seed_assets.py \
+            --abis armeabi-v7a \
+            --families bootstrap,alpine19 \
+            --target-root app/src/main/assets \
+            --receipt reports/moto_e7_arm32_seed_source_receipt.json
+
       - name: Build ARM32 debug beta APK
         shell: bash
         run: |
@@ -68,6 +81,18 @@ jobs:
             --target-device "Motorola E7 Power" \
             --target-android "Android 10"
 
+      - name: Verify pinned ARMv7 runtime seeds inside APK
+        shell: bash
+        run: |
+          set -euo pipefail
+          mapfile -t apks < <(find app/build/outputs/apk/debug -type f -name "*.apk" | sort)
+          if [[ "${#apks[@]}" -ne 1 ]]; then
+            echo "FAIL_CLOSED: expected exactly one ARM32 debug APK" >&2
+            exit 1
+          fi
+          python3 tools/ci/verify_arm32_runtime_seed_apk.py "${apks[0]}" \
+            --receipt reports/moto_e7_arm32_seed_apk_receipt.json
+
       - name: Collect artifact payload
         shell: bash
         run: |
@@ -76,6 +101,8 @@ jobs:
           cp app/build/outputs/apk/debug/*.apk ci-artifacts/moto-e7-arm32-beta/
           cp reports/APK_ARM32_BETA_CONTRACT.md ci-artifacts/moto-e7-arm32-beta/
           cp reports/apk_arm32_beta_contract.json ci-artifacts/moto-e7-arm32-beta/
+          cp reports/moto_e7_arm32_seed_source_receipt.json ci-artifacts/moto-e7-arm32-beta/
+          cp reports/moto_e7_arm32_seed_apk_receipt.json ci-artifacts/moto-e7-arm32-beta/
 
       - name: Upload ARM32 beta artifact
         uses: actions/upload-artifact@v4

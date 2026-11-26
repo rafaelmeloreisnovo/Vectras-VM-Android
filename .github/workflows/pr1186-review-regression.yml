@@ -1,0 +1,22 @@
+# SPDX-License-Identifier: GPL-2.0-only
+name: PR1186 review regression (scoped)
+on:
+  pull_request:
+    paths:
+      - 'app/src/main/java/com/vectras/qemu/MainSettingsManager.java'
+      - 'docs/provenance/PR1186_BENCH_COMPONENT_LINEAGE_PENDING.md'
+      - 'THIRD_PARTY_NOTICES.md'
+      - 'tools/ci/test_pr1186_review_gate.py'
+      - '.github/workflows/pr1186-review-regression.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  static-review-gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Verify P2 main-thread lifecycle and P1 pending disclosure
+        run: python3 tools/ci/test_pr1186_review_gate.py
