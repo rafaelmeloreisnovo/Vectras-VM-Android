@@ -39,6 +39,18 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
 
+      - name: Verify exact comparison endpoints before performance work
+        shell: bash
+        env:
+          BASE_SHA: ${{ inputs.base_sha }}
+          HEAD_SHA: ${{ inputs.head_sha }}
+        run: |
+          set -euo pipefail
+          [[ "$BASE_SHA" =~ ^[0-9a-f]{40}$ && "$HEAD_SHA" =~ ^[0-9a-f]{40}$ ]]
+          git cat-file -e "${BASE_SHA}^{commit}"
+          git cat-file -e "${HEAD_SHA}^{commit}"
+          git merge-base "$BASE_SHA" "$HEAD_SHA" >/dev/null
+
       - name: Validate canonical workflow ownership and overlapping Android lanes
         run: python3 tools/ci/validate_build_matrix.py
 
